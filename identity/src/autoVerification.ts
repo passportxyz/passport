@@ -13,17 +13,13 @@ import {
   VerifiedPayload,
   ProviderContext,
 } from "@gitcoin/passport-types";
-import { ParamsDictionary } from "express-serve-static-core";
 
 // All provider exports from platforms
-import { platforms, providers, handleAxiosError } from "@gitcoin/passport-platforms";
-import { issueHashedCredential } from "@gitcoin/passport-identity";
+import { platforms, providers } from "@gitcoin/passport-platforms";
+import { issueHashedCredential } from "./credentials.js";
 
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
-import axios from "axios";
-
-const apiKey = process.env.SCORER_API_KEY;
 const key = process.env.IAM_JWK;
 const __issuer = DIDKit.keyToDID("key", key);
 const eip712Key = process.env.IAM_JWK_EIP712;
@@ -76,19 +72,12 @@ export const addErrorDetailsToMessage = (message: string, error: any): string =>
   return message;
 };
 
-export class ApiError extends Error {
+export class VerificationError extends Error {
   constructor(
     public message: string,
     public code: number
   ) {
     super(message);
-    this.name = this.constructor.name;
-  }
-}
-
-export class UnexpectedApiError extends ApiError {
-  constructor(message: string) {
-    super(message, 500);
     this.name = this.constructor.name;
   }
 }
@@ -100,25 +89,14 @@ type VerifyTypeResult = {
   code?: number;
 };
 
-export type PassportProviderPoints = {
-  score: string;
-  dedup: boolean;
-  expiration_date: string;
-};
-
-export type PassportScore = {
-  address: string;
-  score: string;
-  passing_score: boolean;
-  last_score_timestamp: string;
-  expiration_timestamp: string;
-  threshold: string;
-  error: string;
-  stamps: Record<string, PassportProviderPoints>;
-};
-
+/**
+ * Verify if the user identify by the request qualifies for the listed providers
+ * @param providersByPlatform - nested map of providers, grouped by platform
+ * @param payload - request payload
+ * @returns An array of Verification results, with 1 element for each provider
+ */
 export async function verifyTypes(
-  typesByPlatform: PROVIDER_ID[][],
+  providersByPlatform: PROVIDER_ID[][],
   payload: RequestPayload
 ): Promise<VerifyTypeResult[]> {
   // define a context to be shared between providers in the verify request
@@ -128,10 +106,10 @@ export async function verifyTypes(
 
   await Promise.all(
     // Run all platforms in parallel
-    typesByPlatform.map(async (platformTypes) => {
+    providersByPlatform.map(async (platformProviders) => {
       // Iterate over the types within a platform in series
       // This enables providers within a platform to reliably share context
-      for (const _type of platformTypes) {
+      for (const _type of platformProviders) {
         let type = _type as string;
         let verifyResult: VerifiedPayload = { valid: false };
         let code, error;
@@ -246,52 +224,18 @@ export const issueCredentials = async (
   );
 };
 
-export type AutoVerificationRequestBodyType = {
+export type AutoVerificationFields = {
   address: string;
   scorerId: string;
   credentialIds?: [];
 };
-
-type AutoVerificationFields = AutoVerificationRequestBodyType;
 
 export type AutoVerificationResponseBodyType = {
   score: string;
   threshold: string;
 };
 
-export const autoVerificationHandler = async (
-  req: Request<ParamsDictionary, AutoVerificationResponseBodyType, AutoVerificationRequestBodyType>,
-  res: Response
-): Promise<void> => {
-  try {
-    const { address, scorerId, credentialIds } = req.body;
-
-    if (!isAddress(address)) {
-      return void errorRes(res, "Invalid address", 400);
-    }
-
-    const stamps = await getPassingEvmStamps({ address, scorerId, credentialIds });
-
-    const score = await addStampsAndGetScore({ address, scorerId, stamps });
-
-    // TODO should we issue a score VC?
-    return void res.json(score);
-  } catch (error) {
-    if (error instanceof ApiError || error instanceof UnexpectedApiError) {
-      return void errorRes(res, error.message, error.code);
-    }
-    const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
-    return void errorRes(res, message, 500);
-  }
-};
-
-const getEvmProvidersByPlatform = ({
-  scorerId,
-  onlyCredentialIds,
-}: {
-  scorerId: string;
-  onlyCredentialIds?: string[];
-}): PROVIDER_ID[][] => {
+const getEvmProvidersByPlatform = ({ scorerId }: { scorerId: string }): PROVIDER_ID[][] => {
   const evmPlatforms = Object.values(platforms).filter(({ PlatformDetails }) => PlatformDetails.isEVM);
 
   // TODO we should use the scorerId to check for any EVM stamps particular to a community, and include those here
@@ -306,58 +250,39 @@ const getEvmProvidersByPlatform = ({
     .filter((platformProviders) => platformProviders.length > 0);
 };
 
-export const getPassingEvmStamps = async ({
+export const autoVerifyStamps = async ({
   address,
   scorerId,
   credentialIds,
 }: AutoVerificationFields): Promise<VerifiableCredential[]> => {
-  const evmProvidersByPlatform = getEvmProvidersByPlatform({ scorerId, onlyCredentialIds: credentialIds });
-
-  const credentialsInfo = {
-    address,
-    type: "EVMBulkVerify",
-    // types: evmProviders,
-    version: "0.0.0",
-    signatureType: "EIP712" as SignatureType,
-  };
-
-  const results = await issueCredentials(evmProvidersByPlatform, address, credentialsInfo);
-
-  const ret = results
-    .flat()
-    .filter(
-      (credentialResponse): credentialResponse is ValidResponseBody =>
-        (credentialResponse as ValidResponseBody).credential !== undefined
-    )
-    .map(({ credential }) => credential);
-  return ret;
-};
-
-export const addStampsAndGetScore = async ({
-  address,
-  scorerId,
-  stamps,
-}: Omit<AutoVerificationFields, "credentialIds"> & { stamps: VerifiableCredential[] }): Promise<PassportScore> => {
   try {
-    const scorerResponse: {
-      data?: {
-        score?: PassportScore;
-      };
-    } = await axios.post(
-      `${process.env.SCORER_ENDPOINT}/embed/stamps/${address}`,
-      {
-        stamps,
-        scorer_id: scorerId,
-      },
-      {
-        headers: {
-          Authorization: apiKey,
-        },
-      }
-    );
+    const evmProvidersByPlatform = getEvmProvidersByPlatform({ scorerId });
 
-    return scorerResponse.data?.score;
+    if (!isAddress(address)) {
+      throw new VerificationError("Invalid address", 400);
+    }
+
+    const credentialsInfo = {
+      address,
+      type: "EVMBulkVerify",
+      // types: evmProviders,
+      version: "0.0.0",
+      signatureType: "EIP712" as SignatureType,
+    };
+
+    const results = await issueCredentials(evmProvidersByPlatform, address, credentialsInfo);
+
+    const ret = results
+      .flat()
+      .filter(
+        (credentialResponse): credentialResponse is ValidResponseBody =>
+          (credentialResponse as ValidResponseBody).credential !== undefined
+      )
+      .map(({ credential }) => credential);
+    return ret;
   } catch (error) {
-    handleAxiosError(error, "Scorer Embed API", UnexpectedApiError, [apiKey]);
+    // TODO: check if error is of a common type used in platforms and evtl. rethrow it
+    const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
+    throw new VerificationError(message, 500);
   }
 };

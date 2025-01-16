@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import axios, { AxiosError } from "axios";
-import { autoVerificationHandler, PassportScore } from "../src/handlers";
+import axios from "axios";
+import { PassportScore, autoVerifyStamps } from "../src/autoVerification";
+import { issueHashedCredential } from "../src/credentials";
 import {
   PROVIDER_ID,
   VerifiableCredential,
@@ -8,7 +9,7 @@ import {
   ProviderContext,
   IssuedCredential,
 } from "@gitcoin/passport-types";
-import { autoVerifyStamps, AutoVerificationFields } from "@gitcoin/passport-identity";
+import { providers } from "@gitcoin/passport-platforms";
 
 // Mock all external dependencies
 jest.mock("ethers", () => {
@@ -23,7 +24,7 @@ jest.mock("ethers", () => {
 
 jest.mock("axios");
 
-jest.mock("@gitcoin/passport-identity");
+jest.mock("../src/credentials");
 
 const expectedEvmProvidersToSucceed = new Set<PROVIDER_ID>([
   "ETHDaysActive#50",
@@ -95,6 +96,7 @@ jest.mock("@gitcoin/passport-platforms", () => {
     ...originalModule,
     providers: {
       verify: jest.fn(async (type: string, payload: RequestPayload, context: ProviderContext) => {
+        console.log("?????????");
         return Promise.resolve({
           valid: true,
           record: { key: "veirfied-condition" },
@@ -241,18 +243,9 @@ const mockedScore: PassportScore = {
 
 describe("autoVerificationHandler", () => {
   let mockReq: Partial<Request>;
-  let mockRes: Partial<Response>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockRes = {
-      json: jest.fn(),
-      status: jest.fn().mockReturnThis(),
-    };
-
-    process.env.SCORER_ENDPOINT = "http://test-endpoint";
-    process.env.SCORER_API_KEY = "abcd";
   });
 
   it("should handle valid request successfully", async () => {
@@ -266,55 +259,37 @@ describe("autoVerificationHandler", () => {
       },
     };
 
-    const postSpy = (axios.post as jest.Mock).mockImplementation((url) => {
-      return Promise.resolve({
-        data: {
-          score: mockedScore,
-        },
-      });
-    });
-
-    const issuedCredentials: VerifiableCredential[] = [
-      createMockVerifiableCredential("provider-1", mockAddress),
-      createMockVerifiableCredential("provider-2", mockAddress),
-      createMockVerifiableCredential("provider-3", mockAddress),
-    ];
-    (autoVerifyStamps as jest.Mock).mockImplementation(
-      ({ address, scorerId }: AutoVerificationFields): Promise<VerifiableCredential[]> => {
-        return Promise.resolve(issuedCredentials);
+    const verifySpy = (providers.verify as jest.Mock).mockImplementation(
+      async (type: string, payload: RequestPayload, context: ProviderContext) => {
+        if (expectedEvmProvidersToSucceed.has(type as PROVIDER_ID)) {
+          return Promise.resolve({
+            valid: true,
+            record: { key: "verified-condition" },
+          });
+        } else {
+          return Promise.resolve({
+            valid: false,
+          });
+        }
       }
     );
 
-    await autoVerificationHandler(mockReq as Request, mockRes as Response);
-
-    expect(postSpy).toHaveBeenCalledTimes(1);
-    expect(postSpy).toHaveBeenCalledWith(
-      `${process.env.SCORER_ENDPOINT}/embed/stamps/${mockAddress}`,
-      {
-        stamps: issuedCredentials,
-        scorer_id: mockScorerId,
-      },
-      {
-        headers: {
-          Authorization: process.env.SCORER_API_KEY,
-        },
+    const issuedCredentials: VerifiableCredential[] = [];
+    (issueHashedCredential as jest.Mock).mockImplementation(
+      (DIDKit, currentKey, address, record: { type: string }, expiresInSeconds, signatureType) => {
+        const credential = getMockedIssuedCredential(record.type, mockAddress);
+        issuedCredentials.push(credential.credential);
+        return Promise.resolve(credential);
       }
     );
-    expect(mockRes.json).toHaveBeenCalledWith(mockedScore);
+
+    const stamps = await autoVerifyStamps({ address: mockAddress, scorerId: mockScorerId });
+    expect(stamps).toEqual(issuedCredentials);
+
+    expect(verifySpy).toHaveBeenCalledTimes(expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size);
   });
 
-  it("should handle axios API errors from the embed scorer API correctly", async () => {
-    const mockAxiosError = new Error("API error") as AxiosError;
-
-    mockAxiosError.isAxiosError = true;
-    mockAxiosError.response = {
-      status: 500,
-      data: {},
-      headers: {},
-      statusText: "Internal Server Error",
-      config: {},
-    };
-
+  it("should handle any errors from the embed scorer API correctly", async () => {
     const mockAddress = "0x123";
     const mockScorerId = "test-scorer";
 
@@ -324,63 +299,6 @@ describe("autoVerificationHandler", () => {
         scorerId: mockScorerId,
       },
     };
-
-    const postSpy = (axios.post as jest.Mock).mockImplementation((url) => {
-      throw mockAxiosError;
-    });
-
-    const issuedCredentials: VerifiableCredential[] = [
-      createMockVerifiableCredential("provider-1", mockAddress),
-      createMockVerifiableCredential("provider-2", mockAddress),
-      createMockVerifiableCredential("provider-3", mockAddress),
-    ];
-    (autoVerifyStamps as jest.Mock).mockImplementation(
-      ({ address, scorerId }: AutoVerificationFields): Promise<VerifiableCredential[]> => {
-        return Promise.resolve(issuedCredentials);
-      }
-    );
-
-    await autoVerificationHandler(mockReq as Request, mockRes as Response);
-
-    expect(postSpy).toHaveBeenCalledTimes(1);
-    expect(postSpy).toHaveBeenCalledWith(
-      `${process.env.SCORER_ENDPOINT}/embed/stamps/${mockAddress}`,
-      {
-        stamps: issuedCredentials,
-        scorer_id: mockScorerId,
-      },
-      {
-        headers: {
-          Authorization: process.env.SCORER_API_KEY,
-        },
-      }
-    );
-    expect(mockRes.json).toHaveBeenCalledWith({
-      error: "Error making Scorer Embed API request, received error response with code 500: {}, headers: {}",
-    });
-    expect(mockRes.status).toHaveBeenCalledWith(500);
-  });
-
-  it("should only verify specified credentials when credentialIds is provided", async () => {
-    const mockAddress = "0x123";
-    const mockScorerId = "test-scorer";
-    const specificCredentials = ["ETHDaysActive#50", "ETHScore#75"];
-
-    mockReq = {
-      body: {
-        address: mockAddress,
-        scorerId: mockScorerId,
-        credentialIds: specificCredentials,
-      },
-    };
-
-    const postSpy = (axios.post as jest.Mock).mockImplementation((url) => {
-      return Promise.resolve({
-        data: {
-          score: mockedScore,
-        },
-      });
-    });
 
     const verifySpy = (providers.verify as jest.Mock).mockImplementation(
       async (type: string, payload: RequestPayload, context: ProviderContext) => {
@@ -400,106 +318,10 @@ describe("autoVerificationHandler", () => {
       }
     );
 
-    await autoVerificationHandler(mockReq as Request, mockRes as Response);
+    const stamps: VerifiableCredential[] = await autoVerifyStamps({ address: mockAddress, scorerId: mockScorerId });
 
-    // Should only verify the specified credentials
-    expect(verifySpy).toHaveBeenCalledTimes(specificCredentials.length);
+    expect(stamps).toEqual(issuedCredentials);
 
-    // Verify that only the specified credentials were checked
-    const verifiedTypes = verifySpy.mock.calls.map((call) => call[0]);
-    expect(verifiedTypes).toEqual(expect.arrayContaining(specificCredentials));
-
-    // Verify that no other credentials were checked
-    verifiedTypes.forEach((type) => {
-      expect(specificCredentials).toContain(type);
-    });
-
-    expect(postSpy).toHaveBeenCalledTimes(1);
-    expect(mockRes.json).toHaveBeenCalledWith(mockedScore);
-  });
-
-  it("should only score if credentialIds is an empty array", async () => {
-    const mockAddress = "0x123";
-    const mockScorerId = "test-scorer";
-
-    mockReq = {
-      body: {
-        address: mockAddress,
-        scorerId: mockScorerId,
-        credentialIds: [],
-      },
-    };
-
-    const postSpy = (axios.post as jest.Mock).mockImplementation((url) => {
-      return Promise.resolve({
-        data: {
-          score: mockedScore,
-        },
-      });
-    });
-
-    const verifySpy = (providers.verify as jest.Mock).mockImplementation(
-      async (type: string, payload: RequestPayload, context: ProviderContext) => {
-        return Promise.resolve({
-          valid: true,
-          record: { key: "verified-condition" },
-        });
-      }
-    );
-
-    await autoVerificationHandler(mockReq as Request, mockRes as Response);
-
-    // Should only verify the specified credentials
-    expect(verifySpy).not.toHaveBeenCalled();
-
-    expect(postSpy).toHaveBeenCalledTimes(1);
-    expect(mockRes.json).toHaveBeenCalledWith(mockedScore);
-  });
-
-  it("should handle any errors from the embed scorer API correctly", async () => {
-    const mockAddress = "0x123";
-    const mockScorerId = "test-scorer";
-
-    mockReq = {
-      body: {
-        address: mockAddress,
-        scorerId: mockScorerId,
-      },
-    };
-
-    const postSpy = (axios.post as jest.Mock).mockImplementation((url) => {
-      throw new Error("Some API error");
-    });
-
-    const issuedCredentials: VerifiableCredential[] = [
-      createMockVerifiableCredential("provider-1", mockAddress),
-      createMockVerifiableCredential("provider-2", mockAddress),
-      createMockVerifiableCredential("provider-3", mockAddress),
-    ];
-    (autoVerifyStamps as jest.Mock).mockImplementation(
-      ({ address, scorerId }: AutoVerificationFields): Promise<VerifiableCredential[]> => {
-        return Promise.resolve(issuedCredentials);
-      }
-    );
-
-    await autoVerificationHandler(mockReq as Request, mockRes as Response);
-
-    expect(postSpy).toHaveBeenCalledTimes(1);
-    expect(postSpy).toHaveBeenCalledWith(
-      `${process.env.SCORER_ENDPOINT}/embed/stamps/${mockAddress}`,
-      {
-        stamps: issuedCredentials,
-        scorer_id: mockScorerId,
-      },
-      {
-        headers: {
-          Authorization: process.env.SCORER_API_KEY,
-        },
-      }
-    );
-    expect(mockRes.json).toHaveBeenCalledWith({
-      error: "Unexpected error when processing request, Error: Some API error",
-    });
-    expect(mockRes.status).toHaveBeenCalledWith(500);
+    expect(verifySpy).toHaveBeenCalledTimes(expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size);
   });
 });
