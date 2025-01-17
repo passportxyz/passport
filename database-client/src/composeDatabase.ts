@@ -105,10 +105,14 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
         // It should be safe to ignore error error, they should be logged in the called functions
       }
     }
-    await this.composeImpl.getPassportWithWrapper();
-    const promiseToReturn = this.composeImpl.addStamps(stamps);
-    this.lastOp = promiseToReturn;
-    return promiseToReturn;
+    const opFunc = async (): Promise<SecondaryStorageAddResponse[]> => {
+      await this.composeImpl.getPassportWithWrapper();
+      const promiseToReturn = this.composeImpl.addStamps(stamps);
+      return promiseToReturn;
+    };
+    const op = opFunc();
+    this.lastOp = op;
+    return op;
   };
 
   patchStamps = async (stampPatches: StampPatch[]): Promise<SecondaryStorageBulkPatchResponse> => {
@@ -119,10 +123,14 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
         // It should be safe to ignore error error, they should be logged in the called functions
       }
     }
-    await this.composeImpl.getPassportWithWrapper();
-    const promiseToReturn = this.composeImpl.patchStamps(stampPatches);
-    this.lastOp = promiseToReturn;
-    return promiseToReturn;
+    const opFunc = async (): Promise<SecondaryStorageBulkPatchResponse> => {
+      await this.composeImpl.getPassportWithWrapper();
+      const promiseToReturn = this.composeImpl.patchStamps(stampPatches);
+      return promiseToReturn;
+    };
+    const op = opFunc();
+    this.lastOp = op;
+    return op;
   };
 
   deleteStamps = async (providers: PROVIDER_ID[]): Promise<SecondaryStorageDeleteResponse[]> => {
@@ -133,10 +141,14 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
         // It should be safe to ignore error error, they should be logged in the called functions
       }
     }
-    // No need to call this.composeImpl.getPassportWithWrapper(); as it is already called in the deleteStamps function
-    const promiseToReturn = this.composeImpl.deleteStamps(providers);
-    this.lastOp = promiseToReturn;
-    return promiseToReturn;
+    const opFunc = async (): Promise<SecondaryStorageDeleteResponse[]> => {
+      // No need to call this.composeImpl.getPassportWithWrapper(); as it is already called in the deleteStamps function
+      const promiseToReturn = this.composeImpl.deleteStamps(providers);
+      return promiseToReturn;
+    };
+    const op = opFunc();
+    this.lastOp = op;
+    return op;
   };
 
   getPassport = async (): Promise<PassportLoadResponse> => {
@@ -508,6 +520,8 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
     }
 
     const wrappers = (result?.data?.viewer?.gitcoinPassportStampWrapperList?.edges || []).map((edge) => edge.node);
+    console.log(`[ComposeDB] ${this.did} getPassportWithWrapper returns`, wrappers);
+    this.logger.info(`[ComposeDB] ${this.did} getPassportWithWrapper returns`, { wrappers });
     return wrappers;
   }
 
@@ -521,8 +535,8 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
         credential: formatCredentialFromCeramic(wrapper.vc),
       }));
 
-      console.log(`[ComposeDB] ${this.did} getPassport:`, stamps);
-      this.logger.info(`[ComposeDB] ${this.did} getPassport`, { stamps });
+      console.log(`[ComposeDB] ${this.did} getPassport stamps:`, stamps);
+      this.logger.info(`[ComposeDB] ${this.did} getPassport stamps`, { stamps });
       return {
         status: "Success",
         passport: {
