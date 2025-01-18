@@ -1,5 +1,5 @@
 import onchainInfo from "../../deployments/onchainInfo.json";
-import GitcoinVerifierAbi from "../../deployments/abi/GitcoinVerifier.json";
+import { GitcoinVerifierAbi } from "@gitcoin/passport-identity/deployments";
 import axios, { AxiosResponse } from "axios";
 import { iamUrl } from "../config/stamp_config";
 import { OnChainStatus } from "../utils/onChainStatus";

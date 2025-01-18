@@ -1,8 +1,8 @@
-import onchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
+import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments";
 import { Wallet, TypedDataDomain } from "ethers";
 
-export const getAttestationDomainSeparator = (chainIdHex: keyof typeof onchainInfo): TypedDataDomain => {
-  const verifyingContract = onchainInfo[chainIdHex].GitcoinVerifier.address;
+export const getAttestationDomainSeparator = (chainIdHex: keyof typeof passportOnchainInfo): TypedDataDomain => {
+  const verifyingContract = passportOnchainInfo[chainIdHex].GitcoinVerifier.address;
   const chainId = parseInt(chainIdHex, 16).toString();
   return {
     name: "GitcoinVerifier",
@@ -38,10 +38,10 @@ const productionAttestationSignerWallet = new Wallet(process.env.ATTESTATION_SIG
 // Wallet to use for testnets
 const testAttestationSignerWallet = new Wallet(process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY);
 
-export const getAttestationSignerForChain = async (chainIdHex: keyof typeof onchainInfo): Promise<Wallet> => {
+export const getAttestationSignerForChain = async (chainIdHex: keyof typeof passportOnchainInfo): Promise<Wallet> => {
   const productionAttestationIssuerAddress = await productionAttestationSignerWallet.getAddress();
   const chainUsesProductionIssuer =
-    onchainInfo[chainIdHex].issuer.address.toLowerCase() === productionAttestationIssuerAddress.toLowerCase();
+    passportOnchainInfo[chainIdHex].issuer.address.toLowerCase() === productionAttestationIssuerAddress.toLowerCase();
 
   return chainUsesProductionIssuer ? productionAttestationSignerWallet : testAttestationSignerWallet;
 };

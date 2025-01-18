@@ -7,7 +7,7 @@ import { Signature, JsonRpcProvider, Contract } from "ethers";
 // ---- Types
 import { Response } from "express";
 import { EasPayload, PassportAttestation, EasRequestBody } from "@gitcoin/passport-types";
-import onchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
+import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments";
 
 import { getEASFeeAmount } from "./easFees.js";
 import { hasValidIssuer } from "../issuers.js";
@@ -90,10 +90,10 @@ async function queryBadgeLevel({
 export const scrollDevBadgeHandler = (req: Request, res: Response): Promise<void> => {
   try {
     const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
-    if (!Object.keys(onchainInfo).includes(chainIdHex)) {
+    if (!Object.keys(passportOnchainInfo).includes(chainIdHex)) {
       return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
     }
-    const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
+    const attestationChainIdHex = chainIdHex as keyof typeof passportOnchainInfo;
 
     if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 

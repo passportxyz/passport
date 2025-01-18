@@ -7,7 +7,7 @@ import { ParamsDictionary } from "express-serve-static-core";
 
 // All provider exports from platforms
 import { handleAxiosError } from "@gitcoin/passport-platforms";
-import { autoVerifyStamps } from "@gitcoin/passport-identity";
+import { autoVerifyStamps } from "@gitcoin/passport-identity/dist/commonjs/identity/src/index.js";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
 import axios from "axios";

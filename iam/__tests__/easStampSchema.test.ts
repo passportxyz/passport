@@ -3,7 +3,7 @@ import { VerifiableCredential } from "@gitcoin/passport-types";
 import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { parseUnits } from "ethers";
-import onchainInfo from "../../deployments/onchainInfo.json";
+import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments";
 
 jest.mock("../src/utils/scorerService", () => ({
   fetchPassportScore: jest.fn().mockImplementation(() => {
@@ -106,7 +106,7 @@ describe("formatMultiAttestationRequest", () => {
 
     const chainIdHex = "0x14a33";
     const result = await easStampModule.formatMultiAttestationRequest(validatedCredentials, recipient, chainIdHex);
-    const scoreSchema = onchainInfo[chainIdHex].easSchemas.score.uid;
+    const scoreSchema = passportOnchainInfo[chainIdHex].easSchemas.score.uid;
 
     expect(result).toEqual([
       {

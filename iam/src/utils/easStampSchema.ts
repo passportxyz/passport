@@ -6,7 +6,7 @@ import {
   MultiAttestationRequest,
   AttestationRequestData,
 } from "@ethereum-attestation-service/eas-sdk";
-import onchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
+import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments" assert { type: "json" };
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
 import { fetchPassportScore } from "./scorerService.js";
@@ -56,7 +56,7 @@ type ValidatedCredential = {
 export const formatMultiAttestationRequest = async (
   credentials: ValidatedCredential[],
   recipient: string,
-  chainIdHex: keyof typeof onchainInfo
+  chainIdHex: keyof typeof passportOnchainInfo
 ): Promise<MultiAttestationRequest[]> => {
   const defaultRequestData = {
     recipient,
@@ -82,7 +82,7 @@ export const formatMultiAttestationRequest = async (
     },
   ];
 
-  const { easSchemas } = onchainInfo[chainIdHex];
+  const { easSchemas } = passportOnchainInfo[chainIdHex];
 
   return [
     {

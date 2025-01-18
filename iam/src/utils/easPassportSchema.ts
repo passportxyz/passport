@@ -9,7 +9,7 @@ import { VerifiableCredential, StampBit } from "@gitcoin/passport-types";
 
 import { fetchPassportScore } from "./scorerService.js";
 import { encodeEasScore } from "./easStampSchema.js";
-import onchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
+import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments" assert { type: "json" };
 
 import bitMapData from "../static/providerBitMapInfo.json" assert { type: "json" };
 
@@ -166,7 +166,7 @@ type ValidatedCredential = {
 export const formatMultiAttestationRequestWithPassportAndScore = async (
   credentials: ValidatedCredential[],
   recipient: string,
-  chainIdHex: keyof typeof onchainInfo,
+  chainIdHex: keyof typeof passportOnchainInfo,
   customScorerId?: number
 ): Promise<MultiAttestationRequest[]> => {
   const defaultRequestData = {
@@ -197,7 +197,7 @@ export const formatMultiAttestationRequestWithPassportAndScore = async (
     },
   ];
 
-  const { easSchemas } = onchainInfo[chainIdHex];
+  const { easSchemas } = passportOnchainInfo[chainIdHex];
 
   return [
     {
@@ -213,7 +213,7 @@ export const formatMultiAttestationRequestWithPassportAndScore = async (
 
 export const formatMultiAttestationRequestWithScore = async (
   recipient: string,
-  chainIdHex: keyof typeof onchainInfo,
+  chainIdHex: keyof typeof passportOnchainInfo,
   customScorerId?: number
 ): Promise<MultiAttestationRequest[]> => {
   const defaultRequestData = {
@@ -231,7 +231,7 @@ export const formatMultiAttestationRequestWithScore = async (
     },
   ];
 
-  const { easSchemas } = onchainInfo[chainIdHex];
+  const { easSchemas } = passportOnchainInfo[chainIdHex];
 
   return [
     {

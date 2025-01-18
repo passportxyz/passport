@@ -8,7 +8,7 @@ import {
   ProviderContext,
   IssuedCredential,
 } from "@gitcoin/passport-types";
-import { autoVerifyStamps, AutoVerificationFields } from "@gitcoin/passport-identity";
+import { autoVerifyStamps, AutoVerificationFields } from "@gitcoin/passport-identity/dist/commonjs/identity/src/index.js";
 
 // Mock all external dependencies
 jest.mock("ethers", () => {

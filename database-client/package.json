@@ -1,5 +1,6 @@
 {
   "name": "@gitcoin/passport-database-client",
+  "private": true,
   "version": "1.0.0",
   "license": "MIT",
   "type": "module",
@@ -24,6 +25,7 @@
     "test": "yarn node --experimental-vm-modules $(yarn bin jest) -c jest.config.cjs"
   },
   "dependencies": {
+    "@gitcoin/passport-identity": "^1.0.0",
     "@composedb/client": "^0.7.1",
     "@composedb/types": "^0.7.1",
     "@glazed/datamodel": "^0.3.0",

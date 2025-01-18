@@ -17,6 +17,7 @@ import {
 // All provider exports from platforms
 import { platforms, providers } from "@gitcoin/passport-platforms";
 import { issueHashedCredential } from "./credentials.js";
+import { checkCredentialBans } from "./bans.js";
 
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
@@ -73,10 +74,7 @@ export const addErrorDetailsToMessage = (message: string, error: any): string =>
 };
 
 export class VerificationError extends Error {
-  constructor(
-    public message: string,
-    public code: number
-  ) {
+  constructor(public message: string, public code: number) {
     super(message);
     this.name = this.constructor.name;
   }
@@ -89,6 +87,27 @@ type VerifyTypeResult = {
   code?: number;
 };
 
+const providerTypePlatformMap = Object.entries(platforms).reduce((acc, [platformName, { providers }]) => {
+  providers.forEach(({ type }) => {
+    acc[type] = platformName;
+  });
+
+  return acc;
+}, {} as { [k: string]: string });
+
+export function groupProviderTypesByPlatform(types: string[]): string[][] {
+  return Object.values(
+    types.reduce((groupedProviders, type) => {
+      const platform = providerTypePlatformMap[type] || "generic";
+
+      if (!groupedProviders[platform]) groupedProviders[platform] = [];
+      groupedProviders[platform].push(type);
+
+      return groupedProviders;
+    }, {} as { [k: keyof typeof platforms]: string[] })
+  );
+}
+
 /**
  * Verify if the user identify by the request qualifies for the listed providers
  * @param providersByPlatform - nested map of providers, grouped by platform
@@ -96,7 +115,7 @@ type VerifyTypeResult = {
  * @returns An array of Verification results, with 1 element for each provider
  */
 export async function verifyTypes(
-  providersByPlatform: PROVIDER_ID[][],
+  providersByPlatform: string[][],
   payload: RequestPayload
 ): Promise<VerifyTypeResult[]> {
   // define a context to be shared between providers in the verify request
@@ -164,9 +183,15 @@ export async function verifyTypes(
   return results;
 }
 
-// return response for given payload
+/**
+ *
+ * @param typesByPlatform List of provider types grouped by platform
+ * @param address the address for which to claim stamps
+ * @param payload the request payload
+ * @returns An array of issued credentials
+ */
 export const issueCredentials = async (
-  typesByPlatform: PROVIDER_ID[][],
+  typesByPlatform: string[][],
   address: string,
   payload: RequestPayload
 ): Promise<CredentialResponseBody[]> => {
@@ -178,7 +203,7 @@ export const issueCredentials = async (
 
   const results = await verifyTypes(typesByPlatform, payload);
 
-  return await Promise.all(
+  const credentials = await Promise.all(
     results.map(async ({ verifyResult, code: verifyCode, error: verifyError, type }) => {
       let code = verifyCode;
       let error = verifyError;
@@ -222,6 +247,10 @@ export const issueCredentials = async (
       };
     })
   );
+
+  const credentialsAfterBanCheck = await checkCredentialBans(credentials);
+
+  return credentialsAfterBanCheck;
 };
 
 export type AutoVerificationFields = {

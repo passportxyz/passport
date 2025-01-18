@@ -1,6 +1,6 @@
 import * as easPassportModule from "../src/utils/easPassportSchema";
 import * as easStampModule from "../src/utils/easStampSchema";
-import onchainInfo from "../../deployments/onchainInfo.json";
+import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments";
 
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
@@ -84,8 +84,8 @@ describe("formatMultiAttestationRequestWithPassportAndScore", () => {
       recipient,
       chainIdHex
     );
-    const scoreSchema = onchainInfo[chainIdHex].easSchemas.score.uid;
-    const passportSchema = onchainInfo[chainIdHex].easSchemas.passport.uid;
+    const scoreSchema = passportOnchainInfo[chainIdHex].easSchemas.score.uid;
+    const passportSchema = passportOnchainInfo[chainIdHex].easSchemas.passport.uid;
 
     expect(result).toEqual([
       {
@@ -117,7 +117,7 @@ describe("formatMultiAttestationRequestWithScore", () => {
     const recipient = "0x123";
     const chainIdHex = "0x14a33";
     const result = await easPassportModule.formatMultiAttestationRequestWithScore(recipient, chainIdHex);
-    const scoreSchema = onchainInfo[chainIdHex].easSchemas.score.uid;
+    const scoreSchema = passportOnchainInfo[chainIdHex].easSchemas.score.uid;
 
     expect(result).toEqual([
       {

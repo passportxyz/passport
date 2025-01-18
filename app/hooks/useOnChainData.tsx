@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo } from "react";
 
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
-import onchainInfo from "../../deployments/onchainInfo.json";
+import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments";
 import { ChainId, chains, wagmiTransports } from "../utils/chains";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
@@ -71,7 +71,7 @@ const getOnChainDataForChain = async ({
   const attestationData = await getAttestationData({
     publicClient,
     address,
-    chainId: chainId as keyof typeof onchainInfo,
+    chainId: chainId as keyof typeof passportOnchainInfo,
     customScorerId,
   });
 
