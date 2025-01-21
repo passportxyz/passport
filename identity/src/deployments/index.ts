@@ -6,8 +6,8 @@ import _GitcoinVeraxPortal from "./abi/GitcoinVeraxPortal.json";
 import _GitcoinVerifier from "./abi/GitcoinVerifier.json";
 
 export const passportOnchainInfo = _onchainInfo;
-export const passportAttesterApi = _GitcoinAttester;
-export const passportDecoderApi = _GitcoinPassportDecoder;
-export const passportResolverApi = _GitcoinResolver;
-export const passportVeraxPortalApi = _GitcoinVeraxPortal;
-export const passportVerifierApi = _GitcoinVerifier;
+export const passportAttesterAbi = _GitcoinAttester;
+export const passportDecoderAbi = _GitcoinPassportDecoder;
+export const passportResolverAbi = _GitcoinResolver;
+export const passportVeraxPortalAbi = _GitcoinVeraxPortal;
+export const passportVerifierAbi = _GitcoinVerifier;

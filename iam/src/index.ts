@@ -220,12 +220,16 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   // get the payload from the JSON req body
   const payload = requestBody.payload;
 
+  console.log("geri ---verify", 1);
+
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   return void verifyCredential(DIDKit, challenge)
     .then(async (verified) => {
+      console.log("geri ---verify", 2);
       if (verified && hasValidIssuer(challenge.issuer)) {
         let address;
         try {
+          console.log("geri ---verify", 3);
           address = await verifyChallengeAndGetAddress(requestBody);
         } catch (error) {
           if (error instanceof VerifyDidChallengeBaseError) {
@@ -236,10 +240,14 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 
         payload.address = address;
 
+        console.log("geri ---verify", 4);
         // Check signer and type
         const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
         const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
 
+        console.log("geri ---verify 4.1 isSigner", isSigner);
+        console.log("geri ---verify 4.2 isType", isType);
+        console.log("geri ---verify 4.2 provider", challenge.credentialSubject.provider);
         if (!isSigner || !isType) {
           return void errorRes(
             res,
@@ -250,15 +258,20 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
           );
         }
 
-        const result = await checkConditionsAndIssueCredentials(payload, address);
+        console.log("geri ---verify", 5);
+        const credentials = await checkConditionsAndIssueCredentials(payload, address);
+        console.log("geri ---verify", 6);
 
-        return void res.json(result);
+        console.log("geri ---verify", 6.1);
+
+        return void res.json(credentials);
       }
 
       // error response
       return void errorRes(res, "Unable to verify payload", 401);
     })
     .catch((error) => {
+      console.log("geri ---verify 7", error);
       if (error instanceof ApiError) {
         return void errorRes(res, error.message, error.code);
       }

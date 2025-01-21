@@ -1,6 +1,6 @@
 import { CredentialResponseBody, ValidResponseBody, VerifiableCredential } from "@gitcoin/passport-types";
 import { handleAxiosError } from "@gitcoin/passport-platforms";
-import { UnexpectedApiError } from "./helpers.js";
+import { UnexpectedApiError } from "./helpers";
 import axios from "axios";
 
 const SCORER_ENDPOINT = process.env.SCORER_ENDPOINT;
@@ -24,13 +24,10 @@ export const checkCredentialBans = async (
     .map(({ credential }) => credential);
 
   const bans = await fetchBans(credentialsToCheck);
-  const bansByHash = bans.reduce(
-    (acc, ban) => {
-      acc[ban.hash] = ban;
-      return acc;
-    },
-    {} as Record<string, Ban>
-  );
+  const bansByHash = bans.reduce((acc, ban) => {
+    acc[ban.hash] = ban;
+    return acc;
+  }, {} as Record<string, Ban>);
 
   return credentialResponses.map((credentialResponse) => {
     const credential = (credentialResponse as ValidResponseBody).credential;

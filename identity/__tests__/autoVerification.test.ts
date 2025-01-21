@@ -1,5 +1,4 @@
-import { Request, Response } from "express";
-import axios from "axios";
+import { Request } from "express";
 import { PassportScore, autoVerifyStamps } from "../src/autoVerification";
 import { issueHashedCredential } from "../src/credentials";
 import {
@@ -25,6 +24,10 @@ jest.mock("ethers", () => {
 jest.mock("axios");
 
 jest.mock("../src/credentials");
+
+jest.mock("../src/bans", () => ({
+  checkCredentialBans: jest.fn().mockImplementation((input) => Promise.resolve(input)),
+}));
 
 const expectedEvmProvidersToSucceed = new Set<PROVIDER_ID>([
   "ETHDaysActive#50",

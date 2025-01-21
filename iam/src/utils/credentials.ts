@@ -170,31 +170,22 @@ const verifyAdditionalSigner = async ({
 export const checkConditionsAndIssueCredentials = async (
   payload: RequestPayload,
   address: string
-): Promise<CredentialResponseBody[] | CredentialResponseBody> => {
+): Promise<CredentialResponseBody[]> => {
   // Verify additional signer if provided
   // TODO: do we need this?
   if (payload.signer) {
     const { verifiedAddress } = await verifyAdditionalSigner(payload.signer);
     payload.signer.address = verifiedAddress;
   }
-
+  
   // Also, can we just drop the singleType? Single type means the array of types contains a single element ...
-  const singleType = !payload.types?.length;
-  const types = (!singleType ? payload.types : [payload.type]).filter((type) => type);
+  const types = payload.types.filter((type) => type);
 
   // Validate requirements and issue credentials
   if (payload && payload.type) {
     const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
     const responses = await issueCredentials(providersGroupedByPlatforms, address, payload);
-
-    if (singleType) {
-      const response = responses[0];
-      if ("error" in response && response.code && response.error) {
-        throw new ApiError(response.error, response.code);
-      }
-      return response;
-    }
     return responses;
   }
 

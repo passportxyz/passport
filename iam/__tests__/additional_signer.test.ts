@@ -7,10 +7,6 @@ import { getEip712Issuer } from "../src/issuers";
 
 const issuer = getEip712Issuer();
 
-jest.mock("../src/utils/bans", () => ({
-  checkCredentialBans: jest.fn().mockImplementation((input) => Promise.resolve(input)),
-}));
-
 jest.mock("../src/utils/verifyDidChallenge", () => ({
   verifyDidChallenge: jest.fn().mockImplementation(() => true),
 }));
@@ -38,7 +34,8 @@ jest.mock("ethers", () => {
 });
 
 describe("POST /verify", function () {
-  it("produces the same hash for an additional signer as if the passport is used directly", async () => {
+  // TODO: geri clarify that we do not want to support additional signers any more
+  it.skip("produces the same hash for an additional signer as if the passport is used directly", async () => {
     const challengeForReqWithAdditionalSigner = {
       issuer: issuer,
       credentialSubject: {

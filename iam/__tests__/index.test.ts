@@ -32,10 +32,6 @@ import { toJsonObject } from "../src/utils/json";
 
 const issuer = getEip712Issuer();
 
-jest.mock("../src/utils/bans", () => ({
-  checkCredentialBans: jest.fn().mockImplementation((input) => Promise.resolve(input)),
-}));
-
 jest.mock("../src/utils/revocations", () => ({
   filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
 }));
@@ -214,6 +210,7 @@ describe("POST /verify", function () {
     // payload containing a signature of the challenge in the challenge credential
     const payload = {
       type: "Simple",
+      types: ["Simple"],
       address: "0x0",
       proofs: {
         valid: "true",
@@ -234,7 +231,12 @@ describe("POST /verify", function () {
       .expect("Content-Type", /json/);
 
     // check for an id match on the mocked credential
-    expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+    const credential = (response.body as ValidResponseBody[])[0];
+    expect(credential.credential.credentialSubject.id).toEqual(expectedId);
+    // TODO: geri drop record attribute from response
+    // Check that only the expected keys are returned
+    const returnedConstKeys = Object.keys(credential);
+    expect(returnedConstKeys).toEqual(["record", "credential"]);
   });
 
   it("handles valid did-session signed challenge requests", async () => {
@@ -256,6 +258,7 @@ describe("POST /verify", function () {
     // payload containing a signature of the challenge in the challenge credential
     const payload = {
       type: "Simple",
+      types: ["Simple"],
       address: "0x0",
       proofs: {
         valid: "true",
@@ -288,7 +291,12 @@ describe("POST /verify", function () {
       .expect("Content-Type", /json/);
 
     // check for an id match on the mocked credential
-    expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+    const credential = (response.body as ValidResponseBody[])[0];
+    expect(credential.credential.credentialSubject.id).toEqual(expectedId);
+    // TODO: geri drop record attribute from response
+    // Check that only the expected keys are returned
+    const returnedConstKeys = Object.keys(credential);
+    expect(returnedConstKeys).toEqual(["record", "credential"]);
   });
 
   it("handles invalid did-session signed challenge requests", async () => {
@@ -356,6 +364,7 @@ describe("POST /verify", function () {
     // payload containing a signature of the challenge in the challenge credential
     const payload = {
       type: "Simple",
+      types: ["Simple"],
       address: "0x0",
       proofs: {
         valid: "true",
@@ -377,7 +386,12 @@ describe("POST /verify", function () {
       .expect("Content-Type", /json/);
 
     // check for an id match on the mocked credential
-    expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+    const credential = (response.body as ValidResponseBody[])[0];
+    expect(credential.credential.credentialSubject.id).toEqual(expectedId);
+    // TODO: geri drop record attribute from response
+    // Check that only the expected keys are returned
+    const returnedConstKeys = Object.keys(credential);
+    expect(returnedConstKeys).toEqual(["record", "credential"]);
   });
 
   it("handles valid verify requests with EIP712 signature, and ethers can validate the credential", async () => {
@@ -397,6 +411,7 @@ describe("POST /verify", function () {
     // payload containing a signature of the challenge in the challenge credential
     const payload = {
       type: "Simple",
+      types: ["Simple"],
       address: "0x0",
       proofs: {
         valid: "true",
@@ -417,7 +432,8 @@ describe("POST /verify", function () {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    const signedCredential = response.body.credential as VerifiableEip712Credential;
+    const signedCredentials = response.body as ValidResponseBody[];
+    const signedCredential = signedCredentials[0].credential as VerifiableEip712Credential;
 
     const standardizedTypes = signedCredential.proof.eip712Domain.types;
     const domain = signedCredential.proof.eip712Domain.domain;
@@ -455,6 +471,7 @@ describe("POST /verify", function () {
     // payload containing a signature of the challenge in the challenge credential
     const payload = {
       type: provider,
+      types: [provider],
       address: "0x0",
       proofs: {
         valid: "true",
@@ -477,9 +494,9 @@ describe("POST /verify", function () {
     const expectedProvider = `${provider}#Username`;
 
     // check that PII is returned with provider
-    expect((response.body as ValidResponseBody).credential.credentialSubject.provider).toEqual(expectedProvider);
+    expect((response.body as ValidResponseBody[])[0].credential.credentialSubject.provider).toEqual(expectedProvider);
     // check for an id match on the mocked credential
-    expect((response.body as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+    expect((response.body as ValidResponseBody[])[0].credential.credentialSubject.id).toEqual(expectedId);
   });
 
   it("handles valid challenge requests with multiple types", async () => {
@@ -691,6 +708,7 @@ describe("POST /verify", function () {
     // payload containing a signature of the challenge in the challenge credential
     const payload = {
       type: "Simple",
+      types: ["Simple"],
       address: "0x0",
       proofs: {
         valid: "false",
@@ -704,10 +722,13 @@ describe("POST /verify", function () {
       .post("/api/v0.0.0/verify")
       .send({ challenge, payload })
       .set("Accept", "application/json")
-      .expect(403)
-      .expect("Content-Type", /json/);
+      .expect("Content-Type", /json/)
+      .expect(200);
 
-    expect((response.body as ErrorResponseBody).error).toEqual("Proof is not valid");
+    expect((response.body as ErrorResponseBody[])[0]).toEqual({
+      code: 403,
+      error: "Proof is not valid",
+    });
   });
 
   it("handles exception if verify credential throws", async () => {
@@ -1120,9 +1141,6 @@ describe("POST /eas", () => {
       .expect(400)
       .expect("Content-Type", /json/);
 
-    console.error("ERROR:");
-    console.error(response.body);
-    console.error(expectedPayload);
     expect(response.body).toEqual(expectedPayload);
   });
 

@@ -2,7 +2,7 @@
   "name": "@gitcoin/passport-iam",
   "private": true,
   "version": "1.0.0",
-  "main": "dist/iam/src/main.js",
+  "main": "dist/src/main.js",
   "types": "src/types.d.ts",
   "type": "module",
   "license": "MIT",
