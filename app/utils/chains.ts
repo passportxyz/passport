@@ -9,6 +9,7 @@ import {
 
 import {
   arbitrum,
+  base,
   mainnet,
   sepolia,
   hardhat,
@@ -36,6 +37,7 @@ const hardhatChainId = "0x7a69";
 const lineaChainId = "0xe708";
 const optimismChainId = "0xa";
 const zkSyncChainId = "0x144";
+const baseChainId = "0x2105";
 const sepoliaOPChainId = "0xaa37dc";
 const arbitrumChainId = "0xa4b1";
 export const scrollChainId = "0x82750";
@@ -233,6 +235,26 @@ if (!TEST_MODE) {
     });
     wagmiChains.push(zksync);
     wagmiTransports[zksync.id] = http(process.env.NEXT_PUBLIC_PASSPORT_ZKSYNC_RPC_URL);
+  }
+
+  if (process.env.NEXT_PUBLIC_FF_ONCHAIN_BASE === "on") {
+    chainConfigs.push({
+      id: baseChainId,
+      token: "ETH",
+      label: "Base",
+      icon: "./assets/baseLogo.svg",
+      chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
+      explorerUrl: "https://basescan.org/",
+      attestationProviderConfig: {
+        name: "Ethereum Attestation Service",
+        status: usingTestEnvironment ? "disabled" : "enabled",
+        skipByDefault: false,
+        easScanUrl: "https://base.easscan.org",
+        monochromeIcon: "./assets/baseLogoBW.svg",
+      },
+    });
+    wagmiChains.push(base);
+    wagmiTransports[base.id] = http(process.env.NEXT_PUBLIC_PASSPORT_BASE_RPC_URL);
   }
 
   chainConfigs.push({

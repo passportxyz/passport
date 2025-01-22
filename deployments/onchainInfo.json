@@ -434,6 +434,40 @@
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
       }
     }
+  },
+  "0x2105": {
+    "description": "Base",
+    "issuer": {
+      "address": "0x804233b96cbd6d81efeb6517347177ef7bD488ED"
+    },
+    "EAS": {
+      "address": "0x4200000000000000000000000000000000000021"
+    },
+    "EASSchemaRegistry": {
+      "address": "0x4200000000000000000000000000000000000020"
+    },
+    "GitcoinAttester": {
+      "address": "0xCc90105D4A2aa067ee768120AdA19886021dF422"
+    },
+    "GitcoinVerifier": {
+      "address": "0x16db23c4b99bbC9A6Bf55dF7a787C9AEFD261185"
+    },
+    "GitcoinResolver": {
+      "address": "0x90E2C4472Df225e8D31f44725B75FFaA244d5D33"
+    },
+    "GitcoinPassportDecoder": {
+      "address": "0xaa24a127d10C68C8F9Ac06199AA606953cD82eE7"
+    },
+    "easSchemas": {
+      "namingSchema": {
+        "uid": "0x44d562ac1d7cd77e232978687fea027ace48f719cf1d58c7888e509663bb87fc"
+      },
+      "passport": {
+        "uid": "0x8ae6ee946bf1c936584cacc969bf7e9d0b274631c818df7e45c246051b364341"
+      },
+      "score": {
+        "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      }
+    }
   }
 }
-
