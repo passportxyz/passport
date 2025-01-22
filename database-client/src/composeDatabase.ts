@@ -22,7 +22,7 @@ import { RuntimeCompositeDefinition } from "@composedb/types";
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
 const COMMUNITY_TESTNET_CERAMIC_CLIENT_URL = "https://ceramic-clay.3boxlabs.com";
 
-type PassportWrapperLoadResponse = {
+export type PassportWrapperLoadResponse = {
   id: string;
   vcID: string;
   isDeleted: boolean;
@@ -90,7 +90,7 @@ const formatCredentialFromCeramic = (
 export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
   did: string;
   composeImpl: ComposeDatabaseImpl;
-  lastOp: Promise<any> | undefined;
+  lastOp: Promise<any> = Promise.resolve();
 
   constructor(did: DID, ceramicUrl: string = COMMUNITY_TESTNET_CERAMIC_CLIENT_URL, logger?: Logger) {
     this.did = (did.hasParent ? did.parent : did.id).toLowerCase();
@@ -98,45 +98,33 @@ export class ComposeDatabase implements WriteOnlySecondaryDataStorageBase {
   }
 
   addStamps = async (stamps: Stamp[]): Promise<SecondaryStorageAddResponse[]> => {
-    if (this.lastOp) {
-      try {
-        await this.lastOp;
-      } catch (error) {
-        // It should be safe to ignore error error, they should be logged in the called functions
-      }
-    }
-    await this.composeImpl.getPassportWithWrapper();
-    const promiseToReturn = this.composeImpl.addStamps(stamps);
-    this.lastOp = promiseToReturn;
-    return promiseToReturn;
+    const op = this.lastOp.then(async () => {
+      await this.composeImpl.getPassportWithWrapper();
+      const promiseToReturn = this.composeImpl.addStamps(stamps);
+      return promiseToReturn;
+    });
+    this.lastOp = op;
+    return op;
   };
 
   patchStamps = async (stampPatches: StampPatch[]): Promise<SecondaryStorageBulkPatchResponse> => {
-    if (this.lastOp) {
-      try {
-        await this.lastOp;
-      } catch (error) {
-        // It should be safe to ignore error error, they should be logged in the called functions
-      }
-    }
-    await this.composeImpl.getPassportWithWrapper();
-    const promiseToReturn = this.composeImpl.patchStamps(stampPatches);
-    this.lastOp = promiseToReturn;
-    return promiseToReturn;
+    const op = this.lastOp.then(async () => {
+      // No need to call this.composeImpl.getPassportWithWrapper(); as it is already called because deleteStamps in patchStamps function
+      const promiseToReturn = this.composeImpl.patchStamps(stampPatches);
+      return promiseToReturn;
+    });
+    this.lastOp = op;
+    return op;
   };
 
   deleteStamps = async (providers: PROVIDER_ID[]): Promise<SecondaryStorageDeleteResponse[]> => {
-    if (this.lastOp) {
-      try {
-        await this.lastOp;
-      } catch (error) {
-        // It should be safe to ignore error error, they should be logged in the called functions
-      }
-    }
-    // No need to call this.composeImpl.getPassportWithWrapper(); as it is already called in the deleteStamps function
-    const promiseToReturn = this.composeImpl.deleteStamps(providers);
-    this.lastOp = promiseToReturn;
-    return promiseToReturn;
+    const op = this.lastOp.then(async () => {
+      // No need to call this.composeImpl.getPassportWithWrapper(); as it is already called in the deleteStamps function
+      const promiseToReturn = this.composeImpl.deleteStamps(providers);
+      return promiseToReturn;
+    });
+    this.lastOp = op;
+    return op;
   };
 
   getPassport = async (): Promise<PassportLoadResponse> => {
@@ -508,6 +496,8 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
     }
 
     const wrappers = (result?.data?.viewer?.gitcoinPassportStampWrapperList?.edges || []).map((edge) => edge.node);
+    console.log(`[ComposeDB] ${this.did} getPassportWithWrapper returns`, wrappers);
+    this.logger.info(`[ComposeDB] ${this.did} getPassportWithWrapper returns`, { wrappers });
     return wrappers;
   }
 
@@ -521,8 +511,8 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
         credential: formatCredentialFromCeramic(wrapper.vc),
       }));
 
-      console.log(`[ComposeDB] ${this.did} getPassport:`, stamps);
-      this.logger.info(`[ComposeDB] ${this.did} getPassport`, { stamps });
+      console.log(`[ComposeDB] ${this.did} getPassport stamps:`, stamps);
+      this.logger.info(`[ComposeDB] ${this.did} getPassport stamps`, { stamps });
       return {
         status: "Success",
         passport: {
