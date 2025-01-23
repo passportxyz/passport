@@ -385,6 +385,101 @@ describe("autoVerificationHandler", () => {
     expect(verifySpy).toHaveBeenCalledTimes(expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size);
   });
 
+  it("should only verify specified credentials when credentialIds is provided", async () => {
+    const mockAddress = "0x123";
+    const mockScorerId = "test-scorer";
+    const specificCredentials = ["ETHDaysActive#50", "ETHScore#75"];
+
+    mockReq = {
+      body: {
+        address: mockAddress,
+        scorerId: mockScorerId,
+        credentialIds: specificCredentials,
+      },
+    };
+
+    const postSpy = (axios.post as jest.Mock).mockImplementation((url) => {
+      return Promise.resolve({
+        data: {
+          score: mockedScore,
+        },
+      });
+    });
+
+    const verifySpy = (providers.verify as jest.Mock).mockImplementation(
+      async (type: string, payload: RequestPayload, context: ProviderContext) => {
+        return Promise.resolve({
+          valid: true,
+          record: { key: "verified-condition" },
+        });
+      }
+    );
+
+    const issuedCredentials: VerifiableCredential[] = [];
+    (issueHashedCredential as jest.Mock).mockImplementation(
+      (DIDKit, currentKey, address, record: { type: string }, expiresInSeconds, signatureType) => {
+        const credential = getMockedIssuedCredential(record.type, mockAddress);
+        issuedCredentials.push(credential.credential);
+        return Promise.resolve(credential);
+      }
+    );
+
+    await autoVerificationHandler(mockReq as Request, mockRes as Response);
+
+    // Should only verify the specified credentials
+    expect(verifySpy).toHaveBeenCalledTimes(specificCredentials.length);
+
+    // Verify that only the specified credentials were checked
+    const verifiedTypes = verifySpy.mock.calls.map((call) => call[0]);
+    expect(verifiedTypes).toEqual(expect.arrayContaining(specificCredentials));
+
+    // Verify that no other credentials were checked
+    verifiedTypes.forEach((type) => {
+      expect(specificCredentials).toContain(type);
+    });
+
+    expect(postSpy).toHaveBeenCalledTimes(1);
+    expect(mockRes.json).toHaveBeenCalledWith(mockedScore);
+  });
+
+  it("should only score if credentialIds is an empty array", async () => {
+    const mockAddress = "0x123";
+    const mockScorerId = "test-scorer";
+
+    mockReq = {
+      body: {
+        address: mockAddress,
+        scorerId: mockScorerId,
+        credentialIds: [],
+      },
+    };
+
+    const postSpy = (axios.post as jest.Mock).mockImplementation((url) => {
+      return Promise.resolve({
+        data: {
+          score: mockedScore,
+        },
+      });
+    });
+
+    const verifySpy = (providers.verify as jest.Mock).mockImplementation(
+      async (type: string, payload: RequestPayload, context: ProviderContext) => {
+        return Promise.resolve({
+          valid: true,
+          record: { key: "verified-condition" },
+        });
+      }
+    );
+
+    await autoVerificationHandler(mockReq as Request, mockRes as Response);
+
+    // Should only verify the specified credentials
+    expect(verifySpy).not.toHaveBeenCalled();
+
+    expect(postSpy).toHaveBeenCalledTimes(1);
+    expect(mockRes.json).toHaveBeenCalledWith(mockedScore);
+  });
+
   it("should handle any errors from the embed scorer API correctly", async () => {
     const mockAddress = "0x123";
     const mockScorerId = "test-scorer";

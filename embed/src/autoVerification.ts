@@ -249,6 +249,7 @@ export const issueCredentials = async (
 export type AutoVerificationRequestBodyType = {
   address: string;
   scorerId: string;
+  credentialIds?: [];
 };
 
 type AutoVerificationFields = AutoVerificationRequestBodyType;
@@ -263,13 +264,13 @@ export const autoVerificationHandler = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { address, scorerId } = req.body;
+    const { address, scorerId, credentialIds } = req.body;
 
     if (!isAddress(address)) {
       return void errorRes(res, "Invalid address", 400);
     }
 
-    const stamps = await getPassingEvmStamps({ address, scorerId });
+    const stamps = await getPassingEvmStamps({ address, scorerId, credentialIds });
 
     const score = await addStampsAndGetScore({ address, scorerId, stamps });
 
@@ -284,24 +285,33 @@ export const autoVerificationHandler = async (
   }
 };
 
-const getEvmProvidersByPlatform = ({ scorerId }: { scorerId: string }): PROVIDER_ID[][] => {
+const getEvmProvidersByPlatform = ({
+  scorerId,
+  onlyCredentialIds,
+}: {
+  scorerId: string;
+  onlyCredentialIds?: string[];
+}): PROVIDER_ID[][] => {
   const evmPlatforms = Object.values(platforms).filter(({ PlatformDetails }) => PlatformDetails.isEVM);
 
   // TODO we should use the scorerId to check for any EVM stamps particular to a community, and include those here
   scorerId;
 
-  return evmPlatforms.map(({ ProviderConfig }) =>
-    ProviderConfig.reduce((acc, platformGroupSpec) => {
-      return acc.concat(platformGroupSpec.providers.map(({ name }) => name));
-    }, [] as PROVIDER_ID[])
-  );
+  return evmPlatforms
+    .map(({ ProviderConfig }) =>
+      ProviderConfig.reduce((acc, platformGroupSpec) => {
+        return acc.concat(platformGroupSpec.providers.map(({ name }) => name));
+      }, [] as PROVIDER_ID[]).filter((provider) => !onlyCredentialIds || onlyCredentialIds.includes(provider))
+    )
+    .filter((platformProviders) => platformProviders.length > 0);
 };
 
 export const getPassingEvmStamps = async ({
   address,
   scorerId,
+  credentialIds,
 }: AutoVerificationFields): Promise<VerifiableCredential[]> => {
-  const evmProvidersByPlatform = getEvmProvidersByPlatform({ scorerId });
+  const evmProvidersByPlatform = getEvmProvidersByPlatform({ scorerId, onlyCredentialIds: credentialIds });
 
   const credentialsInfo = {
     address,
@@ -327,7 +337,7 @@ export const addStampsAndGetScore = async ({
   address,
   scorerId,
   stamps,
-}: AutoVerificationFields & { stamps: VerifiableCredential[] }): Promise<PassportScore> => {
+}: Omit<AutoVerificationFields, "credentialIds"> & { stamps: VerifiableCredential[] }): Promise<PassportScore> => {
   try {
     const scorerResponse: {
       data?: {
