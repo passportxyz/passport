@@ -1,8 +1,3 @@
-node_modules
-.env
-.nvmrc
-.yarnrc
-
 # Logs
 logs
 *.log
@@ -12,8 +7,12 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+node_modules
+dist
+dist-ssr
+*.local
+
 # Editor directories and files
-.yarn/*
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -23,6 +22,3 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
-
-schemas/.env.yarn
-embed-popup/.env.production
