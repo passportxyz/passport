@@ -65,7 +65,7 @@ export const requestAccessToken = async (code: string): Promise<string | undefin
     params.append("redirect_uri", callback);
 
     // Exchange the code for an access token
-    tokenRequest = await axios.post("https://api.coinbase.com/oauth/token", params.toString(), {
+    tokenRequest = await axios.post("https://login.coinbase.com/oauth2/token", params.toString(), {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Accept: "application/json",

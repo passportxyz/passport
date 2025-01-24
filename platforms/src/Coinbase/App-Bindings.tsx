@@ -18,10 +18,13 @@ export class CoinbasePlatform extends Platform {
         </Hyperlink>
         <br />
         <br />
-        Obtain the Coinbase Stamp by completing the following 2 steps to prove your Coinbase Verified ID and Coinbase account:
+        Obtain the Coinbase Stamp by completing the following 2 steps to prove your Coinbase Verified ID and Coinbase
+        account:
         <br />
         <br />
-        <strong>Step 1:</strong> <Hyperlink href="https://www.coinbase.com/onchain-verify">Verify your Coinbase ID</Hyperlink> with the same address that you&apos;re currently using with this Passport.
+        <strong>Step 1:</strong>{" "}
+        <Hyperlink href="https://www.coinbase.com/onchain-verify">Verify your Coinbase ID</Hyperlink> with the same
+        address that you&apos;re currently using with this Passport.
         <br />
         <br />
         <strong>Step 2:</strong> Click &quot;Verify&quot; below to sign into your Coinbase account.
@@ -29,8 +32,13 @@ export class CoinbasePlatform extends Platform {
         <br />
         Important considerations:
         <ul>
-          <li>You <em>must</em> complete both steps to verify this Stamp.</li>
-          <li>You <em>must</em> have an active Coinbase account with a verified government ID to mint your onchain attestation for free on Base.</li>
+          <li>
+            You <em>must</em> complete both steps to verify this Stamp.
+          </li>
+          <li>
+            You <em>must</em> have an active Coinbase account with a verified government ID to mint your onchain
+            attestation for free on Base.
+          </li>
         </ul>
       </div>
     ),
@@ -68,9 +76,9 @@ export class CoinbasePlatform extends Platform {
   }
 
   async getOAuthUrl(state: string): Promise<string> {
-    const coinbasebUrl = await Promise.resolve(
-      `https://www.coinbase.com/oauth/authorize?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${state}`
+    const coinbaseUrl = await Promise.resolve(
+      `https://login.coinbase.com/oauth2/auth?response_type=code&client_id=${this.clientId}&redirect_uri=${this.redirectUri}&state=${state}`
     );
-    return coinbasebUrl;
+    return coinbaseUrl;
   }
 }
