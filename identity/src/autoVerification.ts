@@ -15,18 +15,6 @@ import {
 import { platforms } from "@gitcoin/passport-platforms";
 import { verifyProvidersAndIssueCredentials, VerificationError, addErrorDetailsToMessage } from "./verification";
 
-const providerTypePlatformMap = Object.entries(platforms).reduce(
-  (acc, [platformName, { PlatformDetails, ProviderConfig }]) => {
-    ProviderConfig.forEach(({ platformGroup, providers }) => {
-      providers.forEach(({ name }) => {
-        acc[name] = platformName;
-      });
-    });
-    return acc;
-  },
-  {} as { [k: string]: string }
-);
-
 export type AutoVerificationFields = {
   address: string;
   scorerId: string;
