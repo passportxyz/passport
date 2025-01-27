@@ -15,7 +15,6 @@ import {
 import { platforms } from "@gitcoin/passport-platforms";
 import { verifyProvidersAndIssueCredentials } from "./verification";
 
-
 export class IAMError extends Error {
   constructor(public message: string) {
     super(message);
@@ -96,7 +95,6 @@ export function groupProviderTypesByPlatform(types: string[]): string[][] {
 export type AutoVerificationFields = {
   address: string;
   scorerId: string;
-  credentialIds?: [];
 };
 
 export type AutoVerificationResponseBodyType = {
@@ -110,19 +108,16 @@ const getEvmProvidersByPlatform = ({ scorerId }: { scorerId: string }): PROVIDER
   // TODO we should use the scorerId to check for any EVM stamps particular to a community, and include those here
   scorerId;
 
-  return evmPlatforms
-    .map(({ ProviderConfig }) =>
-      ProviderConfig.reduce((acc, platformGroupSpec) => {
-        return acc.concat(platformGroupSpec.providers.map(({ name }) => name));
-      }, [] as PROVIDER_ID[]).filter((provider) => !onlyCredentialIds || onlyCredentialIds.includes(provider))
-    )
-    .filter((platformProviders) => platformProviders.length > 0);
+  return evmPlatforms.map(({ ProviderConfig }) =>
+    ProviderConfig.reduce((acc, platformGroupSpec) => {
+      return acc.concat(platformGroupSpec.providers.map(({ name }) => name));
+    }, [] as PROVIDER_ID[])
+  );
 };
 
 export const autoVerifyStamps = async ({
   address,
   scorerId,
-  credentialIds,
 }: AutoVerificationFields): Promise<VerifiableCredential[]> => {
   try {
     const evmProvidersByPlatform = getEvmProvidersByPlatform({ scorerId });
