@@ -7,7 +7,7 @@ import { ParamsDictionary } from "express-serve-static-core";
 
 // All provider exports from platforms
 import { handleAxiosError } from "@gitcoin/passport-platforms";
-import { autoVerifyStamps } from "@gitcoin/passport-identity/dist/commonjs/identity/src/index.js";
+import { autoVerifyStamps } from "@gitcoin/passport-identity";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
 import axios from "axios";
@@ -119,7 +119,6 @@ export const autoVerificationHandler = async (
     if (error instanceof EmbedAxiosError) {
       return void errorRes(res, error.message, error.code);
     }
-
     const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
     return void errorRes(res, message, 500);
   }

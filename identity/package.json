@@ -4,16 +4,12 @@
   "license": "MIT",
   "main": "dist/commonjs/index.js",
   "exports": {
-    ".": "./dist/commonjs/index.js",
-    "./deployments": "./dist/commonjs/deployments/index.js"
+    ".": "./dist/commonjs/index.js"
   },
   "typesVersions": {
     "*": {
       "*": [
         "./dist/commonjs/index.d.ts"
-      ],
-      "deployments": [
-        "./dist/commonjs/deployments/index.d.ts"
       ]
     }
   },
