@@ -1,6 +1,4 @@
-import { PassportScore } from "../src/autoVerification";
-import { verifyTypes, verifyProvidersAndIssueCredentials, VerifyTypeResult } from "../src/verification";
-// import * as verification from "../src/verification";
+import { verifyTypes, verifyProvidersAndIssueCredentials } from "../src/verification";
 
 import { issueHashedCredential } from "../src/credentials";
 import { VerifiableCredential, RequestPayload, ProviderContext, IssuedCredential } from "@gitcoin/passport-types";
