@@ -20,12 +20,14 @@ export class IAMError extends Error {
   }
 }
 
+// TODO: geri this is not used ???
 export type PassportProviderPoints = {
   score: string;
   dedup: boolean;
   expiration_date: string;
 };
 
+// TODO: geri this is not used ???
 export type PassportScore = {
   address: string;
   score: string;

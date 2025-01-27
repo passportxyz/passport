@@ -1,4 +1,4 @@
-import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments";
+import passportOnchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
 import { Wallet, TypedDataDomain } from "ethers";
 
 export const getAttestationDomainSeparator = (chainIdHex: keyof typeof passportOnchainInfo): TypedDataDomain => {

@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import { JsonRpcProvider, Contract, version } from "ethers";
-import { passportDecoderAbi } from "@gitcoin/passport-identity/deployments";
+import passportDecoderAbi from "../../../deployments/abi/GitcoinPassportDecoder.json";
 
 import providerBitMapInfo from "../static/providerBitMapInfo.json" assert { type: "json" };
 dotenv.config();

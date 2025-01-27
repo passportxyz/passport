@@ -24,7 +24,7 @@ import {
   EasRequestBody,
 } from "@gitcoin/passport-types";
 
-import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments";
+import passportOnchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
 import { verifyProvidersAndIssueCredentials } from "@gitcoin/passport-identity";
 
 import { getChallenge, verifyChallengeAndGetAddress } from "./utils/challenge.js";
@@ -53,6 +53,7 @@ import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForC
 import { scrollDevBadgeHandler } from "./utils/scrollDevBadge.js";
 import { toJsonObject } from "./utils/json.js";
 import { filterRevokedCredentials } from "./utils/revocations.js";
+import { assert } from "console";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured

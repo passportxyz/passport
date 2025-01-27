@@ -1,6 +1,6 @@
 import * as easPassportModule from "../src/utils/easPassportSchema";
 import * as easStampModule from "../src/utils/easStampSchema";
-import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments";
+import passportOnchainInfo from "../../deployments/onchainInfo.json";
 
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";

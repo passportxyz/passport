@@ -7,7 +7,7 @@ import { Signature, JsonRpcProvider, Contract } from "ethers";
 // ---- Types
 import { Response } from "express";
 import { EasPayload, PassportAttestation, EasRequestBody } from "@gitcoin/passport-types";
-import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments";
+import passportOnchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
 
 import { getEASFeeAmount } from "./easFees.js";
 import { hasValidIssuer } from "../issuers.js";

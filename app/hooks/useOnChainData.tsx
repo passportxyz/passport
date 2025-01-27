@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo } from "react";
 
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
-import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments";
+import passportOnchainInfo from "../../deployments/onchainInfo.json";
 import { ChainId, chains, wagmiTransports } from "../utils/chains";
 
 import { PROVIDER_ID } from "@gitcoin/passport-types";
