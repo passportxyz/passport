@@ -1,11 +1,12 @@
 import { PassportScore } from "../src/autoVerification";
-import { verifyTypes } from "../src/verification";
+import { verifyTypes, verifyProvidersAndIssueCredentials, VerifyTypeResult } from "../src/verification";
 
 import { issueHashedCredential } from "../src/credentials";
 import { VerifiableCredential, RequestPayload, ProviderContext, IssuedCredential } from "@gitcoin/passport-types";
 import { providers } from "@gitcoin/passport-platforms";
 
 jest.mock("../src/credentials");
+jest.mock("../src/verification");
 
 jest.mock("../src/bans", () => ({
   checkCredentialBans: jest.fn().mockImplementation((input) => Promise.resolve(input)),
@@ -80,17 +81,6 @@ jest.mock("@gitcoin/passport-platforms", () => {
     },
   };
 });
-
-const mockedScore: PassportScore = {
-  address: "0x0000000000000000000000000000000000000000",
-  score: "12",
-  passing_score: true,
-  last_score_timestamp: new Date().toISOString(),
-  expiration_timestamp: new Date().toISOString(),
-  threshold: "20.000",
-  error: "",
-  stamps: { "provider-1": { score: "12", dedup: true, expiration_date: new Date().toISOString() } },
-};
 
 describe("verifyTypes", () => {
   beforeEach(() => {
@@ -378,5 +368,64 @@ describe("verifyTypes", () => {
         code: undefined,
       },
     ]);
+  });
+});
+
+describe("verifyProvidersAndIssueCredentials", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should call verifyTypes and create credentials for each successful verification", async () => {
+    const mockAddress = "0x123";
+    const mockScorerId = "test-scorer";
+    let payload: RequestPayload = {
+      version: "v0.0.0",
+      address: mockAddress,
+      type: "test-type",
+      challenge: "test-challenge",
+      proofs: {},
+    };
+
+    const verifyTypesSpy = (verifyTypes as jest.Mock).mockImplementation(
+      async (providersByPlatform: string[][], payload: RequestPayload) => {
+        const ret: VerifyTypeResult[] = [];
+        providersByPlatform.forEach((providers) => {
+          providers.forEach((provider) => {
+            ret.push({
+              verifyResult: {
+                valid: true,
+                record: { key: "verified-condition" },
+              },
+              type: provider,
+              code: undefined,
+              error: undefined,
+            });
+          });
+        });
+        return Promise.resolve({
+          valid: true,
+          record: { key: "verified-condition" },
+        });
+      }
+    );
+
+    const issuedCredentials: VerifiableCredential[] = [];
+    (issueHashedCredential as jest.Mock).mockImplementation(
+      async (DIDKit, currentKey, address, record: { type: string }, expiresInSeconds, signatureType) => {
+        const credential = getMockedIssuedCredential(record.type, mockAddress);
+        issuedCredentials.push(credential.credential);
+        return Promise.resolve(credential);
+      }
+    );
+
+    const result = await verifyProvidersAndIssueCredentials(
+      [
+        ["provider-1", "provider-2"],
+        ["provider-3", "provider-4"],
+      ],
+      mockAddress,
+      payload
+    );
   });
 });
