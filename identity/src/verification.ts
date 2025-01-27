@@ -58,7 +58,7 @@ export class VerificationError extends Error {
   }
 }
 
-type VerifyTypeResult = {
+export type VerifyTypeResult = {
   verifyResult: VerifiedPayload;
   type: string;
   error?: string;
@@ -179,10 +179,10 @@ export const verifyProvidersAndIssueCredentials = async (
   payload: RequestPayload
 ): Promise<CredentialResponseBody[]> => {
   // if the payload includes an additional signer, use that to issue credential.
-  if (payload.signer) {
-    // We can assume that the signer is a valid address because the challenge was verified within the /verify endpoint
-    payload.address = payload.signer.address;
-  }
+  // if (payload.signer) {
+  //   // We can assume that the signer is a valid address because the challenge was verified within the /verify endpoint
+  //   payload.address = payload.signer.address;
+  // }
 
   const results = await verifyTypes(providersByPlatform, payload);
 

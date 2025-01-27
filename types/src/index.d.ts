@@ -104,7 +104,6 @@ export type VerifiableEip712CredentialComposeEncoded = {
     provider?: string;
     address?: string;
     challenge?: string;
-    metaPointer?: string;
   };
   issuer: string;
   issuanceDate: string;

@@ -25,13 +25,14 @@ import {
 } from "@gitcoin/passport-types";
 
 import { passportOnchainInfo } from "@gitcoin/passport-identity/deployments";
+import { verifyProvidersAndIssueCredentials } from "@gitcoin/passport-identity";
 
 import { getChallenge, verifyChallengeAndGetAddress } from "./utils/challenge.js";
 import { getEASFeeAmount } from "./utils/easFees.js";
 import * as stampSchema from "./utils/easStampSchema.js";
 import * as passportSchema from "./utils/easPassportSchema.js";
 import { hasValidIssuer, getIssuerKey } from "./issuers.js";
-import { checkConditionsAndIssueCredentials } from "./utils/credentials.js";
+// import { checkConditionsAndIssueCredentials } from "./utils/credentials.js";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
@@ -220,16 +221,12 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
   // get the payload from the JSON req body
   const payload = requestBody.payload;
 
-  console.log("geri ---verify", 1);
-
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   return void verifyCredential(DIDKit, challenge)
     .then(async (verified) => {
-      console.log("geri ---verify", 2);
       if (verified && hasValidIssuer(challenge.issuer)) {
         let address;
         try {
-          console.log("geri ---verify", 3);
           address = await verifyChallengeAndGetAddress(requestBody);
         } catch (error) {
           if (error instanceof VerifyDidChallengeBaseError) {
@@ -240,14 +237,10 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 
         payload.address = address;
 
-        console.log("geri ---verify", 4);
         // Check signer and type
         const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
         const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
 
-        console.log("geri ---verify 4.1 isSigner", isSigner);
-        console.log("geri ---verify 4.2 isType", isType);
-        console.log("geri ---verify 4.2 provider", challenge.credentialSubject.provider);
         if (!isSigner || !isType) {
           return void errorRes(
             res,
@@ -258,11 +251,10 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
           );
         }
 
-        console.log("geri ---verify", 5);
-        const credentials = await checkConditionsAndIssueCredentials(payload, address);
-        console.log("geri ---verify", 6);
+        const types = payload.types.filter((type) => type);
+        const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
-        console.log("geri ---verify", 6.1);
+        const credentials = await verifyProvidersAndIssueCredentials(providersGroupedByPlatforms, address, payload);
 
         return void res.json(credentials);
       }
