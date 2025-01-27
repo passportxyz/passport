@@ -54,7 +54,10 @@ export const addErrorDetailsToMessage = (message: string, error: any): string =>
 };
 
 export class VerificationError extends Error {
-  constructor(public message: string, public code: number) {
+  constructor(
+    public message: string,
+    public code: number
+  ) {
     super(message);
     this.name = this.constructor.name;
   }
@@ -81,14 +84,17 @@ const providerTypePlatformMap = Object.entries(platforms).reduce(
 
 export function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
-    types.reduce((groupedProviders, type) => {
-      const platform = providerTypePlatformMap[type] || "generic";
+    types.reduce(
+      (groupedProviders, type) => {
+        const platform = providerTypePlatformMap[type] || "generic";
 
-      if (!groupedProviders[platform]) groupedProviders[platform] = [];
-      groupedProviders[platform].push(type);
+        if (!groupedProviders[platform]) groupedProviders[platform] = [];
+        groupedProviders[platform].push(type);
 
-      return groupedProviders;
-    }, {} as { [k: keyof typeof platforms]: string[] })
+        return groupedProviders;
+      },
+      {} as { [k: keyof typeof platforms]: string[] }
+    )
   );
 }
 
@@ -113,11 +119,11 @@ export async function verifyTypes(
       // Iterate over the types within a platform in series
       // This enables providers within a platform to reliably share context
       for (const _type of platformProviders) {
-        let type = _type as string;
+        let type = _type;
         let verifyResult: VerifiedPayload = { valid: false };
         let code, error;
         const realType = type;
-        let payloadForType = { ...payload, proofs: { ...payload.proofs } };
+        const payloadForType = { ...payload, proofs: { ...payload.proofs } };
         if (type.startsWith("AllowList")) {
           payloadForType.proofs = {
             ...payload.proofs,
