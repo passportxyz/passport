@@ -12,7 +12,12 @@
     "outDir": "dist/commonjs",
     "allowJs": true,
     "baseUrl": "src",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*",
+    "src/deployments/*.json",
+    "src/deployments/abi/*.json"
+  ]
 }

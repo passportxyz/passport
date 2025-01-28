@@ -11,7 +11,7 @@ import { RedisReply, RedisStore } from "rate-limit-redis";
 
 // --- Relative imports
 import { keyGenerator, apiKeyRateLimit } from "./rate-limiter.js";
-import { autoVerificationHandler } from "./autoVerification.js";
+import { autoVerificationHandler } from "./handlers.js";
 import { metadataHandler } from "./metadata.js";
 import { redis } from "./redis.js";
 

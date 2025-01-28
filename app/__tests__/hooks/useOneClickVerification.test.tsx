@@ -8,7 +8,7 @@ import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures
 import { CeramicContextState } from "../../context/ceramicContext";
 import { DID } from "dids";
 import { DatastoreConnectionContext } from "../../context/datastoreConnectionContext";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+import { fetchVerifiableCredential } from "../../utils/credentials";
 import { fetchPossibleEVMStamps } from "../../signer/utils";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
@@ -19,7 +19,7 @@ vi.mock("../../utils/helpers", () => ({
   createSignedPayload: vi.fn(),
 }));
 
-vi.mock("@gitcoin/passport-identity", () => ({
+vi.mock("../../utils/credentials", () => ({
   fetchVerifiableCredential: vi.fn(),
 }));
 

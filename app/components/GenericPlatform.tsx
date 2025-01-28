@@ -12,7 +12,7 @@ import {
   StampPatch,
   ValidResponseBody,
 } from "@gitcoin/passport-types";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+import { fetchVerifiableCredential } from "../utils/credentials";
 
 // --- Style Components
 import { SideBarContent } from "./SideBarContent";

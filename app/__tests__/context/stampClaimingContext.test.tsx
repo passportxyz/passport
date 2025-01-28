@@ -5,7 +5,7 @@ import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures
 
 import { CeramicContext } from "../../context/ceramicContext";
 import { StampClaimingContext, StampClaimingContextProvider } from "../../context/stampClaimingContext";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+import { fetchVerifiableCredential } from "../../utils/credentials";
 
 import { PLATFORM_ID, ValidResponseBody } from "@gitcoin/passport-types";
 import { PlatformProps } from "../../components/GenericPlatform";
@@ -16,7 +16,7 @@ vi.mock("../../utils/helpers", () => ({
   generateUID: vi.fn((length: number) => "some random string"),
 }));
 
-vi.mock("@gitcoin/passport-identity", () => ({
+vi.mock("../../utils/credentials", () => ({
   fetchVerifiableCredential: vi.fn(),
 }));
 

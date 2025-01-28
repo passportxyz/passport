@@ -1,6 +1,6 @@
 import { CredentialResponseBody, ValidResponseBody, VerifiableCredential } from "@gitcoin/passport-types";
 import { handleAxiosError } from "@gitcoin/passport-platforms";
-import { UnexpectedApiError } from "./helpers.js";
+import { UnexpectedApiError } from "./helpers";
 import axios from "axios";
 
 const SCORER_ENDPOINT = process.env.SCORER_ENDPOINT;
