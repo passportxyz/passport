@@ -450,69 +450,6 @@ describe("POST /verify", function () {
     expect(returnedConstKeys.sort()).toEqual(["record", "credential"].sort());
   });
 
-  // TODO: move this to identity tests
-  it.skip("handles valid verify requests with EIP712 signature, and ethers can validate the credential", async () => {
-    const originalEthers = jest.requireActual("ethers");
-    // challenge received from the challenge endpoint
-    const eip712Key = process.env.IAM_JWK_EIP712;
-    const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
-    const challenge = {
-      issuer: eip712Issuer,
-      credentialSubject: {
-        id: "did:pkh:eip155:1:0x0",
-        provider: "challenge-Simple",
-        address: "0x0",
-        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
-      },
-    };
-    // payload containing a signature of the challenge in the challenge credential
-    const payload = {
-      type: "Simple",
-      types: ["Simple"],
-      address: "0x0",
-      proofs: {
-        valid: "true",
-        username: "test",
-        signature: "pass",
-      },
-      signatureType: "EIP712",
-    };
-
-    // check that ID matches the payload (this has been mocked)
-    const expectedId = "did:pkh:eip155:1:0x0";
-
-    // create a req against the express app
-    const response = await request(app)
-      .post("/api/v0.0.0/verify")
-      .send({ challenge, payload })
-      .set("Accept", "application/json")
-      .expect(200)
-      .expect("Content-Type", /json/);
-
-    const signedCredentials = response.body as ValidResponseBody[];
-    const signedCredential = signedCredentials[0].credential as VerifiableEip712Credential;
-
-    const standardizedTypes = signedCredential.proof.eip712Domain.types;
-    const domain = signedCredential.proof.eip712Domain.domain;
-
-    // Delete EIP712Domain so that ethers does not complain about the ambiguous primary type
-    delete standardizedTypes.EIP712Domain;
-
-    const signerAddress = originalEthers.verifyTypedData(
-      domain,
-      standardizedTypes,
-      signedCredential,
-      signedCredential.proof.proofValue
-    );
-
-    const signerIssuedCredential = signerAddress.toLowerCase() === signedCredential.issuer.split(":").pop();
-
-    if (signerIssuedCredential) {
-      const splitSignature = originalEthers.Signature.from(signedCredential.proof.proofValue);
-      return splitSignature;
-    }
-  });
-
   it("handles valid verify requests with 'EIP712' or 'Ed25519'  signature", async () => {
     const originalEthers = jest.requireActual("ethers");
     // challenge received from the challenge endpoint
