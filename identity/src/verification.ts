@@ -123,6 +123,7 @@ export async function verifyTypes(
         let verifyResult: VerifiedPayload = { valid: false };
         let code, error;
         const realType = type;
+
         const payloadForType = { ...payload, proofs: { ...payload.proofs } };
         if (type.startsWith("AllowList")) {
           payloadForType.proofs = {
@@ -186,14 +187,7 @@ export const verifyProvidersAndIssueCredentials = async (
   address: string,
   payload: RequestPayload
 ): Promise<CredentialResponseBody[]> => {
-  // if the payload includes an additional signer, use that to issue credential.
-  // if (payload.signer) {
-  //   // We can assume that the signer is a valid address because the challenge was verified within the /verify endpoint
-  //   payload.address = payload.signer.address;
-  // }
-
   const results = await verifyTypes(providersByPlatform, payload);
-
   const credentials = await Promise.all(
     results.map(async ({ verifyResult, code: verifyCode, error: verifyError, type }) => {
       let code = verifyCode;
