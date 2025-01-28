@@ -828,53 +828,6 @@ describe("POST /verify", function () {
       .expect(200)
       .expect("Content-Type", /json/);
   });
-
-  // We shoul drop this, we want to abandon the additional signer concept
-  it.skip("should not issue credential for additional signer when invalid address is provided", async () => {
-    (identityMock.verifyCredential as jest.Mock).mockResolvedValueOnce(true);
-    // challenge received from the challenge endpoint
-    const challenge = {
-      issuer: issuer,
-      credentialSubject: {
-        id: "did:pkh:eip155:1:0x0",
-        provider: "challenge-any",
-        address: "0x0",
-        challenge: {
-          issuer: "did:key:z6Mkecq4nKTCniqNed5cdDSURj1JX4SEdNhvhitZ48HcJMnN",
-        },
-      },
-    };
-
-    // payload containing a signature of the challenge in the challenge credential
-    const payload = {
-      type: "any",
-      types: ["Simple", "Simple"],
-      address: "0x1",
-      proofs: {
-        valid: "true",
-        username: "test",
-        signature: "pass",
-      },
-      signer: {
-        address: "0xbadAddress",
-        signature: "0x1",
-        challenge: {
-          issuer: "did:key:z6Mkecq4nKTCniqNed5cdDSURj1JX4SEdNhvhitZ48HcJMnN",
-          credentialSubject: {
-            challenge: "I commit that this wallet is under my control",
-          },
-        },
-      },
-    };
-
-    // create a req against the express app
-    await request(app)
-      .post("/api/v0.0.0/verify")
-      .send({ challenge, payload })
-      .set("Accept", "application/json")
-      .expect(401)
-      .expect("Content-Type", /json/);
-  });
 });
 
 describe("POST /check", function () {
