@@ -291,7 +291,6 @@ describe("POST /verify", function () {
     // check for an id match on the mocked credential
     const credential = (response.body as ValidResponseBody[])[0];
     expect(credential.credential.credentialSubject.id).toEqual(expectedId);
-    // TODO: geri drop record attribute from response
     // Check that only the expected keys are returned
     const returnedConstKeys = Object.keys(credential);
     expect(returnedConstKeys.sort()).toEqual(["record", "credential"].sort());
@@ -351,7 +350,6 @@ describe("POST /verify", function () {
     // check for an id match on the mocked credential
     const credential = (response.body as ValidResponseBody[])[0];
     expect(credential.credential.credentialSubject.id).toEqual(expectedId);
-    // TODO: geri drop record attribute from response
     // Check that only the expected keys are returned
     const returnedConstKeys = Object.keys(credential);
     expect(returnedConstKeys.sort()).toEqual(["record", "credential"].sort());
@@ -447,7 +445,6 @@ describe("POST /verify", function () {
     // check for an id match on the mocked credential
     const credential = (response.body as ValidResponseBody[])[0];
     expect(credential.credential.credentialSubject.id).toEqual(expectedId);
-    // TODO: geri drop record attribute from response
     // Check that only the expected keys are returned
     const returnedConstKeys = Object.keys(credential);
     expect(returnedConstKeys.sort()).toEqual(["record", "credential"].sort());
