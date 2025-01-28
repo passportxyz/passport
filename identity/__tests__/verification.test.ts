@@ -97,7 +97,7 @@ describe("verifyTypes", () => {
     jest.clearAllMocks();
   });
 
-  it("should call providers.verify for the 'regular' providers in providersByPlatform", async () => {
+  it("should call providers.verify for the 'regular' providers in providersByPlatform and accumulate values in the context", async () => {
     const mockAddress = "0x123";
     const mockScorerId = "test-scorer";
     let payload: RequestPayload = {
