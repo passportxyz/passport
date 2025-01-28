@@ -7,7 +7,7 @@ import { ParamsDictionary } from "express-serve-static-core";
 
 // All provider exports from platforms
 import { handleAxiosError } from "@gitcoin/passport-platforms";
-import { autoVerifyStamps } from "@gitcoin/passport-identity";
+import { autoVerifyStamps, PassportScore } from "@gitcoin/passport-identity";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
 import axios from "axios";
@@ -18,17 +18,6 @@ export type PassportProviderPoints = {
   score: string;
   dedup: boolean;
   expiration_date: string;
-};
-
-export type PassportScore = {
-  address: string;
-  score: string;
-  passing_score: boolean;
-  last_score_timestamp: string;
-  expiration_timestamp: string;
-  threshold: string;
-  error: string;
-  stamps: Record<string, PassportProviderPoints>;
 };
 
 export type AutoVerificationRequestBodyType = {

@@ -1,6 +1,7 @@
 import { Request } from "express";
 import { autoVerifyStamps } from "../src/autoVerification";
 import { PassportScore } from "../src/verification";
+
 import { issueHashedCredential } from "../src/credentials";
 import {
   PROVIDER_ID,

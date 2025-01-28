@@ -20,6 +20,23 @@ export class IAMError extends Error {
   }
 }
 
+export type PassportProviderPoints = {
+  score: string;
+  dedup: boolean;
+  expiration_date: string;
+};
+
+export type PassportScore = {
+  address: string;
+  score: string;
+  passing_score: boolean;
+  last_score_timestamp: string;
+  expiration_timestamp: string;
+  threshold: string;
+  error: string;
+  stamps: Record<string, PassportProviderPoints>;
+};
+
 // return a JSON error response with a 400 status
 export const errorRes = (res: Response, error: string | object, errorCode: number): Response =>
   res.status(errorCode).json({ error });

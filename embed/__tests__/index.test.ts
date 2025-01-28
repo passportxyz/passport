@@ -3,9 +3,9 @@
 import request from "supertest";
 import { Response, Request } from "express";
 import { apiKeyRateLimit, keyGenerator } from "../src/rate-limiter";
-import { AutoVerificationResponseBodyType, AutoVerificationRequestBodyType, PassportScore } from "../src/handlers";
+import { AutoVerificationResponseBodyType, AutoVerificationRequestBodyType } from "../src/handlers";
 import { ParamsDictionary } from "express-serve-static-core";
-// ---- Test subject
+import { PassportScore } from "@gitcoin/passport-identity";
 
 const mockedScore: PassportScore = {
   address: "0x0000000000000000000000000000000000000000",
