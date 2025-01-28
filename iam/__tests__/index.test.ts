@@ -229,11 +229,13 @@ describe("POST /verify", function () {
         const ret: CredentialResponseBody[] = [];
         providersByPlatform.forEach((providers) => {
           providers.forEach((provider) => {
+            const _provider = provider === "ClearTextSimple" ? "ClearTextSimple#Username" : provider;
             ret.push({
-              credential: getMockEIP712Credential(provider, address),
+              credential: getMockEIP712Credential(_provider, address),
               record: {
                 type: "test-record",
                 version: "v0.0.0",
+                pii: provider === "ClearTextSimple" ? _provider : undefined,
               },
             });
           });
@@ -404,6 +406,7 @@ describe("POST /verify", function () {
 
     expect((response.body as ErrorResponseBody).error).toEqual("Invalid challenge signature: Error");
   });
+
   it("handles valid verify requests with EIP712 signature", async () => {
     // challenge received from the challenge endpoint
     const eip712Key = process.env.IAM_JWK_EIP712;
@@ -506,9 +509,7 @@ describe("POST /verify", function () {
     expect(verifyProvidersAndIssueCredentialsFn).toHaveBeenCalledWith([["Simple"]], "0x0", payload);
   });
 
-  // TODO: move this to identity tests ???
-  it.skip("handles valid challenge request returning PII", async () => {
-    // Note: this is the only use-case where we do not want to provide
+  it("returns the pii record on requests", async () => {
     const provider = "ClearTextSimple";
     // challenge received from the challenge endpoint
     const challenge = {
@@ -549,6 +550,12 @@ describe("POST /verify", function () {
     expect((response.body as ValidResponseBody[])[0].credential.credentialSubject.provider).toEqual(expectedProvider);
     // check for an id match on the mocked credential
     expect((response.body as ValidResponseBody[])[0].credential.credentialSubject.id).toEqual(expectedId);
+    // check the returned record
+    expect((response.body as ValidResponseBody[])[0].record).toEqual({
+      pii: expectedProvider,
+      type: "test-record",
+      version: "v0.0.0",
+    });
   });
 
   it("handles valid challenge requests with multiple types", async () => {
