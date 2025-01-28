@@ -749,45 +749,7 @@ describe("POST /verify", function () {
     expect((response.body as ErrorResponseBody).error).toEqual("Invalid challenge 'signer' and 'provider'");
   });
 
-  // TODO: geri move to identity
-  it.skip("handles invalid challenge requests where 'valid' proof is passed as false (test against Simple Provider)", async () => {
-    // challenge received from the challenge endpoint
-    const challenge = {
-      issuer: issuer,
-      credentialSubject: {
-        id: "did:pkh:eip155:1:0x0",
-        provider: "challenge-Simple",
-        address: "0x0",
-        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
-      },
-    };
-    // payload containing a signature of the challenge in the challenge credential
-    const payload = {
-      type: "Simple",
-      types: ["Simple"],
-      address: "0x0",
-      proofs: {
-        valid: "false",
-        username: "test",
-        signature: "pass",
-      },
-    };
-
-    // create a req against the express app
-    const response = await request(app)
-      .post("/api/v0.0.0/verify")
-      .send({ challenge, payload })
-      .set("Accept", "application/json")
-      .expect("Content-Type", /json/)
-      .expect(200);
-
-    expect((response.body as ErrorResponseBody[])[0]).toEqual({
-      code: 403,
-      error: "Proof is not valid",
-    });
-  });
-
-  it("handles exception if verify credential throws", async () => {
+  it("handles exception if verify challenge credential throws", async () => {
     (identityMock.verifyCredential as jest.Mock).mockRejectedValueOnce(new Error("Verify Credential Error"));
 
     // challenge received from the challenge endpoint
@@ -820,6 +782,41 @@ describe("POST /verify", function () {
       .expect("Content-Type", /json/);
 
     expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload: Error");
+  });
+
+  it("handles exception if verify challenge credential returns false", async () => {
+    (identityMock.verifyCredential as jest.Mock).mockResolvedValueOnce(false);
+
+    // challenge received from the challenge endpoint
+    const challenge = {
+      issuer: issuer,
+      credentialSubject: {
+        id: "did:pkh:eip155:1:0xNotAnEthereumAddress",
+        type: "challenge-Simple",
+        address: "0xNotAnEthereumAddress",
+        challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+    };
+    // payload containing a signature of the challenge in the challenge credential
+    const payload = {
+      type: "Simple",
+      address: "0x0",
+      proofs: {
+        valid: "false",
+        username: "test",
+        signature: "pass",
+      },
+    };
+
+    // create a req against the express app
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .send({ challenge, payload })
+      .set("Accept", "application/json")
+      .expect(401)
+      .expect("Content-Type", /json/);
+
+    expect((response.body as ErrorResponseBody).error).toEqual("Unable to verify payload");
   });
 
   it("handles invalid challenge request passed by the additional signer", async () => {
