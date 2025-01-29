@@ -18,6 +18,8 @@ identity.issueChallengeCredential = jest.fn(async (DIDKit, key, record) => ({
 // always verifies
 identity.verifyCredential = jest.fn(async () => true);
 
+identity.verifyProvidersAndIssueCredentials = jest.fn(async () => []);
+
 // return full mock
 module.exports = {
   ...realIdentity,

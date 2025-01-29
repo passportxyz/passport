@@ -7,7 +7,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 // --- Identity tools
 import { VerifiableCredential, PROVIDER_ID, PLATFORM_ID, StampPatch, ValidResponseBody } from "@gitcoin/passport-types";
 import { Platform, ProviderPayload } from "@gitcoin/passport-platforms";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+import { fetchVerifiableCredential } from "../utils/credentials";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";

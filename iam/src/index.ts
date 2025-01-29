@@ -23,18 +23,25 @@ import {
   PassportAttestation,
   EasRequestBody,
 } from "@gitcoin/passport-types";
-import onchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
+
+import passportOnchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
+import { verifyProvidersAndIssueCredentials } from "@gitcoin/passport-identity";
 
 import { getChallenge, verifyChallengeAndGetAddress } from "./utils/challenge.js";
 import { getEASFeeAmount } from "./utils/easFees.js";
 import * as stampSchema from "./utils/easStampSchema.js";
 import * as passportSchema from "./utils/easPassportSchema.js";
 import { hasValidIssuer, getIssuerKey } from "./issuers.js";
-import { checkConditionsAndIssueCredentials, verifyTypes } from "./utils/credentials.js";
+// import { checkConditionsAndIssueCredentials } from "./utils/credentials.js";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import { issueChallengeCredential, verifyCredential } from "@gitcoin/passport-identity";
+import {
+  issueChallengeCredential,
+  verifyCredential,
+  verifyTypes,
+  groupProviderTypesByPlatform,
+} from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
 
@@ -46,6 +53,7 @@ import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForC
 import { scrollDevBadgeHandler } from "./utils/scrollDevBadge.js";
 import { toJsonObject } from "./utils/json.js";
 import { filterRevokedCredentials } from "./utils/revocations.js";
+import { assert } from "console";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -191,8 +199,8 @@ app.post("/api/v0.0.0/check", (req: Request, res: Response): void => {
   }
 
   const types = (payload.types?.length ? payload.types : [payload.type]).filter((type) => type);
-
-  verifyTypes(types, payload)
+  const typesGroupedByPlatform = groupProviderTypesByPlatform(types);
+  verifyTypes(typesGroupedByPlatform, payload)
     .then((results) => {
       const responses = results.map(({ verifyResult, type, error, code }) => ({
         valid: verifyResult.valid,
@@ -244,9 +252,12 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
           );
         }
 
-        const result = await checkConditionsAndIssueCredentials(payload, address);
+        const types = payload.types.filter((type) => type);
+        const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
-        return void res.json(result);
+        const credentials = await verifyProvidersAndIssueCredentials(providersGroupedByPlatforms, address, payload);
+
+        return void res.json(credentials);
       }
 
       // error response
@@ -267,10 +278,10 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   try {
     const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
-    if (!Object.keys(onchainInfo).includes(chainIdHex)) {
+    if (!Object.keys(passportOnchainInfo).includes(chainIdHex)) {
       return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
     }
-    const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
+    const attestationChainIdHex = chainIdHex as keyof typeof passportOnchainInfo;
 
     if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
 
@@ -354,10 +365,10 @@ app.post("/api/v0.0.0/scroll/dev", scrollDevBadgeHandler);
 app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
   try {
     const { recipient, credentials, nonce, chainIdHex, customScorerId } = req.body as EasRequestBody;
-    if (!Object.keys(onchainInfo).includes(chainIdHex)) {
+    if (!Object.keys(passportOnchainInfo).includes(chainIdHex)) {
       return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
     }
-    const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
+    const attestationChainIdHex = chainIdHex as keyof typeof passportOnchainInfo;
 
     if (!credentials || !credentials.length) return void errorRes(res, "No stamps provided", 400);
 
@@ -441,10 +452,10 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
 app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
   try {
     const { recipient, nonce, chainIdHex, customScorerId } = req.body as EasRequestBody;
-    if (!Object.keys(onchainInfo).includes(chainIdHex)) {
+    if (!Object.keys(passportOnchainInfo).includes(chainIdHex)) {
       return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
     }
-    const attestationChainIdHex = chainIdHex as keyof typeof onchainInfo;
+    const attestationChainIdHex = chainIdHex as keyof typeof passportOnchainInfo;
 
     if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
       return void errorRes(res, "Invalid recipient", 400);

@@ -2,7 +2,7 @@ import { PROVIDER_ID, StampPatch, ValidResponseBody } from "@gitcoin/passport-ty
 import { useContext, useEffect, useMemo } from "react";
 import { fetchPossibleEVMStamps } from "../signer/utils";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+import { fetchVerifiableCredential } from "../utils/credentials";
 import { createSignedPayload } from "../utils/helpers";
 import { CeramicContext } from "../context/ceramicContext";
 import { useAtom } from "jotai";

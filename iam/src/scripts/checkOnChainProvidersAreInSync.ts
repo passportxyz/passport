@@ -1,14 +1,14 @@
 import dotenv from "dotenv";
 import { JsonRpcProvider, Contract, version } from "ethers";
-import decoderAbi from "../../../deployments/abi/GitcoinPassportDecoder.json";
+import passportDecoderAbi from "../../../deployments/abi/GitcoinPassportDecoder.json";
 
-import providerBitMapInfo from "../static/providerBitMapInfo.json";
+import providerBitMapInfo from "../static/providerBitMapInfo.json" assert { type: "json" };
 dotenv.config();
 
 console.log(process.argv);
 
 const apiUrl = process.argv[2] + process.env.ALCHEMY_API_KEY;
-const chainId = process.argv[3] as keyof typeof decoderAbi;
+const chainId = process.argv[3] as keyof typeof passportDecoderAbi;
 const decoderContractAddress = process.argv[4];
 
 console.log("ethers version             :", version);
@@ -26,7 +26,7 @@ function difference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
 async function main() {
   let exitCode = 0;
   const provider = new JsonRpcProvider(apiUrl);
-  const decoderContract = new Contract(decoderContractAddress, decoderAbi[chainId], provider);
+  const decoderContract = new Contract(decoderContractAddress, passportDecoderAbi[chainId], provider);
 
   const latestOnChainProviderVersion = await decoderContract.currentVersion();
   console.log("latestOnChainProviderVersion:", latestOnChainProviderVersion);

@@ -1,18 +1,15 @@
 // ---- Testing libraries
 
-// jest.mock("ioredis");
-
 import request from "supertest";
 import { Response, Request } from "express";
 import { apiKeyRateLimit, keyGenerator } from "../src/rate-limiter";
 import {
-  PassportScore,
   AutoVerificationResponseBodyType,
   AutoVerificationRequestBodyType,
-} from "../src/autoVerification";
+  autoVerificationHandler,
+} from "../src/handlers";
 import { ParamsDictionary } from "express-serve-static-core";
-import { VerifiableEip712Credential } from "@gitcoin/passport-types";
-// ---- Test subject
+import { PassportScore } from "@gitcoin/passport-identity";
 
 const mockedScore: PassportScore = {
   address: "0x0000000000000000000000000000000000000000",
@@ -24,53 +21,6 @@ const mockedScore: PassportScore = {
   error: "",
   stamps: { "provider-1": { score: "12", dedup: true, expiration_date: new Date().toISOString() } },
 };
-
-// const createMockVerifiableCredential = (address: string): VerifiableEip712Credential => ({
-//   "@context": ["https://www.w3.org/2018/credentials/v1", "https://w3id.org/security/suites/eip712sig-2021/v1"],
-//   type: ["VerifiableCredential", "EVMCredential"],
-//   credentialSubject: {
-//     id: `did:pkh:eip155:1:${address}`,
-//     "@context": {
-//       hash: "https://schema.org/Text",
-//       provider: "https://schema.org/Text",
-//       address: "https://schema.org/Text",
-//       challenge: "https://schema.org/Text",
-//       metaPointer: "https://schema.org/URL",
-//     },
-//     hash: "0x123456789",
-//     provider: "test-provider",
-//     address: address,
-//     challenge: "test-challenge",
-//     metaPointer: "https://example.com/metadata",
-//   },
-//   issuer: "did:key:test-issuer",
-//   issuanceDate: new Date().toISOString(),
-//   expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-//   proof: {
-//     "@context": "https://w3id.org/security/suites/eip712sig-2021/v1",
-//     type: "EthereumEip712Signature2021",
-//     proofPurpose: "assertionMethod",
-//     proofValue: "0xabcdef1234567890",
-//     verificationMethod: "did:key:test-verification",
-//     created: new Date().toISOString(),
-//     eip712Domain: {
-//       domain: {
-//         name: "GitcoinVerifiableCredential",
-//       },
-//       primaryType: "VerifiableCredential",
-//       types: {
-//         EIP712Domain: [
-//           { name: "name", type: "string" },
-//           { name: "version", type: "string" },
-//         ],
-//         VerifiableCredential: [
-//           { name: "id", type: "string" },
-//           { name: "address", type: "string" },
-//         ],
-//       },
-//     },
-//   },
-// });
 
 jest.mock("../src/rate-limiter", () => {
   const originalModule = jest.requireActual<typeof import("../src/rate-limiter")>("../src/rate-limiter");
@@ -86,8 +36,8 @@ jest.mock("../src/rate-limiter", () => {
   };
 });
 
-jest.mock("../src/autoVerification", () => {
-  const originalModule = jest.requireActual<typeof import("../src/autoVerification")>("../src/autoVerification");
+jest.mock("../src/handlers", () => {
+  const originalModule = jest.requireActual<typeof import("../src/handlers")>("../src/handlers");
 
   return {
     // __esModule: true, // Use it when dealing with esModules
@@ -113,7 +63,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe("POST /embed/verify", function () {
+describe("autoVerificationHandler", function () {
   it("handles valid verify requests", async () => {
     // as each signature is unique, each request results in unique output
     const payload = {
@@ -130,6 +80,7 @@ describe("POST /embed/verify", function () {
 
     expect(apiKeyRateLimit as jest.Mock).toHaveBeenCalledTimes(1);
     expect(keyGenerator as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(autoVerificationHandler as jest.Mock).toHaveBeenCalledTimes(1);
     expect(verifyRequest.status).toBe(200);
     expect(verifyRequest.body).toStrictEqual(mockedScore);
   });

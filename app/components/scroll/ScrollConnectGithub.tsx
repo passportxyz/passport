@@ -8,7 +8,7 @@ import { CUSTOM_PLATFORM_TYPE_INFO } from "../../config/platformMap";
 import { createSignedPayload, generateUID } from "../../utils/helpers";
 import { scrollCampaignBadgeProviders } from "../../config/scroll_campaign";
 import { waitForRedirect } from "../../context/stampClaimingContext";
-import { fetchVerifiableCredential } from "@gitcoin/passport-identity";
+import { fetchVerifiableCredential } from "../../utils/credentials";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../../config/stamp_config";
 import { PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import { datadogLogs } from "@datadog/browser-logs";

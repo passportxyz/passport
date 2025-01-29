@@ -104,7 +104,6 @@ export type VerifiableEip712CredentialComposeEncoded = {
     provider?: string;
     address?: string;
     challenge?: string;
-    metaPointer?: string;
   };
   issuer: string;
   issuanceDate: string;
@@ -156,11 +155,6 @@ export type RequestPayload = {
   version: string;
   proofs?: {
     [k: string]: string;
-  };
-  signer?: {
-    challenge: VerifiableCredential;
-    signature: string;
-    address: string;
   };
   jsonRpcSigner?: JsonRpcSigner;
   challenge?: string;

@@ -1,7 +1,7 @@
-import axios from "axios";
-import { checkCredentialBans } from "../src/utils/bans";
+import axios, { AxiosError } from "axios";
+import { checkCredentialBans } from "../src/bans";
 import { ErrorResponseBody } from "@gitcoin/passport-types";
-import { ApiError } from "../src/utils/helpers";
+import { ApiError, UnexpectedApiError } from "../src/helpers";
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -135,14 +135,22 @@ describe("checkCredentialBans", () => {
         this.response = { data: "response", status: 500, headers: { TEST: "header" } };
         this.request = "request";
       }
-      isAxiosError = true;
+      isAxiosError: true;
     }
+
     mockedAxios.post.mockImplementationOnce(() => {
       throw new MockAxiosError();
     });
 
+    // TODO: geri this test should work without this mock
+    mockedAxios.isAxiosError.mockImplementationOnce((_: any) => {
+      return true;
+    });
+
     await expect(checkCredentialBans([validCredential])).rejects.toThrowError(
-      'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}'
+      new UnexpectedApiError(
+        'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}'
+      )
     );
   });
 

@@ -8,7 +8,7 @@ import { CeramicContextState } from "../../context/ceramicContext";
 import { AppRoutes } from "../../pages";
 import { CredentialResponseBody, PROVIDER_ID } from "@gitcoin/passport-types";
 import { googleStampFixture } from "../../__test-fixtures__/databaseStorageFixtures";
-import * as passportIdentity from "@gitcoin/passport-identity";
+import * as passportUtilsCredentials from "../../utils/credentials";
 import { useScrollBadge } from "../../hooks/useScrollBadge";
 import { ScrollStepsBar } from "../../components/scroll/ScrollLayout";
 import { useMintBadge } from "../../hooks/useMintBadge";
@@ -24,6 +24,25 @@ vi.mock("wagmi", async (importActual) => ({
   usePublicClient: vi.fn(),
   useAccount: vi.fn().mockReturnValue({ isConnected: true }),
 }));
+
+vi.mock("../../utils/credentials", async (importActual) => {
+  const originalModule = (await importActual()) as any;
+  return {
+    ...originalModule,
+    fetchVerifiableCredential: vi.fn().mockImplementation(async () => {
+      const credentials: CredentialResponseBody[] = [
+        {
+          credential: googleStampFixture.credential,
+          record: {
+            type: "test",
+            version: "test",
+          },
+        },
+      ];
+      return { credentials };
+    }),
+  };
+});
 
 const navigateMock = vi.fn();
 const useParamsMock = vi.fn();
@@ -111,25 +130,6 @@ vi.mock("../../config/platformMap", async (importActual) => {
         })),
       },
     },
-  };
-});
-
-vi.mock("@gitcoin/passport-identity", async (importActual) => {
-  const originalModule = (await importActual()) as any;
-  return {
-    ...originalModule,
-    fetchVerifiableCredential: vi.fn().mockImplementation(async () => {
-      const credentials: CredentialResponseBody[] = [
-        {
-          credential: googleStampFixture.credential,
-          record: {
-            type: "test",
-            version: "test",
-          },
-        },
-      ];
-      return { credentials };
-    }),
   };
 });
 
@@ -336,7 +336,7 @@ describe("Github Connect page tests", () => {
   });
 
   it("displays an error message if the verification failed", async () => {
-    vi.spyOn(passportIdentity, "fetchVerifiableCredential").mockImplementation(async () => {
+    vi.spyOn(passportUtilsCredentials, "fetchVerifiableCredential").mockImplementation(async () => {
       return { credentials: [] };
     });
 

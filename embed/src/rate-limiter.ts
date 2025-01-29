@@ -40,7 +40,6 @@ function parseRateLimit(rateLimitSpec: string): number {
 
 export async function apiKeyRateLimit(req: Request, res: Response): Promise<number> {
   try {
-    console.log(" ===> apiKeyRateLimit");
     const apiKey = req.headers["x-api-key"] as string;
     const cacheKey = `erl:${apiKey}`;
     const cachedRateLimit = await redis.get(cacheKey);
