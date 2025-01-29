@@ -23,6 +23,7 @@ export type PassportProviderPoints = {
 export type AutoVerificationRequestBodyType = {
   address: string;
   scorerId: string;
+  credentialIds?: [];
 };
 
 type AutoVerificationFields = AutoVerificationRequestBodyType;
@@ -63,6 +64,7 @@ export const addStampsAndGetScore = async ({
   scorerId,
   stamps,
 }: AutoVerificationFields & { stamps: VerifiableCredential[] }): Promise<PassportScore> => {
+  console.log("geri ---- addStampsAndGetScore");
   try {
     const scorerResponse: {
       data?: {
@@ -81,8 +83,10 @@ export const addStampsAndGetScore = async ({
       }
     );
 
+    console.log("geri ---- scorerResponse", scorerResponse);
     return scorerResponse.data?.score;
   } catch (error) {
+    console.log("geri ---- scorerResponse error", error);
     handleAxiosError(error, "Scorer Embed API", EmbedAxiosError, [apiKey]);
   }
 };
@@ -92,13 +96,13 @@ export const autoVerificationHandler = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { address, scorerId } = req.body;
+    const { address, scorerId, credentialIds } = req.body;
 
     if (!isAddress(address)) {
       return void errorRes(res, "Invalid address", 400);
     }
 
-    const stamps = await autoVerifyStamps({ address, scorerId });
+    const stamps = await autoVerifyStamps({ address, scorerId, credentialIds });
 
     const score = await addStampsAndGetScore({ address, scorerId, stamps });
 
@@ -108,6 +112,7 @@ export const autoVerificationHandler = async (
     if (error instanceof EmbedAxiosError) {
       return void errorRes(res, error.message, error.code);
     }
+
     const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
     return void errorRes(res, message, 500);
   }

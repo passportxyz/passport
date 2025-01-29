@@ -3,7 +3,11 @@
 import request from "supertest";
 import { Response, Request } from "express";
 import { apiKeyRateLimit, keyGenerator } from "../src/rate-limiter";
-import { AutoVerificationResponseBodyType, AutoVerificationRequestBodyType } from "../src/handlers";
+import {
+  AutoVerificationResponseBodyType,
+  AutoVerificationRequestBodyType,
+  autoVerificationHandler,
+} from "../src/handlers";
 import { ParamsDictionary } from "express-serve-static-core";
 import { PassportScore } from "@gitcoin/passport-identity";
 
@@ -59,7 +63,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe("POST /embed/verify", function () {
+describe("autoVerificationHandler", function () {
   it("handles valid verify requests", async () => {
     // as each signature is unique, each request results in unique output
     const payload = {
@@ -76,6 +80,7 @@ describe("POST /embed/verify", function () {
 
     expect(apiKeyRateLimit as jest.Mock).toHaveBeenCalledTimes(1);
     expect(keyGenerator as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(autoVerificationHandler as jest.Mock).toHaveBeenCalledTimes(1);
     expect(verifyRequest.status).toBe(200);
     expect(verifyRequest.body).toStrictEqual(mockedScore);
   });
