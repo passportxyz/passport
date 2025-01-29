@@ -36,23 +36,19 @@ export const fetchVerifiableCredential = async (
   payload: RequestPayload,
   createSignedPayload: (data: any) => Promise<any>
 ): Promise<{ credentials: CredentialResponseBody[] }> => {
-  console.log("fetchVerifiableCredential 1");
   // first pull a challenge that can be signed by the user
   const { challenge } = await fetchChallengeCredential(iamUrl, payload);
 
-  console.log("fetchVerifiableCredential 2");
   // sign the challenge provided by the IAM
   const signedChallenge = challenge.credentialSubject.challenge
     ? await createSignedPayload(challenge.credentialSubject.challenge)
     : "";
 
-  console.log("fetchVerifiableCredential 3");
   // must provide signature for message
   if (!signedChallenge) {
     throw new Error("Unable to sign message");
   }
 
-  console.log("fetchVerifiableCredential 4");
   // fetch a credential from the API that fits the version, payload and passes the signature message challenge
   const response: { data: CredentialResponseBody | CredentialResponseBody[] } = await axios.post(
     `${iamUrl.replace(/\/*?$/, "")}/v${payload.version}/verify`,
@@ -63,7 +59,6 @@ export const fetchVerifiableCredential = async (
     }
   );
 
-  console.log("fetchVerifiableCredential 5");
   // return everything that was used to create the credential (along with the credential)
   return {
     credentials: Array.isArray(response.data) ? response.data : [response.data],

@@ -25,11 +25,24 @@ vi.mock("wagmi", async (importActual) => ({
   useAccount: vi.fn().mockReturnValue({ isConnected: true }),
 }));
 
-vi.mock("../../utils/credentials", (importActual) => ({
-  ...importActual,
-  verifyCredential: vi.fn(() => true),
-  fetchVerifiableCredential: vi.fn(() => true),
-}));
+vi.mock("../../utils/credentials", async (importActual) => {
+  const originalModule = (await importActual()) as any;
+  return {
+    ...originalModule,
+    fetchVerifiableCredential: vi.fn().mockImplementation(async () => {
+      const credentials: CredentialResponseBody[] = [
+        {
+          credential: googleStampFixture.credential,
+          record: {
+            type: "test",
+            version: "test",
+          },
+        },
+      ];
+      return { credentials };
+    }),
+  };
+});
 
 const navigateMock = vi.fn();
 const useParamsMock = vi.fn();
@@ -117,25 +130,6 @@ vi.mock("../../config/platformMap", async (importActual) => {
         })),
       },
     },
-  };
-});
-
-vi.mock("@gitcoin/passport-identity", async (importActual) => {
-  const originalModule = (await importActual()) as any;
-  return {
-    ...originalModule,
-    fetchVerifiableCredential: vi.fn().mockImplementation(async () => {
-      const credentials: CredentialResponseBody[] = [
-        {
-          credential: googleStampFixture.credential,
-          record: {
-            type: "test",
-            version: "test",
-          },
-        },
-      ];
-      return { credentials };
-    }),
   };
 });
 
@@ -318,7 +312,7 @@ describe("Github Connect page tests", () => {
     expect(navigateMock).not.toHaveBeenCalled();
   });
 
-  it("saves the stamps in the DB and navigates to the success page in case the verification succeeded", async () => {
+  it.only("saves the stamps in the DB and navigates to the success page in case the verification succeeded", async () => {
     renderWithContext(
       mockCeramicContext,
       <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
@@ -332,13 +326,13 @@ describe("Github Connect page tests", () => {
 
     await userEvent.click(connectGithubButton);
 
-    // expect(mockCeramicContext.database?.addStamps).toHaveBeenCalledWith([
-    //   { provider: "randomValuesProvider", credential: googleStampFixture.credential },
-    // ]);
+    expect(mockCeramicContext.database?.addStamps).toHaveBeenCalledWith([
+      { provider: "randomValuesProvider", credential: googleStampFixture.credential },
+    ]);
 
-    // await waitFor(() => {
-    //   expect(navigateMock).toHaveBeenCalledWith("/campaign/scroll-developer/2");
-    // });
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenCalledWith("/campaign/scroll-developer/2");
+    });
   });
 
   it("displays an error message if the verification failed", async () => {
