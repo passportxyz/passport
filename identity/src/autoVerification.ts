@@ -18,6 +18,7 @@ import { verifyProvidersAndIssueCredentials, VerificationError, addErrorDetailsT
 export type AutoVerificationFields = {
   address: string;
   scorerId: string;
+  credentialIds?: [];
 };
 
 export type AutoVerificationResponseBodyType = {
@@ -25,7 +26,13 @@ export type AutoVerificationResponseBodyType = {
   threshold: string;
 };
 
-const getEvmProvidersByPlatform = ({ scorerId }: { scorerId: string }): PROVIDER_ID[][] => {
+const getEvmProvidersByPlatform = ({
+  scorerId,
+  onlyCredentialIds,
+}: {
+  scorerId: string;
+  onlyCredentialIds?: string[];
+}): PROVIDER_ID[][] => {
   const evmPlatforms = Object.values(platforms).filter(({ PlatformDetails }) => PlatformDetails.isEVM);
 
   // TODO we should use the scorerId to check for any EVM stamps particular to a community, and include those here
@@ -33,7 +40,14 @@ const getEvmProvidersByPlatform = ({ scorerId }: { scorerId: string }): PROVIDER
 
   return evmPlatforms.map(({ ProviderConfig }) =>
     ProviderConfig.reduce((acc, platformGroupSpec) => {
-      return acc.concat(platformGroupSpec.providers.map(({ name }) => name));
+      const providers = platformGroupSpec.providers.map(({ name }) => name);
+      const filteredProviders = !onlyCredentialIds
+        ? providers
+        : providers.filter((provider) => !onlyCredentialIds || onlyCredentialIds.includes(provider));
+      if (filteredProviders.length > 0) {
+        return acc.concat(filteredProviders);
+      }
+      return acc;
     }, [] as PROVIDER_ID[])
   );
 };
@@ -41,9 +55,10 @@ const getEvmProvidersByPlatform = ({ scorerId }: { scorerId: string }): PROVIDER
 export const autoVerifyStamps = async ({
   address,
   scorerId,
+  credentialIds,
 }: AutoVerificationFields): Promise<VerifiableCredential[]> => {
   try {
-    const evmProvidersByPlatform = getEvmProvidersByPlatform({ scorerId });
+    const evmProvidersByPlatform = getEvmProvidersByPlatform({ scorerId, onlyCredentialIds: credentialIds });
 
     if (!isAddress(address)) {
       throw new VerificationError("Invalid address", 400);
