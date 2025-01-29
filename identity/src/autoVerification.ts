@@ -18,7 +18,7 @@ import { verifyProvidersAndIssueCredentials, VerificationError, addErrorDetailsT
 export type AutoVerificationFields = {
   address: string;
   scorerId: string;
-  credentialIds?: [];
+  credentialIds?: string[];
 };
 
 export type AutoVerificationResponseBodyType = {
@@ -26,7 +26,7 @@ export type AutoVerificationResponseBodyType = {
   threshold: string;
 };
 
-const getEvmProvidersByPlatform = ({
+export const getEvmProvidersByPlatform = ({
   scorerId,
   onlyCredentialIds,
 }: {
@@ -41,12 +41,15 @@ const getEvmProvidersByPlatform = ({
   return evmPlatforms.map(({ ProviderConfig }) =>
     ProviderConfig.reduce((acc, platformGroupSpec) => {
       const providers = platformGroupSpec.providers.map(({ name }) => name);
+      console.log("providers", providers);
+      console.log("onlyCredentialIds", onlyCredentialIds);
       const filteredProviders = !onlyCredentialIds
         ? providers
-        : providers.filter((provider) => !onlyCredentialIds || onlyCredentialIds.includes(provider));
+        : providers.filter((provider) => onlyCredentialIds.includes(provider));
       if (filteredProviders.length > 0) {
         return acc.concat(filteredProviders);
       }
+      console.log("filteredProviders", filteredProviders);
       return acc;
     }, [] as PROVIDER_ID[])
   );
@@ -59,7 +62,7 @@ export const autoVerifyStamps = async ({
 }: AutoVerificationFields): Promise<VerifiableCredential[]> => {
   try {
     const evmProvidersByPlatform = getEvmProvidersByPlatform({ scorerId, onlyCredentialIds: credentialIds });
-
+    console.log("geri evmProvidersByPlatform", evmProvidersByPlatform);
     if (!isAddress(address)) {
       throw new VerificationError("Invalid address", 400);
     }

@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { autoVerifyStamps } from "../src/autoVerification";
+import { autoVerifyStamps, getEvmProvidersByPlatform } from "../src/autoVerification";
 import { PassportScore } from "../src/verification";
 
 import { issueHashedCredential } from "../src/credentials";
@@ -294,6 +294,57 @@ describe("autoVerificationHandler", () => {
     expect(verifySpy).toHaveBeenCalledTimes(expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size);
   });
 
+  it.only("should filter providers if valid request successfully", async () => {
+    const mockAddress = "0x123";
+    const mockScorerId = "test-scorer";
+
+    mockReq = {
+      body: {
+        address: mockAddress,
+        scorerId: mockScorerId,
+        credentialIds: [
+          "ETHDaysActive#50",
+          "HolonymPhone",
+          "HolonymGovIdProvider",
+          "githubContributionActivityGte#120", // not marked as evm
+          "githubContributionActivityGte#30", // not marked as evm
+        ],
+      },
+    };
+
+    const verifySpy = (providers.verify as jest.Mock).mockImplementation(
+      async (type: string, payload: RequestPayload, context: ProviderContext) => {
+        if (expectedEvmProvidersToSucceed.has(type as PROVIDER_ID)) {
+          return Promise.resolve({
+            valid: true,
+            record: { key: "verified-condition" },
+          });
+        } else {
+          return Promise.resolve({
+            valid: false,
+          });
+        }
+      }
+    );
+
+    const issuedCredentials: VerifiableCredential[] = [];
+    (issueHashedCredential as jest.Mock).mockImplementation(
+      (DIDKit, currentKey, address, record: { type: string }, expiresInSeconds, signatureType) => {
+        const credential = getMockedIssuedCredential(record.type, mockAddress);
+        issuedCredentials.push(credential.credential);
+        return Promise.resolve(credential);
+      }
+    );
+
+    const stamps = await autoVerifyStamps({
+      address: mockAddress,
+      scorerId: mockScorerId,
+      credentialIds: ["provider-ok-1", "provider-bad-1"],
+    });
+    expect(stamps).toEqual(issuedCredentials);
+    expect(verifySpy).toHaveBeenCalledTimes(3); // We only had 3 selected EVM providers
+  });
+
   it("should handle any errors from the embed scorer API correctly", async () => {
     const mockAddress = "0x123";
     const mockScorerId = "test-scorer";
@@ -328,5 +379,21 @@ describe("autoVerificationHandler", () => {
     expect(stamps).toEqual(issuedCredentials);
 
     expect(verifySpy).toHaveBeenCalledTimes(expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size);
+  });
+});
+
+describe("getEvmProvidersByPlatform", () => {
+  it("should correctly filter returned providers", async () => {
+    const providersByPlatform = getEvmProvidersByPlatform({
+      scorerId: "123",
+      onlyCredentialIds: [
+        "ETHDaysActive#50",
+        "HolonymPhone",
+        "HolonymGovIdProvider",
+        "githubContributionActivityGte#120", // not marked as evm
+        "githubContributionActivityGte#30", // not marked as evm
+      ],
+    });
+    expect(providersByPlatform).toEqual([["ETHDaysActive#50"], ["HolonymGovIdProvider", "HolonymPhone"]]);
   });
 });
