@@ -157,7 +157,7 @@ describe("Attempt verification", function () {
     );
     expect(mockedAxios.post).toBeCalledTimes(1);
     expect(mockedAxios.post).toBeCalledWith(
-      "https://api.coinbase.com/oauth/token",
+      "https://login.coinbase.com/oauth2/token",
       `grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
       { headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" } }
     );
@@ -190,7 +190,7 @@ describe("Attempt verification", function () {
     expect(mockedAxios.post).toBeCalledTimes(1);
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
-      "https://api.coinbase.com/oauth/token",
+      "https://login.coinbase.com/oauth2/token",
       `grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
       { headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" } }
     );
@@ -229,7 +229,7 @@ describe("Attempt verification", function () {
 
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
-      "https://api.coinbase.com/oauth/token",
+      "https://login.coinbase.com/oauth2/token",
       `grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
       { headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" } }
     );
@@ -260,7 +260,7 @@ describe("Attempt verification", function () {
 
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
-      "https://api.coinbase.com/oauth/token",
+      "https://login.coinbase.com/oauth2/token",
       `grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
       { headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" } }
     );
@@ -289,7 +289,7 @@ describe("Attempt verification", function () {
     expect(mockedAxios.post).toBeCalledTimes(1);
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
-      "https://api.coinbase.com/oauth/token",
+      "https://login.coinbase.com/oauth2/token",
       `grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
       { headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" } }
     );
