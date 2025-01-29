@@ -9,7 +9,7 @@ import { createHash } from "crypto";
 
 // this would need to be a valid key but we've mocked out didkit (and no verifications are made)
 describe("EIP712 credential", function () {
-  it.only("can issue credentials with valid EIP712 signature, and ethers can validate the credential", async () => {
+  it("can issue credentials with valid EIP712 signature, and ethers can validate the credential", async () => {
     const originalEthers = jest.requireActual("ethers");
 
     const record = {

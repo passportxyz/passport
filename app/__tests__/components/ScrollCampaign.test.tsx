@@ -312,7 +312,7 @@ describe("Github Connect page tests", () => {
     expect(navigateMock).not.toHaveBeenCalled();
   });
 
-  it.only("saves the stamps in the DB and navigates to the success page in case the verification succeeded", async () => {
+  it("saves the stamps in the DB and navigates to the success page in case the verification succeeded", async () => {
     renderWithContext(
       mockCeramicContext,
       <MemoryRouter initialEntries={["/campaign/scroll-developer/1"]}>
