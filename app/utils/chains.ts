@@ -198,45 +198,6 @@ if (!TEST_MODE) {
     wagmiTransports[fantom.id] = http("https://rpc.ftm.tools/");
   }
 
-  chainConfigs.push({
-    id: optimismChainId,
-    token: "ETH",
-    label: "Optimism",
-    explorerUrl: "https://optimistic.etherscan.io",
-    icon: "./assets/op-logo.svg",
-    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
-    attestationProviderConfig: {
-      name: "Ethereum Attestation Service",
-      status: usingTestEnvironment ? "disabled" : "enabled",
-      skipByDefault: false,
-      easScanUrl: "https://optimism.easscan.org",
-      monochromeIcon: "./assets/op-logo-monochrome.svg",
-    },
-  });
-  wagmiChains.push(optimism);
-  wagmiTransports[optimism.id] = http(process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL);
-
-  if (process.env.NEXT_PUBLIC_FF_ONCHAIN_ZKSYNC === "on") {
-    chainConfigs.push({
-      id: zkSyncChainId,
-      token: "ETH",
-      label: "zkSync",
-      icon: "./assets/zksyncStampIcon.svg",
-      chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
-      explorerUrl: "https://explorer.zksync.io/",
-      attestationProviderConfig: {
-        name: "Ethereum Attestation Service",
-        status: usingTestEnvironment ? "disabled" : "enabled",
-        skipByDefault: false,
-
-        easScanUrl: "https://zksync.easscan.org",
-        monochromeIcon: "./assets/zksync-logo-monochrome.svg",
-      },
-    });
-    wagmiChains.push(zksync);
-    wagmiTransports[zksync.id] = http(process.env.NEXT_PUBLIC_PASSPORT_ZKSYNC_RPC_URL);
-  }
-
   if (process.env.NEXT_PUBLIC_FF_ONCHAIN_BASE === "on") {
     chainConfigs.push({
       id: baseChainId,
@@ -276,17 +237,6 @@ if (!TEST_MODE) {
   wagmiTransports[linea.id] = http("https://rpc.linea.build");
 
   chainConfigs.push({
-    id: "0xa86a",
-    token: "AVAX",
-    label: "Avalanche",
-    explorerUrl: "https://subnets.avax.network/",
-    icon: "./assets/avax-logo.svg",
-    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
-  });
-  wagmiChains.push(avalanche);
-  wagmiTransports[avalanche.id] = http("https://api.avax.network/ext/bc/C/rpc");
-
-  chainConfigs.push({
     id: arbitrumChainId,
     token: "ETH",
     label: "Arbitrum One",
@@ -303,6 +253,45 @@ if (!TEST_MODE) {
   });
   wagmiChains.push(arbitrum);
   wagmiTransports[arbitrum.id] = http(process.env.NEXT_PUBLIC_PASSPORT_ARB_RPC_URL);
+
+  chainConfigs.push({
+    id: optimismChainId,
+    token: "ETH",
+    label: "Optimism",
+    explorerUrl: "https://optimistic.etherscan.io",
+    icon: "./assets/op-logo.svg",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
+    attestationProviderConfig: {
+      name: "Ethereum Attestation Service",
+      status: usingTestEnvironment ? "disabled" : "enabled",
+      skipByDefault: false,
+      easScanUrl: "https://optimism.easscan.org",
+      monochromeIcon: "./assets/op-logo-monochrome.svg",
+    },
+  });
+  wagmiChains.push(optimism);
+  wagmiTransports[optimism.id] = http(process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL);
+
+  if (process.env.NEXT_PUBLIC_FF_ONCHAIN_ZKSYNC === "on") {
+    chainConfigs.push({
+      id: zkSyncChainId,
+      token: "ETH",
+      label: "zkSync",
+      icon: "./assets/zksyncStampIcon.svg",
+      chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
+      explorerUrl: "https://explorer.zksync.io/",
+      attestationProviderConfig: {
+        name: "Ethereum Attestation Service",
+        status: usingTestEnvironment ? "disabled" : "enabled",
+        skipByDefault: false,
+
+        easScanUrl: "https://zksync.easscan.org",
+        monochromeIcon: "./assets/zksync-logo-monochrome.svg",
+      },
+    });
+    wagmiChains.push(zksync);
+    wagmiTransports[zksync.id] = http(process.env.NEXT_PUBLIC_PASSPORT_ZKSYNC_RPC_URL);
+  }
 
   if (process.env.NEXT_PUBLIC_FF_ONCHAIN_SCROLL === "on") {
     chainConfigs.push({
@@ -323,6 +312,17 @@ if (!TEST_MODE) {
     wagmiChains.push(scroll);
     wagmiTransports[scroll.id] = http(process.env.NEXT_PUBLIC_PASSPORT_SCROLL_RPC_URL);
   }
+
+  chainConfigs.push({
+    id: "0xa86a",
+    token: "AVAX",
+    label: "Avalanche",
+    explorerUrl: "https://subnets.avax.network/",
+    icon: "./assets/avax-logo.svg",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
+  });
+  wagmiChains.push(avalanche);
+  wagmiTransports[avalanche.id] = http("https://api.avax.network/ext/bc/C/rpc");
 
   if (process.env.NEXT_PUBLIC_FF_ONCHAIN_SHAPE === "on") {
     chainConfigs.push({
