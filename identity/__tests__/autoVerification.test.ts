@@ -247,8 +247,6 @@ const mockedScore: PassportScore = {
 };
 
 describe("autoVerificationHandler", () => {
-  let mockReq: Partial<Request>;
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -256,13 +254,6 @@ describe("autoVerificationHandler", () => {
   it("should handle valid request successfully", async () => {
     const mockAddress = "0x123";
     const mockScorerId = "test-scorer";
-
-    mockReq = {
-      body: {
-        address: mockAddress,
-        scorerId: mockScorerId,
-      },
-    };
 
     const verifySpy = (providers.verify as jest.Mock).mockImplementation(
       async (type: string, payload: RequestPayload, context: ProviderContext) => {
@@ -294,23 +285,9 @@ describe("autoVerificationHandler", () => {
     expect(verifySpy).toHaveBeenCalledTimes(expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size);
   });
 
-  it.only("should filter providers if valid request successfully", async () => {
+  it("should filter providers if valid request successfully", async () => {
     const mockAddress = "0x123";
     const mockScorerId = "test-scorer";
-
-    mockReq = {
-      body: {
-        address: mockAddress,
-        scorerId: mockScorerId,
-        credentialIds: [
-          "ETHDaysActive#50",
-          "HolonymPhone",
-          "HolonymGovIdProvider",
-          "githubContributionActivityGte#120", // not marked as evm
-          "githubContributionActivityGte#30", // not marked as evm
-        ],
-      },
-    };
 
     const verifySpy = (providers.verify as jest.Mock).mockImplementation(
       async (type: string, payload: RequestPayload, context: ProviderContext) => {
@@ -339,7 +316,13 @@ describe("autoVerificationHandler", () => {
     const stamps = await autoVerifyStamps({
       address: mockAddress,
       scorerId: mockScorerId,
-      credentialIds: ["provider-ok-1", "provider-bad-1"],
+      credentialIds: [
+        "ETHDaysActive#50",
+        "HolonymPhone",
+        "HolonymGovIdProvider",
+        "githubContributionActivityGte#120", // not marked as evm
+        "githubContributionActivityGte#30", // not marked as evm
+      ],
     });
     expect(stamps).toEqual(issuedCredentials);
     expect(verifySpy).toHaveBeenCalledTimes(3); // We only had 3 selected EVM providers
@@ -348,13 +331,6 @@ describe("autoVerificationHandler", () => {
   it("should handle any errors from the embed scorer API correctly", async () => {
     const mockAddress = "0x123";
     const mockScorerId = "test-scorer";
-
-    mockReq = {
-      body: {
-        address: mockAddress,
-        scorerId: mockScorerId,
-      },
-    };
 
     const verifySpy = (providers.verify as jest.Mock).mockImplementation(
       async (type: string, payload: RequestPayload, context: ProviderContext) => {
