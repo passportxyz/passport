@@ -1,0 +1,34 @@
+<svg width="1156" height="724" viewBox="0 0 1156 724" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_f_17190_8155)">
+<ellipse cx="578.572" cy="672.598" rx="518.089" ry="5.72474" stroke="#4A5065" stroke-width="1.5"/>
+</g>
+<path d="M113.151 29.6592C113.151 14.1952 125.687 1.65918 141.151 1.65918H1019.43C1034.89 1.65918 1047.43 14.1952 1047.43 29.6592V627.38C1047.43 629.589 1045.64 631.38 1043.43 631.38H117.151C114.942 631.38 113.151 629.589 113.151 627.38V29.6592Z" stroke="#4A5065" stroke-width="1.5"/>
+<path d="M118.876 29.3425C118.876 17.1923 128.726 7.34259 140.876 7.34259H1019.7C1031.85 7.34259 1041.7 17.1923 1041.7 29.3426V607.51H118.876V29.3425Z" stroke="#4A5065" stroke-width="1.5"/>
+<rect x="137.195" y="36.8963" width="881.609" height="545.607" stroke="#4A5065" stroke-width="1.5"/>
+<path d="M0.946655 633.38C0.946655 632.276 1.84209 631.38 2.94666 631.38H1153.05C1154.16 631.38 1155.05 632.276 1155.05 633.38V651.989H0.946655V633.38Z" stroke="#4A5065" stroke-width="1.5"/>
+<path d="M0.946655 651.989H1155.05L1126.07 657.834C1100.04 663.084 1073.55 665.729 1046.99 665.729H106.683C77.4978 665.729 48.4005 662.534 19.9105 656.203L0.946655 651.989Z" stroke="#4A5065" stroke-width="1.5"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M483.007 631.38C483.596 640.331 491.043 647.409 500.143 647.409H657.001C666.101 647.409 673.549 640.331 674.138 631.38H483.007Z" stroke="#4A5065" stroke-width="1.5"/>
+
+<g transform="translate(165, 60)">
+  <path d="M0.0827637 42.39H827.329" stroke="#4A5065" stroke-width="2"/>
+  <circle cx="19.9904" cy="17.0217" r="15.0393" stroke="#4A5065" stroke-width="2"/>
+  <circle cx="792.961" cy="17.0217" r="15.0393" stroke="#4A5065" stroke-width="2"/>
+  <circle cx="750.039" cy="17.0217" r="15.0393" stroke="#4A5065" stroke-width="2"/>
+  <circle cx="704.937" cy="17.0217" r="15.0393" stroke="#4A5065" stroke-width="2"/>
+  <path d="M52.069 18.2879L185.801 18.2879" stroke="#4A5065" stroke-width="2"/>
+  <path d="M31.069 120.288L164.801 120.288" stroke="#4A5065" stroke-width="2"/>
+  <path d="M10.069 263.288L143.801 263.288" stroke="#4A5065" stroke-width="2"/>
+  <path d="M13.069 318.288H308.963" stroke="#4A5065" stroke-width="2"/>
+  <path d="M13.069 344.505H248.414" stroke="#4A5065" stroke-width="2"/>
+  <path d="M13.069 375.716H274.631" stroke="#4A5065" stroke-width="2"/>
+  <rect x="4.95105" y="86.1624" width="411.952" height="128" rx="15" stroke="#4A5065" stroke-width="2"/>
+</g>
+
+<defs>
+<filter id="filter0_f_17190_8155" x="15.7339" y="622.123" width="1125.68" height="100.949" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="22" result="effect1_foregroundBlur_17190_8155"/>
+</filter>
+</defs>
+</svg>

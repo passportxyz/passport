@@ -2,9 +2,11 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import NotFound from "./NotFound";
 import { ScrollCampaign } from "../components/ScrollCampaign";
+import { EmbedCampaign } from "../components/EmbedCampaign";
 
 const CAMPAIGN_MAP: Record<string, React.FC<{ step: number }>> = {
   "scroll-developer": ScrollCampaign,
+  embed: EmbedCampaign,
 };
 
 const Campaign = () => {
