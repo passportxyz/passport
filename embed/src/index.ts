@@ -107,4 +107,6 @@ app.get("/health", (_req, res) => {
 });
 
 app.post("/embed/verify", autoVerificationHandler);
+// Returns the metadata for the stamps
+// Receives a query parameter `scorerId` and returns the stamp metadata for that scorer
 app.get("/embed/stamps/metadata", metadataHandler);
