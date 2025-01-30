@@ -11,14 +11,8 @@ type Platform = {
   requireSignature?: boolean;
   requiresPopup?: boolean;
   popUpUrl?: string;
-  credentials?: Credential[];
-  displayWeight: string;
 };
 
-type Credential = {
-  id: string;
-  weight: string;
-};
 const oAuthPopupUrl = process.env.EMBED_POPUP_OAUTH_URL;
 
 export const STAMP_PAGES: StampPage[] = [
@@ -44,50 +38,23 @@ export const STAMP_PAGES: StampPage[] = [
           `,
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-binance-stamp",
-        credentials: [
-          {
-            id: "BinanceBABT2",
-            weight: "10",
-          },
-        ],
       },
       {
         name: "Holonym",
         description: "Proven uniqueness using Holonym KYC with government ID or ePassport",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-holonym-stamp",
-        credentials: [
-          {
-            id: "HolonymGovIdProvider",
-            weight: "16",
-          },
-        ],
       },
     ],
   },
   {
     header: "Biometrics verification",
-    // description: "Choose from below to verify",
     platforms: [
       {
         name: "Civic",
         description: "<div>Connect to Civic to verify your identity.</div>",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-civic-stamp",
-        credentials: [
-          {
-            id: "CivicCaptchaPass",
-            weight: "0.8",
-          },
-          {
-            id: "CivicUniquenessPass",
-            weight: "3",
-          },
-          {
-            id: "CivicLivenessPass",
-            weight: "5",
-          },
-        ],
       },
     ],
   },
@@ -104,12 +71,6 @@ export const STAMP_PAGES: StampPage[] = [
         requireSignature: true,
         requiresPopup: true,
         popUpUrl: oAuthPopupUrl,
-        credentials: [
-          {
-            id: "LinkedIn",
-            weight: "1.5",
-          },
-        ],
       },
       {
         name: "Discord",
@@ -120,12 +81,6 @@ export const STAMP_PAGES: StampPage[] = [
         requireSignature: true,
         requiresPopup: true,
         popUpUrl: oAuthPopupUrl,
-        credentials: [
-          {
-            id: "Discord",
-            weight: "0.5",
-          },
-        ],
       },
       {
         name: "Github",
@@ -135,20 +90,6 @@ export const STAMP_PAGES: StampPage[] = [
         requireSignature: true,
         requiresPopup: true,
         popUpUrl: oAuthPopupUrl,
-        credentials: [
-          {
-            id: "githubContributionActivityGte#30",
-            weight: "1.9",
-          },
-          {
-            id: "githubContributionActivityGte#60",
-            weight: "1.9",
-          },
-          {
-            id: "githubContributionActivityGte#120",
-            weight: "2.3",
-          },
-        ],
       },
       {
         name: "Google",
@@ -158,12 +99,6 @@ export const STAMP_PAGES: StampPage[] = [
         requireSignature: true,
         requiresPopup: true,
         popUpUrl: oAuthPopupUrl,
-        credentials: [
-          {
-            id: "Google",
-            weight: "0.5",
-          },
-        ],
       },
       {
         name: "Coinbase",
@@ -173,21 +108,7 @@ export const STAMP_PAGES: StampPage[] = [
         requireSignature: true,
         requiresPopup: true,
         popUpUrl: oAuthPopupUrl,
-        credentials: [
-          {
-            id: "CoinbaseDualVerification2",
-            weight: "10",
-          },
-        ],
       },
     ],
   },
-].map((page) => ({
-  ...page,
-  platforms: page.platforms.map((platform) => ({
-    ...platform,
-    displayWeight: displayNumber(
-      platform.credentials.reduce((acc, credential) => acc + parseFloat(credential.weight), 0)
-    ),
-  })),
-}));
+];
