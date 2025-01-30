@@ -9,6 +9,7 @@ import HeaderContentFooterGrid from "./HeaderContentFooterGrid";
 import WelcomeFooter from "./WelcomeFooter";
 import MinimalHeader from "./MinimalHeader";
 import { PAGE_PADDING } from "./PageWidthGrid";
+import { Disclosure } from "@headlessui/react";
 
 const passportEmbedParams = {
   apiKey: process.env.NEXT_PUBLIC_EMBED_CAMPAIGN_API_KEY as string,
@@ -279,9 +280,89 @@ export const EmbedCampaign = () => {
             />
             <div className={selectedTheme === "Dark" ? "text-color-1" : "text-color-4"}>Text below the widget.</div>
           </div>
+          <img
+            className="w-full h-auto col-start-1 row-start-4 hidden lg:block"
+            src="./assets/passportBackgroundLogo.svg"
+            alt="Background Icon"
+          />
+          <Heading className="col-start-1 col-end-1 lg:max-w-sm lg:row-start-4 lg:self-start lg:mt-16">
+            Frequently Asked Questions
+          </Heading>
+          <FAQ className="col-span-1 w-full self-start" />
         </BodyWrapper>
         <WelcomeFooter displayPrivacyPolicy={true} />
       </HeaderContentFooterGrid>
     </PageRoot>
+  );
+};
+
+const FAQ_ENTRIES = [
+  {
+    title: "What is Passport's Identity Staking?",
+    body: (
+      <p>
+        Identity Staking is a feature within the Passport app that allows users to stake GTC tokens to verify their
+        human identity. This initiative aims to deter Sybil attacks, enhance the utility of the Passport, and promote a
+        more secure and trustworthy web3 ecosystem by developing an onchain trust graph.
+      </p>
+    ),
+  },
+  {
+    title: "How does Identity Staking work?",
+    body: (
+      <p>
+        Users can stake GTC tokens on their own identity or other trusted individuals within the Passport app. Staking
+        GTC acts as a trust signal, supporting the integrity of the web3 community by making it harder for malicious
+        actors to create fake identities or engage in Sybil attacks.
+      </p>
+    ),
+  },
+  {
+    title: "Why should I stake GTC on my identity?",
+    body: (
+      <p>
+        Staking GTC on your identity or other trusted individuals increases your Passport score, which can unlock
+        additional benefits and opportunities within the{" "}
+        <a href="https://www.passport.xyz/ecosystem" target="_blank">
+          Passport ecosystem
+        </a>{" "}
+        and beyond. It&apos;s a way to verify your commitment to being a genuine participant in web3 spaces.
+      </p>
+    ),
+  },
+  {
+    title: "What is slashing?",
+    body: (
+      <p>
+        Slashing is an automated penalty mechanism that confiscates and eventually burns the staked GTC of users who
+        violate Passport’s trust protocols. This process helps maintain the community&apos;s integrity by deterring
+        malicious behaviors.
+      </p>
+    ),
+  },
+  {
+    title: "What triggers slashing?",
+    body: (
+      <p>
+        Slashing can be triggered by behaviors that compromise the trustworthiness of the{" "}
+        <a href="https://www.passport.xyz/ecosystem" target="_blank">
+          Passport ecosystem
+        </a>
+        , such as participating in Sybil attacks or other fraudulent activities.
+      </p>
+    ),
+  },
+];
+
+const FAQ = ({ className }: { className?: string }) => {
+  return (
+    <div className={className}>
+      {FAQ_ENTRIES.map((entry, index) => (
+        <Disclosure key={index} as="div" className="py-4 border-b border-foreground-4 faq">
+          <Disclosure.Button className="group text-foreground-2 flex text-left">{entry.title}</Disclosure.Button>
+          <Disclosure.Panel className="mt-2 text-foreground-1 flex text-left">{entry.body}</Disclosure.Panel>
+        </Disclosure>
+      ))}
+    </div>
   );
 };
