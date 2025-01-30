@@ -244,9 +244,14 @@ export const EmbedCampaign = () => {
             <Heading>Install Component</Heading>
             <div>
               Verify your identity with just one click. Our system will check your ETH account for activities that match
-              our Stamp criteria. This quick verification is your first step into TODO
+              our Stamp criteria. If you still need help verifying your identity, the embed component will walk you
+              through claiming the best stamps for your account.
             </div>
-            <Button variant="primary" className="w-full md:max-w-64">
+            <Button
+              variant="primary"
+              className="w-full md:max-w-64"
+              onClick={() => window.open("https://github.com/passportxyz/passport-embed", "_blank")?.focus()}
+            >
               Go to documentation
             </Button>
           </div>
@@ -311,57 +316,51 @@ export const EmbedCampaign = () => {
 
 const FAQ_ENTRIES = [
   {
-    title: "What is Passport's Identity Staking?",
+    title: "How does it work?",
     body: (
       <p>
-        Identity Staking is a feature within the Passport app that allows users to stake GTC tokens to verify their
-        human identity. This initiative aims to deter Sybil attacks, enhance the utility of the Passport, and promote a
-        more secure and trustworthy web3 ecosystem by developing an onchain trust graph.
+        Passport Embed allows developers to easily integrate identity verification and unique humanity score directly
+        into their dApp. This enables a seamless experience for end users.
       </p>
     ),
   },
   {
-    title: "How does Identity Staking work?",
+    title: "How do I use Passport Embed in my application?",
     body: (
       <p>
-        Users can stake GTC tokens on their own identity or other trusted individuals within the Passport app. Staking
-        GTC acts as a trust signal, supporting the integrity of the web3 community by making it harder for malicious
-        actors to create fake identities or engage in Sybil attacks.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae ipsum dui. Morbi dictum orci id tempus
+        laoreet. Nulla iaculis sapien et tempus lobortis. Aenean ut enim eu diam venenatis vehicula. Donec eu placerat
+        eros. Vestibulum porttitor maximus ultrices.
       </p>
     ),
   },
   {
-    title: "Why should I stake GTC on my identity?",
+    title: "What sort of customizations can I do?",
     body: (
       <p>
-        Staking GTC on your identity or other trusted individuals increases your Passport score, which can unlock
-        additional benefits and opportunities within the{" "}
-        <a href="https://www.passport.xyz/ecosystem" target="_blank">
-          Passport ecosystem
-        </a>{" "}
-        and beyond. It&apos;s a way to verify your commitment to being a genuine participant in web3 spaces.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae ipsum dui. Morbi dictum orci id tempus
+        laoreet. Nulla iaculis sapien et tempus lobortis. Aenean ut enim eu diam venenatis vehicula. Donec eu placerat
+        eros. Vestibulum porttitor maximus ultrices.
       </p>
     ),
   },
   {
-    title: "What is slashing?",
+    title: "What programming languages and frameworks are compatible with Passport Embed?",
     body: (
       <p>
-        Slashing is an automated penalty mechanism that confiscates and eventually burns the staked GTC of users who
-        violate Passport’s trust protocols. This process helps maintain the community&apos;s integrity by deterring
-        malicious behaviors.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae ipsum dui. Morbi dictum orci id tempus
+        laoreet. Nulla iaculis sapien et tempus lobortis. Aenean ut enim eu diam venenatis vehicula. Donec eu placerat
+        eros. Vestibulum porttitor maximus ultrices.
       </p>
     ),
   },
   {
-    title: "What triggers slashing?",
+    title: "Where can I learn more about this functionality?",
     body: (
       <p>
-        Slashing can be triggered by behaviors that compromise the trustworthiness of the{" "}
-        <a href="https://www.passport.xyz/ecosystem" target="_blank">
-          Passport ecosystem
-        </a>
-        , such as participating in Sybil attacks or other fraudulent activities.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae ipsum dui. Morbi dictum orci id tempus
+        laoreet. Nulla iaculis sapien et tempus lobortis. Aenean ut enim eu diam venenatis vehicula. Donec eu placerat
+        eros. Vestibulum porttitor maximus ultrices.
       </p>
     ),
   },
