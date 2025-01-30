@@ -29,19 +29,15 @@ export const STAMP_PAGES: StampPage[] = [
       {
         name: "Binance",
         description: `<div>
-            If you do not have the Binance Account Bound Token (BABT), obtain it{" "}
+            If you do not have the Binance Account Bound Token (BABT), obtain it
             <a
               href="https://www.binance.com/en/babt"
-              style={{
-                color: "inherit",
-                fontWeight: "700",
-                textDecoration: "none",
-              }}
+              style="color: inherit; font-weight: 700; text-decoration: none;"
               rel="noopener noreferrer"
               target="_blank"
             >
               here
-            </a>{" "}
+            </a>
             by verifying your identity and logging into your Binance account.
             Then return here and click Verify to claim this Stamp.
           </div>
@@ -57,7 +53,7 @@ export const STAMP_PAGES: StampPage[] = [
       },
       {
         name: "Holonym",
-        description: "TODO: Proven uniqueness using Holonym KYC with government ID or ePassport",
+        description: "Proven uniqueness using Holonym KYC with government ID or ePassport",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-holonym-stamp",
         credentials: [
@@ -75,20 +71,21 @@ export const STAMP_PAGES: StampPage[] = [
     platforms: [
       {
         name: "Civic",
-        description: "<div>TODO</div>",
-        documentationLink: "https://google.com",
+        description: "<div>Connect to Civic to verify your identity.</div>",
+        documentationLink:
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-civic-stamp",
         credentials: [
           {
             id: "CivicCaptchaPass",
-            weight: "1",
+            weight: "0.8",
           },
           {
             id: "CivicUniquenessPass",
-            weight: "2",
+            weight: "3",
           },
           {
             id: "CivicLivenessPass",
-            weight: "3",
+            weight: "5",
           },
         ],
       },
