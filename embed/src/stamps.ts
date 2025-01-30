@@ -9,7 +9,8 @@ type Platform = {
   description: string;
   documentationLink?: string;
   requireSignature?: boolean;
-  oAuthPopup?: boolean;
+  requiresPopup?: boolean;
+  popUpUrl?: string;
   credentials?: Credential[];
   displayWeight: string;
 };
