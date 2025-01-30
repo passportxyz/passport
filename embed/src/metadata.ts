@@ -1,8 +1,7 @@
 // ---- Types
 import { Request, Response } from "express";
 
-// ---- Platform imports
-import { platformsData } from "@gitcoin/passport-platforms";
+import { STAMP_PAGES } from "./stamps.js";
 
 export class IAMError extends Error {
   constructor(public message: string) {
@@ -37,7 +36,13 @@ export class ApiError extends Error {
 
 export const metadataHandler = (_req: Request, res: Response): void => {
   try {
-    return void res.json(platformsData);
+    const { scorerId } = _req.query;
+    if (!scorerId) {
+      throw new ApiError("Missing required query parameter `scorerId`", 400);
+    }
+    // TODO: in the future return specific stamp metadata based on the scorerId
+    // TODO: clarify the returned response
+    return void res.json(STAMP_PAGES);
   } catch (error) {
     if (error instanceof ApiError) {
       return void errorRes(res, error.message, error.code);
