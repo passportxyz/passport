@@ -1,8 +1,12 @@
 module.exports = {
   testEnvironment: "node",
-  transform: {
-    "^.+\\.tsx?$": "ts-jest",
-  },
   modulePathIgnorePatterns: ["<rootDir>/dist/"],
   setupFiles: ["<rootDir>/jest.setup.cjs"],
+  preset: "ts-jest",
+  extensionsToTreatAsEsm: [".ts"],
+  globals: {
+    "ts-jest": {
+      useESM: true,
+    },
+  },
 };

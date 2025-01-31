@@ -14,7 +14,6 @@ import {
   RequestPayload,
   ValidResponseBody,
   VerifiableCredential,
-  VerifiableEip712Credential,
   VerifiedPayload,
   CredentialResponseBody,
 } from "@gitcoin/passport-types";
@@ -27,19 +26,15 @@ import * as identityMock from "@gitcoin/passport-identity";
 import * as easSchemaMock from "../src/utils/easStampSchema";
 import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
 import { IAMError } from "../src/utils/scorerService";
-import { VerifyDidChallengeBaseError, verifyDidChallenge } from "../src/utils/verifyDidChallenge";
-import { getEip712Issuer } from "../src/issuers";
 import { toJsonObject } from "../src/utils/json";
 
-const issuer = getEip712Issuer();
+const issuer = identityMock.getEip712Issuer();
+const verifyDidChallenge = identityMock.verifyDidChallenge;
+const verifyChallengeAndGetAddress = identityMock.verifyChallengeAndGetAddress;
+const VerifyDidChallengeBaseError = identityMock.VerifyDidChallengeBaseError;
 
 jest.mock("../src/utils/revocations", () => ({
   filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
-}));
-
-jest.mock("../src/utils/verifyDidChallenge", () => ({
-  verifyDidChallenge: jest.fn().mockImplementation(() => "0x0"),
-  VerifyDidChallengeBaseError: jest.requireActual("../src/utils/verifyDidChallenge").VerifyDidChallengeBaseError,
 }));
 
 jest.mock("../src/index", () => {
@@ -247,19 +242,20 @@ describe("POST /verify", function () {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it("handles valid wallet-signed challenge requests", async () => {
     // Mock the did-session method to throw an error, to ensure we're not calling it
-    (verifyDidChallenge as jest.Mock).mockImplementation(() => {
-      throw new VerifyDidChallengeBaseError("Verification failed, challenge mismatch");
+    (verifyChallengeAndGetAddress as jest.Mock).mockImplementationOnce(() => {
+      return "0x123456";
     });
 
     // challenge received from the challenge endpoint
     const challenge = {
       issuer: issuer,
       credentialSubject: {
-        id: "did:pkh:eip155:1:0x0",
+        id: "did:pkh:eip155:1:0x123456",
         provider: "challenge-Simple",
         address: "0x0",
         challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -269,7 +265,7 @@ describe("POST /verify", function () {
     const payload = {
       type: "Simple",
       types: ["Simple"],
-      address: "0x0",
+      address: "0x123456",
       proofs: {
         valid: "true",
         username: "test",
@@ -278,7 +274,7 @@ describe("POST /verify", function () {
     };
 
     // check that ID matches the payload (this has been mocked)
-    const expectedId = "did:pkh:eip155:1:0x0";
+    const expectedId = "did:pkh:eip155:1:0x123456";
 
     // create a req against the express app
     const response = await request(app)
@@ -291,13 +287,19 @@ describe("POST /verify", function () {
     // check for an id match on the mocked credential
     const credential = (response.body as ValidResponseBody[])[0];
     expect(credential.credential.credentialSubject.id).toEqual(expectedId);
+
     // Check that only the expected keys are returned
     const returnedConstKeys = Object.keys(credential);
     expect(returnedConstKeys.sort()).toEqual(["record", "credential"].sort());
+    expect(verifyChallengeAndGetAddress as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(verifyChallengeAndGetAddress as jest.Mock).toHaveBeenCalledWith({
+      challenge,
+      payload,
+    });
   });
 
   it("handles valid did-session signed challenge requests", async () => {
-    (verifyDidChallenge as jest.Mock).mockImplementationOnce(() => {
+    (verifyChallengeAndGetAddress as jest.Mock).mockImplementationOnce(() => {
       return "0x123456";
     });
 
@@ -305,7 +307,7 @@ describe("POST /verify", function () {
     const challenge = {
       issuer: issuer,
       credentialSubject: {
-        id: "did:pkh:eip155:1:0x0",
+        id: "did:pkh:eip155:1:0x123456",
         provider: "challenge-Simple",
         address: "0x123456",
         challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -316,7 +318,7 @@ describe("POST /verify", function () {
     const payload = {
       type: "Simple",
       types: ["Simple"],
-      address: "0x0",
+      address: "0x123456",
       proofs: {
         valid: "true",
         username: "test",
@@ -337,7 +339,7 @@ describe("POST /verify", function () {
     };
 
     // check that ID matches the payload (this has been mocked)
-    const expectedId = "did:pkh:eip155:1:0x0";
+    const expectedId = "did:pkh:eip155:1:0x123456";
 
     // create a req against the express app
     const response = await request(app)
@@ -353,10 +355,16 @@ describe("POST /verify", function () {
     // Check that only the expected keys are returned
     const returnedConstKeys = Object.keys(credential);
     expect(returnedConstKeys.sort()).toEqual(["record", "credential"].sort());
+    expect(verifyChallengeAndGetAddress as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(verifyChallengeAndGetAddress as jest.Mock).toHaveBeenCalledWith({
+      challenge,
+      payload,
+      signedChallenge,
+    });
   });
 
   it("handles invalid did-session signed challenge requests", async () => {
-    (verifyDidChallenge as jest.Mock).mockImplementationOnce(() => {
+    (verifyChallengeAndGetAddress as jest.Mock).mockImplementationOnce(() => {
       throw new VerifyDidChallengeBaseError("Verification failed, challenge mismatch");
     });
 

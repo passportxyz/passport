@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Signature, Contract } from "ethers";
 import { scrollDevBadgeHandler, getScrollRpcUrl } from "../src/utils/scrollDevBadge";
 import { getAttestationSignerForChain } from "../src/utils/attestations";
-import { hasValidIssuer } from "../src/issuers";
+import { hasValidIssuer } from "@gitcoin/passport-identity";
 import { getEASFeeAmount } from "../src/utils/easFees";
 
 // Mock external dependencies
@@ -17,7 +17,6 @@ jest.mock("ethers", () => {
 });
 
 jest.mock("../src/utils/easFees");
-jest.mock("../src/issuers");
 jest.mock("../src/utils/attestations");
 
 describe("scrollDevBadgeHandler", () => {

@@ -1,5 +1,6 @@
 // ---- Web3 packages
 import { isAddress } from "ethers";
+import * as DIDKit from "@spruceid/didkit-wasm-node";
 
 // ---- Types
 import { Response, Request } from "express";
@@ -7,8 +8,18 @@ import { ParamsDictionary } from "express-serve-static-core";
 
 // All provider exports from platforms
 import { handleAxiosError } from "@gitcoin/passport-platforms";
-import { autoVerifyStamps, PassportScore } from "@gitcoin/passport-identity";
-import { VerifiableCredential } from "@gitcoin/passport-types";
+import {
+  autoVerifyStamps,
+  PassportScore,
+  verifyCredential,
+  hasValidIssuer,
+  verifyChallengeAndGetAddress,
+  VerifyDidChallengeBaseError,
+  helpers,
+  groupProviderTypesByPlatform,
+  verifyProvidersAndIssueCredentials,
+} from "@gitcoin/passport-identity";
+import { VerifiableCredential, VerifyRequestBody } from "@gitcoin/passport-types";
 
 import axios from "axios";
 
@@ -116,4 +127,65 @@ export const autoVerificationHandler = async (
     const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
     return void errorRes(res, message, 500);
   }
+};
+
+export const verificationHandler = (
+  req: Request<ParamsDictionary, AutoVerificationResponseBodyType, VerifyRequestBody>,
+  res: Response
+): void => {
+  const requestBody: VerifyRequestBody = req.body;
+  // each verify request should be received with a challenge credential detailing a signature contained in the RequestPayload.proofs
+  const challenge = requestBody.challenge;
+  // get the payload from the JSON req body
+  const payload = requestBody.payload;
+
+  // Check the challenge and the payload is valid before issuing a credential from a registered provider
+  return void verifyCredential(DIDKit, challenge)
+    .then(async (verified): Promise<void> => {
+      if (verified && hasValidIssuer(challenge.issuer)) {
+        let address;
+        try {
+          address = await verifyChallengeAndGetAddress(requestBody);
+        } catch (error) {
+          if (error instanceof VerifyDidChallengeBaseError) {
+            return void errorRes(res, `Invalid challenge signature: ${error.name}`, 401);
+          }
+          throw error;
+        }
+
+        payload.address = address;
+
+        // Check signer and type
+        const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
+        const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
+
+        if (!isSigner || !isType) {
+          return void errorRes(
+            res,
+            "Invalid challenge '" +
+              [!isSigner && "signer", !isType && "provider"].filter(Boolean).join("' and '") +
+              "'",
+            401
+          );
+        }
+
+        const types = payload.types.filter((type) => type);
+        const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
+
+        const credentials = await verifyProvidersAndIssueCredentials(providersGroupedByPlatforms, address, payload);
+
+        return void res.json(credentials);
+      }
+
+      // error response
+      return void errorRes(res, "Unable to verify payload", 401);
+    })
+    .catch((error): void => {
+      if (error instanceof helpers.ApiError) {
+        return void errorRes(res, error.message, error.code);
+      }
+      let message = "Unable to verify payload";
+      if (error instanceof Error) message += `: ${error.name}`;
+      return void errorRes(res, message, 500);
+    });
 };

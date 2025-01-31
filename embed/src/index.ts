@@ -11,7 +11,7 @@ import { RedisReply, RedisStore } from "rate-limit-redis";
 
 // --- Relative imports
 import { keyGenerator, apiKeyRateLimit } from "./rate-limiter.js";
-import { autoVerificationHandler } from "./handlers.js";
+import { autoVerificationHandler, verificationHandler } from "./handlers.js";
 import { metadataHandler } from "./metadata.js";
 import { redis } from "./redis.js";
 
@@ -106,7 +106,9 @@ app.get("/health", (_req, res) => {
   res.status(200).send(data);
 });
 
-app.post("/embed/verify", autoVerificationHandler);
+
+app.post("/embed/auto-verify", autoVerificationHandler);
+app.post("/embed/verify", verificationHandler);
 // Returns the metadata for the stamps
 // Receives a query parameter `scorerId` and returns the stamp metadata for that scorer
 app.get("/embed/stamps/metadata", metadataHandler);

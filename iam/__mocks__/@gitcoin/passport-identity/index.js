@@ -17,12 +17,18 @@ identity.issueChallengeCredential = jest.fn(async (DIDKit, key, record) => ({
 
 // always verifies
 identity.verifyCredential = jest.fn(async () => true);
-
 identity.verifyProvidersAndIssueCredentials = jest.fn(async () => []);
+identity.verifyDidChallenge = jest.fn().mockImplementation(() => "0x0");
+identity.verifyChallengeAndGetAddress = jest.fn().mockImplementation(() => {
+  return "0x0";
+});
+identity.hasValidIssuer = jest.fn().mockImplementation(realIdentity.hasValidIssuer);
 
 // return full mock
 module.exports = {
   ...realIdentity,
   ...identity,
+  getEip712Issuer: realIdentity.getEip712Issuer,
+  VerifyDidChallengeBaseError: realIdentity.VerifyDidChallengeBaseError,
   realIdentity,
 };
