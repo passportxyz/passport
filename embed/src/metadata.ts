@@ -39,7 +39,7 @@ export const metadataHandler = async (_req: Request, res: Response): Promise<voi
   try {
     const { scorerId } = _req.query;
     if (!scorerId) {
-      throw new ApiError("Missing required query parameter `scorerId`", 400);
+      throw new ApiError("Missing required query parameter: `scorerId`", 400);
     }
     // TODO: in the future return specific stamp metadata based on the scorerId
     // TODO: clarify the returned response
@@ -50,7 +50,6 @@ export const metadataHandler = async (_req: Request, res: Response): Promise<voi
 
     // get providers / credential ids from passport-platforms
     // for each provider, get the weight from the weights response
-
     const updatedStampPages = STAMP_PAGES.map((stampPage) => ({
       ...stampPage,
       platforms: stampPage.platforms.map((platform) => {
@@ -60,14 +59,12 @@ export const metadataHandler = async (_req: Request, res: Response): Promise<voi
         if (!platformData || !platformData.providers) {
           return platform; // If no platform data, return unchanged
         }
-
         // Extract provider types
         const providers = platformData.providers;
         const credentials = Object.values(providers).map((provider: { type: string }) => ({
           id: provider.type,
-          weight: weightsResponseData[provider.type].toString() ?? "0",
+          weight: weightsResponseData[provider.type] ? weightsResponseData[provider.type].toString() : "0",
         }));
-
         return {
           ...platform,
           credentials,
