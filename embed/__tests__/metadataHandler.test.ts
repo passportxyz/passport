@@ -48,7 +48,8 @@ describe("GET /embed/stamps/metadata", () => {
     await metadataHandler(mockReq as Request, mockRes as Response);
 
     // Extract returned data from mock calls
-    const actualResponse = mockRes.json.mock.calls[0][0];
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    const actualResponse = (mockRes.json as jest.Mock).mock.calls[0][0];
 
     // Flatten all credentials from platforms
     const allCredentials = actualResponse.flatMap((section: any) =>
