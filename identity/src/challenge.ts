@@ -1,7 +1,7 @@
 // ---- Return randomBytes as a challenge to test that the user has control of a provided address
 import { ChallengePayload, RequestPayload, VerifyRequestBody } from "@gitcoin/passport-types";
 import crypto from "crypto";
-import { verifyDidChallenge } from "./verifyDidChallenge";
+import { verifyDidChallenge } from "./verifyDidChallenge.js";
 import { getAddress, verifyMessage } from "ethers";
 // request a challenge sig
 export const getChallenge = (payload: RequestPayload): ChallengePayload => {

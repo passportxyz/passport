@@ -25,27 +25,26 @@ import {
 } from "@gitcoin/passport-types";
 
 import passportOnchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
-import { verifyProvidersAndIssueCredentials } from "@gitcoin/passport-identity";
 
 import {
   getChallenge,
-  verifyChallengeAndGetAddress,
   hasValidIssuer,
   getIssuerKey,
   VerifyDidChallengeBaseError,
+  issueChallengeCredential,
+  verifyCredential,
+  verifyTypes,
+  groupProviderTypesByPlatform,
+  verifyProvidersAndIssueCredentials,
+  verifyChallengeAndGetAddress,
 } from "@gitcoin/passport-identity";
+
 import { getEASFeeAmount } from "./utils/easFees.js";
 import * as stampSchema from "./utils/easStampSchema.js";
 import * as passportSchema from "./utils/easPassportSchema.js";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import {
-  issueChallengeCredential,
-  verifyCredential,
-  verifyTypes,
-  groupProviderTypesByPlatform,
-} from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
 

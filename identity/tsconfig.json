@@ -1,23 +1,22 @@
 {
   "extends": "../tsconfig.settings.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "NodeNext",
     "esModuleInterop": true,
     "declaration": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2022",
     "noImplicitAny": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "sourceMap": true,
     "outDir": "dist/commonjs",
     "allowJs": true,
     "baseUrl": "src",
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "typeRoots": ["./node_modules/@types", "./src/types"],
   },
   "include": [
     "src/**/*",
-    "src/deployments/*.json",
-    "src/deployments/abi/*.json"
   ]
 }

@@ -1,11 +1,11 @@
 import { DID } from "dids";
 import { getResolver } from "key-did-resolver";
-import { Cacao } from "ceramic-cacao";
-import { CID } from "multiformats/cid";
+import { CID } from "multiformats";
 import { SignedDidChallenge } from "@gitcoin/passport-types";
 import * as dagCBOR from "@ipld/dag-cbor";
 import { encode } from "multiformats/block";
 import { sha256 } from "multiformats/hashes/sha2";
+import { Cacao } from "@didtools/cacao";
 
 export class VerifyDidChallengeBaseError extends Error {}
 
@@ -88,6 +88,6 @@ export const verifyDidChallenge = async (
   const cacao = await verifyAgeAndGetCacao(signedChallenge);
   await verifyMatchesExpectedChallenge(signedChallenge, expectedChallenge);
   await verifySignature(signedChallenge, cacao);
-
+  
   return signedChallenge.issuer.replace("did:pkh:eip155:1:", "");
 };

@@ -13,7 +13,7 @@ import {
 
 // All provider exports from platforms
 import { platforms } from "@gitcoin/passport-platforms";
-import { verifyProvidersAndIssueCredentials, VerificationError, addErrorDetailsToMessage } from "./verification";
+import { verifyProvidersAndIssueCredentials, VerificationError, addErrorDetailsToMessage } from "./verification.js";
 
 export type AutoVerificationFields = {
   address: string;

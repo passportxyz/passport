@@ -1,9 +1,9 @@
 // export credential tooling
-export * from "./credentials";
-export * from "./signingDocuments";
-export * from "./verification";
-export * from "./autoVerification";
-export * from "./issuers";
-export * from "./challenge";
-export * from "./verifyDidChallenge";
-export * as helpers from "./helpers";
+export * from "./credentials.js";
+export * from "./signingDocuments.js";
+export * from "./verification.js";
+export * from "./autoVerification.js";
+export * from "./issuers.js";
+export * from "./challenge.js";
+export * from "./verifyDidChallenge.js";
+export * as helpers from "./helpers.js";

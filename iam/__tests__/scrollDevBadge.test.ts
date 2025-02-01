@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { Signature, Contract } from "ethers";
-import { scrollDevBadgeHandler, getScrollRpcUrl } from "../src/utils/scrollDevBadge";
-import { getAttestationSignerForChain } from "../src/utils/attestations";
+import { scrollDevBadgeHandler, getScrollRpcUrl } from "../src/utils/scrollDevBadge.js";
+import { getAttestationSignerForChain } from "../src/utils/attestations.js";
 import { hasValidIssuer } from "@gitcoin/passport-identity";
-import { getEASFeeAmount } from "../src/utils/easFees";
+import { getEASFeeAmount } from "../src/utils/easFees.js";
 
 // Mock external dependencies
 jest.mock("@spruceid/didkit-wasm-node");

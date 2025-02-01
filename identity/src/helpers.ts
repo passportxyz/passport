@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { IAMError } from "./verification";
+import { IAMError } from "./verification.js";
 
 // return a JSON error response with a 400 status
 export const errorRes = (res: Response, error: string | object, errorCode: number): Response =>

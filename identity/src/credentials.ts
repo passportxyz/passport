@@ -26,7 +26,7 @@ import {
   challengeSignatureDocument,
   DocumentType,
   stampCredentialDocument,
-} from "./signingDocuments";
+} from "./signingDocuments.js";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min

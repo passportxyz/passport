@@ -4,8 +4,8 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 import { PassportCache, providers } from "@gitcoin/passport-platforms";
 
 // ---- Test subject
-import { app } from "../src/index";
-import { getAttestationDomainSeparator } from "../src/utils/attestations";
+import { app } from "../src/index.js";
+import { getAttestationDomainSeparator } from "../src/utils/attestations.js";
 
 // ---- Types
 import {
@@ -21,12 +21,12 @@ import {
 import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
 import { parseEther } from "ethers";
-import * as easFeesMock from "../src/utils/easFees";
+import * as easFeesMock from "../src/utils/easFees.js";
 import * as identityMock from "@gitcoin/passport-identity";
-import * as easSchemaMock from "../src/utils/easStampSchema";
-import * as easPassportSchemaMock from "../src/utils/easPassportSchema";
-import { IAMError } from "../src/utils/scorerService";
-import { toJsonObject } from "../src/utils/json";
+import * as easSchemaMock from "../src/utils/easStampSchema.js";
+import * as easPassportSchemaMock from "../src/utils/easPassportSchema.js";
+import { IAMError } from "../src/utils/scorerService.js";
+import { toJsonObject } from "../src/utils/json.js";
 
 const issuer = identityMock.getEip712Issuer();
 const verifyDidChallenge = identityMock.verifyDidChallenge;
