@@ -6,7 +6,7 @@ import {
   AutoVerificationResponseBodyType,
   AutoVerificationRequestBodyType,
   autoVerificationHandler,
-} from "../src/handlers";
+} from "../src/handlers.js";
 import { ParamsDictionary } from "express-serve-static-core";
 import { autoVerifyStamps, AutoVerificationFields } from "@gitcoin/passport-identity";
 import { VerifiableCredential } from "@gitcoin/passport-types";

@@ -2,12 +2,12 @@
 
 import request from "supertest";
 import { Response, Request } from "express";
-import { apiKeyRateLimit, keyGenerator } from "../src/rate-limiter";
+import { apiKeyRateLimit, keyGenerator } from "../src/rate-limiter.js";
 import {
   AutoVerificationResponseBodyType,
   AutoVerificationRequestBodyType,
   autoVerificationHandler,
-} from "../src/handlers";
+} from "../src/handlers.js";
 import { ParamsDictionary } from "express-serve-static-core";
 import { PassportScore } from "@gitcoin/passport-identity";
 
@@ -23,7 +23,7 @@ const mockedScore: PassportScore = {
 };
 
 jest.mock("../src/rate-limiter", () => {
-  const originalModule = jest.requireActual<typeof import("../src/rate-limiter")>("../src/rate-limiter");
+  const originalModule = jest.requireActual<typeof import("../src/rate-limiter.js")>("../src/rate-limiter");
 
   return {
     ...originalModule,
@@ -37,7 +37,7 @@ jest.mock("../src/rate-limiter", () => {
 });
 
 jest.mock("../src/handlers", () => {
-  const originalModule = jest.requireActual<typeof import("../src/handlers")>("../src/handlers");
+  const originalModule = jest.requireActual<typeof import("../src/handlers.js")>("../src/handlers");
 
   return {
     // __esModule: true, // Use it when dealing with esModules
@@ -56,7 +56,7 @@ jest.mock("../src/handlers", () => {
   };
 });
 
-import { app } from "../src/index";
+import { app } from "../src/index.js";
 
 beforeEach(() => {
   // CLear the spy stats

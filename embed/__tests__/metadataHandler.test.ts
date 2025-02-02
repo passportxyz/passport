@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { metadataHandler } from "../src/metadata";
+import { metadataHandler } from "../src/metadata.js";
 import axios from "axios";
 
 // Mock axios to intercept any HTTP requests

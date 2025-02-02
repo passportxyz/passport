@@ -106,7 +106,6 @@ app.get("/health", (_req, res) => {
   res.status(200).send(data);
 });
 
-
 app.post("/embed/auto-verify", autoVerificationHandler);
 app.post("/embed/verify", verificationHandler);
 // Returns the metadata for the stamps
