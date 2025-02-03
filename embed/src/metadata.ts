@@ -50,16 +50,11 @@ export const metadataHandler = async (_req: Request, res: Response): Promise<voi
 
     // get providers / credential ids from passport-platforms
     // for each provider, get the weight from the weights response
-    console.log("HELLO LARISA platforms", platforms);
     const updatedStampPages = STAMP_PAGES.map((stampPage) => ({
       ...stampPage,
       platforms: stampPage.platforms.map((platform) => {
         const platformName = platform.name;
-
         const platformData = platforms[platformName];
-        if (platformName === "Discord") {
-          console.log("HELLO LARISA platformData", platformData.providers);
-        }
 
         if (!platformData || !platformData.providers) {
           return {
