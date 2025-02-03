@@ -1,4 +1,4 @@
-export const displayNumber = (num?: number): string => String(parseInt(num?.toString() || "0"));
+export const displayNumber = (num?: number): string => (num ?? 0).toFixed(1);
 
 type StampPage = {
   header: string;
@@ -63,7 +63,7 @@ export const STAMP_PAGES: StampPage[] = [
     // description: "Choose from below to verify",
     platforms: [
       {
-        name: "LinkedIn",
+        name: "Linkedin",
         description:
           "<div>This stamp confirms that your LinkedIn account is verified and includes a valid, verified email address.</div>",
         documentationLink:
