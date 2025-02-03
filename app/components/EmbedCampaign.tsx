@@ -14,8 +14,6 @@ import { Disclosure } from "@headlessui/react";
 const passportEmbedParams = {
   apiKey: process.env.NEXT_PUBLIC_EMBED_CAMPAIGN_API_KEY as string,
   scorerId: process.env.NEXT_PUBLIC_EMBED_CAMPAIGN_SCORER_ID as string,
-  // TODO
-  overrideIamUrl: "http://localhost:8004",
 };
 
 const Heading = ({ className, children }: { className?: string; children: React.ReactNode }) => (
