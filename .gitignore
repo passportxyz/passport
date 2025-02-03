@@ -25,3 +25,8 @@ lerna-debug.log*
 *.sw?
 
 schemas/.env.yarn
+embed-popup/.env.production
+embed-popup/dist/index.html
+embed-popup/dist/vite.svg
+embed-popup/dist/assets/index-CrUVkJ-U.css
+embed-popup/dist/assets/index-CWMZjW8S.js
