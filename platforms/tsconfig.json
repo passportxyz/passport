@@ -10,7 +10,7 @@
     "noImplicitAny": true,
     "moduleResolution": "nodenext",
     "sourceMap": true,
-    "outDir": "dist/commonjs",
+    "outDir": "dist/esm",
     "allowJs": true,
     "baseUrl": "src",
     "jsx": "react",
