@@ -1,7 +1,7 @@
 /* eslint-disable */
 import React from "react";
-import { AppContext, PlatformOptions, ProviderPayload } from "../types";
-import { Platform } from "../utils/platform";
+import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
+import { Platform } from "../utils/platform.js";
 
 export class AllowListPlatform extends Platform {
   platformId = "AllowList";

@@ -1,7 +1,7 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import { Provider } from "../../types";
-import { getGithubUserData, requestAccessToken } from "../../utils/githubClient";
-import { GithubContext } from "../../utils/githubClient";
+import { Provider } from "../../types.js";
+import { getGithubUserData, requestAccessToken } from "../../utils/githubClient.js";
+import { GithubContext } from "../../utils/githubClient.js";
 import axios from "axios";
 
 import {
@@ -11,8 +11,8 @@ import {
   evaluateOrganisationContributor,
   evaluateRepositoryCommiter,
   evaluateRepositoryContributor,
-} from "./condition";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+} from "./condition.js";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
 
 export const githubConditionEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}account/customization/credential`;
 

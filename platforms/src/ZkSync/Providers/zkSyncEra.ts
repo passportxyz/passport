@@ -1,12 +1,12 @@
 // ----- Types
-import { Provider, ProviderExternalVerificationError, ProviderOptions } from "../../types";
+import { Provider, ProviderExternalVerificationError, ProviderOptions } from "../../types.js";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
 
 // ----- Credential verification
-import { getAddress } from "../../utils/signer";
+import { getAddress } from "../../utils/signer.js";
 
 // This is used in the Era Explorer
 export const zkSyncEraApiEndpoint = process.env.ZKSYNC_ERA_MAINNET_ENDPOINT || "";

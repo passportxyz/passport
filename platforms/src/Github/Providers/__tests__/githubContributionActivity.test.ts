@@ -1,7 +1,7 @@
-import * as githubContributionActivity from "../githubContributionActivity";
+import * as githubContributionActivity from "../githubContributionActivity.js";
 
 import { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
-import { fetchAndCheckContributions, requestAccessToken } from "../../../utils/githubClient";
+import { fetchAndCheckContributions, requestAccessToken } from "../../../utils/githubClient.js";
 
 const { GithubContributionActivityProvider } = githubContributionActivity;
 

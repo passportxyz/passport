@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { GuildAdminProvider, GuildPassportMemberProvider } from "./Providers/guildXYZ";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { GuildAdminProvider, GuildPassportMemberProvider } from "./Providers/guildXYZ.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/guildXYZStampIcon.svg",

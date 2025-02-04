@@ -1,8 +1,8 @@
 /* eslint-disable */
 import { RequestPayload, ProviderContext, VerifiedPayload, PROVIDER_ID } from "@gitcoin/passport-types";
-import { ProviderExternalVerificationError } from "../../types";
-import { Providers, withTimeout } from "../providers";
-import { SimpleProvider, verifySimpleProvider } from "../simpleProvider";
+import { ProviderExternalVerificationError } from "../../types.js";
+import { Providers, withTimeout } from "../providers.js";
+import { SimpleProvider, verifySimpleProvider } from "../simpleProvider.js";
 
 jest.spyOn(console, "error").mockImplementation(() => {});
 

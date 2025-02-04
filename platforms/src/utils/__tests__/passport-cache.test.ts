@@ -1,4 +1,4 @@
-import { PassportCache } from "../passport-cache";
+import { PassportCache } from "../passport-cache.js";
 
 describe("PassportCache", () => {
   let passportCache: PassportCache;

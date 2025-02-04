@@ -1,8 +1,8 @@
 /* eslint-disable */
 import { PLATFORM_ID, PROVIDER_ID, ProviderContext, RequestPayload } from "@gitcoin/passport-types";
-import { SimpleProvider } from "../simpleProvider";
-import { createProviders } from "../createProviders";
-import { PlatformConfig } from "platforms";
+import { SimpleProvider } from "../simpleProvider.js";
+import { createProviders } from "../createProviders.js";
+import { PlatformConfig } from "platforms.js";
 
 jest.useFakeTimers(); // Use Jest's timer mocks
 

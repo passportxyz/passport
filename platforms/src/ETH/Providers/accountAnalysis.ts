@@ -1,8 +1,8 @@
 // ----- Types
-import { type Provider } from "../../types";
+import { type Provider } from "../../types.js";
 import type { RequestPayload, VerifiedPayload, ProviderContext, PROVIDER_ID } from "@gitcoin/passport-types";
 import axios from "axios";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
 
 export type ModelResponse = {
   data: {

@@ -1,1 +1,1 @@
-export { GnosisSafeProvider } from "./gnosisSafe";
+export { GnosisSafeProvider } from "./gnosisSafe.js";

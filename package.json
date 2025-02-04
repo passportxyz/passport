@@ -19,7 +19,8 @@
     "identity",
     "schemas",
     "types",
-    "platforms"
+    "platforms",
+    "embed-popup"
   ],
   "scripts": {
     "clean": "lerna run clean",

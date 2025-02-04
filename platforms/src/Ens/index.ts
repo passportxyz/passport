@@ -1,3 +1,3 @@
-export { EnsPlatform } from "./App-Bindings";
-export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
-export { EnsProvider } from "./Providers/EnsProvider";
+export { EnsPlatform } from "./App-Bindings.js";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config.js";
+export { EnsProvider } from "./Providers/EnsProvider.js";

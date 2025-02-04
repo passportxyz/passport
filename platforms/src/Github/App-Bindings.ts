@@ -1,6 +1,6 @@
 import React from "react";
-import { PlatformOptions } from "../types";
-import { Platform } from "../utils/platform";
+import { PlatformOptions } from "../types.js";
+import { Platform } from "../utils/platform.js";
 
 export class GithubPlatform extends Platform {
   platformId = "Github";

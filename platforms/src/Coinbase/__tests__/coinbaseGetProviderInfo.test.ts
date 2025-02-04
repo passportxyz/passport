@@ -1,8 +1,8 @@
 /* eslint-disable */
 // ---- Test subject
-import { verifyCoinbaseAttestation } from "../Providers/coinbase";
-import { CoinbasePlatform } from "../App-Bindings";
-import { PlatformPreCheckError } from "../../utils/platform";
+import { verifyCoinbaseAttestation } from "../Providers/coinbase.js";
+import { CoinbasePlatform } from "../App-Bindings.js";
+import { PlatformPreCheckError } from "../../utils/platform.js";
 
 jest.mock("../Providers/coinbase");
 

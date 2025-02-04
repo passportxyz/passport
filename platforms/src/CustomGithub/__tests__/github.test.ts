@@ -1,9 +1,8 @@
 // Import the necessary modules and mock axios
 import { RequestPayload } from "@gitcoin/passport-types";
-import { ProviderExternalVerificationError } from "../../types";
 import axios from "axios";
-import { CustomGithubProvider } from "../Providers/github"; // Adjust the import path as necessary
-import * as githubClient from "../../utils/githubClient";
+import { CustomGithubProvider } from "../Providers/github.js"; // Adjust the import path as necessary
+import * as githubClient from "../../utils/githubClient.js";
 
 jest.mock("axios");
 

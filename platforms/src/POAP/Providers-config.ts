@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { POAPProvider } from "./Providers/poap";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { POAPProvider } from "./Providers/poap.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/poapStampIcon.svg",

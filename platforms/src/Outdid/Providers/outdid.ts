@@ -1,4 +1,4 @@
-import { type Provider, type ProviderOptions } from "../../types";
+import { type Provider, type ProviderOptions } from "../../types.js";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import axios from "axios";
  

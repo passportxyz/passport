@@ -1,6 +1,6 @@
-import type { Provider, ProviderOptions } from "../../types";
+import type { Provider, ProviderOptions } from "../../types.js";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
 
 // ----- Libs
 import axios from "axios";

@@ -1,8 +1,8 @@
 /* eslint-disable */
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import { OutdidProvider } from "../Providers/outdid";
-import { outdidRequestVerification } from "../procedures/outdidVerification";
+import { OutdidProvider } from "../Providers/outdid.js";
+import { outdidRequestVerification } from "../procedures/outdidVerification.js";
 
 // ----- Libs
 import axios from "axios";

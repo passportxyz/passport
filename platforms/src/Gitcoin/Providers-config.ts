@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { GitcoinContributorStatisticsProvider } from "./Providers";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { GitcoinContributorStatisticsProvider } from "./Providers/index.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/gtcGrantsLightIcon.svg",

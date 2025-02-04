@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { TrustaLabsProvider } from "./Providers/TrustaLabs";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { TrustaLabsProvider } from "./Providers/TrustaLabs.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/trustaLabsStampIcon.svg",

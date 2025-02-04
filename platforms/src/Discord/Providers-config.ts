@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { DiscordProvider } from "./Providers/discord";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { DiscordProvider } from "./Providers/discord.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/discordStampIcon.svg",

@@ -1,6 +1,6 @@
 import { RequestPayload } from "@gitcoin/passport-types";
-import { CivicPassProvider } from "../Providers/civic";
-import { CivicPassLookupPass, CivicPassType, PassesForAddress } from "../Providers/types";
+import { CivicPassProvider } from "../Providers/civic.js";
+import { CivicPassLookupPass, CivicPassType, PassesForAddress } from "../Providers/types.js";
 import axios from "axios";
 
 // Mock out all top level functions, such as get, put, delete and post:

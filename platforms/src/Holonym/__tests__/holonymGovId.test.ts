@@ -1,7 +1,6 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import { ProviderExternalVerificationError } from "../../types";
-import { HolonymGovIdProvider } from "../Providers/holonymGovIdProvider";
+import { HolonymGovIdProvider } from "../Providers/holonymGovIdProvider.js";
 
 // ----- Libs
 import axios from "axios";

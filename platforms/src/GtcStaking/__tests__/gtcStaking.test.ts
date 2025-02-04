@@ -1,5 +1,5 @@
-import BigNumber from "bignumber.js";
-import { GtcStakingProvider } from "../Providers/GtcStaking";
+import { BigNumber } from "bignumber.js";
+import { GtcStakingProvider } from "../Providers/GtcStaking.js";
 
 describe("GtcStakingProvider", () => {
   beforeAll(() => {

@@ -1,4 +1,4 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import {
   ETHAdvocateProvider,
   ETHMaxiProvider,
@@ -6,7 +6,7 @@ import {
   EthGasSpentProvider,
   EthDaysActiveProvider,
   EthTransactionsProvider,
-} from "./Providers/accountAnalysis";
+} from "./Providers/accountAnalysis.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/ethereumStampIcon.svg",

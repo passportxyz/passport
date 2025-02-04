@@ -1,1 +1,1 @@
-export { HolonymGovIdProvider } from "./holonymGovIdProvider";
+export { HolonymGovIdProvider } from "./holonymGovIdProvider.js";

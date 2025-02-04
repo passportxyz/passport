@@ -1,6 +1,6 @@
-import { CivicPassLookupPass, CivicPassLookupResponse, CivicPassType, Pass, SupportedChain } from "./types";
+import { CivicPassLookupPass, CivicPassLookupResponse, CivicPassType, Pass, SupportedChain } from "./types.js";
 import axios from "axios";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
 
 const CIVIC_URL = "https://api.civic.com/pass-lookup";
 

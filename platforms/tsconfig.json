@@ -1,14 +1,14 @@
 {
   "extends": "../tsconfig.settings.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "NodeNext",
     "esModuleInterop": true,
     "declaration": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2022",
     "skipLibCheck": true,
     "noImplicitAny": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "sourceMap": true,
     "outDir": "dist/commonjs",
     "allowJs": true,

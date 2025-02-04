@@ -7,8 +7,8 @@ import {
   getTwitterUserData,
   TwitterContext,
   TwitterUserData,
-} from "../../Twitter/procedures/twitterOauth";
-import type { Provider, ProviderOptions } from "../../types";
+} from "../../Twitter/procedures/twitterOauth.js";
+import type { Provider, ProviderOptions } from "../../types.js";
 // import { verifyTwitter } from "../providers/twitter";
 
 // Export a Twitter Provider to carry out OAuth and return a record object

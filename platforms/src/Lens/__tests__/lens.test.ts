@@ -1,6 +1,6 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import { LensProfileProvider } from "../Providers/lens";
+import { LensProfileProvider } from "../Providers/lens.js";
 import axios from "axios";
 
 jest.mock("axios");

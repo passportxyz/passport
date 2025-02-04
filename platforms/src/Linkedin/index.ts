@@ -1,3 +1,3 @@
-export { LinkedinProvider } from "./Providers/linkedin";
-export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
-export { LinkedinPlatform } from "./App-Bindings";
+export { LinkedinProvider } from "./Providers/linkedin.js";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config.js";
+export { LinkedinPlatform } from "./App-Bindings.js";

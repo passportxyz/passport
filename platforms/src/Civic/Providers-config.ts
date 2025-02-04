@@ -1,6 +1,6 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { CivicPassType } from "./Providers/types";
-import { CivicPassProvider } from "./Providers/civic";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { CivicPassType } from "./Providers/types.js";
+import { CivicPassProvider } from "./Providers/civic.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/civicStampIcon.svg",

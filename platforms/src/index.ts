@@ -1,9 +1,9 @@
 // Provider Utils
-import platforms from "./platforms";
-import { PlatformConfig } from "./platforms";
-import { createProviders } from "./utils/createProviders";
+import platforms from "./platforms.js";
+import { PlatformConfig } from "./platforms.js";
+import { createProviders } from "./utils/createProviders.js";
 import { keccak256, toUtf8Bytes } from "ethers";
-import { PlatformGroupSpec } from "./types";
+import { PlatformGroupSpec } from "./types.js";
 
 // Check that all platforms have a ProviderConfig, PlatformDetails, and providers
 Object.entries(platforms).map(([platformName, platform]) => {
@@ -88,12 +88,12 @@ export const platformsData = Object.entries(platforms).reduce((data, [id, platfo
   ];
 }, [] as PlatformData[]);
 
-export * from "./types";
+export * from "./types.js";
 export { type PlatformConfig };
-export { Platform as PlatformClass } from "./utils/platform";
+export { Platform as PlatformClass } from "./utils/platform.js";
 export { platforms as platforms };
-export { initCacheSession, loadCacheSession, clearCacheSession } from "./utils/platform-cache";
-export { handleAxiosError } from "./utils/handleAxiosError";
-export { PassportCache } from "./utils/passport-cache";
-export { PlatformPreCheckError } from "./utils/platform";
-export { Hyperlink } from "./utils/Hyperlink";
+export { initCacheSession, loadCacheSession, clearCacheSession } from "./utils/platform-cache.js";
+export { handleAxiosError } from "./utils/handleAxiosError.js";
+export { PassportCache } from "./utils/passport-cache.js";
+export { PlatformPreCheckError } from "./utils/platform.js";
+export { Hyperlink } from "./utils/Hyperlink.js";

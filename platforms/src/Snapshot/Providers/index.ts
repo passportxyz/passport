@@ -1,1 +1,1 @@
-export { SnapshotProposalsProvider } from "./snapshotProposalsProvider";
+export { SnapshotProposalsProvider } from "./snapshotProposalsProvider.js";

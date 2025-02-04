@@ -1,4 +1,4 @@
-import { GithubPlatform } from "../Github/App-Bindings";
+import { GithubPlatform } from "../Github/App-Bindings.js";
 
 export class CustomGithubPlatform extends GithubPlatform {
   platformId = "DeveloperList";

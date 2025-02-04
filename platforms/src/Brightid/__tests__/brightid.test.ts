@@ -1,10 +1,10 @@
 // --- Test subject
-import { BrightIdProvider } from "../Providers/brightid";
-import { triggerBrightidSponsorship } from "../procedures/brightid";
+import { BrightIdProvider } from "../Providers/brightid.js";
+import { triggerBrightidSponsorship } from "../procedures/brightid.js";
 import { BrightIdVerificationResponse, BrightIdSponsorshipResponse } from "@gitcoin/passport-types";
 import { RequestPayload } from "@gitcoin/passport-types";
 import { verifyContextId, sponsor } from "brightid_sdk";
-import { ProviderExternalVerificationError } from "../../types";
+import { ProviderExternalVerificationError } from "../../types.js";
 
 jest.mock("brightid_sdk", () => ({
   verifyContextId: jest.fn(),

@@ -1,7 +1,7 @@
-import { BinanceProvider } from "../Providers/binance";
+import { BinanceProvider } from "../Providers/binance.js";
 import axios from "axios";
 import * as ethers from "ethers";
-import { getRPCProvider } from "../../utils/signer";
+import { getRPCProvider } from "../../utils/signer.js";
 import { RequestPayload } from "@gitcoin/passport-types";
 
 jest.mock("axios");

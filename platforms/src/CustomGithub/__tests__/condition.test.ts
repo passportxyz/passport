@@ -1,4 +1,4 @@
-import { ConditionEvaluator, evaluateAND, evaluateOR } from "../Providers/condition";
+import { ConditionEvaluator, evaluateAND, evaluateOR } from "../Providers/condition.js";
 // eslint-disable-next-line  @typescript-eslint/require-await
 const evaluateTrue = async (condition: any, evaluator: ConditionEvaluator, context: any): Promise<boolean> => {
   return true;

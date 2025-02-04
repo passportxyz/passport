@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { GnosisSafeProvider } from "./Providers";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { GnosisSafeProvider } from "./Providers/index.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/gnosisSafeStampIcon.svg",

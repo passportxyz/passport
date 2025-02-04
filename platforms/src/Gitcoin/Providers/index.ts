@@ -1,2 +1,2 @@
 /* eslint-disable */
-export { GitcoinContributorStatisticsProvider } from "./gitcoinGrantsContributorStatistics";
+export { GitcoinContributorStatisticsProvider } from "./gitcoinGrantsContributorStatistics.js";

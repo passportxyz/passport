@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { OutdidProvider } from "./Providers/outdid";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { OutdidProvider } from "./Providers/outdid.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/outdidStampIcon.svg",

@@ -1,11 +1,12 @@
 // ----- Types
-import { ProviderExternalVerificationError, ProviderInternalVerificationError, type Provider } from "../../types";
+import { ProviderExternalVerificationError, ProviderInternalVerificationError, type Provider } from "../../types.js";
 import type { ProviderContext, PROVIDER_ID, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
-import BigNumber from "bignumber.js";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
+
+import { BigNumber}  from "bignumber.js";
 
 export const gtcStakingEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}registry/gtc-stake`;
 export const gtcStakingEndpointV2 = `${process.env.PASSPORT_SCORER_BACKEND}stake/gtc`;

@@ -1,8 +1,8 @@
 // ----- Types
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type { Provider } from "../../types";
+import type { Provider } from "../../types.js";
 import axios from "axios";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
 
 export type CoinbaseTokenResponse = {
   access_token?: string;

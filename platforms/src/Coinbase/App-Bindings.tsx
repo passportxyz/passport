@@ -1,8 +1,8 @@
-import { AppContext, PlatformOptions, ProviderPayload } from "../types";
-import { Platform, PlatformPreCheckError } from "../utils/platform";
+import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
+import { Platform, PlatformPreCheckError } from "../utils/platform.js";
 import React from "react";
-import { verifyCoinbaseAttestation } from "./Providers/coinbase";
-import { Hyperlink } from "../utils/Hyperlink";
+import { verifyCoinbaseAttestation } from "./Providers/coinbase.js";
+import { Hyperlink } from "../utils/Hyperlink.js";
 
 export class CoinbasePlatform extends Platform {
   platformId = "Coinbase";

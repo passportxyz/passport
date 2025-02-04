@@ -1,9 +1,9 @@
 import axios from "axios";
-import { Provider } from "../../types";
+import { Provider } from "../../types.js";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import { getRPCProvider } from "../../utils/signer";
+import { getRPCProvider } from "../../utils/signer.js";
 import { Contract } from "ethers";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
 
 const abi = [
   {

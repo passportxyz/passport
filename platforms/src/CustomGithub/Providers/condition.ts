@@ -3,7 +3,7 @@ import {
   fetchAndCheckContributionsToOrganisation,
   fetchAndCheckContributionsToRepository,
   GithubContext,
-} from "../../utils/githubClient";
+} from "../../utils/githubClient.js";
 
 type OperatorHandler = (condition: any, evaluator: ConditionEvaluator, context: any) => Promise<boolean>;
 

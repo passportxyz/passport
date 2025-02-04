@@ -1,6 +1,6 @@
 /* eslint-disable */
-import { AppContext, ProviderPayload } from "../types";
-import { Platform } from "../utils/platform";
+import { AppContext, ProviderPayload } from "../types.js";
+import { Platform } from "../utils/platform.js";
 
 export class SnapshotPlatform extends Platform {
   platformId = "Snapshot";

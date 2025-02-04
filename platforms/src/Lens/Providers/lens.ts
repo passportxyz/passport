@@ -1,12 +1,12 @@
 // ----- Types
-import { Provider, ProviderExternalVerificationError, ProviderOptions } from "../../types";
+import { Provider, ProviderExternalVerificationError, ProviderOptions } from "../../types.js";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
 
 // ----- Utils
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
 
 interface Profile {
   id: string;

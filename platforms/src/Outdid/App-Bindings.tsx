@@ -1,8 +1,8 @@
 import React from "react";
 import axios from "axios";
-import { AppContext, PlatformOptions, ProviderPayload } from "../types";
-import { Platform } from "../utils/platform";
-import { Hyperlink } from "../utils/Hyperlink";
+import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
+import { Platform } from "../utils/platform.js";
+import { Hyperlink } from "../utils/Hyperlink.js";
 
 export class OutdidPlatform extends Platform {
   platformId = "Outdid";

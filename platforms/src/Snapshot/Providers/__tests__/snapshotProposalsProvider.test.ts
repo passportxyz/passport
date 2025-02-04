@@ -1,7 +1,7 @@
 /* eslint-disable */
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import { SnapshotProposalsProvider, snapshotGraphQLDatabase } from "../snapshotProposalsProvider";
+import { SnapshotProposalsProvider, snapshotGraphQLDatabase } from "../snapshotProposalsProvider.js";
 
 // ----- Libs
 import axios from "axios";

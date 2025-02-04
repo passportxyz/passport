@@ -1,6 +1,6 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import { ZeronymPhoneProvider } from "../Providers/zeronymPhone";
+import { ZeronymPhoneProvider } from "../Providers/zeronymPhone.js";
 
 // ----- Libs
 import axios from "axios";

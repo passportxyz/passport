@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { BrightIdProvider } from "./Providers/brightid";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { BrightIdProvider } from "./Providers/brightid.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/brightidStampIcon.svg",

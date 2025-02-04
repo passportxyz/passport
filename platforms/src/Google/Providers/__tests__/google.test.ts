@@ -1,6 +1,6 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import * as google from "../google";
+import * as google from "../google.js";
 
 const MOCK_EMAIL = "testEmail";
 const MOCK_EMAIL_VERIFIED = true;

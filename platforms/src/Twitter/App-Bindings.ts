@@ -1,4 +1,4 @@
-import { Platform } from "../utils/platform";
+import { Platform } from "../utils/platform.js";
 import axios from "axios";
 
 type TwitterProcResponse = {

@@ -1,3 +1,3 @@
-export { BinancePlatform } from "./App-Bindings";
-export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
-export { BinanceProvider } from "./Providers/binance";
+export { BinancePlatform } from "./App-Bindings.js";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config.js";
+export { BinanceProvider } from "./Providers/binance.js";

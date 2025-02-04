@@ -1,7 +1,7 @@
 // Import the necessary modules and mock axios
 import { RequestPayload } from "@gitcoin/passport-types";
-import { AllowListProvider } from "../Providers/allowList"; // Adjust the import path as necessary
-import { ProviderExternalVerificationError } from "../../types";
+import { AllowListProvider } from "../Providers/allowList.js"; // Adjust the import path as necessary
+import { ProviderExternalVerificationError } from "../../types.js";
 import axios from "axios";
 
 jest.mock("axios");

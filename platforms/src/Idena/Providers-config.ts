@@ -1,9 +1,9 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import {
   IdenaStateNewbieProvider,
   IdenaStateVerifiedProvider,
   IdenaStateHumanProvider,
-} from "./Providers/IdenaStateProvider";
+} from "./Providers/IdenaStateProvider.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/idenaStampIcon.svg",

@@ -1,7 +1,7 @@
 // ----- Types
-import { type Provider } from "../../types";
+import { type Provider } from "../../types.js";
 import type { RequestPayload, VerifiedPayload, ProviderContext, PROVIDER_ID } from "@gitcoin/passport-types";
-import { fetchModelData } from "../../ETH/Providers/accountAnalysis";
+import { fetchModelData } from "../../ETH/Providers/accountAnalysis.js";
 
 export type ModelResponse = {
   data: {

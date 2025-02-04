@@ -2,8 +2,8 @@
 //  - https://developers.google.com/identity/protocols/oauth2
 //  - https://developers.google.com/oauthplayground/
 
-import { PlatformOptions } from "../types";
-import { Platform } from "../utils/platform";
+import { PlatformOptions } from "../types.js";
+import { Platform } from "../utils/platform.js";
 
 export class GooglePlatform extends Platform {
   platformId = "Google";

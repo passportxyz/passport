@@ -1,5 +1,5 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../types";
+import type { Provider, ProviderOptions } from "../types.js";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // Export a simple Provider as an example

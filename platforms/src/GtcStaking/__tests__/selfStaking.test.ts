@@ -4,12 +4,12 @@ import {
   SelfStakingBronzeProvider,
   SelfStakingSilverProvider,
   SelfStakingGoldProvider,
-} from "../Providers/selfStaking";
+} from "../Providers/selfStaking.js";
 
 // ----- Libs
 import axios from "axios";
-import { ProviderExternalVerificationError } from "../../types";
-import { gtcStakingEndpointV2 } from "../Providers/GtcStaking";
+import { ProviderExternalVerificationError } from "../../types.js";
+import { gtcStakingEndpointV2 } from "../Providers/GtcStaking.js";
 
 jest.mock("axios");
 

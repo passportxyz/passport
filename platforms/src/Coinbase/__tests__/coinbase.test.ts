@@ -1,6 +1,6 @@
 /* eslint-disable */
 // ---- Test subject
-import * as coinbaseProviderModule from "../Providers/coinbase";
+import * as coinbaseProviderModule from "../Providers/coinbase.js";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
@@ -140,7 +140,9 @@ describe("Attempt verification", function () {
       data: {},
       headers: {},
       statusText: "Internal Server Error",
-      config: {},
+      config: {
+        headers: {} as any
+      },
     };
 
     mockedAxios.post.mockRejectedValueOnce(mockAxiosError);
@@ -209,7 +211,9 @@ describe("Attempt verification", function () {
       data: {},
       headers: {},
       statusText: "Internal Server Error",
-      config: {},
+      config: {
+        headers: {} as any
+      },
     };
 
     mockedAxios.get.mockRejectedValueOnce(mockAxiosError);

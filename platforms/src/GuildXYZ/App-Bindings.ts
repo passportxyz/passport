@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { AppContext, Platform, PlatformOptions, ProviderPayload } from "../types";
+import { AppContext, Platform, PlatformOptions, ProviderPayload } from "../types.js";
 
 export class GuildXYZPlatform implements Platform {
   platformId = "GuildXYZ";

@@ -1,1 +1,1 @@
-export { TrustaLabsProvider } from "./TrustaLabs";
+export { TrustaLabsProvider } from "./TrustaLabs.js";

@@ -5,13 +5,12 @@ import {
   ArtAficionadoProvider,
   NftVisionaryProvider,
   NftCollectorBaseProvider,
-} from "../collectors_journey";
+} from "../collectors_journey.js";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios, { AxiosError } from "axios";
-import { ProviderExternalVerificationError } from "../../../types";
 jest.mock("axios");
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -284,7 +283,9 @@ describe("Test Error cases for stamp  verification", function () {
         data: {},
         headers: {},
         statusText: "Internal Server Error",
-        config: {},
+        config: {
+          headers: {} as unknown as any,
+        },
       };
 
       mockedAxios.post.mockRejectedValueOnce(mockAxiosError);

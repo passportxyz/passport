@@ -1,7 +1,7 @@
 /* eslint-disable */
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import { POAPProvider, poapSubgraphs } from "../Providers/poap";
+import { POAPProvider, poapSubgraphs } from "../Providers/poap.js";
 
 // ----- Libs
 import axios from "axios";

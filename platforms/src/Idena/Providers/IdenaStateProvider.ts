@@ -1,9 +1,9 @@
 // ----- Types
-import { Provider, ProviderOptions } from "../../types";
+import { Provider, ProviderOptions } from "../../types.js";
 import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Idena SignIn library
-import { IdenaContext, requestIdentityState } from "../procedures/idenaSignIn";
+import { IdenaContext, requestIdentityState } from "../procedures/idenaSignIn.js";
 
 // Class used as a base for verifying Idena state
 abstract class IdenaStateProvider implements Provider {
