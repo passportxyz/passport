@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import Loader from "./components/Loader";
 
+console.log("geri --- import.meta.env", import.meta.env);
+console.log("geri --- process.env", process.env);
+process.env = import.meta.env;
+console.log("geri --- process.env", process.env);
+
+import { defaultPlatformMap } from "./platformMap";
+import { PLATFORM_ID } from "@gitcoin/passport-types";
+
 const VERIFICATION_URL = import.meta.env.VITE_VERIFY_URL as string;
 
 const generateRandomState = (): string => {
@@ -10,20 +18,29 @@ const generateRandomState = (): string => {
 // this will be taken dynamically from the platform Provider.
 // the provider name will be received as a query parameter
 
-const getOAuthUrl = async (state: string): Promise<string> => {
-  const AUTH_URL = "https://www.linkedin.com/oauth/v2/authorization";
-  const clinetID = import.meta.env.VITE_APP_LINKEDIN_CLIENT_ID! as string;
-  const redirectURI = import.meta.env.VITE_REDIRECT_URI! as string;
-  const params = new URLSearchParams({
-    response_type: "code",
-    client_id: clinetID,
-    redirect_uri: redirectURI,
-    scope: "profile email openid",
-    state: state,
-  });
+const getOAuthUrl = async (state: string, platformName: PLATFORM_ID): Promise<string> => {
+  console.log("geri getOAuthUrl", platformName);
+  console.log("geri state", state);
 
-  const linkedinUrl = `${AUTH_URL}?${params.toString()}`;
-  return await Promise.resolve(linkedinUrl);
+  const platform = defaultPlatformMap.get(platformName)?.platform;
+  if (platform) {
+    return platform.getOAuthUrl(state);
+  }
+  throw new Error(`Platform ${platformName} not found`);
+
+  // const AUTH_URL = "https://www.linkedin.com/oauth/v2/authorization";
+  // const clinetID = import.meta.env.VITE_APP_LINKEDIN_CLIENT_ID! as string;
+  // const redirectURI = import.meta.env.VITE_REDIRECT_URI! as string;
+  // const params = new URLSearchParams({
+  //   response_type: "code",
+  //   client_id: clinetID,
+  //   redirect_uri: redirectURI,
+  //   scope: "profile email openid",
+  //   state: state,
+  // });
+
+  // const linkedinUrl = `${AUTH_URL}?${params.toString()}`;
+  // return await Promise.resolve(linkedinUrl);
 };
 
 function App() {
@@ -51,12 +68,20 @@ function App() {
     localStorage.setItem("credential", credential);
   }
 
+  console.log("geri --- urlParams", urlParams);
+  console.log("geri --- code", code);
+  console.log("geri --- state", state);
+  console.log("geri --- address", address);
+  console.log("geri --- platform", platform);
+  console.log("geri --- signature", signature);
+  console.log("geri --- credential", credential);
   useEffect(() => {
     const handleOAuthFlow = async () => {
       const verifyEndpoint = VERIFICATION_URL;
 
       // Check if the required values are missing
       const isBadRequest = (!code || !state) && (!address || !signature || !credential || !platform);
+      console.log("geri --- isBadRequest", isBadRequest);
 
       if (isBadRequest) {
         setLoading(false);
@@ -74,7 +99,7 @@ function App() {
         // if there is no code present we are in the first step of the OAuth flow
         console.log("No authorization code found. Redirecting to LinkedIn...");
         const state = generateRandomState();
-        const linkedinAuthUrl = getOAuthUrl(state);
+        const linkedinAuthUrl = getOAuthUrl(state, platform as PLATFORM_ID);
         window.location.href = await linkedinAuthUrl;
       } else {
         setStep("Making the verify call...");

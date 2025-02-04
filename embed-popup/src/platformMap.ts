@@ -110,8 +110,8 @@ defaultPlatformMap.set("Discord", {
 
 defaultPlatformMap.set("Linkedin", {
   platform: new Linkedin.LinkedinPlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CLIENT_ID_V2,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
+    clientId: import.meta.env.VITE_PASSPORT_LINKEDIN_CLIENT_ID_V2,
+    redirectUri: import.meta.env.VITE_PASSPORT_LINKEDIN_CALLBACK,
   }),
   platFormGroupSpec: Linkedin.ProviderConfig,
 });
@@ -123,8 +123,8 @@ defaultPlatformMap.set("GtcStaking", {
 
 defaultPlatformMap.set("Google", {
   platform: new Google.GooglePlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CALLBACK,
+    clientId: import.meta.env.VITE_PASSPORT_GOOGLE_CLIENT_ID,
+    redirectUri: import.meta.env.VITE_PASSPORT_GOOGLE_CALLBACK,
   }),
   platFormGroupSpec: Google.ProviderConfig,
 });
