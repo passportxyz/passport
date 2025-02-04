@@ -52,7 +52,7 @@ type IdenaCache = {
 
 describe("Idena", () => {
   beforeAll(() => {
-    jest.useFakeTimers("modern");
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(Date.UTC(2023, 0, 1)));
   });
 
@@ -188,7 +188,7 @@ describe("Idena", () => {
 
 describe("Idena Error", () => {
   beforeAll(() => {
-    jest.useFakeTimers("modern");
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(Date.UTC(2023, 0, 1)));
   });
 
