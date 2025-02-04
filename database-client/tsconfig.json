@@ -1,12 +1,12 @@
 {
   "extends": "../tsconfig.settings.json",
   "compilerOptions": {
-    "module": "esnext",
+    "module": "NodeNext",
     "esModuleInterop": true,
     "declaration": true,
     "allowSyntheticDefaultImports": true,
     "target": "es5",
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "sourceMap": true,
     "outDir": "dist/esm",
     "allowJs": true,

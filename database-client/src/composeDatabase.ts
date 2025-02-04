@@ -15,8 +15,8 @@ import {
 
 import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas";
 import { GraphQLError } from "graphql";
-import { Logger } from "./logger";
-import { WriteOnlySecondaryDataStorageBase } from "./types";
+import { Logger } from "./logger.js";
+import { WriteOnlySecondaryDataStorageBase } from "./types.js";
 import { RuntimeCompositeDefinition } from "@composedb/types";
 
 // const LOCAL_CERAMIC_CLIENT_URL = "http://localhost:7007";
