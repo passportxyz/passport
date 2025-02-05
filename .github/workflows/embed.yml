@@ -51,7 +51,7 @@ jobs:
             - name: Retrieve Secrets from 1Password
               id: fetch_secrets
               run: |
-                SECRETS=$(op read "op://Engineering/${{ env.ONE_PASS_ENV }}")
+                SECRETS=$(op read "op://DevOps/${{ env.ONE_PASS_ENV }}")
                 echo "SECRETS=$SECRETS" >> $GITHUB_ENV
 
             - name: Create .env file
