@@ -39,7 +39,8 @@
     "@gitcoin/passport-types": "^1.0.0",
     "@ipld/dag-cbor": "^9.2.2",
     "axios": "^1.7.9",
-    "dids": "^5.0.3"
+    "dids": "^5.0.3",
+    "multiformats": "^13.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.3",
