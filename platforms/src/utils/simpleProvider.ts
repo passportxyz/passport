@@ -1,5 +1,6 @@
 // ----- Types
 import type { Provider, ProviderOptions } from "../types.js";
+import { verifySimpleProvider } from "./simpleProviderVerifier.js";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // Export a simple Provider as an example
@@ -21,16 +22,3 @@ export class SimpleProvider implements Provider {
     return Promise.resolve(verifySimpleProvider(payload));
   }
 }
-
-// This is pulled out to allow easier mocking in tests
-export const verifySimpleProvider = (payload: RequestPayload): VerifiedPayload => {
-  const valid = payload?.proofs?.valid === "true";
-  const errors = valid ? [] : ["Proof is not valid"];
-  return {
-    valid,
-    errors,
-    record: {
-      username: payload?.proofs?.username || "",
-    },
-  };
-};

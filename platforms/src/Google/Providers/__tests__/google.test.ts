@@ -9,6 +9,8 @@ const MOCK_ACCESS_TOKEN = "secret access token";
 
 import axios from "axios";
 
+jest.mock("axios");
+
 describe("Attempt verification", function () {
   beforeEach(() => {
     jest.restoreAllMocks();
@@ -17,11 +19,22 @@ describe("Attempt verification", function () {
   it("handles valid verification attempt", async () => {
     const googleProvider = new google.GoogleProvider();
 
-    const verifyGoogleMock = jest.spyOn(google, "verifyGoogle").mockImplementation((): Promise<google.UserInfo> => {
-      return new Promise<google.UserInfo>((resolve) => {
+    const accessTokenMock = (axios.post as jest.Mock).mockImplementation(
+      (): Promise<{ data: google.GoogleTokenResponse }> => {
+        return new Promise((resolve) => {
+          resolve({ data: { access_token: MOCK_ACCESS_TOKEN } });
+        });
+      }
+    );
+
+    const userInfoMock = jest.spyOn(axios, "get").mockImplementation((): Promise<unknown> => {
+      return new Promise((resolve) => {
         resolve({
-          email: MOCK_EMAIL,
-          emailVerified: MOCK_EMAIL_VERIFIED,
+          data: {
+            email: MOCK_EMAIL,
+            verified_email: MOCK_EMAIL_VERIFIED,
+          },
+          status: 200,
         });
       });
     });
@@ -33,7 +46,16 @@ describe("Attempt verification", function () {
       },
     } as unknown as RequestPayload);
 
-    expect(verifyGoogleMock).toHaveBeenCalledWith(MOCK_TOKEN_ID);
+    expect(accessTokenMock).toHaveBeenCalledWith(
+      `https://oauth2.googleapis.com/token?client_id=undefined&client_secret=undefined&code=${MOCK_TOKEN_ID}&grant_type=authorization_code&redirectUri=undefined`,
+      {},
+      {
+        headers: { Accept: "application/json" },
+      }
+    );
+    expect(userInfoMock).toHaveBeenCalledWith("https://www.googleapis.com/oauth2/v2/userinfo", {
+      headers: { Authorization: `Bearer ${MOCK_ACCESS_TOKEN}` },
+    });
     expect(verifiedPayload).toEqual({
       valid: true,
       record: {
@@ -45,11 +67,23 @@ describe("Attempt verification", function () {
 
   it("should return invalid payload when email is not verified", async () => {
     const googleProvider = new google.GoogleProvider();
-    const verifyGoogleMock = jest.spyOn(google, "verifyGoogle").mockImplementation((): Promise<google.UserInfo> => {
-      return new Promise<google.UserInfo>((resolve) => {
+
+    const accessTokenMock = (axios.post as jest.Mock).mockImplementation(
+      (): Promise<{ data: google.GoogleTokenResponse }> => {
+        return new Promise((resolve) => {
+          resolve({ data: { access_token: MOCK_ACCESS_TOKEN } });
+        });
+      }
+    );
+
+    const userInfoMock = jest.spyOn(axios, "get").mockImplementation((): Promise<unknown> => {
+      return new Promise((resolve) => {
         resolve({
-          email: MOCK_EMAIL,
-          emailVerified: false,
+          data: {
+            email: MOCK_EMAIL,
+            verified_email: false,
+          },
+          status: 200,
         });
       });
     });
@@ -61,7 +95,16 @@ describe("Attempt verification", function () {
       },
     } as unknown as RequestPayload);
 
-    expect(verifyGoogleMock).toHaveBeenCalledWith(MOCK_TOKEN_ID);
+    expect(accessTokenMock).toHaveBeenCalledWith(
+      `https://oauth2.googleapis.com/token?client_id=undefined&client_secret=undefined&code=${MOCK_TOKEN_ID}&grant_type=authorization_code&redirectUri=undefined`,
+      {},
+      {
+        headers: { Accept: "application/json" },
+      }
+    );
+    expect(userInfoMock).toHaveBeenCalledWith("https://www.googleapis.com/oauth2/v2/userinfo", {
+      headers: { Authorization: `Bearer ${MOCK_ACCESS_TOKEN}` },
+    });
     expect(verifiedPayload).toEqual({
       valid: false,
       record: undefined,
@@ -76,11 +119,13 @@ describe("verifyGoogle", function () {
   });
 
   it("should suceed when a access token and user info are obtained", async () => {
-    const requestAccessTokenMock = jest.spyOn(google, "requestAccessToken").mockImplementation((): Promise<string> => {
-      return new Promise((resolve) => {
-        resolve(MOCK_ACCESS_TOKEN);
-      });
-    });
+    const accessTokenMock = (axios.post as jest.Mock).mockImplementation(
+      (): Promise<{ data: google.GoogleTokenResponse }> => {
+        return new Promise((resolve) => {
+          resolve({ data: { access_token: MOCK_ACCESS_TOKEN } });
+        });
+      }
+    );
 
     const userInfoMock = jest.spyOn(axios, "get").mockImplementation((): Promise<unknown> => {
       return new Promise((resolve) => {
@@ -95,7 +140,13 @@ describe("verifyGoogle", function () {
     });
 
     const verifiedGoogleResponse = await google.verifyGoogle(MOCK_TOKEN_ID);
-    expect(requestAccessTokenMock).toHaveBeenCalledWith(MOCK_TOKEN_ID);
+    expect(accessTokenMock).toHaveBeenCalledWith(
+      `https://oauth2.googleapis.com/token?client_id=undefined&client_secret=undefined&code=${MOCK_TOKEN_ID}&grant_type=authorization_code&redirectUri=undefined`,
+      {},
+      {
+        headers: { Accept: "application/json" },
+      }
+    );
     expect(userInfoMock).toHaveBeenCalledWith("https://www.googleapis.com/oauth2/v2/userinfo", {
       headers: { Authorization: `Bearer ${MOCK_ACCESS_TOKEN}` },
     });
@@ -106,13 +157,15 @@ describe("verifyGoogle", function () {
   });
 
   it("should throw if getting user info throws", async () => {
-    const requestAccessTokenMock = jest.spyOn(google, "requestAccessToken").mockImplementation((): Promise<string> => {
-      return new Promise((resolve) => {
-        resolve(MOCK_ACCESS_TOKEN);
-      });
-    });
+    const accessTokenMock = (axios.post as jest.Mock).mockImplementation(
+      (): Promise<{ data: google.GoogleTokenResponse }> => {
+        return new Promise((resolve) => {
+          resolve({ data: { access_token: MOCK_ACCESS_TOKEN } });
+        });
+      }
+    );
 
-    const userInfoMock = jest.spyOn(axios, "get").mockImplementation((): Promise<google.GoogleUserInfo> => {
+    const userInfoMock = (axios.get as jest.Mock).mockImplementation((): Promise<google.GoogleUserInfo> => {
       throw { response: { data: { error: { message: "error message for user data request" } } } };
     });
 
@@ -126,7 +179,13 @@ describe("verifyGoogle", function () {
         "Details: " + JSON.stringify({ error: { message: "error message for user data request" } }),
       ],
     });
-    expect(requestAccessTokenMock).toHaveBeenCalledWith(MOCK_TOKEN_ID);
+    expect(accessTokenMock).toHaveBeenCalledWith(
+      `https://oauth2.googleapis.com/token?client_id=undefined&client_secret=undefined&code=${MOCK_TOKEN_ID}&grant_type=authorization_code&redirectUri=undefined`,
+      {},
+      {
+        headers: { Accept: "application/json" },
+      }
+    );
     expect(userInfoMock).toHaveBeenCalledTimes(1);
     expect(userInfoMock).toHaveBeenCalledWith("https://www.googleapis.com/oauth2/v2/userinfo", {
       headers: { Authorization: `Bearer ${MOCK_ACCESS_TOKEN}` },
@@ -134,14 +193,21 @@ describe("verifyGoogle", function () {
   });
 
   it("should throw when requestAccessToken throws", async () => {
-    jest.spyOn(google, "requestAccessToken").mockImplementation((): Promise<string> => {
-      throw new Error("ERROR");
-    });
+    const accessTokenMock = (axios.post as jest.Mock).mockImplementation(
+      (): Promise<{ data: google.GoogleTokenResponse }> => {
+        throw new Error("Some Error");
+      }
+    );
 
     const verifiedGoogleResponse = await google.verifyGoogle(MOCK_TOKEN_ID);
 
     expect(verifiedGoogleResponse).toEqual({
-      errors: ["Error getting user info", "ERROR", "Status undefined: undefined", "Details: undefined"],
+      errors: [
+        "Error getting user info",
+        "Error - Some Error|response: Status undefined - undefined|response data: undefined",
+        "Status undefined: undefined",
+        "Details: undefined",
+      ],
     });
   });
 });

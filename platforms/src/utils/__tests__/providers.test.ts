@@ -2,14 +2,25 @@
 import { RequestPayload, ProviderContext, VerifiedPayload, PROVIDER_ID } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError } from "../../types.js";
 import { Providers, withTimeout } from "../providers.js";
-import { SimpleProvider, verifySimpleProvider } from "../simpleProvider.js";
+import { SimpleProvider } from "../simpleProvider.js";
+import { verifySimpleProvider } from "../simpleProviderVerifier.js";
 
 jest.spyOn(console, "error").mockImplementation(() => {});
 
 jest.useFakeTimers(); // Use Jest's timer mocks
 
+jest.mock("../simpleProviderVerifier", () => {
+  const originalModule = jest.requireActual("../simpleProviderVerifier");
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return {
+    __esModule: true,
+    ...originalModule,
+    verifySimpleProvider: jest.fn(originalModule.verifySimpleProvider),
+  };
+});
+
 describe("withTimeout", () => {
-  beforeAll(() => {
+  beforeEach(() => {
     jest.spyOn(global, "clearTimeout");
   });
   it("should resolve with the correct value if the promise resolves before the timeout", async () => {
@@ -31,7 +42,9 @@ describe("withTimeout", () => {
     ) as Promise<VerifiedPayload>;
 
     const resultPromise = withTimeout(3000, slowPromise, "testType");
+    const begin = new Date().getTime();
     jest.advanceTimersByTime(3001); // Fast-forward until the timeout should occur
+    const end = new Date().getTime();
 
     await expect(resultPromise).rejects.toThrow(ProviderExternalVerificationError);
     await expect(resultPromise).rejects.toThrow(
@@ -59,7 +72,7 @@ describe("Providers", function () {
   };
 
   it("should report unexpected errors even if not derived from Error", async () => {
-    (verifySimpleProvider as jest.MockedFunction<typeof verifySimpleProvider>) = jest.fn().mockImplementation(() => {
+    (verifySimpleProvider as jest.Mock).mockImplementationOnce(() => {
       throw "I don't have an error type";
     });
 
@@ -78,7 +91,7 @@ describe("Providers", function () {
   });
 
   it("should report unexpected error details if derived from Error", async () => {
-    (verifySimpleProvider as jest.MockedFunction<typeof verifySimpleProvider>) = jest.fn().mockImplementation(() => {
+    (verifySimpleProvider as jest.Mock).mockImplementationOnce(() => {
       class MyError extends Error {
         constructor(message: string) {
           super(message);
@@ -107,7 +120,7 @@ describe("Providers", function () {
   });
 
   it("should not report expected errors", async () => {
-    (verifySimpleProvider as jest.MockedFunction<typeof verifySimpleProvider>) = jest.fn().mockImplementation(() => {
+    (verifySimpleProvider as jest.Mock).mockImplementationOnce(() => {
       throw new ProviderExternalVerificationError("I'm an expected error");
     });
 

@@ -141,7 +141,7 @@ describe("Attempt verification", function () {
       headers: {},
       statusText: "Internal Server Error",
       config: {
-        headers: {} as any
+        headers: {} as any,
       },
     };
 
@@ -212,7 +212,7 @@ describe("Attempt verification", function () {
       headers: {},
       statusText: "Internal Server Error",
       config: {
-        headers: {} as any
+        headers: {} as any,
       },
     };
 
@@ -283,22 +283,58 @@ describe("Attempt verification", function () {
   it("handles valid verification attempt", async () => {
     jest.spyOn(coinbaseProviderModule, "verifyCoinbaseAttestation").mockResolvedValueOnce(true);
     mockedAxios.get.mockResolvedValue(validCoinbaseUserResponse);
+    mockedAxios.post.mockResolvedValueOnce(validCodeResponse).mockResolvedValueOnce({
+      data: {
+        data: {
+          attestations: [
+            {
+              revoked: false,
+              revocationTime: 0,
+              expirationTime: 0,
+              schema: {
+                id: coinbaseProviderModule.VERIFIED_ACCOUNT_SCHEMA,
+              },
+            },
+          ],
+        },
+      },
+    });
     const coinbase = new coinbaseProviderModule.CoinbaseProvider();
     const coinbasePayload = await coinbase.verify({
       proofs: {
         code,
       },
+      address: "0x123"
     } as unknown as RequestPayload);
 
-    expect(mockedAxios.post).toBeCalledTimes(1);
+    expect(mockedAxios.post).toBeCalledTimes(2);
     // Check the request to get the token
     expect(mockedAxios.post).toBeCalledWith(
       "https://login.coinbase.com/oauth2/token",
       `grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&redirect_uri=${callback}`,
       { headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" } }
     );
+    expect(mockedAxios.post).toHaveBeenCalledWith(coinbaseProviderModule.BASE_EAS_SCAN_URL, {
+      query: `
+    query {
+      attestations (where: {
+          attester: { equals: "${coinbaseProviderModule.COINBASE_ATTESTER}" },
+          recipient: { equals: "0x123", mode: insensitive }
+      }) {
+        recipient
+        revocationTime
+        revoked
+        expirationTime
+        schema {
+          id
+        }
+      }
+    }
+  `,
+    });
 
     expect(mockedAxios.get).toBeCalledTimes(1);
+
     // Check the request to get the user
     expect(mockedAxios.get).toBeCalledWith("https://api.coinbase.com/v2/user", {
       headers: { Authorization: "Bearer cnbstkn294745627362562", Accept: "application/json" },
