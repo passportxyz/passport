@@ -142,7 +142,6 @@ describe("checkCredentialBans", () => {
       throw new MockAxiosError();
     });
 
-    // TODO: geri this test should work without this mock
     mockedAxios.isAxiosError.mockImplementationOnce((_: any) => {
       return true;
     });

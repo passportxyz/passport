@@ -50,7 +50,8 @@ describe("withTimeout", () => {
     await expect(resultPromise).rejects.toThrow(
       "Request timeout while verifying testType. It took over 3000 ms to complete."
     );
-    expect(clearTimeout).toHaveBeenCalledTimes(1);
+    // We expect 0 calls, because an error should have been thrown
+    expect(clearTimeout).toHaveBeenCalledTimes(0);
   });
 });
 
