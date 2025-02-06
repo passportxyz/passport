@@ -52,8 +52,13 @@ jobs:
             - name: Create .env file
               # working-directory: embed-popup
               run: |
+                echo "ONE_PASS_ENV=$ONE_PASS_ENV"
                 op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
                 jq -r '.fields[] | select(.section.label=="App") | "\(.label)=\(.value)"' > .env
+            - name: Cat .env file
+              # working-directory: embed-popup
+              run: |
+                cat .env
                 
             - name: Install Dependencies
               working-directory: .
