@@ -34,7 +34,6 @@ const cloudflareZoneId = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci
 
 // Manage secrets & envs for Passport XYZ
 const passportEmbedSecretObject = new aws.secretsmanager.Secret("passport-embed", {
-  // name: "iam-secret-passport-xyz",
   description: "Secrets for Passport Embed on Passport XYZ",
   tags: {
     ...defaultTags,
@@ -45,9 +44,9 @@ const passportEmbedSecretObject = new aws.secretsmanager.Secret("passport-embed"
 const passportEmbedSecrets = secretsManager
   .syncSecretsAndGetRefs({
     vault: "DevOps",
-    repo: "passport-xyz",
+    repo: "passport-embed",
     env: stack,
-    section: "iam",
+    section: "embed",
     targetSecret: passportEmbedSecretObject,
     secretVersionName: "passport-embed-secret-version",
   })
@@ -69,9 +68,9 @@ const passportEmbedEnvironment = pulumi
   .all([
     secretsManager.getEnvironmentVars({
       vault: "DevOps",
-      repo: "passport-xyz",
+      repo: "passport-embed",
       env: stack,
-      section: "iam",
+      section: "embed",
     }),
     redisConnectionUrl,
     passportDataScienceEndpoint,
@@ -90,17 +89,17 @@ const passportEmbedEnvironment = pulumi
     ].sort(secretsManager.sortByName)
   );
 
-const passportEmbedAppEnvironment = secretsManager
-  .getEnvironmentVars({
-    vault: "DevOps",
-    repo: "passport-xyz",
-    env: stack,
-    section: "app",
-  })
-  .reduce((acc, { name, value }) => {
-    acc[name] = value;
-    return acc;
-  }, {} as Record<string, string | pulumi.Output<any>>);
+// const passportEmbedAppEnvironment = secretsManager
+//   .getEnvironmentVars({
+//     vault: "DevOps",
+//     repo: "passport-embed",
+//     env: stack,
+//     section: "app",
+//   })
+//   .reduce((acc, { name, value }) => {
+//     acc[name] = value;
+//     return acc;
+//   }, {} as Record<string, string | pulumi.Output<any>>);
 
 const logsRetention = Object({
   review: 1,

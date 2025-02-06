@@ -47,19 +47,14 @@ jobs:
                 OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
                 AWS_ACCESS_KEY_ID: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
                 AWS_SECRET_ACCESS_KEY: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
-  
-            - name: Retrieve Secrets from 1Password
-              id: fetch_secrets
-              run: |
-                SECRETS=$(op read "op://Engineering/${{ env.ONE_PASS_ENV }}")
-                echo "SECRETS=$SECRETS" >> $GITHUB_ENV
-
+                PULUMI_ACCESS_TOKEN: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
+                
             - name: Create .env file
               working-directory: embed-popup
               run: |
-               echo "Generating .env from 1Password..."
-               echo "$SECRETS" | jq -r 'to_entries | map("\(.key)=\(.value)") | .[]' > .env
-
+                op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
+                jq -r '.fields[] | select(.section.label=="App") | "\(.label)=\(.value)"' > .env
+                
             - name: Install Dependencies
               working-directory: embed-popup
               run: yarn install --frozen-lockfile
