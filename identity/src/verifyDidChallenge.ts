@@ -88,6 +88,6 @@ export const verifyDidChallenge = async (
   const cacao = await verifyAgeAndGetCacao(signedChallenge);
   await verifyMatchesExpectedChallenge(signedChallenge, expectedChallenge);
   await verifySignature(signedChallenge, cacao);
-  
+
   return signedChallenge.issuer.replace("did:pkh:eip155:1:", "");
 };

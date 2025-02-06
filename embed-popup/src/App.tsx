@@ -7,7 +7,7 @@ process.env = import.meta.env;
 console.log("geri --- process.env", process.env);
 
 import { defaultPlatformMap } from "./platformMap";
-import { PLATFORM_ID } from "@gitcoin/passport-types";
+import { PLATFORM_ID, CredentialResponseBody } from "@gitcoin/passport-types";
 
 const VERIFICATION_URL = import.meta.env.VITE_VERIFY_URL as string;
 
@@ -43,11 +43,15 @@ const getOAuthUrl = async (state: string, platformName: PLATFORM_ID): Promise<st
   // return await Promise.resolve(linkedinUrl);
 };
 
+export type VerificationResponseType = {
+  credentials: CredentialResponseBody[];
+};
+
 function App() {
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<string>("Initializing...");
   const [errorMessages, setErrorMessages] = useState<string | null>(null);
-  const [verificationResponse, setVerificationResponse] = useState<any | null>(undefined);
+  const [verificationResponse, setVerificationResponse] = useState<VerificationResponseType | null>(null);
 
   // load query parameters from URL
   const urlParams = new URLSearchParams(window.location.search);
@@ -147,7 +151,7 @@ function App() {
     };
 
     handleOAuthFlow();
-  }, []);
+  }, [address, code, credential, platform, signature, state]);
 
   const fetchVerifiableCredential = async (
     verifyEndpoint: string,
@@ -161,14 +165,14 @@ function App() {
       };
       challenge: string | null;
     }
-  ): Promise<any> => {
+  ): Promise<VerificationResponseType | null> => {
     let parsedChallenge;
     try {
       parsedChallenge = data.challenge ? JSON.parse(data.challenge) : null;
     } catch (error) {
       setStep("Error parsing local storage values.");
       setErrorMessages(`Invalid JSON format in local storage. ${error}`);
-      return;
+      return null;
     }
 
     const response = await fetch(verifyEndpoint, {
