@@ -10,7 +10,7 @@ type Platform = {
   documentationLink?: string;
   requiresSignature?: boolean;
   requiresPopup?: boolean;
-  popUpUrl?: string;
+  popupUrl?: string;
 };
 
 const oAuthPopupUrl = process.env.EMBED_POPUP_OAUTH_URL;
@@ -70,7 +70,7 @@ export const STAMP_PAGES: StampPage[] = [
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-linkedin-stamp",
         requiresSignature: true,
         requiresPopup: true,
-        popUpUrl: oAuthPopupUrl,
+        popupUrl: oAuthPopupUrl,
       },
       {
         name: "Discord",
@@ -80,7 +80,7 @@ export const STAMP_PAGES: StampPage[] = [
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-discord-account-to-passport",
         requiresSignature: true,
         requiresPopup: true,
-        popUpUrl: oAuthPopupUrl,
+        popupUrl: oAuthPopupUrl,
       },
       {
         name: "Github",
@@ -89,7 +89,7 @@ export const STAMP_PAGES: StampPage[] = [
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-github-account-to-passport",
         requiresSignature: true,
         requiresPopup: true,
-        popUpUrl: oAuthPopupUrl,
+        popupUrl: oAuthPopupUrl,
       },
       {
         name: "Google",
@@ -98,7 +98,7 @@ export const STAMP_PAGES: StampPage[] = [
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-google-account-to-passport",
         requiresSignature: true,
         requiresPopup: true,
-        popUpUrl: oAuthPopupUrl,
+        popupUrl: oAuthPopupUrl,
       },
       {
         name: "Coinbase",
@@ -107,7 +107,7 @@ export const STAMP_PAGES: StampPage[] = [
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-coinbase-stamp",
         requiresSignature: true,
         requiresPopup: true,
-        popUpUrl: oAuthPopupUrl,
+        popupUrl: oAuthPopupUrl,
       },
     ],
   },
