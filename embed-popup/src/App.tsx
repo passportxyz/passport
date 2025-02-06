@@ -118,9 +118,9 @@ function App() {
           // get address , challenge and signature from local storage
           const _address = localStorage.getItem("address");
           const _signature = localStorage.getItem("signature");
-          const _credential = localStorage.getItem("credential");
-          const _platform = localStorage.getItem("platform");
-          const _scorerId = localStorage.getItem("scorerId");
+          const _credential = localStorage.getItem("credential") || "";
+          const _platform = localStorage.getItem("platform") || "";
+          const _scorerId = localStorage.getItem("scorerId") || "";
 
           console.log("geri --- _address", _address);
           console.log("geri --- _signature", _signature);
