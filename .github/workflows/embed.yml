@@ -56,15 +56,17 @@ jobs:
               uses: 1password/load-secrets-action/configure@v1
               with:
                 service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-                
+
             - name: Create .env file
-              # working-directory: embed-popup
+              working-directory: embed-popup
               run: |
                 echo "ONE_PASS_ENV=$ONE_PASS_ENV"
                 op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
-                jq -r '.fields[] | select(.section.label=="App") | "\(.label)=\(.value)"' > .env
+                jq -r '.fields[] | select(.section.label=="App") | "\(.label)=\(.value)"' > .env 
+                cat .env >> $GITHUB_ENV
+
             - name: Cat .env file
-              # working-directory: embed-popup
+              working-directory: embed-popup
               run: |
                 cat .env
                 
