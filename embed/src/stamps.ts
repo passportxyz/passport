@@ -8,7 +8,7 @@ type Platform = {
   name: string;
   description: string;
   documentationLink?: string;
-  requireSignature?: boolean;
+  requiresSignature?: boolean;
   requiresPopup?: boolean;
   popUpUrl?: string;
 };
@@ -68,7 +68,7 @@ export const STAMP_PAGES: StampPage[] = [
           "<div>This stamp confirms that your LinkedIn account is verified and includes a valid, verified email address.</div>",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-linkedin-stamp",
-        requireSignature: true,
+        requiresSignature: true,
         requiresPopup: true,
         popUpUrl: oAuthPopupUrl,
       },
@@ -78,7 +78,7 @@ export const STAMP_PAGES: StampPage[] = [
           "<div>Connect your Discord account to Passport to identity and reputation in Web3 communities.</div>",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-discord-account-to-passport",
-        requireSignature: true,
+        requiresSignature: true,
         requiresPopup: true,
         popUpUrl: oAuthPopupUrl,
       },
@@ -87,7 +87,7 @@ export const STAMP_PAGES: StampPage[] = [
         description: "<div>Connect to GitHub to verify your activity based on days with active commits.</div>",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-github-account-to-passport",
-        requireSignature: true,
+        requiresSignature: true,
         requiresPopup: true,
         popUpUrl: oAuthPopupUrl,
       },
@@ -96,7 +96,7 @@ export const STAMP_PAGES: StampPage[] = [
         description: "<div>Connect to Google to verify your email address.</div>",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-google-account-to-passport",
-        requireSignature: true,
+        requiresSignature: true,
         requiresPopup: true,
         popUpUrl: oAuthPopupUrl,
       },
@@ -105,7 +105,7 @@ export const STAMP_PAGES: StampPage[] = [
         description: "<div>Confirm Your Coinbase Verified ID</div>",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-coinbase-stamp",
-        requireSignature: true,
+        requiresSignature: true,
         requiresPopup: true,
         popUpUrl: oAuthPopupUrl,
       },
