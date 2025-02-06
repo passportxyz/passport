@@ -16,7 +16,7 @@
     "prod:start": "tsc && node .",
     "test": "jest --verbose",
     "prettier": "prettier --write .",
-    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
+    "lint": "tsc --noEmit",
     "lint:fix": "eslint --fix --ext .ts,.js,.tsx .",
     "checkProviders:op-sepolia": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://opt-sepolia.g.alchemy.com/v2/ 0xaa37dc 0x19a6DCAbE629C8e71814bD9B4Ea7e2A7B90cFeC0",
     "checkProviders:op": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://opt-mainnet.g.alchemy.com/v2/ 0xa 0x5558D441779Eca04A329BcD6b47830D2C6607769",

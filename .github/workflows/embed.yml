@@ -56,11 +56,11 @@ jobs:
                 jq -r '.fields[] | select(.section.label=="App") | "\(.label)=\(.value)"' > .env
                 
             - name: Install Dependencies
-              working-directory: embed-popup
+              working-directory: .
               run: yarn install --frozen-lockfile
 
             - name: Build Application
-              working-directory: embed-popup
+              working-directory: .
               run: yarn build
 
             - name: Install Pulumi CLI
