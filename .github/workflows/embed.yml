@@ -51,7 +51,7 @@ jobs:
             - name: Create .env file
               working-directory: embed-popup
               run: |
-                op item get "passport-embed-review-env" --vault "DevOps" --format json | \
+                op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
                 jq -r '.fields[] | select(.section.label=="App") | "\(.label)=\(.value)"' > .env
 
             - name: Install Dependencies
