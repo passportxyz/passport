@@ -1,5 +1,5 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import { ProviderExternalVerificationError, type Provider } from "../../types";
+import { ProviderExternalVerificationError, type Provider } from "../../types.js";
 import axios from "axios";
 
 export const allowListEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}account/allow-list`;

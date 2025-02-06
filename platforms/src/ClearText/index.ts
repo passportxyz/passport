@@ -1,2 +1,2 @@
-export { ClearTextGithubOrgProvider } from "./Providers/clearTextGithubOrg";
-export { ClearTextTwitterProvider } from "./Providers/clearTextTwitter";
+export { ClearTextGithubOrgProvider } from "./Providers/clearTextGithubOrg.js";
+export { ClearTextTwitterProvider } from "./Providers/clearTextTwitter.js";

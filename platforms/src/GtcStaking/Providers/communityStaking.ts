@@ -1,6 +1,6 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import BigNumber from "bignumber.js";
-import { GtcStakingContext, GtcStakingProvider, GtcStakingProviderOptions, Stake, StakeV2 } from "./GtcStaking";
+import { BigNumber } from "bignumber.js";
+import { GtcStakingContext, GtcStakingProvider, GtcStakingProviderOptions, Stake, StakeV2 } from "./GtcStaking.js";
 
 class CommunityStakingBaseProvider extends GtcStakingProvider {
   minimumCountCommunityStakes: number;
@@ -48,14 +48,14 @@ class CommunityStakingBaseProvider extends GtcStakingProvider {
         if (stake.staked) {
           stakesByAddressOnOthers[stake.address] = stakesByAddressOnOthers[stake.address].plus(stakeAmount);
         } else {
-          stakesByAddressOnOthers[stake.address] = stakesByAddressOnOthers[stake.address].sub(stakeAmount);
+          stakesByAddressOnOthers[stake.address] = stakesByAddressOnOthers[stake.address].minus(stakeAmount);
         }
       } else if (stake.address === address && stake.staker !== address) {
         stakesOnAddressByOthers[stake.staker] ||= new BigNumber(0);
         if (stake.staked) {
           stakesOnAddressByOthers[stake.staker] = stakesOnAddressByOthers[stake.staker].plus(stakeAmount);
         } else {
-          stakesOnAddressByOthers[stake.staker] = stakesOnAddressByOthers[stake.staker].sub(stakeAmount);
+          stakesOnAddressByOthers[stake.staker] = stakesOnAddressByOthers[stake.staker].minus(stakeAmount);
         }
       }
     }
@@ -140,7 +140,7 @@ export class TrustedCitizenProvider extends CommunityStakingBaseProvider {
         if (stake.staked) {
           stakesOnAddressByOthers[stake.staker] = stakesOnAddressByOthers[stake.staker].plus(stakeAmount);
         } else {
-          stakesOnAddressByOthers[stake.staker] = stakesOnAddressByOthers[stake.staker].sub(stakeAmount);
+          stakesOnAddressByOthers[stake.staker] = stakesOnAddressByOthers[stake.staker].minus(stakeAmount);
         }
       }
     }

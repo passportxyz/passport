@@ -1,1 +1,1 @@
-export { CustomGithubProvider } from "./github";
+export { CustomGithubProvider } from "./github.js";

@@ -7,9 +7,9 @@ import { RequestPayload, CredentialResponseBody, VerifiedPayload, ProviderContex
 
 // All provider exports from platforms
 import { platforms, providers } from "@gitcoin/passport-platforms";
-import { issueHashedCredential } from "./credentials";
-import { checkCredentialBans } from "./bans";
-import { getIssuerKey } from "./issuers";
+import { issueHashedCredential } from "./credentials.js";
+import { checkCredentialBans } from "./bans.js";
+import { getIssuerKey } from "./issuers.js";
 
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 

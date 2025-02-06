@@ -1,3 +1,3 @@
-export { LensPlatform } from "./App-Bindings";
-export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
-export { LensProfileProvider } from "./Providers/lens";
+export { LensPlatform } from "./App-Bindings.js";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config.js";
+export { LensProfileProvider } from "./Providers/lens.js";

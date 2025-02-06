@@ -4,12 +4,12 @@ import {
   BeginnerCommunityStakerProvider,
   ExperiencedCommunityStakerProvider,
   TrustedCitizenProvider,
-} from "../Providers/communityStaking";
+} from "../Providers/communityStaking.js";
 
 // ----- Libs
 import axios from "axios";
-import { Stake, StakeV2, gtcStakingEndpoint, gtcStakingEndpointV2 } from "../Providers/GtcStaking";
-import { ProviderExternalVerificationError } from "../../types";
+import { Stake, StakeV2, gtcStakingEndpoint, gtcStakingEndpointV2 } from "../Providers/GtcStaking.js";
+import { ProviderExternalVerificationError } from "../../types.js";
 
 jest.mock("axios");
 

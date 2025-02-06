@@ -1,12 +1,12 @@
 // ----- Types
-import type { Provider, ProviderOptions } from "../../types";
+import type { Provider, ProviderOptions } from "../../types.js";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
 
 // ----- Credential verification
-import { getAddress } from "../../utils/signer";
+import { getAddress } from "../../utils/signer.js";
 
 // List of POAP subgraphs to check
 export const poapSubgraphs = [

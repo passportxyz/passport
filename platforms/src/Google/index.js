@@ -1,3 +1,3 @@
-export { GooglePlatform } from "./App-Bindings";
-export { ProviderConfig, PlatformDetails, providers } from "./Providers-config";
-export { GoogleProvider } from "./Providers/google";
+export { GooglePlatform } from "./App-Bindings.js";
+export { ProviderConfig, PlatformDetails, providers } from "./Providers-config.js";
+export { GoogleProvider } from "./Providers/google.js";

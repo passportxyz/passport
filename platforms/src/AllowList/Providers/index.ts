@@ -1,1 +1,1 @@
-export { AllowListProvider } from "./allowList";
+export { AllowListProvider } from "./allowList.js";

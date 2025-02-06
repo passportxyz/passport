@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { AllowListProvider } from "./Providers";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { AllowListProvider } from "./Providers/index.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/star-light.svg",

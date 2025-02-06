@@ -1,5 +1,5 @@
 // ---- Types
-import { Provider, ProviderExternalVerificationError, ProviderInternalVerificationError } from "../types";
+import { Provider, ProviderExternalVerificationError, ProviderInternalVerificationError } from "../types.js";
 import type { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
 
 class NoFailureReasonError extends Error {
@@ -33,12 +33,12 @@ export const withTimeout = async (
   const timeout = new Promise<VerifiedPayload>(
     (_resolve, reject) =>
       (timeoutPid = setTimeout(
-        () =>
+        () => {
           reject(
             new ProviderExternalVerificationError(
               `Request timeout while verifying ${type}. It took over ${millis} ms to complete.`
             )
-          ),
+          )},
         millis
       ))
   );

@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { BinanceProvider, BinanceProvider2 } from "./Providers/binance";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { BinanceProvider, BinanceProvider2 } from "./Providers/binance.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/binanceStamp.svg",

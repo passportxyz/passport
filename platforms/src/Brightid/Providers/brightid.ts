@@ -1,9 +1,9 @@
 // ----- Types
-import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types.js";
 import type { RequestPayload, VerifiedPayload, BrightIdVerificationResponse } from "@gitcoin/passport-types";
 
 // --- verifyMethod in providers
-import { verifyBrightidContextId } from "../procedures/brightid";
+import { verifyBrightidContextId } from "../procedures/brightid.js";
 
 // Request a verifiable credential from brightid
 export class BrightIdProvider implements Provider {

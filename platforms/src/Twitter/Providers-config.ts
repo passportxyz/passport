@@ -1,4 +1,4 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/twitterStampIcon.svg",

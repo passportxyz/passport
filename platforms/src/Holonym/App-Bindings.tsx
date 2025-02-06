@@ -1,7 +1,7 @@
 /* eslint-disable */
 import React from "react";
-import { AppContext, Platform, ProviderPayload } from "../types";
-import { Hyperlink } from "../utils/Hyperlink";
+import { AppContext, Platform, ProviderPayload } from "../types.js";
+import { Hyperlink } from "../utils/Hyperlink.js";
 
 export class HolonymPlatform implements Platform {
   platformId = "Holonym";

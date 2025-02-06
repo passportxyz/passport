@@ -1,6 +1,6 @@
-import { CacheToken } from "../types";
+import { CacheToken } from "../types.js";
 import crypto from "crypto";
-import { PassportCache } from "./passport-cache";
+import { PassportCache } from "./passport-cache.js";
 
 export type CacheSession = Record<string, string>;
 

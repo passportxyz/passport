@@ -1,6 +1,6 @@
 // ----- Libs
 import axios from "axios";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
 
 // Defining interfaces for the data structure returned by the Snapshot graphQL DB
 interface VotesQueryResponse {

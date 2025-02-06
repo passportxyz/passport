@@ -1,3 +1,3 @@
-export { GnosisSafePlatform } from "./App-Bindings";
-export { GnosisSafeProvider } from "./Providers";
-export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
+export { GnosisSafePlatform } from "./App-Bindings.js";
+export { GnosisSafeProvider } from "./Providers/index.js";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config.js";

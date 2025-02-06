@@ -1,6 +1,6 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { ZkSyncEraProvider } from "./Providers/zkSyncEra";
-import { ZkSyncScore5Provider, ZkSyncScore20Provider, ZkSyncScore50Provider } from "./Providers/accountAnalysis";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { ZkSyncEraProvider } from "./Providers/zkSyncEra.js";
+import { ZkSyncScore5Provider, ZkSyncScore20Provider, ZkSyncScore50Provider } from "./Providers/accountAnalysis.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/zksyncStampIcon.svg",

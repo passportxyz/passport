@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 /* eslint-disable @typescript-eslint/require-await */
 
-import { ProviderContext, RequestPayload } from "@gitcoin/passport-types";
-import { IdenaContext } from "../procedures/idenaSignIn";
-import { initCacheSession, loadCacheSession, PlatformSession } from "../../utils/platform-cache";
+import { RequestPayload } from "@gitcoin/passport-types";
+import { IdenaContext } from "../procedures/idenaSignIn.js";
+import { initCacheSession, loadCacheSession } from "../../utils/platform-cache.js";
 import {
   IdenaStateHumanProvider,
   IdenaStateNewbieProvider,
   IdenaStateVerifiedProvider,
-} from "../Providers/IdenaStateProvider";
+} from "../Providers/IdenaStateProvider.js";
 
 // ----- Libs
 import axios from "axios";
-import { ProviderExternalVerificationError, ProviderInternalVerificationError } from "../../types";
+
 
 jest.mock("axios");
 
@@ -52,7 +52,7 @@ type IdenaCache = {
 
 describe("Idena", () => {
   beforeAll(() => {
-    jest.useFakeTimers("modern");
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(Date.UTC(2023, 0, 1)));
   });
 
@@ -188,7 +188,7 @@ describe("Idena", () => {
 
 describe("Idena Error", () => {
   beforeAll(() => {
-    jest.useFakeTimers("modern");
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(Date.UTC(2023, 0, 1)));
   });
 

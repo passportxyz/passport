@@ -1,5 +1,5 @@
 // ----- Libs
-import { GitcoinContributorStatisticsProvider } from "../gitcoinGrantsContributorStatistics";
+import { GitcoinContributorStatisticsProvider } from "../gitcoinGrantsContributorStatistics.js";
 /* eslint-disable no-use-before-define */
 describe("GitcoinContributorStatisticsProvider class", function () {
   it("should be properly initialized", function () {

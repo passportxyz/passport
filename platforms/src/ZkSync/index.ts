@@ -1,4 +1,4 @@
-export { ZkSyncEraProvider } from "./Providers/zkSyncEra";
+export { ZkSyncEraProvider } from "./Providers/zkSyncEra.js";
 
-export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
-export { ZkSyncPlatform } from "./App-Bindings";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config.js";
+export { ZkSyncPlatform } from "./App-Bindings.js";

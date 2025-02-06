@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { HolonymGovIdProvider } from "./Providers/holonymGovIdProvider";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { HolonymGovIdProvider } from "./Providers/holonymGovIdProvider.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/holonymStampIcon.svg",

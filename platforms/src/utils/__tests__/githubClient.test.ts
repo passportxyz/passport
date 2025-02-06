@@ -9,7 +9,7 @@ import {
   GithubOrgMetaData,
   MAX_YEARS_TO_CHECK,
   RepoCommit,
-} from "../githubClient";
+} from "../githubClient.js";
 
 jest.mock("axios");
 const mockedPost = jest.spyOn(axios, "post");

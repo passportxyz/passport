@@ -1,6 +1,6 @@
 // TODO - remove lint skip once types are unified
 /* eslint-disable @typescript-eslint/require-await */
-import { BrightidPlatform } from "../App-Bindings";
+import { BrightidPlatform } from "../App-Bindings.js";
 import axios from "axios";
 
 jest.mock("axios");

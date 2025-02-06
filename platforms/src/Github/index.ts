@@ -1,2 +1,2 @@
-export { GithubPlatform } from "./App-Bindings";
-export { ProviderConfig, PlatformDetails, providers } from "./Providers-config";
+export { GithubPlatform } from "./App-Bindings.js";
+export { ProviderConfig, PlatformDetails, providers } from "./Providers-config.js";

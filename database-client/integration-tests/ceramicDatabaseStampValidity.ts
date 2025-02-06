@@ -8,7 +8,7 @@ import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
 import { jest } from "@jest/globals";
 
-import { ComposeDatabase } from "../src";
+import { ComposeDatabase } from "../src/index.js";
 
 let testDID: DID;
 let composeDatabase: ComposeDatabase;

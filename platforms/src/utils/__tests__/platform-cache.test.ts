@@ -1,4 +1,4 @@
-import { initCacheSession, loadCacheSession, clearCacheSession } from "../platform-cache";
+import { initCacheSession, loadCacheSession, clearCacheSession } from "../platform-cache.js";
 import crypto from "crypto";
 
 // Mock the crypto.randomBytes function

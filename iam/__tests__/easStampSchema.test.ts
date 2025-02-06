@@ -1,9 +1,9 @@
-import * as easStampModule from "../src/utils/easStampSchema";
+import * as easStampModule from "../src/utils/easStampSchema.js";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { parseUnits } from "ethers";
-import passportOnchainInfo from "../../deployments/onchainInfo.json";
+import passportOnchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
 
 jest.mock("../src/utils/scorerService", () => ({
   fetchPassportScore: jest.fn().mockImplementation(() => {

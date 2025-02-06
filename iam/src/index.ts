@@ -25,35 +25,36 @@ import {
 } from "@gitcoin/passport-types";
 
 import passportOnchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
-import { verifyProvidersAndIssueCredentials } from "@gitcoin/passport-identity";
 
-import { getChallenge, verifyChallengeAndGetAddress } from "./utils/challenge.js";
-import { getEASFeeAmount } from "./utils/easFees.js";
-import * as stampSchema from "./utils/easStampSchema.js";
-import * as passportSchema from "./utils/easPassportSchema.js";
-import { hasValidIssuer, getIssuerKey } from "./issuers.js";
-// import { checkConditionsAndIssueCredentials } from "./utils/credentials.js";
-
-// ---- Generate & Verify methods
-import * as DIDKit from "@spruceid/didkit-wasm-node";
 import {
+  getChallenge,
+  hasValidIssuer,
+  getIssuerKey,
+  VerifyDidChallengeBaseError,
   issueChallengeCredential,
   verifyCredential,
   verifyTypes,
   groupProviderTypesByPlatform,
+  verifyProvidersAndIssueCredentials,
+  verifyChallengeAndGetAddress,
 } from "@gitcoin/passport-identity";
+
+import { getEASFeeAmount } from "./utils/easFees.js";
+import * as stampSchema from "./utils/easStampSchema.js";
+import * as passportSchema from "./utils/easPassportSchema.js";
+
+// ---- Generate & Verify methods
+import * as DIDKit from "@spruceid/didkit-wasm-node";
 
 // All provider exports from platforms
 
 import path from "path";
 import { fileURLToPath } from "url";
-import { VerifyDidChallengeBaseError } from "./utils/verifyDidChallenge.js";
 import { errorRes, addErrorDetailsToMessage, ApiError } from "./utils/helpers.js";
 import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForChain } from "./utils/attestations.js";
 import { scrollDevBadgeHandler } from "./utils/scrollDevBadge.js";
 import { toJsonObject } from "./utils/json.js";
 import { filterRevokedCredentials } from "./utils/revocations.js";
-import { assert } from "console";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured

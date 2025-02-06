@@ -3,9 +3,9 @@ import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
 import { jest } from "@jest/globals";
-import mockStamps from "../__tests__/mockStamps.json";
+import mockStamps from "../__tests__/mockStamps.json" assert { type: "json" };
 
-import { ComposeDatabase } from "../src";
+import { ComposeDatabase } from "../src/index.js";
 
 let testDID: DID;
 let composeDatabase: ComposeDatabase;

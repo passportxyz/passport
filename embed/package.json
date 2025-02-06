@@ -24,7 +24,7 @@
     "@gitcoin/passport-platforms": "^1.0.0",
     "@gitcoin/passport-types": "^1.0.0",
     "@spruceid/didkit-wasm-node": "^0.2.1",
-    "axios": "^0.27.2",
+    "axios": "^1.7.9",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "ethers": "^6.13.4",

@@ -1,3 +1,3 @@
-export { PhoneVerificationPlatform } from "./App-Bindings";
-export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
-export { ZeronymPhoneProvider } from "./Providers/zeronymPhone";
+export { PhoneVerificationPlatform } from "./App-Bindings.js";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config.js";
+export { ZeronymPhoneProvider } from "./Providers/zeronymPhone.js";

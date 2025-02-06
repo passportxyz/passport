@@ -1,5 +1,5 @@
 // ----- Types
-import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types.js";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
@@ -7,10 +7,10 @@ import axios from "axios";
 import { ethers } from "ethers";
 
 // ----- Credential verification
-import { getAddress } from "../../utils/signer";
+import { getAddress } from "../../utils/signer.js";
 
 // ----- Utils
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
 
 // https://safe-transaction.gnosis.io/
 export const gnosisSafeApiEndpoint = "https://safe-transaction-mainnet.safe.global/api/v1/";

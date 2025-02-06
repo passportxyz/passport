@@ -2,13 +2,13 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 /* eslint-disable @typescript-eslint/require-await */
 // ---- Test subject
-import { DiscordProvider } from "../Providers/discord";
+import { DiscordProvider } from "../Providers/discord.js";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { ProviderExternalVerificationError } from "../../types";
+import { ProviderExternalVerificationError } from "../../types.js";
 
 jest.mock("axios");
 

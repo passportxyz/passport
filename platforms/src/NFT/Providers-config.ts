@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { NFTProvider, DigitalCollectorProvider, ArtAficionadoProvider, NftVisionaryProvider } from "./Providers";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { NFTProvider, DigitalCollectorProvider, ArtAficionadoProvider, NftVisionaryProvider } from "./Providers/index.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/nftStampIcon.svg",

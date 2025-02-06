@@ -1,3 +1,3 @@
-export { POAPPlatform } from "./App-Bindings";
-export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
-export { POAPProvider } from "./Providers/poap";
+export { POAPPlatform } from "./App-Bindings.js";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config.js";
+export { POAPProvider } from "./Providers/poap.js";

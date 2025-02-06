@@ -1,7 +1,7 @@
 import React from "react";
-import { AppContext, PlatformOptions, ProviderPayload } from "../types";
-import { Platform } from "../utils/platform";
-import { Hyperlink } from "../utils/Hyperlink";
+import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
+import { Platform } from "../utils/platform.js";
+import { Hyperlink } from "../utils/Hyperlink.js";
 
 export class GitcoinPlatform extends Platform {
   platformId = "Gitcoin";

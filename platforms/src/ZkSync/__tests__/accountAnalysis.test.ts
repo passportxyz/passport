@@ -6,7 +6,7 @@ import {
   ModelResponse,
   getZkSyncAnalysis,
   ZkSyncScore5Provider,
-} from "../Providers/accountAnalysis";
+} from "../Providers/accountAnalysis.js";
 
 const mockAddress = "0x0";
 let mockContext = {};

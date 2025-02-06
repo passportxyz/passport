@@ -1,7 +1,7 @@
 /* eslint-disable */
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import { TrustaLabsProvider } from "../../Providers/TrustaLabs";
+import { TrustaLabsProvider } from "../../Providers/TrustaLabs.js";
 
 // ----- Libs
 import axios from "axios";

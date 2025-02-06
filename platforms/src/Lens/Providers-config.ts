@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { LensProfileProvider } from "./Providers/lens";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { LensProfileProvider } from "./Providers/lens.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/lensWhiteStampIcon.svg",

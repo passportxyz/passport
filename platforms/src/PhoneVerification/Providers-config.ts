@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { ZeronymPhoneProvider } from "./Providers/zeronymPhone";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { ZeronymPhoneProvider } from "./Providers/zeronymPhone.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/zeronymLogo.png",

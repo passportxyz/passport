@@ -1,4 +1,4 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import {
   SelfStakingBronzeProvider,
   SelfStakingGoldProvider,
@@ -6,7 +6,7 @@ import {
   BeginnerCommunityStakerProvider,
   ExperiencedCommunityStakerProvider,
   TrustedCitizenProvider,
-} from "./Providers";
+} from "./Providers/index.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/gtcStakingLogoIcon.svg",

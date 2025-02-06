@@ -1,9 +1,9 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
-import { EnsProvider } from "../Providers/EnsProvider";
+import { EnsProvider } from "../Providers/EnsProvider.js";
 
 // ----- Ethers library
-import { ProviderExternalVerificationError } from "../../types";
+import { ProviderExternalVerificationError } from "../../types.js";
 import { EnsResolver, JsonRpcProvider, getAddress } from "ethers";
 
 jest.mock("ethers");

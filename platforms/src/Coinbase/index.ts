@@ -1,3 +1,3 @@
-export { CoinbasePlatform } from "./App-Bindings";
-export { ProviderConfig, PlatformDetails, providers } from "./Providers-config";
-export { CoinbaseProvider } from "./Providers/coinbase";
+export { CoinbasePlatform } from "./App-Bindings.js";
+export { ProviderConfig, PlatformDetails, providers } from "./Providers-config.js";
+export { CoinbaseProvider } from "./Providers/coinbase.js";

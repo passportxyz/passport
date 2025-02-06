@@ -1,12 +1,11 @@
 /* eslint-disable */
 // ---- Test subject
-import { getNFTEndpoint, NFTProvider } from "../nft";
+import { getNFTEndpoint, NFTProvider } from "../nft.js";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { ProviderExternalVerificationError } from "../../../types";
 
 jest.mock("axios");
 

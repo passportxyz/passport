@@ -1,12 +1,12 @@
 // Provider Utils
-import { Providers } from "./providers";
-import { Provider } from "../types";
-import { SimpleProvider } from "./simpleProvider";
-import { SimpleEvmProvider } from "./simpleEvmProvider";
-import { ClearTextSimpleProvider } from "./clearTextSimpleProvider";
-import { ClearTextTwitterProvider, ClearTextGithubOrgProvider } from "../ClearText";
+import { Providers } from "./providers.js";
+import { Provider } from "../types.js";
+import { SimpleProvider } from "./simpleProvider.js";
+import { SimpleEvmProvider } from "./simpleEvmProvider.js";
+import { ClearTextSimpleProvider } from "./clearTextSimpleProvider.js";
+import { ClearTextTwitterProvider, ClearTextGithubOrgProvider } from "../ClearText/index.js";
 
-import { PlatformConfig } from "../platforms";
+import { PlatformConfig } from "../platforms.js";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 export const createProviders = (platforms: Record<string, PlatformConfig>): Providers => {

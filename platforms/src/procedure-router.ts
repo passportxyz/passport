@@ -1,11 +1,11 @@
 // ---- Server
 import { Request, Response, Router } from "express";
 
-import * as twitterOAuth from "./Twitter/procedures/twitterOauth";
-import { triggerBrightidSponsorship, verifyBrightidContextId } from "./Brightid/procedures/brightid";
+import * as twitterOAuth from "./Twitter/procedures/twitterOauth.js";
+import { triggerBrightidSponsorship, verifyBrightidContextId } from "./Brightid/procedures/brightid.js";
 import path from "path";
-import * as idenaSignIn from "./Idena/procedures/idenaSignIn";
-import { outdidRequestVerification } from "./Outdid/procedures/outdidVerification";
+import * as idenaSignIn from "./Idena/procedures/idenaSignIn.js";
+import { outdidRequestVerification } from "./Outdid/procedures/outdidVerification.js";
 
 export const router = Router();
 

@@ -1,10 +1,10 @@
 // ----- Types
-import type { Provider } from "../../types";
+import type { Provider } from "../../types.js";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import { CivicPassType } from "./types";
+import { CivicPassType } from "./types.js";
 
 // ----- Utils
-import { findAllPasses, latestExpiry, secondsFromNow, getNowAsBigNumberSeconds } from "./util";
+import { findAllPasses, latestExpiry, secondsFromNow, getNowAsBigNumberSeconds } from "./util.js";
 
 // If the environment variable INCLUDE_TESTNETS is set to true,
 // then passes on testnets will be included in the verification by default.

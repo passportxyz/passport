@@ -1,6 +1,7 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import BigNumber from "bignumber.js";
-import { GtcStakingContext, GtcStakingProvider, GtcStakingProviderOptions } from "./GtcStaking";
+import { BigNumber } from "bignumber.js";
+
+import { GtcStakingContext, GtcStakingProvider, GtcStakingProviderOptions } from "./GtcStaking.js";
 
 class SelfStakingBaseProvider extends GtcStakingProvider {
   constructor(options: GtcStakingProviderOptions) {

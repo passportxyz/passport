@@ -1,8 +1,8 @@
 // ----- Types
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type { Provider } from "../../types";
+import type { Provider } from "../../types.js";
 import axios from "axios";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
 
 export type CoinbaseTokenResponse = {
   access_token?: string;
@@ -95,7 +95,7 @@ export const verifyCoinbaseLogin = async (code: string): Promise<string | undefi
   return userResponse?.data?.data?.id;
 };
 
-const COINBASE_ATTESTER = "0x357458739F90461b99789350868CD7CF330Dd7EE";
+export const COINBASE_ATTESTER = "0x357458739F90461b99789350868CD7CF330Dd7EE";
 export const BASE_EAS_SCAN_URL = "https://base.easscan.org/graphql";
 export const VERIFIED_ACCOUNT_SCHEMA = "0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9";
 

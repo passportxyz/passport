@@ -1,5 +1,5 @@
-import { PlatformOptions } from "../types";
-import { Platform } from "../utils/platform";
+import { PlatformOptions } from "../types.js";
+import { Platform } from "../utils/platform.js";
 
 export class LinkedinPlatform extends Platform {
   platformId = "Linkedin";

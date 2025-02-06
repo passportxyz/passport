@@ -1,3 +1,3 @@
-export { SnapshotPlatform } from "./App-Bindings";
-export { PlatformDetails, ProviderConfig, providers } from "./Providers-config";
-export { SnapshotProposalsProvider } from "./Providers";
+export { SnapshotPlatform } from "./App-Bindings.js";
+export { PlatformDetails, ProviderConfig, providers } from "./Providers-config.js";
+export { SnapshotProposalsProvider } from "./Providers/index.js";

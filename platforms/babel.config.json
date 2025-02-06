@@ -1,0 +1,13 @@
+{
+  "presets": [
+    "@babel/preset-typescript",
+    ["@babel/preset-env", { "targets": { "node": "current" } }],
+    "@babel/preset-react"
+  ],
+  "plugins": [
+    "@babel/plugin-syntax-import-assertions",
+    "babel-plugin-transform-import-meta",
+    ["babel-plugin-replace-import-extension", { "extMapping": { ".js": "" } }],
+    "@babel/plugin-transform-modules-commonjs"
+  ]
+}

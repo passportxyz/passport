@@ -1,6 +1,6 @@
 import axios from "axios";
-import { Logger } from "./logger";
-import { DataStorageBase } from "./types";
+import { Logger } from "./logger.js";
+import { DataStorageBase } from "./types.js";
 import type { DID as CeramicDID } from "dids";
 import {
   PROVIDER_ID,

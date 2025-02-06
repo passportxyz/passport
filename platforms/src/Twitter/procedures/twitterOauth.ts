@@ -6,9 +6,9 @@ import {
   ApiPartialResponseError,
 } from "twitter-api-v2";
 
-import { clearCacheSession, initCacheSession, loadCacheSession, PlatformSession } from "../../utils/platform-cache";
+import { clearCacheSession, initCacheSession, loadCacheSession, PlatformSession } from "../../utils/platform-cache.js";
 import { ProviderContext } from "@gitcoin/passport-types";
-import { ProviderExternalVerificationError, ProviderInternalVerificationError } from "../../types";
+import { ProviderExternalVerificationError, ProviderInternalVerificationError } from "../../types.js";
 
 export type TwitterContext = ProviderContext & {
   twitter?: {

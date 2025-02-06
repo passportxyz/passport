@@ -1,6 +1,6 @@
-import { MAX_CONTRIBUTION_DAYS } from "../utils/githubClient";
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { GithubContributionActivityProvider } from "./Providers/githubContributionActivity";
+import { MAX_CONTRIBUTION_DAYS } from "../utils/githubClient.js";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { GithubContributionActivityProvider } from "./Providers/githubContributionActivity.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/githubWhiteStampIcon.svg",

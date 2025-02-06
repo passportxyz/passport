@@ -2,5 +2,5 @@ export {
   BeginnerCommunityStakerProvider,
   ExperiencedCommunityStakerProvider,
   TrustedCitizenProvider,
-} from "./communityStaking";
-export { SelfStakingBronzeProvider, SelfStakingGoldProvider, SelfStakingSilverProvider } from "./selfStaking";
+} from "./communityStaking.js";
+export { SelfStakingBronzeProvider, SelfStakingGoldProvider, SelfStakingSilverProvider } from "./selfStaking.js";

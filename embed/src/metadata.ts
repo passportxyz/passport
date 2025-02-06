@@ -1,9 +1,9 @@
 // ---- Types
 import { Request, Response } from "express";
 
-// ---- Platform imports
-import { platformsData } from "@gitcoin/passport-platforms";
-
+import { STAMP_PAGES, displayNumber } from "./stamps.js";
+import { platforms } from "@gitcoin/passport-platforms";
+import axios from "axios";
 export class IAMError extends Error {
   constructor(public message: string) {
     super(message);
@@ -35,9 +35,49 @@ export class ApiError extends Error {
   }
 }
 
-export const metadataHandler = (_req: Request, res: Response): void => {
+export const metadataHandler = async (_req: Request, res: Response): Promise<void> => {
   try {
-    return void res.json(platformsData);
+    const { scorerId } = _req.query;
+    if (!scorerId) {
+      throw new ApiError("Missing required query parameter: `scorerId`", 400);
+    }
+    // TODO: in the future return specific stamp metadata based on the scorerId
+    // TODO: clarify the returned response
+    // get weight for scorerId
+    const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/embed/weights?community_id=${scorerId as string}`;
+    const weightsResponse = await axios.get(embedWeightsUrl);
+    const weightsResponseData: { [key: string]: number } = weightsResponse.data as { [key: string]: number };
+
+    // get providers / credential ids from passport-platforms
+    // for each provider, get the weight from the weights response
+    const updatedStampPages = STAMP_PAGES.map((stampPage) => ({
+      ...stampPage,
+      platforms: stampPage.platforms.map((platform) => {
+        const platformName = platform.name;
+        const platformData = platforms[platformName];
+
+        if (!platformData || !platformData.providers) {
+          return {
+            ...platform,
+            credentials: [],
+            displayWeight: displayNumber(0),
+          };
+        }
+        // Extract provider types
+        const providers = platformData.providers;
+        const credentials = Object.values(providers).map((provider: { type: string }) => ({
+          id: provider.type,
+          weight: weightsResponseData[provider.type] ? weightsResponseData[provider.type].toString() : "0",
+        }));
+        return {
+          ...platform,
+          credentials,
+          displayWeight: displayNumber(credentials.reduce((acc, credential) => acc + parseFloat(credential.weight), 0)),
+        };
+      }),
+    }));
+
+    return void res.json(updatedStampPages);
   } catch (error) {
     if (error instanceof ApiError) {
       return void errorRes(res, error.message, error.code);

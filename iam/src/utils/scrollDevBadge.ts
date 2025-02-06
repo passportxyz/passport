@@ -10,7 +10,7 @@ import { EasPayload, PassportAttestation, EasRequestBody } from "@gitcoin/passpo
 import passportOnchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
 
 import { getEASFeeAmount } from "./easFees.js";
-import { hasValidIssuer } from "../issuers.js";
+import { hasValidIssuer } from "@gitcoin/passport-identity";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";

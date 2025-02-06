@@ -1,6 +1,6 @@
 // ----- Types
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import { ProviderExternalVerificationError, type Provider } from "../../types";
+import { ProviderExternalVerificationError, type Provider } from "../../types.js";
 import { createGuildClient, GuildClient } from "@guildxyz/sdk";
 
 // Need to do it like this to support mocking in tests
@@ -12,7 +12,7 @@ const getGuildClient = () => {
   return guildClient;
 };
 
-import { getAddress } from "../../utils/signer";
+import { getAddress } from "../../utils/signer.js";
 
 type GuildMembership = {
   guildId: number;

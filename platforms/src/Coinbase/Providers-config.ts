@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { CoinbaseProvider, CoinbaseProvider2 } from "./Providers/coinbase";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { CoinbaseProvider, CoinbaseProvider2 } from "./Providers/coinbase.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/coinbaseStampIcon.svg",

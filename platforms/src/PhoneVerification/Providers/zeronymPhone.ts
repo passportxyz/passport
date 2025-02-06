@@ -1,15 +1,15 @@
 // ----- Types
-import { type Provider, type ProviderOptions } from "../../types";
+import { type Provider, type ProviderOptions } from "../../types.js";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
 
 // ----- Credential verification
-import { getAddress } from "../../utils/signer";
+import { getAddress } from "../../utils/signer.js";
 
 // ----- Utils
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError";
+import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
 
 export const holonymApiPhoneEndpoint = "https://api.holonym.io/sybil-resistance/phone/optimism";
 

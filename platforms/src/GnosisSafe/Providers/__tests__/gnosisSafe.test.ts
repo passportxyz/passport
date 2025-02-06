@@ -1,12 +1,12 @@
 /* eslint-disable */
 // ---- Test subject
-import { gnosisSafeApiEndpoint, GnosisSafeProvider } from "../gnosisSafe";
+import { gnosisSafeApiEndpoint, GnosisSafeProvider } from "../gnosisSafe.js";
 
 import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs
 import axios from "axios";
-import { ProviderExternalVerificationError } from "../../../types";
+import { ProviderExternalVerificationError } from "../../../types.js";
 
 jest.mock("axios");
 

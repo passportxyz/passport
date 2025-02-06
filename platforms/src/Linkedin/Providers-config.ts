@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { LinkedinProvider } from "./Providers/linkedin";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { LinkedinProvider } from "./Providers/linkedin.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/linkedinStampIcon.svg",

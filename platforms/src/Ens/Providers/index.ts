@@ -1,1 +1,1 @@
-export { EnsProvider } from "./EnsProvider";
+export { EnsProvider } from "./EnsProvider.js";

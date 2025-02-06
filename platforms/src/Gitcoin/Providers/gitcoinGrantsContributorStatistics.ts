@@ -1,6 +1,6 @@
 // ----- Types
-import { ProviderOptions } from "../../types";
-import { GitcoinGrantStatisticsProvider } from "./gitcoinGrantsStatistics";
+import { ProviderOptions } from "../../types.js";
+import { GitcoinGrantStatisticsProvider } from "./gitcoinGrantsStatistics.js";
 
 // Export a Gitcoin Provider
 export class GitcoinContributorStatisticsProvider extends GitcoinGrantStatisticsProvider {

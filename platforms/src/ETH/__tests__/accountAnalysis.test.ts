@@ -9,7 +9,7 @@ import {
   EthDaysActiveProvider,
   EthGasSpentProvider,
   EthTransactionsProvider,
-} from "../Providers/accountAnalysis";
+} from "../Providers/accountAnalysis.js";
 
 const mockAddress = "0x0";
 let mockContext = {};

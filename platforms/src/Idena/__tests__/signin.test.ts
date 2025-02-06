@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 /* eslint-disable @typescript-eslint/require-await */
 
-import { authenticate, loadIdenaSession } from "../procedures/idenaSignIn";
-import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/platform-cache";
+import { authenticate, loadIdenaSession } from "../procedures/idenaSignIn.js";
+import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/platform-cache.js";
 
 // ----- Libs
 import axios from "axios";

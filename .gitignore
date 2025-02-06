@@ -1,5 +1,6 @@
 node_modules
 .env
+.env.*
 .nvmrc
 .yarnrc
 
@@ -25,4 +26,6 @@ lerna-debug.log*
 *.sw?
 
 schemas/.env.yarn
-embed-popup/.env.production
+
+# Do not ignore tehse files
+!.env.example

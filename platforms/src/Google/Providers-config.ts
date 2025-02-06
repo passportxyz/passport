@@ -1,5 +1,5 @@
-import { PlatformSpec, PlatformGroupSpec, Provider } from "../types";
-import { GoogleProvider } from "./Providers/google";
+import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
+import { GoogleProvider } from "./Providers/google.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/googleStampIcon.svg",

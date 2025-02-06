@@ -1,3 +1,3 @@
-export { TrustaLabsPlatform } from "./App-Bindings";
-export { ProviderConfig, PlatformDetails, providers } from "./Providers-config";
-export { TrustaLabsProvider } from "./Providers/TrustaLabs";
+export { TrustaLabsPlatform } from "./App-Bindings.js";
+export { ProviderConfig, PlatformDetails, providers } from "./Providers-config.js";
+export { TrustaLabsProvider } from "./Providers/TrustaLabs.js";

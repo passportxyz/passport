@@ -1,1 +1,1 @@
-export { ZeronymPhoneProvider } from "./zeronymPhone";
+export { ZeronymPhoneProvider } from "./zeronymPhone.js";

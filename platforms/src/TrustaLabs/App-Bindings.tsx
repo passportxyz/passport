@@ -1,6 +1,6 @@
-import { Hyperlink } from "../utils/Hyperlink";
-import { AppContext, ProviderPayload } from "../types";
-import { Platform } from "../utils/platform";
+import { Hyperlink } from "../utils/Hyperlink.js";
+import { AppContext, ProviderPayload } from "../types.js";
+import { Platform } from "../utils/platform.js";
 import React from "react";
 
 export class TrustaLabsPlatform extends Platform {

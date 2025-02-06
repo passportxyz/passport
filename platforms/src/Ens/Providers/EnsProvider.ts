@@ -1,9 +1,9 @@
 // ----- Types
-import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types.js";
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 // ----- Credential verification
-import { getRPCProvider } from "../../utils/signer";
+import { getRPCProvider } from "../../utils/signer.js";
 
 const ENS_PUBLIC_RESOLVERS = [
   "0x231b0ee14048e9dccd1d247744d114a4eb5e8e63",
