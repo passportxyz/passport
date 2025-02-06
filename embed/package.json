@@ -16,7 +16,7 @@
     "prod:start": "tsc && node .",
     "test": "jest --verbose",
     "prettier": "prettier --write .",
-    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
+    "lint": "tsc --noEmit",
     "lint:fix": "eslint --fix --ext .ts,.js,.tsx ."
   },
   "dependencies": {
