@@ -1,5 +1,5 @@
 {
-  "name": "embed-popup",
+  "name": "@gitcoin/passport-embed-popup",
   "private": true,
   "version": "0.0.0",
   "type": "module",

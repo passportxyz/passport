@@ -154,7 +154,7 @@ function App() {
             setStep("Verification successful!");
             setVerificationResponse(response);
 
-            // window.close(); // Close the pop-up after sending the message
+            window.close(); // Close the pop-up after sending the message
           } catch (error) {
             console.error("Error during verification:", error);
             setStep(`Verification failed to ${verifyEndpoint}`);
