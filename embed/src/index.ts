@@ -11,7 +11,7 @@ import { RedisReply, RedisStore } from "rate-limit-redis";
 
 // --- Relative imports
 import { keyGenerator, apiKeyRateLimit } from "./rate-limiter.js";
-import { autoVerificationHandler, verificationHandler } from "./handlers.js";
+import { autoVerificationHandler, verificationHandler, getChallengeHandler } from "./handlers.js";
 import { metadataHandler } from "./metadata.js";
 import { redis } from "./redis.js";
 
@@ -92,7 +92,9 @@ app.use(
       },
     }),
     skip: (req, res): boolean => {
-      return req.path === "/health";
+      // TODO: geri review this, /verify should be removed ...
+      console.log("geri --- path", req.path);
+      return req.path === "/health" || req.path === "/embed/challenge" || req.path === "/embed/verify";
     },
   })
 );
@@ -111,3 +113,6 @@ app.post("/embed/verify", verificationHandler);
 // Returns the metadata for the stamps
 // Receives a query parameter `scorerId` and returns the stamp metadata for that scorer
 app.get("/embed/stamps/metadata", metadataHandler);
+
+// expose challenge entry point
+app.post("/embed/challenge", getChallengeHandler);

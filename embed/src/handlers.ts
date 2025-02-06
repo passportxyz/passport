@@ -1,5 +1,5 @@
 // ---- Web3 packages
-import { isAddress } from "ethers";
+import { isAddress, getAddress } from "ethers";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
 // ---- Types
@@ -18,8 +18,17 @@ import {
   helpers,
   groupProviderTypesByPlatform,
   verifyProvidersAndIssueCredentials,
+  getChallenge,
+  getIssuerKey,
+  issueChallengeCredential,
 } from "@gitcoin/passport-identity";
-import { VerifiableCredential, VerifyRequestBody } from "@gitcoin/passport-types";
+import {
+  VerifiableCredential,
+  VerifyRequestBody,
+  ChallengeRequestBody,
+  RequestPayload,
+  CredentialResponseBody,
+} from "@gitcoin/passport-types";
 
 import axios from "axios";
 
@@ -75,7 +84,6 @@ export const addStampsAndGetScore = async ({
   scorerId,
   stamps,
 }: AutoVerificationFields & { stamps: VerifiableCredential[] }): Promise<PassportScore> => {
-  console.log("geri ---- addStampsAndGetScore");
   try {
     const scorerResponse: {
       data?: {
@@ -94,10 +102,8 @@ export const addStampsAndGetScore = async ({
       }
     );
 
-    console.log("geri ---- scorerResponse", scorerResponse);
     return scorerResponse.data?.score;
   } catch (error) {
-    console.log("geri ---- scorerResponse error", error);
     handleAxiosError(error, "Scorer Embed API", EmbedAxiosError, [apiKey]);
   }
 };
@@ -129,20 +135,32 @@ export const autoVerificationHandler = async (
   }
 };
 
+type EmbedVerifyRequestBody = VerifyRequestBody & {
+  scorerId: string;
+};
+
 export const verificationHandler = (
-  req: Request<ParamsDictionary, AutoVerificationResponseBodyType, VerifyRequestBody>,
+  req: Request<ParamsDictionary, AutoVerificationResponseBodyType, EmbedVerifyRequestBody>,
   res: Response
 ): void => {
-  const requestBody: VerifyRequestBody = req.body;
+  console.log("geri ---- verificationHandler");
+  const requestBody: EmbedVerifyRequestBody = req.body;
+  console.log("geri ---- verificationHandler requestBody", requestBody);
   // each verify request should be received with a challenge credential detailing a signature contained in the RequestPayload.proofs
   const challenge = requestBody.challenge;
   // get the payload from the JSON req body
   const payload = requestBody.payload;
+  // get the payload from the JSON req body
+  const scorerId = requestBody.scorerId;
 
+  console.log("geri ---- verificationHandler challenge", challenge);
+  console.log("geri ---- verificationHandler payload", payload);
+  console.log("geri ---- verificationHandler scorerId", scorerId);
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   return void verifyCredential(DIDKit, challenge)
     .then(async (verified): Promise<void> => {
       if (verified && hasValidIssuer(challenge.issuer)) {
+        console.log("geri ---- verificationHandler verified", verified);
         let address;
         try {
           address = await verifyChallengeAndGetAddress(requestBody);
@@ -152,8 +170,6 @@ export const verificationHandler = (
           }
           throw error;
         }
-
-        payload.address = address;
 
         // Check signer and type
         const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
@@ -172,9 +188,29 @@ export const verificationHandler = (
         const types = payload.types.filter((type) => type);
         const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
-        const credentials = await verifyProvidersAndIssueCredentials(providersGroupedByPlatforms, address, payload);
+        const credentialsVerificationResponses = await verifyProvidersAndIssueCredentials(
+          providersGroupedByPlatforms,
+          address,
+          payload
+        );
 
-        return void res.json(credentials);
+        console.log("geri ---- verificationHandler credentialsVerificationResponses", credentialsVerificationResponses);
+        const stamps = credentialsVerificationResponses.reduce((acc, response) => {
+          if ("credential" in response && response.credential) {
+            if (response.credential) {
+              acc.push(response.credential);
+            }
+          }
+          return acc;
+        }, [] as VerifiableCredential[]);
+
+        console.log("geri ---- verificationHandler stamps", stamps);
+        const score = await addStampsAndGetScore({ address, scorerId, stamps });
+
+        return void res.json({
+          score: score,
+          credentials: stamps,
+        });
       }
 
       // error response
@@ -188,4 +224,64 @@ export const verificationHandler = (
       if (error instanceof Error) message += `: ${error.name}`;
       return void errorRes(res, message, 500);
     });
+};
+
+export const getChallengeHandler = (
+  req: Request<ParamsDictionary, AutoVerificationResponseBodyType, EmbedVerifyRequestBody>,
+  res: Response
+): void => {
+  // get the payload from the JSON req body
+  const requestBody: ChallengeRequestBody = req.body as ChallengeRequestBody;
+  const payload: RequestPayload = requestBody.payload;
+
+  // check for a valid payload
+  if (payload.address && payload.type) {
+    // ensure address is check-summed
+    payload.address = getAddress(payload.address);
+    // generate a challenge for the given payload
+    const challenge = getChallenge(payload);
+    // if the request is valid then proceed to generate a challenge credential
+    if (challenge && challenge.valid === true) {
+      // construct a request payload to issue a credential against
+      const record: RequestPayload = {
+        // add fields to identify the bearer of the challenge
+        type: payload.type,
+        address: payload.address,
+        // version as defined by entry point
+        version: "0.0.0",
+        // extend/overwrite with record returned from the provider
+        ...(challenge?.record || {}),
+      };
+
+      const currentKey = getIssuerKey(payload.signatureType);
+      // generate a VC for the given payload
+      return void issueChallengeCredential(DIDKit, currentKey, record, payload.signatureType)
+        .then((credential) => {
+          // return the verifiable credential
+          return res.json(credential as CredentialResponseBody);
+        })
+        .catch((error) => {
+          if (error) {
+            // return error msg indicating a failure producing VC
+            return void errorRes(res, "Unable to produce a verifiable credential", 400);
+          }
+        });
+    } else {
+      // return error message if an error present
+      // limit the error message string to 1000 chars
+      return void errorRes(
+        res,
+        (challenge.error && challenge.error.join(", ").substring(0, 1000)) || "Unable to verify proofs",
+        403
+      );
+    }
+  }
+
+  if (!payload.address) {
+    return void errorRes(res, "Missing address from challenge request body", 400);
+  }
+
+  if (!payload.type) {
+    return void errorRes(res, "Missing type from challenge request body", 400);
+  }
 };
