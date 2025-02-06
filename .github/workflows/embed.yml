@@ -48,12 +48,13 @@ jobs:
                 AWS_ACCESS_KEY_ID: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
                 AWS_SECRET_ACCESS_KEY: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
                 PULUMI_ACCESS_TOKEN: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
+                
             - name: Create .env file
               working-directory: embed-popup
               run: |
                 op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
                 jq -r '.fields[] | select(.section.label=="App") | "\(.label)=\(.value)"' > .env
-
+                
             - name: Install Dependencies
               working-directory: embed-popup
               run: yarn install --frozen-lockfile
