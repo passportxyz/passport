@@ -50,7 +50,7 @@ jobs:
                 PULUMI_ACCESS_TOKEN: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
                 
             - name: Create .env file
-              working-directory: embed-popup
+              # working-directory: embed-popup
               run: |
                 op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
                 jq -r '.fields[] | select(.section.label=="App") | "\(.label)=\(.value)"' > .env
