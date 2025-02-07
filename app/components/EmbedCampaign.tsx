@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import { useAppKit } from "@reown/appkit/react";
 import { CollapseMode, DarkTheme, PassportScoreWidget } from "@passportxyz/passport-embed";
 import { Button } from "./Button";
@@ -14,7 +14,14 @@ import { Disclosure } from "@headlessui/react";
 const passportEmbedParams = {
   apiKey: process.env.NEXT_PUBLIC_EMBED_CAMPAIGN_API_KEY as string,
   scorerId: process.env.NEXT_PUBLIC_EMBED_CAMPAIGN_SCORER_ID as string,
+  overrideIamUrl: process.env.NEXT_PUBLIC_EMBED_SERVICE_URL as string,
+  // challengeSignatureUrl: "https://iam.review.passport.xyz/api/v0.0.0/challenge",
+  challengeSignatureUrl: `${process.env.NEXT_PUBLIC_EMBED_SERVICE_URL}/embed/challenge`,
 };
+
+console.log(" --- process.env.NEXT_PUBLIC_EMBED_CAMPAIGN_API_KEY", process.env.NEXT_PUBLIC_EMBED_CAMPAIGN_API_KEY);
+console.log(" --- process.env.NEXT_PUBLIC_EMBED_CAMPAIGN_SCORER_ID", process.env.NEXT_PUBLIC_EMBED_CAMPAIGN_SCORER_ID);
+console.log(" --- process.env.NEXT_PUBLIC_EMBED_SERVICE_URL", process.env.NEXT_PUBLIC_EMBED_SERVICE_URL);
 
 const Heading = ({ className, children }: { className?: string; children: React.ReactNode }) => (
   <div className={`font-heading text-4xl md:text-5xl text-foreground-2 ${className}`}>{children}</div>
@@ -218,6 +225,26 @@ export const EmbedCampaign = () => {
   const { address } = useAccount();
   const [selectedTheme, setSelectedTheme] = React.useState<ThemeOption>("Dark");
   const [collapseType, setCollapseType] = React.useState<"Shift" | "Overlay" | "None">("Shift");
+  const { signMessageAsync } = useSignMessage();
+
+  const hexToUtf8 = (hexString: string): string => {
+    return Buffer.from(hexString.replace(/^0x/, ""), "hex").toString("utf8");
+  };
+
+  const generateSignature = async (message: string) => {
+    const strMsg = hexToUtf8(message);
+    try {
+      const signature = signMessageAsync({
+        account: address,
+        message: strMsg,
+      });
+      return signature;
+    } catch (error) {
+      console.error("Error signing message:", error);
+      alert("Failed to sign message");
+      throw error;
+    }
+  };
 
   return (
     <PageRoot className="text-color-1">
@@ -291,6 +318,7 @@ export const EmbedCampaign = () => {
               }
               address={address}
               connectWalletCallback={openWeb3Modal}
+              generateSignatureCallback={generateSignature}
               collapseMode={{ None: "off", Shift: "shift", Overlay: "overlay" }[collapseType] as CollapseMode}
               {...passportEmbedParams}
             />
