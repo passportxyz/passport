@@ -128,13 +128,15 @@ defaultPlatformMap.set("Brightid", {
   platFormGroupSpec: Brightid.ProviderConfig,
 });
 
-defaultPlatformMap.set("Coinbase", {
-  platform: new Coinbase.CoinbasePlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK,
-  }),
-  platFormGroupSpec: Coinbase.ProviderConfig,
-});
+if (process.env.NEXT_PUBLIC_FF_COINBASE_STAMP === "on") {
+  defaultPlatformMap.set("Coinbase", {
+    platform: new Coinbase.CoinbasePlatform({
+      clientId: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CLIENT_ID,
+      redirectUri: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK,
+    }),
+    platFormGroupSpec: Coinbase.ProviderConfig,
+  });
+}
 
 if (process.env.NEXT_PUBLIC_FF_OUTDID_STAMP === "on") {
   defaultPlatformMap.set("Outdid", {

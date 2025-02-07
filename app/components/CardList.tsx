@@ -56,6 +56,9 @@ const useShouldDisplayPlatform = () => {
         return false;
       }
 
+      // Feature Flag Coinbase Stamp
+      if (process.env.NEXT_PUBLIC_FF_COINBASE_STAMP !== "on" && platform.platform === "Coinbase") return false;
+
       // Feature Flag Guild Stamp
       if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return false;
 
