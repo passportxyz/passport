@@ -3,7 +3,7 @@ import {
   getEvmProvidersByPlatform,
 } from "../src/autoVerification.js";
 import { providers } from "@gitcoin/passport-platforms";
-import { issueHashedCredential } from "../src/credentials.js";
+import { issueNullifiableCredential } from "../src/credentials.js";
 import {
   PROVIDER_ID,
   VerifiableCredential,
@@ -29,13 +29,13 @@ jest.mock("@gitcoin/passport-platforms", () => ({
       async (
         type: string,
         payload: RequestPayload,
-        context: ProviderContext,
+        context: ProviderContext
       ) => {
         return Promise.resolve({
           valid: true,
           record: { key: "veirfied-condition" },
         });
-      },
+      }
     ),
   },
   platforms: {
@@ -185,7 +185,7 @@ const expectedEvmProvidersToFail = new Set<PROVIDER_ID>([
 
 const createMockVerifiableCredential = (
   provider: string,
-  address: string,
+  address: string
 ): VerifiableCredential => ({
   "@context": [
     "https://www.w3.org/2018/credentials/v1",
@@ -239,7 +239,7 @@ const createMockVerifiableCredential = (
 
 function getMockedIssuedCredential(
   provider: string,
-  address: string,
+  address: string
 ): IssuedCredential {
   const credential: IssuedCredential = {
     credential: createMockVerifiableCredential(provider, address),
@@ -277,7 +277,7 @@ describe("autoVerificationHandler", () => {
       async (
         type: string,
         payload: RequestPayload,
-        context: ProviderContext,
+        context: ProviderContext
       ) => {
         if (expectedEvmProvidersToSucceed.has(type as PROVIDER_ID)) {
           return Promise.resolve({
@@ -289,23 +289,24 @@ describe("autoVerificationHandler", () => {
             valid: false,
           });
         }
-      },
+      }
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
-    (issueHashedCredential as jest.Mock).mockImplementation(
-      (
+    (issueNullifiableCredential as jest.Mock).mockImplementation(
+      async ({
         DIDKit,
-        currentKey,
+        issuerKey,
         address,
-        record: { type: string },
+        record,
+        nullifierGenerators,
         expiresInSeconds,
         signatureType,
-      ) => {
+      }) => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
-      },
+      }
     );
 
     const stamps = await autoVerifyStamps({
@@ -315,7 +316,7 @@ describe("autoVerificationHandler", () => {
     expect(stamps).toEqual(issuedCredentials);
 
     expect(verifySpy).toHaveBeenCalledTimes(
-      expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size,
+      expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size
     );
   });
 
@@ -327,7 +328,7 @@ describe("autoVerificationHandler", () => {
       async (
         type: string,
         payload: RequestPayload,
-        context: ProviderContext,
+        context: ProviderContext
       ) => {
         if (expectedEvmProvidersToSucceed.has(type as PROVIDER_ID)) {
           return Promise.resolve({
@@ -339,23 +340,24 @@ describe("autoVerificationHandler", () => {
             valid: false,
           });
         }
-      },
+      }
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
-    (issueHashedCredential as jest.Mock).mockImplementation(
-      (
+    (issueNullifiableCredential as jest.Mock).mockImplementation(
+      async ({
         DIDKit,
-        currentKey,
+        issuerKey,
         address,
-        record: { type: string },
+        record,
+        nullifierGenerators,
         expiresInSeconds,
         signatureType,
-      ) => {
+      }) => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
-      },
+      }
     );
 
     const stamps = await autoVerifyStamps({
@@ -381,29 +383,30 @@ describe("autoVerificationHandler", () => {
       async (
         type: string,
         payload: RequestPayload,
-        context: ProviderContext,
+        context: ProviderContext
       ) => {
         return Promise.resolve({
           valid: true,
           record: { key: "verified-condition" },
         });
-      },
+      }
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
-    (issueHashedCredential as jest.Mock).mockImplementation(
-      (
+    (issueNullifiableCredential as jest.Mock).mockImplementation(
+      async ({
         DIDKit,
-        currentKey,
+        issuerKey,
         address,
-        record: { type: string },
+        record,
+        nullifierGenerators,
         expiresInSeconds,
         signatureType,
-      ) => {
+      }) => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
-      },
+      }
     );
 
     const stamps: VerifiableCredential[] = await autoVerifyStamps({
@@ -414,7 +417,7 @@ describe("autoVerificationHandler", () => {
     expect(stamps).toEqual(issuedCredentials);
 
     expect(verifySpy).toHaveBeenCalledTimes(
-      expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size,
+      expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size
     );
   });
 });

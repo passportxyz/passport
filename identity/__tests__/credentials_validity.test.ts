@@ -1,12 +1,18 @@
-import { jest, it, describe, expect } from "@jest/globals";
 import { VerifiableEip712Credential } from "@gitcoin/passport-types";
-import { issueHashedCredential, objToSortedArray } from "../src/credentials.js";
+import { issueNullifiableCredential } from "../src/credentials.js";
+import {
+  HashNullifierGenerator,
+  objToSortedArray,
+} from "../src/nullifierGenerators.js";
 import { getIssuerKey, getEip712Issuer } from "../src/issuers.js";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 import * as base64 from "@ethersproject/base64";
 
 // ---- crypto lib for hashing
 import { createHash } from "crypto";
+
+const nullifierGenerator = HashNullifierGenerator({ key: "test" });
+const nullifierGenerators = [nullifierGenerator];
 
 // this would need to be a valid key but we've mocked out didkit (and no verifications are made)
 describe("EIP712 credential", function () {
@@ -26,18 +32,19 @@ describe("EIP712 credential", function () {
         createHash("sha256")
           .update(getIssuerKey("EIP712"))
           .update(JSON.stringify(objToSortedArray(record)))
-          .digest(),
+          .digest()
       );
 
-    // Details of this credential are created by issueHashedCredential - but the proof is added by DIDKit (which is mocked)
-    const { credential } = await issueHashedCredential(
+    // Details of this credential are created by issueNullifiableCredential - but the proof is added by DIDKit (which is mocked)
+    const { credential } = await issueNullifiableCredential({
       DIDKit,
-      getIssuerKey("EIP712"),
-      "0x0",
+      issuerKey: getIssuerKey("EIP712"),
+      address: "0x0",
       record,
-      100,
-      "EIP712",
-    );
+      expiresInSeconds: 100,
+      signatureType: "EIP712",
+      nullifierGenerators,
+    });
     const signedCredential = credential as VerifiableEip712Credential;
 
     const standardizedTypes = signedCredential.proof.eip712Domain.types;
@@ -50,7 +57,7 @@ describe("EIP712 credential", function () {
       domain,
       standardizedTypes,
       signedCredential,
-      signedCredential.proof.proofValue,
+      signedCredential.proof.proofValue
     );
 
     const expectedEthSignerAddress = getEip712Issuer().split(":").pop();
