@@ -5,14 +5,15 @@
     "esModuleInterop": true,
     "declaration": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es5",
+    "target": "ESNext",
     "moduleResolution": "nodenext",
     "sourceMap": true,
     "outDir": "dist/esm",
     "allowJs": true,
     "baseUrl": "src",
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "lib": ["ESNext"]
   },
   "include": ["src/*", "___test___", "integration-tests"]
 }
