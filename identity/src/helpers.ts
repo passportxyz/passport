@@ -31,3 +31,12 @@ export class UnexpectedApiError extends ApiError {
     this.name = this.constructor.name;
   }
 }
+
+// Create an ordered array of the given input (of the form [[key:string, value:string], ...])
+export const objToSortedArray = (obj: { [k: string]: string }): string[][] => {
+  const keys: string[] = Object.keys(obj).sort();
+  return keys.reduce((out: string[][], key: string) => {
+    out.push([key, obj[key]]);
+    return out;
+  }, [] as string[][]);
+};
