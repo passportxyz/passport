@@ -1,27 +1,20 @@
-import { fetchPassportScore } from "../src/utils/scorerService.js";
+import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 
-// Import the entire module to help with typing
-import * as scorerService from "../src/utils/scorerService.js";
-
-// Type for the mocked function (adjust as needed based on the actual implementation)
-type MockedFunction = jest.MockedFunction<typeof scorerService.fetchPassportScore>;
-
-jest.mock("../src/utils/scorerService", () => {
-  const actualModule = jest.requireActual("../src/utils/scorerService");
+jest.unstable_mockModule("../src/utils/scorerService.js", () => {
   return {
-    ...actualModule,
     fetchPassportScore: jest.fn(),
-  } as typeof scorerService;
+  };
 });
 
-describe("score utilities", () => {
-  let mockedFetchPassportScore: MockedFunction;
+// Import the entire module to help with typing
+const { fetchPassportScore } = await import("../src/utils/scorerService.js");
 
+const mockedFetchPassportScore = fetchPassportScore as jest.Mock;
+
+describe("score utilities", () => {
   beforeEach(() => {
     // Clear all mocks before each test
     jest.clearAllMocks();
-    // Get the mocked function
-    mockedFetchPassportScore = scorerService.fetchPassportScore as MockedFunction;
   });
 
   it("should return custom scorer id if provided", async () => {

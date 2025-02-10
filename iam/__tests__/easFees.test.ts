@@ -1,17 +1,21 @@
-import { getEASFeeAmount } from "../src/utils/easFees.js";
-import { parseEther } from "ethers";
-import Moralis from "moralis";
-import { PassportCache } from "@gitcoin/passport-platforms";
+import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 
-jest.mock("moralis", () => ({
-  EvmApi: {
-    token: {
-      getTokenPrice: jest.fn().mockResolvedValue({
-        result: { usdPrice: 3000 },
-      }),
+jest.unstable_mockModule("moralis", () => ({
+  default: {
+    EvmApi: {
+      token: {
+        getTokenPrice: jest.fn().mockResolvedValue({
+          result: { usdPrice: 3000 },
+        }),
+      },
     },
   },
 }));
+
+import { parseEther } from "ethers";
+const { getEASFeeAmount } = await import("../src/utils/easFees.js");
+const Moralis = await import("moralis");
+const { PassportCache } = await import("@gitcoin/passport-platforms");
 
 jest.spyOn(PassportCache.prototype, "init").mockImplementation(() => Promise.resolve());
 
@@ -60,7 +64,9 @@ describe("EthPriceLoader", () => {
 
       jest.spyOn(PassportCache.prototype, "set").mockImplementation(() => Promise.resolve());
 
-      (Moralis.EvmApi.token.getTokenPrice as jest.Mock).mockRejectedValueOnce(new Error("Failed fetching price"));
+      (Moralis.default.EvmApi.token.getTokenPrice as jest.Mock).mockRejectedValueOnce(
+        new Error("Failed fetching price")
+      );
       await getEASFeeAmount(2);
       expect(consoleSpy).toHaveBeenCalledWith("MORALIS ERROR: Failed to get ETH price, Error: Failed fetching price");
     });
@@ -110,7 +116,7 @@ describe("EthPriceLoader", () => {
     await getEASFeeAmount(3);
     await getEASFeeAmount(4);
 
-    expect(Moralis.EvmApi.token.getTokenPrice).toHaveBeenCalledTimes(1);
+    expect(Moralis.default.EvmApi.token.getTokenPrice).toHaveBeenCalledTimes(1);
   });
 
   it("should call Moralis API again if cachePeriod is exceeded", async () => {
@@ -130,6 +136,6 @@ describe("EthPriceLoader", () => {
 
     await getEASFeeAmount(2);
 
-    expect(Moralis.EvmApi.token.getTokenPrice).toHaveBeenCalledTimes(2);
+    expect(Moralis.default.EvmApi.token.getTokenPrice).toHaveBeenCalledTimes(2);
   });
 });

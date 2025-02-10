@@ -1,4 +1,4 @@
-import passportOnchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
+import passportOnchainInfo from "../../../deployments/onchainInfo.json" with { type: "json" };
 import { Wallet, TypedDataDomain } from "ethers";
 
 export const getAttestationDomainSeparator = (chainIdHex: keyof typeof passportOnchainInfo): TypedDataDomain => {

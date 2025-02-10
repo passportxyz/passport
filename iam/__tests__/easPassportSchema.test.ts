@@ -1,11 +1,6 @@
-import * as easPassportModule from "../src/utils/easPassportSchema.js";
-import * as easStampModule from "../src/utils/easStampSchema.js";
-import passportOnchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
+import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 
-import { VerifiableCredential } from "@gitcoin/passport-types";
-import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
-
-jest.mock("../src/utils/scorerService", () => ({
+jest.unstable_mockModule("../src/utils/scorerService.js", () => ({
   fetchPassportScore: jest.fn().mockImplementation(() => {
     return Promise.resolve({
       score: 10,
@@ -13,6 +8,28 @@ jest.mock("../src/utils/scorerService", () => ({
     });
   }),
 }));
+
+jest.unstable_mockModule("../src/static/providerBitMapInfo.json", () => ({
+  default: [
+    {
+      name: "mockProvider",
+      index: 0,
+      bit: 1,
+    },
+
+    {
+      name: "mockProvider1",
+      index: 1,
+      bit: 0,
+    },
+  ],
+}));
+
+import passportOnchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
+import { VerifiableCredential } from "@gitcoin/passport-types";
+import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
+
+const easPassportModule = await import("../src/utils/easPassportSchema.js");
 
 // Prepare a mock stamp
 const mockStamp = {
@@ -26,20 +43,6 @@ const mockStamp1 = {
   index: 1,
   bit: 0,
 };
-
-jest.mock("../src/static/providerBitMapInfo.json", () => [
-  {
-    name: "mockProvider",
-    index: 0,
-    bit: 1,
-  },
-
-  {
-    name: "mockProvider1",
-    index: 1,
-    bit: 0,
-  },
-]);
 
 const defaultRequestData = {
   recipient: "0x123",
@@ -112,8 +115,6 @@ describe("formatMultiAttestationRequestWithPassportAndScore", () => {
 
 describe("formatMultiAttestationRequestWithScore", () => {
   it("should return formatted attestation request containing passport and score attestations", async () => {
-    jest.spyOn(easStampModule, "encodeEasScore").mockReturnValue("0x00000000000000000000000");
-
     const recipient = "0x123";
     const chainIdHex = "0x14a33";
     const result = await easPassportModule.formatMultiAttestationRequestWithScore(recipient, chainIdHex);
@@ -125,7 +126,7 @@ describe("formatMultiAttestationRequestWithScore", () => {
         data: [
           {
             ...defaultRequestData,
-            data: "0x00000000000000000000000",
+            data: "0x0000000000000000000000000000000000000000000000008ac7230489e80000000000000000000000000000000000000000000000000000000000000000014f0000000000000000000000000000000000000000000000000000000000000012",
           },
         ],
       },

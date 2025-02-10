@@ -14,7 +14,7 @@
     "start": "node .",
     "debug": "concurrently --kill-others \"tsc --watch\" \"node --watch --inspect .\"",
     "prod:start": "tsc && node .",
-    "test": "jest --verbose",
+    "test": "node --experimental-vm-modules ../node_modules/jest/bin/jest.js",
     "prettier": "prettier --write .",
     "lint": "tsc --noEmit",
     "lint:fix": "eslint --fix --ext .ts,.js,.tsx .",
@@ -69,7 +69,10 @@
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "@swc/cli": "^0.6.0",
+    "@swc/core": "^1.10.14",
+    "@swc/jest": "^0.2.37"
   },
   "resolutions": {
     "leveldown": "6.1.1"

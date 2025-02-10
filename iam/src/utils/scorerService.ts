@@ -9,7 +9,7 @@ export class IAMError extends Error {
   }
 }
 
-type GetScoreResponse = {
+export type GetScoreResponse = {
   data: {
     status: string;
     evidence: {

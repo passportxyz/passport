@@ -1,11 +1,6 @@
-import * as easStampModule from "../src/utils/easStampSchema.js";
-import { VerifiableCredential } from "@gitcoin/passport-types";
-import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
-import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { parseUnits } from "ethers";
-import passportOnchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
+import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 
-jest.mock("../src/utils/scorerService", () => ({
+jest.unstable_mockModule("../src/utils/scorerService.js", () => ({
   fetchPassportScore: jest.fn().mockImplementation(() => {
     return Promise.resolve({
       score: 10,
@@ -13,6 +8,13 @@ jest.mock("../src/utils/scorerService", () => ({
     });
   }),
 }));
+
+const easStampModule = await import("../src/utils/easStampSchema.js");
+import { VerifiableCredential } from "@gitcoin/passport-types";
+const { NO_EXPIRATION, ZERO_BYTES32 } = await import("@ethereum-attestation-service/eas-sdk");
+const { SchemaEncoder } = await import("@ethereum-attestation-service/eas-sdk");
+const { parseUnits } = await import("ethers");
+import passportOnchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
 
 const ensProviderConfig = {
   platformGroup: "Account Name",
