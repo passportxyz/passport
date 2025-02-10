@@ -24,7 +24,7 @@ import {
   EasRequestBody,
 } from "@gitcoin/passport-types";
 
-import passportOnchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
+import passportOnchainInfo from "../../deployments/onchainInfo.json" with { type: "json" };
 
 import {
   getChallenge,
@@ -166,7 +166,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
           // return the verifiable credential
           return res.json(credential as CredentialResponseBody);
         })
-        .catch((error) => {
+        .catch((error): void => {
           if (error) {
             // return error msg indicating a failure producing VC
             return void errorRes(res, "Unable to produce a verifiable credential", 400);
@@ -225,7 +225,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
 
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   return void verifyCredential(DIDKit, challenge)
-    .then(async (verified) => {
+    .then(async (verified): Promise<void> => {
       if (verified && hasValidIssuer(challenge.issuer)) {
         let address;
         try {
@@ -264,7 +264,7 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
       // error response
       return void errorRes(res, "Unable to verify payload", 401);
     })
-    .catch((error) => {
+    .catch((error): void => {
       if (error instanceof ApiError) {
         return void errorRes(res, error.message, error.code);
       }
@@ -304,7 +304,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
             };
           })
         )
-          .then(async (credentialVerifications) => {
+          .then(async (credentialVerifications): Promise<void> => {
             const invalidCredentials = credentialVerifications
               .filter(({ verified }) => !verified)
               .map(({ credential }) => credential);
@@ -332,7 +332,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 
             signer
               .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
-              .then((signature) => {
+              .then((signature): void => {
                 const { v, r, s } = Signature.from(signature);
 
                 const payload: EasPayload = {
@@ -343,15 +343,15 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
 
                 return void res.type("application/json").send(toJsonObject(payload));
               })
-              .catch(() => {
+              .catch((): void => {
                 return void errorRes(res, "Error signing passport", 500);
               });
           })
-          .catch(() => {
+          .catch((): void => {
             return void errorRes(res, "Error formatting onchain passport", 500);
           });
       })
-      .catch(() => {
+      .catch((): void => {
         return void errorRes(res, "Error formatting onchain passport", 500);
       });
   } catch (error) {
@@ -419,7 +419,7 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
 
             signer
               .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
-              .then((signature) => {
+              .then((signature): Promise<void> => {
                 const { v, r, s } = Signature.from(signature);
 
                 const payload: EasPayload = {
@@ -434,12 +434,12 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
                 return void errorRes(res, "Error signing passport", 500);
               });
           })
-          .catch((error) => {
+          .catch((error): void => {
             const message = addErrorDetailsToMessage("Error formatting onchain passport", error);
             return void errorRes(res, message, 500);
           });
       })
-      .catch((error) => {
+      .catch((error): void => {
         const message = addErrorDetailsToMessage("Error formatting onchain passport", error);
         return void errorRes(res, message, 500);
       });
@@ -481,7 +481,7 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
 
       signer
         .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
-        .then((signature) => {
+        .then((signature): void => {
           const { v, r, s } = Signature.from(signature);
 
           const payload: EasPayload = {
@@ -492,7 +492,7 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
 
           return void res.json(toJsonObject(payload));
         })
-        .catch(() => {
+        .catch((): void => {
           return void errorRes(res, "Error signing score", 500);
         });
     } catch (error) {

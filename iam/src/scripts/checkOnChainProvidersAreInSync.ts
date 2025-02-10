@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import { JsonRpcProvider, Contract, version } from "ethers";
-import passportDecoderAbi from "../../../deployments/abi/GitcoinPassportDecoder.json";
+import passportDecoderAbi from "../../../deployments/abi/GitcoinPassportDecoder.json" with { type: "json" };
+import providerBitMapInfo from "../static/providerBitMapInfo.json" with { type: "json" };
 
-import providerBitMapInfo from "../static/providerBitMapInfo.json" assert { type: "json" };
 dotenv.config();
 
 console.log(process.argv);

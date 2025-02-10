@@ -113,7 +113,7 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): Promise<void
         };
       })
     )
-      .then(async (credentialVerifications) => {
+      .then(async (credentialVerifications): Promise<void> => {
         const SCROLL_BADGE_PROVIDER_INFO: Record<
           string,
           {
@@ -235,7 +235,7 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): Promise<void
 
         signer
           .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
-          .then((signature) => {
+          .then((signature): void => {
             const { v, r, s } = Signature.from(signature);
 
             const payload: EasPayload = {
@@ -246,12 +246,12 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): Promise<void
 
             return void res.json(toJsonObject(payload));
           })
-          .catch((e) => {
+          .catch((e): void => {
             console.log("Error signing badge request", { e });
             return void errorRes(res, "Error signing badge request", 500);
           });
       })
-      .catch((e) => {
+      .catch((e): void => {
         console.log("Error formatting badge request", { e });
         return void errorRes(res, "Error formatting badge request", 500);
       });
