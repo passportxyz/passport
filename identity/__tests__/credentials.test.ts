@@ -6,7 +6,11 @@ import {
 } from "../src/credentials";
 import { getIssuerKey } from "../src/issuers";
 import { objToSortedArray } from "../src/helpers";
-import { HashNullifierGenerator } from "../src/nullifierGenerators";
+import {
+  HashNullifierGenerator,
+  MishtiNullifierGenerator,
+} from "../src/nullifierGenerators";
+import { mishtiOprf } from "../src/mishtiOprf";
 
 // ---- original DIDKit lib
 import * as OriginalDIDKit from "@spruceid/didkit-wasm-node";
@@ -34,9 +38,14 @@ const DIDKit: DIDKitLib = mockDIDKit as unknown as DIDKitLib;
 // this would need to be a valid key but we've mocked out didkit (and no verifications are made)
 const key = "SAMPLE_KEY";
 
+jest.mock("../src/mishtiOprf", () => ({
+  mishtiOprf: jest.fn(),
+  initMishti: jest.fn(),
+}));
+
 // Set up nullifier generators
-const nullifierGenerator = HashNullifierGenerator({ key });
-const nullifierGenerators: NullifierGenerators = [nullifierGenerator];
+const hashNullifierGenerator = HashNullifierGenerator({ key });
+const nullifierGenerators: NullifierGenerators = [hashNullifierGenerator];
 describe("issueChallengeCredential", function () {
   beforeEach(() => {
     mockDIDKit.clearDidkitMocks();
@@ -160,13 +169,16 @@ describe("issueNullifiableCredential", function () {
   });
 
   it("can generate an eip712 signed credential containing hash", async () => {
+    const mockMishtiOprfResponse = "encrypted";
+    (mishtiOprf as jest.Mock).mockResolvedValue(mockMishtiOprfResponse);
+
     const record = {
       type: "Simple",
       version: "Test-Case-1",
       address: "0x0",
     };
 
-    const expectedHash: string =
+    const expectedStandardHash: string =
       "v0.0.0:" +
       base64.encode(
         createHash("sha256")
@@ -175,12 +187,30 @@ describe("issueNullifiableCredential", function () {
           .digest()
       );
 
+    const secret = "secret";
+
+    const expectedHNHash =
+      "v0.0.0:" +
+      base64.encode(
+        createHash("sha256")
+          .update(secret)
+          .update(mockMishtiOprfResponse)
+          .digest()
+      );
+
     const { credential } = await issueNullifiableCredential({
       DIDKit,
       issuerKey: key,
       address: "0x0",
       record,
-      nullifierGenerators,
+      nullifierGenerators: [
+        hashNullifierGenerator,
+        MishtiNullifierGenerator({
+          clientPrivateKey: "",
+          relayUrl: "",
+          localSecret: secret,
+        }),
+      ],
       expiresInSeconds: 100,
       signatureType: "EIP712",
     });
@@ -194,7 +224,10 @@ describe("issueNullifiableCredential", function () {
     expect(Array.isArray(credential.credentialSubject.nullifiers)).toEqual(
       true
     );
-    expect(credential.credentialSubject.nullifiers).toEqual([expectedHash]);
+    expect(credential.credentialSubject.nullifiers).toEqual([
+      expectedStandardHash,
+      expectedHNHash,
+    ]);
     expect(typeof credential.proof).toEqual("object");
     expect(credential["@context"]).toContain(
       "https://w3id.org/vc/status-list/2021/v1"

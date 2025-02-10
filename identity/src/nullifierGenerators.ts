@@ -23,6 +23,19 @@ type HashNullifierGeneratorOptions = {
   key: string;
 };
 
+/*
+  Example usage:
+
+    {
+      ...
+      nullifierGenerators: [
+        HashNullifierGenerator({ key: privateKey, version: 1 }),
+        MishtiNullifierGenerator({ clientPrivateKey: mishtiKey, relayUrl, localSecret: privateKey, version: 1 }),
+      ];
+    }
+
+*/
+
 export const HashNullifierGenerator =
   ({ key }: HashNullifierGeneratorOptions): NullifierGenerator =>
   ({ record }) => {
