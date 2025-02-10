@@ -37,14 +37,12 @@ import {
 
 const identityMock = await import("../src/utils/identityHelper.js");
 
-
 const issuer = identityMock.getEip712Issuer();
 const verifyCredential = identityMock.verifyCredential;
 const hasValidIssuer = identityMock.hasValidIssuer;
 const verifyChallengeAndGetAddress = identityMock.verifyChallengeAndGetAddress;
 const VerifyDidChallengeBaseError = identityMock.VerifyDidChallengeBaseError;
 const verifyProvidersAndIssueCredentialsMock = identityMock.verifyProvidersAndIssueCredentials as jest.Mock;
-
 
 const getMockEIP712Credential = (provider: string, address: string): VerifiableCredential => {
   return {
