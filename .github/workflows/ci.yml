@@ -27,6 +27,8 @@ jobs:
           cache: "yarn"
       - name: Install Packages
         run: yarn install --frozen-lockfile
+      - name: Cat platforms/jest.config.ts
+        run: cat platforms/jest.config.ts
       - name: Run Tests
         run: yarn test
       # - name: Run Linter
