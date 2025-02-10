@@ -1,6 +1,3 @@
-// ---- Web3 packages
-import { isAddress } from "ethers";
-
 // ---- Types
 import { Response } from "express";
 import { RequestPayload, CredentialResponseBody, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
@@ -12,7 +9,7 @@ import { checkCredentialBans } from "./bans.js";
 import { getIssuerKey } from "./issuers.js";
 
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import { HashNullifierGenerator } from "nullifierGenerators.js";
+import { HashNullifierGenerator } from "./nullifierGenerators.js";
 
 export class IAMError extends Error {
   constructor(public message: string) {
@@ -53,7 +50,10 @@ export const addErrorDetailsToMessage = (message: string, error: any): string =>
 };
 
 export class VerificationError extends Error {
-  constructor(public message: string, public code: number) {
+  constructor(
+    public message: string,
+    public code: number
+  ) {
     super(message);
     this.name = this.constructor.name;
   }
@@ -67,8 +67,8 @@ export type VerifyTypeResult = {
 };
 
 const providerTypePlatformMap = Object.entries(platforms).reduce(
-  (acc, [platformName, { PlatformDetails, ProviderConfig }]) => {
-    ProviderConfig.forEach(({ platformGroup, providers }) => {
+  (acc, [platformName, { ProviderConfig }]) => {
+    ProviderConfig.forEach(({ providers }) => {
       providers.forEach(({ name }) => {
         acc[name] = platformName;
       });
@@ -80,14 +80,17 @@ const providerTypePlatformMap = Object.entries(platforms).reduce(
 
 export function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
-    types.reduce((groupedProviders, type) => {
-      const platform = providerTypePlatformMap[type] || "generic";
+    types.reduce(
+      (groupedProviders, type) => {
+        const platform = providerTypePlatformMap[type] || "generic";
 
-      if (!groupedProviders[platform]) groupedProviders[platform] = [];
-      groupedProviders[platform].push(type);
+        if (!groupedProviders[platform]) groupedProviders[platform] = [];
+        groupedProviders[platform].push(type);
 
-      return groupedProviders;
-    }, {} as { [k: keyof typeof platforms]: string[] })
+        return groupedProviders;
+      },
+      {} as { [k: keyof typeof platforms]: string[] }
+    )
   );
 }
 
@@ -171,7 +174,7 @@ export async function verifyTypes(
  * @returns An array of issued credentials
  *
  * This function will verify the request for all the providers listed in providersByPlatform and
- * return an credential for each verification that is succeful or an error where this failed.
+ * return an credential for each verification that is successful or an error where this failed.
  *
  * Credentials are verified against existing bans in the scorer service.
  */

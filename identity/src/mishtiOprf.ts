@@ -1,10 +1,3 @@
-// ---- Types
-import { ProofRecord } from "@gitcoin/passport-types";
-
-// ---- Generate & Verify methods
-import { objToSortedArray } from "./helpers.js";
-
-// All provider exports from platforms
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
 
@@ -17,7 +10,11 @@ const initializeMishti = () => {
   const monorepoBaseDir = dirname(process.cwd());
   const wasmPath = join(monorepoBaseDir, "node_modules/@holonym-foundation/mishtiwasm/pkg/esm", "mishtiwasm_bg.wasm");
 
+  // TODO leaving in in case there are any weird
+  // issues in other environments, but can be removed
+  // next time we're in this file
   console.log("Loading wasm module", wasmPath);
+
   const wasmModuleBuffer = readFileSync(wasmPath);
 
   mishtiInitSync({ module: wasmModuleBuffer });

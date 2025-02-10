@@ -7,7 +7,7 @@ import * as base64 from "@ethersproject/base64";
 // --- Crypto lib for hashing
 import { createHash } from "crypto";
 import { objToSortedArray } from "./helpers.js";
-import { mishtiOprf } from "mishtiOprf.js";
+import { mishtiOprf } from "./mishtiOprf.js";
 
 // TODO should probably switch to just v1, v2, etc and
 // increment with each new key, and maybe use as an option
