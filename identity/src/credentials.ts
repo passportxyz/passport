@@ -8,9 +8,6 @@ import {
   SignatureType,
 } from "@gitcoin/passport-types";
 
-// Keeping track of the hashing mechanism (algo + content)
-export const VERSION = "v0.0.0";
-
 const ONE_DAY_IN_MS = 1000 * 60 * 60 * 24;
 export const MAX_VALID_DID_SESSION_AGE = ONE_DAY_IN_MS;
 
@@ -180,6 +177,9 @@ export const issueChallengeCredential = async (
   } as IssuedCredential;
 };
 
+// At least one
+export type NullifierGenerators = [NullifierGenerator, ...NullifierGenerator[]];
+
 // Return a verifiable credential with embedded nullifier(s)
 export const issueNullifiableCredential = async ({
   DIDKit,
@@ -194,8 +194,7 @@ export const issueNullifiableCredential = async ({
   issuerKey: string;
   address: string;
   record: ProofRecord;
-  // At least one NullifierGenerator
-  nullifierGenerators: [NullifierGenerator, ...NullifierGenerator[]];
+  nullifierGenerators: NullifierGenerators;
   expiresInSeconds: number;
   signatureType?: string;
 }): Promise<IssuedCredential> => {
@@ -212,7 +211,10 @@ export const issueNullifiableCredential = async ({
       {
         credentialSubject: {
           "@context": {
-            hash: "https://schema.org/Text",
+            nullifiers: {
+              "@container": "@list",
+              "@type": "https://schema.org/Text",
+            },
             provider: "https://schema.org/Text",
           },
 
@@ -240,7 +242,10 @@ export const issueNullifiableCredential = async ({
       credentialSubject: {
         "@context": [
           {
-            hash: "https://schema.org/Text",
+            nullifiers: {
+              "@container": "@list",
+              "@type": "https://schema.org/Text",
+            },
             provider: "https://schema.org/Text",
           },
         ],

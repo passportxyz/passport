@@ -1,10 +1,11 @@
 import {
   issueChallengeCredential,
   issueNullifiableCredential,
+  NullifierGenerators,
   verifyCredential,
 } from "../src/credentials";
 import { getIssuerKey } from "../src/issuers";
-import { objToSortedArray } from "../src/nullifierGenerators";
+import { objToSortedArray } from "../src/helpers";
 import { HashNullifierGenerator } from "../src/nullifierGenerators";
 
 // ---- original DIDKit lib
@@ -34,8 +35,8 @@ const DIDKit: DIDKitLib = mockDIDKit as unknown as DIDKitLib;
 const key = "SAMPLE_KEY";
 
 // Set up nullifier generators
-const nullifierGenerator = HashNullifierGenerator({ key: "test" });
-const nullifierGenerators = [nullifierGenerator];
+const nullifierGenerator = HashNullifierGenerator({ key });
+const nullifierGenerators: NullifierGenerators = [nullifierGenerator];
 describe("issueChallengeCredential", function () {
   beforeEach(() => {
     mockDIDKit.clearDidkitMocks();
@@ -151,8 +152,10 @@ describe("issueNullifiableCredential", function () {
       `did:pkh:eip155:1:${record.address}`
     );
     expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
-    expect(typeof credential.credentialSubject.hash).toEqual("string");
-    expect(credential.credentialSubject.hash).toEqual(expectedHash);
+    expect(Array.isArray(credential.credentialSubject.nullifiers)).toEqual(
+      true
+    );
+    expect(credential.credentialSubject.nullifiers).toEqual([expectedHash]);
     expect(typeof credential.proof).toEqual("object");
   });
 
@@ -188,8 +191,10 @@ describe("issueNullifiableCredential", function () {
       `did:pkh:eip155:1:${record.address}`
     );
     expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
-    expect(typeof credential.credentialSubject.hash).toEqual("string");
-    expect(credential.credentialSubject.hash).toEqual(expectedHash);
+    expect(Array.isArray(credential.credentialSubject.nullifiers)).toEqual(
+      true
+    );
+    expect(credential.credentialSubject.nullifiers).toEqual([expectedHash]);
     expect(typeof credential.proof).toEqual("object");
     expect(credential["@context"]).toContain(
       "https://w3id.org/vc/status-list/2021/v1"

@@ -1,18 +1,13 @@
 import { VerifiableEip712Credential } from "@gitcoin/passport-types";
 import { issueNullifiableCredential } from "../src/credentials.js";
-import {
-  HashNullifierGenerator,
-  objToSortedArray,
-} from "../src/nullifierGenerators.js";
+import { HashNullifierGenerator } from "../src/nullifierGenerators.js";
 import { getIssuerKey, getEip712Issuer } from "../src/issuers.js";
+import { objToSortedArray } from "../src/helpers";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 import * as base64 from "@ethersproject/base64";
 
 // ---- crypto lib for hashing
 import { createHash } from "crypto";
-
-const nullifierGenerator = HashNullifierGenerator({ key: "test" });
-const nullifierGenerators = [nullifierGenerator];
 
 // this would need to be a valid key but we've mocked out didkit (and no verifications are made)
 describe("EIP712 credential", function () {
@@ -26,11 +21,13 @@ describe("EIP712 credential", function () {
       address: "0x0",
     };
 
+    const issuerKey = getIssuerKey("EIP712");
+
     const expectedHash: string =
       "v0.0.0:" +
       base64.encode(
         createHash("sha256")
-          .update(getIssuerKey("EIP712"))
+          .update(issuerKey)
           .update(JSON.stringify(objToSortedArray(record)))
           .digest()
       );
@@ -43,7 +40,7 @@ describe("EIP712 credential", function () {
       record,
       expiresInSeconds: 100,
       signatureType: "EIP712",
-      nullifierGenerators,
+      nullifierGenerators: [HashNullifierGenerator({ key: issuerKey })],
     });
     const signedCredential = credential as VerifiableEip712Credential;
 
@@ -62,6 +59,8 @@ describe("EIP712 credential", function () {
 
     const expectedEthSignerAddress = getEip712Issuer().split(":").pop();
     expect(signerAddress.toLowerCase()).toEqual(expectedEthSignerAddress);
-    expect(signedCredential.credentialSubject.hash).toEqual(expectedHash);
+    expect(signedCredential.credentialSubject.nullifiers?.[0]).toEqual(
+      expectedHash
+    );
   });
 });

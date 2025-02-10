@@ -13,7 +13,6 @@ import {
 import { getIssuerKey } from "../src/issuers";
 import { checkCredentialBans } from "../src/bans";
 import { providers } from "@gitcoin/passport-platforms";
-import { HashNullifierGenerator } from "../src/nullifierGenerators";
 
 const { verify } = providers;
 
@@ -403,8 +402,6 @@ describe("verifyProvidersAndIssueCredentials", () => {
     };
 
     const currentKey = getIssuerKey("EIP712");
-    const nullifierGenerator = HashNullifierGenerator({ key: "test" });
-    const nullifierGenerators = [nullifierGenerator];
 
     const verifySpy = (verify as jest.Mock<typeof verify>).mockImplementation(
       async (
@@ -422,18 +419,8 @@ describe("verifyProvidersAndIssueCredentials", () => {
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
-    (
-      issueNullifiableCredential as jest.Mock<typeof issueNullifiableCredential>
-    ).mockImplementation(
-      async ({
-        DIDKit,
-        issuerKey,
-        address,
-        record,
-        nullifierGenerators,
-        expiresInSeconds,
-        signatureType,
-      }) => {
+    (issueNullifiableCredential as jest.Mock).mockImplementation(
+      async ({ record }) => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
@@ -450,8 +437,6 @@ describe("verifyProvidersAndIssueCredentials", () => {
       payload
     );
 
-    const verifyTypesSpy = verifyTypes as jest.Mock;
-
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
       issuerKey: currentKey,
@@ -461,10 +446,11 @@ describe("verifyProvidersAndIssueCredentials", () => {
         version: "0.0.0",
         key: "verified-condition",
       },
-      nullifierGenerators,
+      nullifierGenerators: expect.any(Array<Function>),
       expiresInSeconds: undefined,
       signatureType: payload.signatureType,
     });
+
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
       issuerKey: currentKey,
@@ -474,7 +460,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
         version: "0.0.0",
         key: "verified-condition",
       },
-      nullifierGenerators,
+      nullifierGenerators: expect.any(Array<Function>),
       expiresInSeconds: undefined,
       signatureType: payload.signatureType,
     });
@@ -487,7 +473,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
         version: "0.0.0",
         key: "verified-condition",
       },
-      nullifierGenerators,
+      nullifierGenerators: expect.any(Array<Function>),
       expiresInSeconds: undefined,
       signatureType: payload.signatureType,
     });
@@ -500,7 +486,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
         version: "0.0.0",
         key: "verified-condition",
       },
-      nullifierGenerators,
+      nullifierGenerators: expect.any(Array<Function>),
       expiresInSeconds: undefined,
       signatureType: payload.signatureType,
     });
@@ -587,8 +573,6 @@ describe("verifyProvidersAndIssueCredentials", () => {
       signatureType: "EIP712",
     };
     const currentKey = getIssuerKey("EIP712");
-    const nullifierGenerator = HashNullifierGenerator({ key: "test" });
-    const nullifierGenerators = [nullifierGenerator];
 
     const verifySpy = (verify as jest.Mock<typeof verify>).mockImplementation(
       async (
@@ -657,7 +641,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
         version: "0.0.0",
         key: "verified-condition",
       },
-      nullifierGenerators,
+      nullifierGenerators: expect.any(Array<Function>),
       expiresInSeconds: undefined,
       signatureType: payload.signatureType,
     });
@@ -671,7 +655,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
         version: "0.0.0",
         key: "verified-condition",
       },
-      nullifierGenerators,
+      nullifierGenerators: expect.any(Array<Function>),
       expiresInSeconds: undefined,
       signatureType: payload.signatureType,
     });
@@ -685,7 +669,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
         version: "0.0.0",
         key: "verified-condition",
       },
-      nullifierGenerators,
+      nullifierGenerators: expect.any(Array<Function>),
       expiresInSeconds: undefined,
       signatureType: payload.signatureType,
     });
@@ -699,7 +683,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
         version: "0.0.0",
         key: "verified-condition",
       },
-      nullifierGenerators,
+      nullifierGenerators: expect.any(Array<Function>),
       expiresInSeconds: undefined,
       signatureType: payload.signatureType,
     });

@@ -1,9 +1,19 @@
 import { isAddress } from "ethers";
 
-import { PROVIDER_ID, ValidResponseBody, SignatureType, VerifiableCredential } from "@gitcoin/passport-types";
+// ---- Types
+import {
+  PROVIDER_ID,
+  ValidResponseBody,
+  SignatureType,
+  VerifiableCredential,
+} from "@gitcoin/passport-types";
 
 import { platforms } from "@gitcoin/passport-platforms";
-import { verifyProvidersAndIssueCredentials, VerificationError, addErrorDetailsToMessage } from "./verification.js";
+import {
+  verifyProvidersAndIssueCredentials,
+  VerificationError,
+  addErrorDetailsToMessage,
+} from "./verification.js";
 
 export type AutoVerificationFields = {
   address: string;
@@ -23,7 +33,9 @@ export const getEvmProvidersByPlatform = ({
   scorerId: string;
   onlyCredentialIds?: string[];
 }): PROVIDER_ID[][] => {
-  const evmPlatforms = Object.values(platforms).filter(({ PlatformDetails }) => PlatformDetails.isEVM);
+  const evmPlatforms = Object.values(platforms).filter(
+    ({ PlatformDetails }) => PlatformDetails.isEVM
+  );
 
   // TODO we should use the scorerId to check for any EVM stamps particular to a community, and include those here
   const _ = scorerId;
@@ -50,7 +62,10 @@ export const autoVerifyStamps = async ({
   credentialIds,
 }: AutoVerificationFields): Promise<VerifiableCredential[]> => {
   try {
-    const evmProvidersByPlatform = getEvmProvidersByPlatform({ scorerId, onlyCredentialIds: credentialIds });
+    const evmProvidersByPlatform = getEvmProvidersByPlatform({
+      scorerId,
+      onlyCredentialIds: credentialIds,
+    });
 
     if (!isAddress(address)) {
       throw new VerificationError("Invalid address", 400);
@@ -64,7 +79,11 @@ export const autoVerifyStamps = async ({
       signatureType: "EIP712" as SignatureType,
     };
 
-    const results = await verifyProvidersAndIssueCredentials(evmProvidersByPlatform, address, credentialsInfo);
+    const results = await verifyProvidersAndIssueCredentials(
+      evmProvidersByPlatform,
+      address,
+      credentialsInfo
+    );
 
     const ret = results
       .flat()
@@ -76,7 +95,10 @@ export const autoVerifyStamps = async ({
     return ret;
   } catch (error) {
     // TODO: check if error is of a common type used in platforms and evtl. rethrow it
-    const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
+    const message = addErrorDetailsToMessage(
+      "Unexpected error when processing request",
+      error
+    );
     throw new VerificationError(message, 500);
   }
 };
