@@ -17,8 +17,8 @@ export class HolonymPlatform implements Platform {
           Aurora), AVAX, or FTM for Government ID Verification.
         </li>
         <li>
-          Go to <Hyperlink href="https://holonym.id">Holonym's page</Hyperlink>, verify your ID by connecting your
-          wallet, and follow prompts to obtain the Government ID or ePassport Proof.
+          Go to <Hyperlink href="https://silksecure.net/holonym/diff-wallet">Holonym's page</Hyperlink>, verify your ID
+          by connecting your wallet, and follow prompts to obtain the Government ID or ePassport Proof.
         </li>
         <li>After verification, mint the SBT to your wallet, then link it to your Passport by verifying it.</li>
       </ul>
