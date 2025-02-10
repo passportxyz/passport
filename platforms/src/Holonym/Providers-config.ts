@@ -8,7 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect to Holonym to verify your identity without revealing any personal information.",
   connectMessage: "Connect Account",
   isEVM: true,
-  website: "https://holonym.id/",
+  website: "https://silksecure.net/holonym/diff-wallet",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
