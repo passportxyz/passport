@@ -18,7 +18,7 @@ import {
   DocumentType,
   stampCredentialDocument,
 } from "./signingDocuments.js";
-import { NullifierGenerator } from "nullifierGenerators.js";
+import { IgnorableNullifierGeneratorError, NullifierGenerator } from "./nullifierGenerators.js";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
@@ -180,6 +180,35 @@ export const issueChallengeCredential = async (
 // At least one
 export type NullifierGenerators = [NullifierGenerator, ...NullifierGenerator[]];
 
+const getNullifiers = async ({
+  record,
+  nullifierGenerators,
+}: {
+  record: ProofRecord;
+  nullifierGenerators: NullifierGenerators;
+}) => {
+  const nullifierPromiseResults = await Promise.allSettled(nullifierGenerators.map((g) => g({ record })));
+
+  const unexpectedErrors = nullifierPromiseResults
+    .filter((result) => result.status === "rejected")
+    .filter((result) => !(result.reason instanceof IgnorableNullifierGeneratorError));
+
+  if (unexpectedErrors.length > 0) {
+    console.error("Unexpected errors generating nullifiers", unexpectedErrors);
+    throw new Error("Unable to generate nullifiers");
+  }
+
+  const nullifiers = nullifierPromiseResults
+    .filter((result) => result.status === "fulfilled")
+    .map((result) => result.value);
+
+  if (nullifiers.length === 0) {
+    throw new Error("No valid nullifiers generated");
+  }
+
+  return nullifiers;
+};
+
 // Return a verifiable credential with embedded nullifier(s)
 export const issueNullifiableCredential = async ({
   DIDKit,
@@ -198,7 +227,7 @@ export const issueNullifiableCredential = async ({
   expiresInSeconds: number;
   signatureType?: string;
 }): Promise<IssuedCredential> => {
-  const nullifiers = await Promise.all(nullifierGenerators.map((g) => g({ record })));
+  const nullifiers = await getNullifiers({ record, nullifierGenerators });
 
   let credential: VerifiableCredential;
   if (signatureType === "EIP712") {

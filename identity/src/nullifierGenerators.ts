@@ -11,6 +11,14 @@ import { mishtiOprf } from "./mishtiOprf.js";
 
 export type NullifierGenerator = ({ record }: { record: ProofRecord }) => Promise<string>;
 
+// Used during roll out of new nullifier generators
+export class IgnorableNullifierGeneratorError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "IgnorableNullifierGeneratorError";
+  }
+}
+
 type NullifierVersion = number | "0.0.0";
 
 const hashValueWithSecret = ({ secret, value }: { secret: string; value: string }) =>
