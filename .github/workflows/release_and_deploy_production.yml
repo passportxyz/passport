@@ -153,6 +153,7 @@ jobs:
     name: Build Embed Popup and Deploy to Staging S3
     needs: ref
     uses: ./.github/workflows/sync_to_se_generic.yml
+    secrets: inherit
     with:
       refspec: ${{ needs.ref.outputs.refspec }}
       environment: staging
@@ -205,6 +206,7 @@ jobs:
     name: Build Embed Popup and Deploy to Production S3
     needs: ref
     uses: ./.github/workflows/sync_to_se_generic.yml
+    secrets: inherit
     with:
       refspec: ${{ needs.ref.outputs.refspec }}
       environment: production
