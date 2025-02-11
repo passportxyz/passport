@@ -1,4 +1,4 @@
-FROM node:20.11
+FROM node:22.14.0
 WORKDIR /usr/src
 
 COPY . .
