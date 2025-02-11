@@ -9,13 +9,7 @@ import { createHash } from "crypto";
 import { objToSortedArray } from "./helpers.js";
 import { mishtiOprf } from "./mishtiOprf.js";
 
-export type NullifierGenerator = ({
-  record,
-  version,
-}: {
-  record: ProofRecord;
-  version: number | "0.0.0";
-}) => Promise<string>;
+export type NullifierGenerator = ({ record }: { record: ProofRecord }) => Promise<string>;
 
 type NullifierVersion = number | "0.0.0";
 

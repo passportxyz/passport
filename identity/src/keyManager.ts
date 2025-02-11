@@ -4,11 +4,16 @@
 // IAM_JWK_EIP712_V2='{...}'
 // IAM_JWK_EIP712_V2_START_TIME=2021-04-01T00:00:00Z
 //
-// The latest 2 active keys are loaded. "active" means the start time is in the past.
+// All "initiated" keys are loaded, meaning the start time is in the past.
 //
-// Versions must be consecutive after the first present version, but old
-// versions do not need to be present (i.e. just having 21 -> 22 -> 23 is fine,
-// but 21 -> 23 is not).
+// The latest 2 initiated keys are the "active" keys.
+//
+// The older of the 2 "active" keys is the "issuer" key.
+//
+// Each consecutive version must have a monotonically increasing start time.
+//
+// Old keys can be removed from the ENV, and gaps are allowed. But we should hold
+// onto keys until any credentials issued with those keys are expired
 
 const MAX_CONCURRENT_KEYS = 2;
 
@@ -29,7 +34,7 @@ const loadKeyFromEnv = ({ version }: { version: number }): KeyVersion | undefine
   const startTimeStr = process.env[getStartTimeEnvName(version)];
 
   if (!key || !startTimeStr) {
-    return undefined;
+    throw new Error(`Missing key value or start time for version ${version}`);
   }
 
   const startTime = new Date(startTimeStr);
@@ -40,20 +45,12 @@ const loadKeyFromEnv = ({ version }: { version: number }): KeyVersion | undefine
   return { key, startTime, version };
 };
 
-const getStartVersion = () => {
-  const startVersion = Math.min(
-    ...Object.keys(process.env)
-      .map((key) => key.match(keyEnvNameRegex)?.groups?.version)
-      .filter((v) => v)
-      .map(parseInt)
-  );
-
-  if (isNaN(startVersion) || startVersion < 1) {
-    throw new Error("No valid key versions found in environment variables");
-  }
-
-  return startVersion;
-};
+const getVersions = () =>
+  Object.keys(process.env)
+    .map((key) => key.match(keyEnvNameRegex)?.groups?.version)
+    .filter((v) => v)
+    .map(Number)
+    .sort();
 
 // Enforce monotonically increasing start times
 const checkKeyOrder = (keys: KeyVersion[]) => {
@@ -68,32 +65,43 @@ const checkKeyOrder = (keys: KeyVersion[]) => {
 };
 
 const loadInitiatedKeys = (): KeyVersion[] => {
-  const initiatedKeys: KeyVersion[] = [];
+  const initiatedKeyVersions: KeyVersion[] = [];
 
-  let version = getStartVersion();
+  const versions = getVersions();
 
-  while (true) {
-    const key = loadKeyFromEnv({ version });
+  for (const version of versions) {
+    const keyVersion = loadKeyFromEnv({ version });
 
-    // Break if no key found, or if we found a future key
-    if (!key || key.startTime > new Date()) {
+    // Break if we found a future key
+    if (keyVersion.startTime > new Date()) {
       break;
     }
 
-    initiatedKeys.push(key);
-    version++;
+    initiatedKeyVersions.push(keyVersion);
   }
 
-  if (initiatedKeys.length === 0) {
+  if (initiatedKeyVersions.length === 0) {
     throw new Error("No valid keys configured");
   }
 
-  checkKeyOrder(initiatedKeys);
-
-  return initiatedKeys;
+  return initiatedKeyVersions;
 };
 
-export const getCurrentKeys = (): KeyVersion[] => {
-  const initiatedKeys = loadInitiatedKeys();
-  return initiatedKeys.slice(-MAX_CONCURRENT_KEYS);
+export const getKeyVersions = (): {
+  initiatedKeyVersions: KeyVersion[];
+  activeKeyVersions: KeyVersion[];
+  issuerKeyVersion: KeyVersion;
+} => {
+  const initiatedKeyVersions = loadInitiatedKeys();
+
+  checkKeyOrder(initiatedKeyVersions);
+
+  const activeKeyVersions = initiatedKeyVersions.slice(-MAX_CONCURRENT_KEYS);
+  const issuerKeyVersion = activeKeyVersions[0];
+
+  return {
+    initiatedKeyVersions,
+    activeKeyVersions,
+    issuerKeyVersion,
+  };
 };

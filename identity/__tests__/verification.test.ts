@@ -10,9 +10,10 @@ import {
   verifyTypes,
   verifyProvidersAndIssueCredentials,
 } from "../src/verification";
-import { getIssuerKey } from "../src/issuers";
-import { checkCredentialBans } from "../src/bans";
 import { providers } from "@gitcoin/passport-platforms";
+import { checkCredentialBans } from "../src/bans";
+import { generateEIP712PairJWK } from "../src/helpers";
+import { getKeyVersions } from "../src/keyManager";
 
 const { verify } = providers;
 
@@ -46,6 +47,12 @@ jest.mock("../src/bans", () => ({
     .fn()
     .mockImplementation((input) => Promise.resolve(input)),
 }));
+
+jest.mock("../src/keyManager", () => ({
+  getKeyVersions: jest.fn(),
+}));
+
+const mockIssuerKey = generateEIP712PairJWK();
 
 const createMockVerifiableCredential = (
   provider: string,
@@ -114,6 +121,12 @@ function getMockedIssuedCredential(
 describe("verifyTypes", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const mockKey = { key: mockIssuerKey, version: 1, startTime: new Date() };
+    (getKeyVersions as jest.Mock).mockImplementation(() => ({
+      initiatedKeyVersions: [mockKey],
+      activeKeyVersions: [mockKey],
+      issuerKeyVersion: mockKey,
+    }));
   });
 
   it.only("should call providers.verify for the 'regular' providers in providersByPlatform and accumulate values in the context", async () => {
@@ -388,6 +401,12 @@ describe("verifyTypes", () => {
 describe("verifyProvidersAndIssueCredentials", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const mockKey = { key: mockIssuerKey, version: 1, startTime: new Date() };
+    (getKeyVersions as jest.Mock).mockImplementation(() => ({
+      initiatedKeyVersions: [mockKey],
+      activeKeyVersions: [mockKey],
+      issuerKeyVersion: mockKey,
+    }));
   });
 
   it.only("should issue valid credentials via issueHashedCredentials", async () => {
@@ -401,9 +420,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
       signatureType: "EIP712",
     };
 
-    const currentKey = getIssuerKey("EIP712");
-
-    const verifySpy = (verify as jest.Mock<typeof verify>).mockImplementation(
+    const verifySpy = (providers.verify as jest.Mock).mockImplementation(
       async (
         provider: string,
         payload: RequestPayload,
@@ -439,7 +456,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
 
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: {
         type: "provider-1",
@@ -453,7 +470,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
 
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: {
         type: "provider-2",
@@ -466,7 +483,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     });
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: {
         type: "provider-3",
@@ -479,7 +496,107 @@ describe("verifyProvidersAndIssueCredentials", () => {
     });
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
+      address: mockAddress,
+      record: {
+        type: "provider-4",
+        version: "0.0.0",
+        key: "verified-condition",
+      },
+      nullifierGenerators: expect.any(Array<Function>),
+      expiresInSeconds: undefined,
+      signatureType: payload.signatureType,
+    });
+  });
+
+  it("should verify the issued credentials against the ban list", async () => {
+    const mockAddress = "0x123";
+    let payload: RequestPayload = {
+      version: "v0.0.0",
+      address: mockAddress,
+      type: "test-type",
+      challenge: "test-challenge",
+      proofs: {},
+      signatureType: "EIP712",
+    };
+
+    const verifySpy = (providers.verify as jest.Mock).mockImplementation(
+      async (
+        provider: string,
+        payload: RequestPayload,
+        context: ProviderContext
+      ) => {
+        // update the context
+        context[`context-${provider}`] = true;
+        return Promise.resolve({
+          valid: true,
+          record: { key: "verified-condition" },
+        });
+      }
+    );
+
+    const issuedCredentials: VerifiableCredential[] = [];
+    (issueNullifiableCredential as jest.Mock).mockImplementation(
+      async ({ record }) => {
+        const credential = getMockedIssuedCredential(record.type, mockAddress);
+        issuedCredentials.push(credential.credential);
+        return Promise.resolve(credential);
+      }
+    );
+
+    const providersByPlatform = [
+      ["provider-1", "provider-2"],
+      ["provider-3", "provider-4"],
+    ];
+    await verifyProvidersAndIssueCredentials(
+      providersByPlatform,
+      mockAddress,
+      payload
+    );
+
+    expect(issueNullifiableCredential).toHaveBeenCalledWith({
+      DIDKit,
+      issuerKey: mockIssuerKey,
+      address: mockAddress,
+      record: {
+        type: "provider-1",
+        version: "0.0.0",
+        key: "verified-condition",
+      },
+      nullifierGenerators: expect.any(Array<Function>),
+      expiresInSeconds: undefined,
+      signatureType: payload.signatureType,
+    });
+
+    expect(issueNullifiableCredential).toHaveBeenCalledWith({
+      DIDKit,
+      issuerKey: mockIssuerKey,
+      address: mockAddress,
+      record: {
+        type: "provider-2",
+        version: "0.0.0",
+        key: "verified-condition",
+      },
+      nullifierGenerators: expect.any(Array<Function>),
+      expiresInSeconds: undefined,
+      signatureType: payload.signatureType,
+    });
+    expect(issueNullifiableCredential).toHaveBeenCalledWith({
+      DIDKit,
+      issuerKey: mockIssuerKey,
+      address: mockAddress,
+      record: {
+        type: "provider-3",
+        version: "0.0.0",
+        key: "verified-condition",
+      },
+      nullifierGenerators: expect.any(Array<Function>),
+      expiresInSeconds: undefined,
+      signatureType: payload.signatureType,
+    });
+    expect(issueNullifiableCredential).toHaveBeenCalledWith({
+      DIDKit,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: {
         type: "provider-4",
@@ -572,7 +689,6 @@ describe("verifyProvidersAndIssueCredentials", () => {
       proofs: {},
       signatureType: "EIP712",
     };
-    const currentKey = getIssuerKey("EIP712");
 
     const verifySpy = (verify as jest.Mock<typeof verify>).mockImplementation(
       async (
@@ -590,18 +706,8 @@ describe("verifyProvidersAndIssueCredentials", () => {
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
-    (
-      issueNullifiableCredential as jest.Mock<typeof issueNullifiableCredential>
-    ).mockImplementation(
-      async ({
-        DIDKit,
-        issuerKey,
-        address,
-        record,
-        nullifierGenerators,
-        expiresInSeconds,
-        signatureType,
-      }) => {
+    (issueNullifiableCredential as jest.Mock).mockImplementation(
+      async ({ record }) => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
@@ -633,7 +739,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     );
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: {
         type: "provider-1#pii-provider-1",
@@ -647,7 +753,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     });
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: {
         type: "provider-2#pii-provider-2",
@@ -661,7 +767,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     });
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: {
         type: "provider-3#pii-provider-3",
@@ -675,7 +781,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     });
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: {
         type: "provider-4#pii-provider-4",
