@@ -1,5 +1,5 @@
 import passportOnchainInfo from "../../../deployments/onchainInfo.json" with { type: "json" };
-import { Wallet, TypedDataDomain } from "ethers";
+import { Wallet, TypedDataDomain } from "./ethersHelper.js";
 
 export const getAttestationDomainSeparator = (chainIdHex: keyof typeof passportOnchainInfo): TypedDataDomain => {
   const verifyingContract = passportOnchainInfo[chainIdHex].GitcoinVerifier.address;

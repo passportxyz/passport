@@ -2,7 +2,7 @@
 import { Request } from "express";
 
 // ---- Web3 packages
-import { Signature, JsonRpcProvider, Contract } from "ethers";
+import { Signature, JsonRpcProvider, Contract } from "./ethersHelper.js";
 
 // ---- Types
 import { Response } from "express";
@@ -10,11 +10,10 @@ import { EasPayload, PassportAttestation, EasRequestBody } from "@gitcoin/passpo
 import passportOnchainInfo from "../../../deployments/onchainInfo.json" with { type: "json" };
 
 import { getEASFeeAmount } from "./easFees.js";
-import { hasValidIssuer } from "@gitcoin/passport-identity";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import { verifyCredential } from "@gitcoin/passport-identity";
+import { hasValidIssuer, verifyCredential } from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
 

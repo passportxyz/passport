@@ -510,8 +510,6 @@ describe("POST /eas/passport", () => {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    console.log("geri --- ", JSON.stringify(response.body.passport.multiAttestationRequest, undefined, 2));
-
     // TODO: geri, use snapshot here?
     const expectedValue = [
       {
