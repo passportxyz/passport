@@ -47,7 +47,10 @@ export const addErrorDetailsToMessage = (message: string, error: any): string =>
 };
 
 export class VerificationError extends Error {
-  constructor(public message: string, public code: number) {
+  constructor(
+    public message: string,
+    public code: number
+  ) {
     super(message);
     this.name = this.constructor.name;
   }
@@ -74,14 +77,17 @@ const providerTypePlatformMap = Object.entries(platforms).reduce(
 
 export function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
-    types.reduce((groupedProviders, type) => {
-      const platform = providerTypePlatformMap[type] || "generic";
+    types.reduce(
+      (groupedProviders, type) => {
+        const platform = providerTypePlatformMap[type] || "generic";
 
-      if (!groupedProviders[platform]) groupedProviders[platform] = [];
-      groupedProviders[platform].push(type);
+        if (!groupedProviders[platform]) groupedProviders[platform] = [];
+        groupedProviders[platform].push(type);
 
-      return groupedProviders;
-    }, {} as { [k: keyof typeof platforms]: string[] })
+        return groupedProviders;
+      },
+      {} as { [k: keyof typeof platforms]: string[] }
+    )
   );
 }
 

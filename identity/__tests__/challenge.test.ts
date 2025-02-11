@@ -2,8 +2,6 @@ import { RequestPayload } from "@gitcoin/passport-types";
 import { getChallenge } from "../src/challenge.js";
 
 describe("getChallenge", () => {
-  it("Dummy test to keep jest happy - remove when fixing test file", () => {});
-
   it("returns a challenge for EVMBulkVerify", () => {
     const requestPayload = {
       type: "EVMBulkVerify",

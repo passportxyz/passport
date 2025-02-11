@@ -143,9 +143,7 @@ export const verificationHandler = (
   req: Request<ParamsDictionary, AutoVerificationResponseBodyType, EmbedVerifyRequestBody>,
   res: Response
 ): void => {
-  console.log("geri ---- verificationHandler");
   const requestBody: EmbedVerifyRequestBody = req.body;
-  console.log("geri ---- verificationHandler requestBody", requestBody);
   // each verify request should be received with a challenge credential detailing a signature contained in the RequestPayload.proofs
   const challenge = requestBody.challenge;
   // get the payload from the JSON req body
@@ -153,14 +151,10 @@ export const verificationHandler = (
   // get the payload from the JSON req body
   const scorerId = requestBody.scorerId;
 
-  console.log("geri ---- verificationHandler challenge", challenge);
-  console.log("geri ---- verificationHandler payload", payload);
-  console.log("geri ---- verificationHandler scorerId", scorerId);
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   return void verifyCredential(DIDKit, challenge)
     .then(async (verified): Promise<void> => {
       if (verified && hasValidIssuer(challenge.issuer)) {
-        console.log("geri ---- verificationHandler verified", verified);
         let address;
         try {
           address = await verifyChallengeAndGetAddress(requestBody);
@@ -194,7 +188,6 @@ export const verificationHandler = (
           payload
         );
 
-        console.log("geri ---- verificationHandler credentialsVerificationResponses", credentialsVerificationResponses);
         const stamps = credentialsVerificationResponses.reduce((acc, response) => {
           if ("credential" in response && response.credential) {
             if (response.credential) {
@@ -204,7 +197,6 @@ export const verificationHandler = (
           return acc;
         }, [] as VerifiableCredential[]);
 
-        console.log("geri ---- verificationHandler stamps", stamps);
         const score = await addStampsAndGetScore({ address, scorerId, stamps });
 
         return void res.json({

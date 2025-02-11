@@ -37,7 +37,7 @@ import {
   groupProviderTypesByPlatform,
   verifyProvidersAndIssueCredentials,
   verifyChallengeAndGetAddress,
-} from "@gitcoin/passport-identity";
+} from "./utils/identityHelper.js";
 
 import { getEASFeeAmount } from "./utils/easFees.js";
 import * as stampSchema from "./utils/easStampSchema.js";
