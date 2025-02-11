@@ -6,14 +6,15 @@
 //
 // All "initiated" keys are loaded, meaning the start time is in the past.
 //
-// The latest 2 initiated keys are the "active" keys.
+// The newest 2 initiated keys are the "active" keys.
 //
-// The older of the 2 "active" keys is the "issuer" key.
+// The older of the 2 active keys is the "issuer" key.
 //
 // Each consecutive version must have a monotonically increasing start time.
 //
-// Old keys can be removed from the ENV, and gaps are allowed. But we should hold
-// onto keys until any credentials issued with those keys are expired
+// Old keys can be removed from the ENV, and gaps are allowed. But we should
+// generally hold onto keys until any credentials issued with those keys are
+// expired
 
 const MAX_CONCURRENT_KEYS = 2;
 

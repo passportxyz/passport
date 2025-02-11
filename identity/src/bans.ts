@@ -38,21 +38,23 @@ export const checkCredentialBans = async (
       return credentialResponse;
     }
 
-    const ban = bansByHash[credential.credentialSubject.hash];
+    const nullifiers = credential.credentialSubject.nullifiers;
 
-    if (!ban) {
-      throw new UnexpectedApiError(
-        `Ban not found for hash ${credential.credentialSubject.hash}. This should not happen.`
-      );
-    }
+    for (const nullifier of nullifiers) {
+      const ban = bansByHash[nullifier];
 
-    if (ban.is_banned) {
-      return {
-        error:
-          `Credential is banned. Type=${ban.ban_type}, End=${ban.end_time || "indefinite"},` +
-          (ban.reason ? ` Reason=${ban.reason}` : ""),
-        code: 403,
-      };
+      if (!ban) {
+        throw new UnexpectedApiError(`Ban not found for nullifier ${nullifier}. This should not happen.`);
+      }
+
+      if (ban.is_banned) {
+        return {
+          error:
+            `Credential is banned. Type=${ban.ban_type}, End=${ban.end_time || "indefinite"},` +
+            (ban.reason ? ` Reason=${ban.reason}` : ""),
+          code: 403,
+        };
+      }
     }
 
     return credentialResponse;
@@ -64,15 +66,21 @@ const fetchBans = async (credentials: VerifiableCredential[]): Promise<Ban[]> =>
     return [];
   }
 
-  const payload = credentials.map((credential) => {
-    const { hash, provider, id } = credential.credentialSubject;
-    return {
-      credentialSubject: {
-        hash,
-        provider,
-        id,
-      },
-    };
+  const payload: { credentialSubject: { provider: string; id: string; hash: string } }[] = [];
+
+  credentials.forEach((credential) => {
+    const { nullifiers, provider, id } = credential.credentialSubject;
+
+    nullifiers.forEach((nullifier) => {
+      payload.push({
+        credentialSubject: {
+          provider,
+          id,
+          // TODO do we want to modify this payload to expect "nullifier" or "nullifiers" instead of "hash"?
+          hash: nullifier,
+        },
+      });
+    });
   });
 
   try {
