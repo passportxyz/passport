@@ -33,14 +33,6 @@ jobs:
         with:
           node-version: 20.9.0
           cache: "yarn"
-
-      - name: Install 1Password CLI
-        uses: 1password/install-cli-action@v1
-      
-      - name: Configure 1Password Service Account
-        uses: 1password/load-secrets-action/configure@v1
-        with:
-          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
       
       - name: Load secret
         id: op-load-secret
@@ -52,6 +44,15 @@ jobs:
           AWS_ACCESS_KEY_ID: op://DevOps/passport-embed-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
           AWS_SECRET_ACCESS_KEY: op://DevOps/passport-embed-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
           PULUMI_ACCESS_TOKEN: op://DevOps/passport-embed-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
+
+      - name: Install 1Password CLI
+        uses: 1password/install-cli-action@v1
+      
+      - name: Configure 1Password Service Account
+        uses: 1password/load-secrets-action/configure@v1
+        with:
+          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+      
 
       - name: Get envs from 1Pass
         working-directory: embed-popup
