@@ -26,7 +26,7 @@ jobs:
   build-deploy:
     name: Build App and Deploy to Production S3
     needs: ref
-    uses: ./.github/workflows/sync_to_se_generic.yml
+    uses: ./.github/workflows/sync_to_s3_generic.yml
     with:
       refspec: ${{ needs.ref.outputs.refspec }}
       environment: production
