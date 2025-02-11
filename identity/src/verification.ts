@@ -6,10 +6,9 @@ import { RequestPayload, CredentialResponseBody, VerifiedPayload, ProviderContex
 import { platforms, providers } from "@gitcoin/passport-platforms";
 import { issueNullifiableCredential } from "./credentials.js";
 import { checkCredentialBans } from "./bans.js";
-import { getIssuerKey } from "./issuers.js";
+import { getIssuerInfo } from "./issuers.js";
 
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import { HashNullifierGenerator } from "./nullifierGenerators.js";
 
 export class IAMError extends Error {
   constructor(public message: string) {
@@ -203,17 +202,17 @@ export const verifyProvidersAndIssueCredentials = async (
             ...(verifyResult?.record || {}),
           };
 
-          const currentKey = getIssuerKey(payload.signatureType);
+          const { issuerKey, nullifierGenerators } = getIssuerInfo(payload.signatureType);
 
           // generate a VC for the given payload
           ({ credential } = await issueNullifiableCredential({
             DIDKit,
-            issuerKey: currentKey,
+            issuerKey,
             address,
             record,
             expiresInSeconds: verifyResult.expiresInSeconds,
             signatureType: payload.signatureType,
-            nullifierGenerators: [HashNullifierGenerator({ key: currentKey })],
+            nullifierGenerators,
           }));
         }
       } catch {
