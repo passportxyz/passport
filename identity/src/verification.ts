@@ -1,15 +1,12 @@
-// ---- Web3 packages
-import { isAddress } from "ethers";
-
 // ---- Types
 import { Response } from "express";
 import { RequestPayload, CredentialResponseBody, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
 
 // All provider exports from platforms
 import { platforms, providers } from "@gitcoin/passport-platforms";
-import { issueHashedCredential } from "./credentials.js";
+import { issueNullifiableCredential } from "./credentials.js";
 import { checkCredentialBans } from "./bans.js";
-import { getIssuerKey } from "./issuers.js";
+import { getIssuerInfo } from "./issuers.js";
 
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
@@ -69,8 +66,8 @@ export type VerifyTypeResult = {
 };
 
 const providerTypePlatformMap = Object.entries(platforms).reduce(
-  (acc, [platformName, { PlatformDetails, ProviderConfig }]) => {
-    ProviderConfig.forEach(({ platformGroup, providers }) => {
+  (acc, [platformName, { ProviderConfig }]) => {
+    ProviderConfig.forEach(({ providers }) => {
       providers.forEach(({ name }) => {
         acc[name] = platformName;
       });
@@ -176,7 +173,7 @@ export async function verifyTypes(
  * @returns An array of issued credentials
  *
  * This function will verify the request for all the providers listed in providersByPlatform and
- * return an credential for each verification that is succeful or an error where this failed.
+ * return an credential for each verification that is successful or an error where this failed.
  *
  * Credentials are verified against existing bans in the scorer service.
  */
@@ -205,17 +202,18 @@ export const verifyProvidersAndIssueCredentials = async (
             ...(verifyResult?.record || {}),
           };
 
-          const currentKey = getIssuerKey(payload.signatureType);
+          const { issuerKey, nullifierGenerators } = getIssuerInfo(payload.signatureType);
 
           // generate a VC for the given payload
-          ({ credential } = await issueHashedCredential(
+          ({ credential } = await issueNullifiableCredential({
             DIDKit,
-            currentKey,
+            issuerKey,
             address,
             record,
-            verifyResult.expiresInSeconds,
-            payload.signatureType
-          ));
+            expiresInSeconds: verifyResult.expiresInSeconds,
+            signatureType: payload.signatureType,
+            nullifierGenerators,
+          }));
         }
       } catch {
         error = "Unable to produce a verifiable credential";

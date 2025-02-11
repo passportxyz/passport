@@ -84,10 +84,20 @@ export const stampCredentialDocument = (verificationMethod: string): DocumentSig
           name: "name",
         },
       ],
-      "@context": [
+      NullifiersContext: [
         {
           type: "string",
-          name: "hash",
+          name: "@container",
+        },
+        {
+          type: "string",
+          name: "@type",
+        },
+      ],
+      "@context": [
+        {
+          type: "NullifiersContext",
+          name: "nullifiers",
         },
         {
           type: "string",
@@ -152,8 +162,8 @@ export const stampCredentialDocument = (verificationMethod: string): DocumentSig
           name: "@context",
         },
         {
-          type: "string",
-          name: "hash",
+          type: "string[]",
+          name: "nullifiers",
         },
         {
           type: "string",

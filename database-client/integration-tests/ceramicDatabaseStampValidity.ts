@@ -37,6 +37,13 @@ describe("assuming a valid stamp is stored in ceramic", () => {
     // Step 1: First, we need to create a valid stamp
     const verificationMethod: string = (await DIDKit.keyToVerificationMethod("ethr", eip712Key)) as string;
 
+    // TODO temporary workaround until we actually make the new
+    // nullifier format work with ceramic
+    const testStampCredentialDocument = stampCredentialDocument(verificationMethod);
+    delete testStampCredentialDocument.eip712Domain.types.NullifiersContext;
+    testStampCredentialDocument.eip712Domain.types["@context"][0] = { type: "string", name: "hash" };
+    testStampCredentialDocument.eip712Domain.types.CredentialSubject[1] = { type: "string", name: "hash" };
+
     const credential = await issueEip712Credential(
       DIDKit,
       eip712Key,
@@ -52,7 +59,7 @@ describe("assuming a valid stamp is stored in ceramic", () => {
           provider: "Discord",
         },
       },
-      stampCredentialDocument(verificationMethod),
+      testStampCredentialDocument,
       ["https://w3id.org/vc/status-list/2021/v1"]
     );
 

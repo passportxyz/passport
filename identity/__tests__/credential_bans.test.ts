@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { checkCredentialBans } from "../src/bans";
 import { ErrorResponseBody } from "@gitcoin/passport-types";
 import { ApiError, UnexpectedApiError } from "../src/helpers";
@@ -15,7 +15,7 @@ describe("checkCredentialBans", () => {
     record: { type: "test" },
     credential: {
       credentialSubject: {
-        hash: "hash123",
+        nullifiers: ["hash123"],
         provider: "provider123",
         id: "did:0x123",
       },
@@ -113,17 +113,23 @@ describe("checkCredentialBans", () => {
       data: [
         { hash: "hash123", is_banned: true, ban_type: "hash" },
         { hash: "hash456", is_banned: false },
+        { hash: "hash789", is_banned: false },
+        { hash: "hashABC", is_banned: true, ban_type: "hash" },
       ],
     });
 
     const anotherValidCredential = JSON.parse(JSON.stringify(validCredential));
-    anotherValidCredential.credential.credentialSubject.hash = "hash456";
+    anotherValidCredential.credential.credentialSubject.nullifiers = ["hash456"];
 
-    const input = [validCredential, anotherValidCredential];
+    const aThirdValidCredential = JSON.parse(JSON.stringify(validCredential));
+    aThirdValidCredential.credential.credentialSubject.nullifiers = ["hash789", "hashABC"];
+
+    const input = [validCredential, anotherValidCredential, aThirdValidCredential];
     const result = await checkCredentialBans(input);
 
     expect((result[0] as ErrorResponseBody).code).toBe(403);
     expect((result[1] as ErrorResponseBody).code).toBe(200);
+    expect((result[2] as ErrorResponseBody).code).toBe(403);
   });
 
   it("should handle API errors gracefully", async () => {
@@ -159,7 +165,7 @@ describe("checkCredentialBans", () => {
     const input = [validCredential];
 
     await expect(checkCredentialBans(input)).rejects.toThrowError(
-      new ApiError("Ban not found for hash hash123. This should not happen.", 500)
+      new ApiError("Ban not found for nullifier hash123. This should not happen.", 500)
     );
   });
 });

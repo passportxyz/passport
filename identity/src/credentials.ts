@@ -8,15 +8,6 @@ import {
   SignatureType,
 } from "@gitcoin/passport-types";
 
-// --- Base64 encoding
-import * as base64 from "@ethersproject/base64";
-
-// --- Crypto lib for hashing
-import { createHash } from "crypto";
-
-// Keeping track of the hashing mechanism (algo + content)
-export const VERSION = "v0.0.0";
-
 const ONE_DAY_IN_MS = 1000 * 60 * 60 * 24;
 export const MAX_VALID_DID_SESSION_AGE = ONE_DAY_IN_MS;
 
@@ -27,6 +18,7 @@ import {
   DocumentType,
   stampCredentialDocument,
 } from "./signingDocuments.js";
+import { IgnorableNullifierGeneratorError, NullifierGenerator } from "./nullifierGenerators.js";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
@@ -38,15 +30,6 @@ const addSeconds = (date: Date, seconds: number): Date => {
   result.setSeconds(result.getSeconds() + seconds);
 
   return result;
-};
-
-// Create an ordered array of the given input (of the form [[key:string, value:string], ...])
-export const objToSortedArray = (obj: { [k: string]: string }): string[][] => {
-  const keys: string[] = Object.keys(obj).sort();
-  return keys.reduce((out: string[][], key: string) => {
-    out.push([key, obj[key]]);
-    return out;
-  }, [] as string[][]);
 };
 
 // Internal method to issue a verifiable credential
@@ -194,44 +177,80 @@ export const issueChallengeCredential = async (
   } as IssuedCredential;
 };
 
-// Return a verifiable credential with embedded hash
-export const issueHashedCredential = async (
-  DIDKit: DIDKitLib,
-  key: string,
-  address: string,
-  record: ProofRecord,
-  expiresInSeconds: number = CREDENTIAL_EXPIRES_AFTER_SECONDS,
-  signatureType?: string
-): Promise<IssuedCredential> => {
-  // Generate a hash like SHA256(IAM_PRIVATE_KEY+PII), where PII is the (deterministic) JSON representation
-  // of the PII object after transforming it to an array of the form [[key:string, value:string], ...]
-  // with the elements sorted by key
-  const hash = base64.encode(
-    createHash("sha256")
-      .update(key, "utf-8")
-      .update(JSON.stringify(objToSortedArray(record)))
-      .digest()
-  );
+// At least one
+export type NullifierGenerators = [NullifierGenerator, ...NullifierGenerator[]];
+
+const getNullifiers = async ({
+  record,
+  nullifierGenerators,
+}: {
+  record: ProofRecord;
+  nullifierGenerators: NullifierGenerators;
+}) => {
+  const nullifierPromiseResults = await Promise.allSettled(nullifierGenerators.map((g) => g({ record })));
+
+  const unexpectedErrors = nullifierPromiseResults
+    .filter((result): result is PromiseRejectedResult => result.status === "rejected")
+    .filter((result) => !(result.reason instanceof IgnorableNullifierGeneratorError));
+
+  if (unexpectedErrors.length > 0) {
+    console.error("Unexpected errors generating nullifiers", unexpectedErrors);
+    throw new Error("Unable to generate nullifiers");
+  }
+
+  const nullifiers = nullifierPromiseResults
+    .filter((result): result is PromiseFulfilledResult<string> => result.status === "fulfilled")
+    .map((result) => result.value);
+
+  if (nullifiers.length === 0) {
+    throw new Error("No valid nullifiers generated");
+  }
+
+  return nullifiers;
+};
+
+// Return a verifiable credential with embedded nullifier(s)
+export const issueNullifiableCredential = async ({
+  DIDKit,
+  issuerKey,
+  address,
+  record,
+  nullifierGenerators,
+  expiresInSeconds = CREDENTIAL_EXPIRES_AFTER_SECONDS,
+  signatureType,
+}: {
+  DIDKit: DIDKitLib;
+  issuerKey: string;
+  address: string;
+  record: ProofRecord;
+  nullifierGenerators: NullifierGenerators;
+  expiresInSeconds: number;
+  signatureType?: string;
+}): Promise<IssuedCredential> => {
+  const nullifiers = await getNullifiers({ record, nullifierGenerators });
 
   let credential: VerifiableCredential;
   if (signatureType === "EIP712") {
-    const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
+    const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", issuerKey);
     // generate a verifiableCredential
     credential = await issueEip712Credential(
       DIDKit,
-      key,
+      issuerKey,
       { expiresInSeconds },
       {
         credentialSubject: {
           "@context": {
-            hash: "https://schema.org/Text",
+            nullifiers: {
+              "@container": "@list",
+              "@type": "https://schema.org/Text",
+            },
             provider: "https://schema.org/Text",
           },
 
           // construct a pkh DID on mainnet (:1) for the given wallet address
           id: `did:pkh:eip155:1:${address}`,
           provider: record.type,
-          hash: `${VERSION}:${hash}`,
+          nullifiers,
         },
         // https://www.w3.org/TR/vc-status-list/#statuslist2021entry
         // Can be added to support revocation
@@ -248,18 +267,21 @@ export const issueHashedCredential = async (
     );
   } else {
     // generate a verifiableCredential
-    credential = await _issueEd25519Credential(DIDKit, key, expiresInSeconds, {
+    credential = await _issueEd25519Credential(DIDKit, issuerKey, expiresInSeconds, {
       credentialSubject: {
         "@context": [
           {
-            hash: "https://schema.org/Text",
+            nullifiers: {
+              "@container": "@list",
+              "@type": "https://schema.org/Text",
+            },
             provider: "https://schema.org/Text",
           },
         ],
         // construct a pkh DID on mainnet (:1) for the given wallet address
         id: `did:pkh:eip155:1:${address}`,
         provider: record.type,
-        hash: `${VERSION}:${hash}`,
+        nullifiers,
       },
     });
   }

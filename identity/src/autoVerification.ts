@@ -2,14 +2,7 @@
 import { isAddress } from "ethers";
 
 // ---- Types
-import { Response } from "express";
-import {
-  PROVIDER_ID,
-  ValidResponseBody,
-  SignatureType,
-  VerifiableCredential,
-  VerifiedPayload,
-} from "@gitcoin/passport-types";
+import { PROVIDER_ID, ValidResponseBody, SignatureType, VerifiableCredential } from "@gitcoin/passport-types";
 
 // All provider exports from platforms
 import { platforms } from "@gitcoin/passport-platforms";

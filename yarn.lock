@@ -6389,6 +6389,11 @@
   resolved "https://registry.yarnpkg.com/@heroicons/react/-/react-2.0.17.tgz#42a8086bc434ceefc03592f20c4e81b11e915cf8"
   integrity sha512-90GMZktkA53YbNzHp6asVEDevUQCMtxWH+2UK2S8OpnLEu7qckTJPhNxNQG52xIR1WFTwFqtH6bt7a60ZNcLLA==
 
+"@holonym-foundation/mishtiwasm@^0.3.0-robustnet":
+  version "0.3.0-robustnet"
+  resolved "https://registry.yarnpkg.com/@holonym-foundation/mishtiwasm/-/mishtiwasm-0.3.0-robustnet.tgz#621cec90bae996aeb0eb396f77d256b3abe81668"
+  integrity sha512-0wCFQdeDx1XDsKcc7/jnnADY60kBf1HhbswS5rZ46kD9ZbPzm1LDYAmC5k7FLmgaCmyJdeGewLiSX1xSzFOFZQ==
+
 "@humanfs/core@^0.19.1":
   version "0.19.1"
   resolved "https://registry.yarnpkg.com/@humanfs/core/-/core-0.19.1.tgz#17c55ca7d426733fe3c561906b8173c336b40a77"
@@ -16703,9 +16708,9 @@ expect@^29.6.4:
     jest-util "^29.6.3"
 
 exponential-backoff@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/exponential-backoff/-/exponential-backoff-3.1.1.tgz#64ac7526fe341ab18a39016cd22c787d01e00bf6"
-  integrity sha512-dX7e/LHVJ6W3DE1MHWi9S1EYzDESENfLrYohG2G++ovZrYOkm4Knwa0mc1cn84xJOR4KEU0WSchhLbd0UklbHw==
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/exponential-backoff/-/exponential-backoff-3.1.2.tgz#a8f26adb96bf78e8cd8ad1037928d5e5c0679d91"
+  integrity sha512-8QxYTVXUkuy7fIIoitQkPwGonB8F3Zj8eEO8Sqg9Zv/bkI7RJAzowee4gr81Hak/dUTpA2Z7VfQgoijjPNlUZA==
 
 express-rate-limit@^7.5.0:
   version "7.5.0"
