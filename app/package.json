@@ -14,8 +14,8 @@
     "test:watch": "vitest --watch"
   },
   "dependencies": {
-    "@chakra-ui/react": "^2.8.1",
-    "@chakra-ui/toast": "^7.0.2",
+    "@chakra-ui/react": "=2.8.1",
+    "@chakra-ui/toast": "=7.0.1",
     "@coinbase/wallet-sdk": "^4.2.0",
     "@datadog/browser-logs": "^4.11.2",
     "@datadog/browser-rum": "^4.11.2",
@@ -35,8 +35,8 @@
     "@intercom/messenger-js-sdk": "^0.0.13",
     "@passportxyz/passport-embed": "^0.1.0",
     "@popperjs/core": "^2.11.8",
-    "@reown/appkit": "^1.5.0",
-    "@reown/appkit-adapter-wagmi": "^1.5.0",
+    "@reown/appkit": "=1.5.0",
+    "@reown/appkit-adapter-wagmi": "=1.5.0",
     "@self.id/framework": "^0.4.0",
     "@tanstack/react-query": "^5.59.20",
     "@testing-library/react-hooks": "^8.0.1",
