@@ -27,6 +27,7 @@ jobs:
     name: Build App and Deploy to Review S3
     needs: ref
     uses: ./.github/workflows/sync_to_s3_generic.yml
+    secrets: inherit
     with:
       refspec: ${{ needs.ref.outputs.refspec }}
       environment: review
