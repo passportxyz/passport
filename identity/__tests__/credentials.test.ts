@@ -8,6 +8,8 @@ import { generateEIP712PairJWK, objToSortedArray } from "../src/helpers";
 import {
   HashNullifierGenerator,
   MishtiNullifierGenerator,
+  IgnorableNullifierGeneratorError,
+  NullifierGenerator,
 } from "../src/nullifierGenerators";
 import { mishtiOprf } from "../src/mishtiOprf";
 
@@ -376,5 +378,148 @@ describe("verifyCredential", function () {
 
     // all verifications will pass as the DIDKit response is mocked
     expect(await verifyCredential(OriginalDIDKit, credential)).toEqual(false);
+  });
+});
+
+describe("issueNullifiableCredential with ignorable errors", () => {
+  beforeEach(() => {
+    mockDIDKit.clearDidkitMocks();
+    (mishtiOprf as jest.Mock).mockReset();
+  });
+
+  it("succeeds when some nullifier generators throw ignorable errors", async () => {
+    const record = {
+      type: "Simple",
+      version: "Test-Case-1",
+      address: "0x0",
+    };
+
+    const throwingGenerator = async () => {
+      throw new IgnorableNullifierGeneratorError("Expected test error");
+    };
+
+    const expectedHash =
+      "v0.0.0:" +
+      base64.encode(
+        createHash("sha256")
+          .update(key)
+          .update(JSON.stringify(objToSortedArray(record)))
+          .digest()
+      );
+
+    const { credential } = await issueNullifiableCredential({
+      DIDKit,
+      issuerKey: key,
+      address: "0x0",
+      record,
+      nullifierGenerators: [
+        hashNullifierGenerator,
+        throwingGenerator as NullifierGenerator,
+      ],
+      expiresInSeconds: 3600,
+    });
+
+    expect(credential.credentialSubject.nullifiers).toEqual([expectedHash]);
+    expect(DIDKit.issueCredential).toHaveBeenCalled();
+  });
+
+  it("fails when all nullifier generators throw ignorable errors", async () => {
+    const record = {
+      type: "Simple",
+      version: "Test-Case-1",
+      address: "0x0",
+    };
+
+    const throwingGenerator = async () => {
+      throw new IgnorableNullifierGeneratorError("Expected test error");
+    };
+
+    await expect(
+      issueNullifiableCredential({
+        DIDKit,
+        issuerKey: key,
+        address: "0x0",
+        record,
+        nullifierGenerators: [
+          throwingGenerator as NullifierGenerator,
+          throwingGenerator as NullifierGenerator,
+        ],
+        expiresInSeconds: 3600,
+      })
+    ).rejects.toThrow("No valid nullifiers generated");
+  });
+
+  describe("unexpected errors", () => {
+    let consoleErrorSpy: any;
+    beforeEach(() => {
+      consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleErrorSpy.mockRestore();
+    });
+
+    it("fails when any nullifier generator throws an unexpected error", async () => {
+      const record = {
+        type: "Simple",
+        version: "Test-Case-1",
+        address: "0x0",
+      };
+
+      const unexpectedErrorGenerator = async () => {
+        throw new Error("Unexpected error");
+      };
+
+      await expect(
+        issueNullifiableCredential({
+          DIDKit,
+          issuerKey: key,
+          address: "0x0",
+          record,
+          nullifierGenerators: [
+            hashNullifierGenerator,
+            unexpectedErrorGenerator as NullifierGenerator,
+          ],
+          expiresInSeconds: 3600,
+        })
+      ).rejects.toThrow("Unable to generate nullifiers");
+
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    it("handles mix of successful, ignorable, and unexpected errors", async () => {
+      const record = {
+        type: "Simple",
+        version: "Test-Case-1",
+        address: "0x0",
+      };
+
+      const ignorableGenerator = async () => {
+        throw new IgnorableNullifierGeneratorError("Expected test error");
+      };
+
+      const unexpectedErrorGenerator = async () => {
+        throw new Error("Unexpected error");
+      };
+
+      await expect(
+        issueNullifiableCredential({
+          DIDKit,
+          issuerKey: key,
+          address: "0x0",
+          record,
+          nullifierGenerators: [
+            hashNullifierGenerator,
+            ignorableGenerator as NullifierGenerator,
+            unexpectedErrorGenerator as NullifierGenerator,
+          ],
+          expiresInSeconds: 3600,
+        })
+      ).rejects.toThrow("Unable to generate nullifiers");
+
+      expect(console.error).toHaveBeenCalled();
+    });
   });
 });
