@@ -82,6 +82,7 @@ export type VerifiableEip712Credential = {
       };
       primaryType: string;
       types: {
+        "@context": { name: string; type: string }[];
         [key: string]: {
           name: string;
           type: string;

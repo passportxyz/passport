@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "type": "module",
-  "main": "dist/esm/src/index.js",
+  "main": "dist/index.js",
   "directories": {
     "src": "src",
     "dist": "dist"
