@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 3010",
-    "build": "tsc -b && vite build",
+    "build": "tsc -p ./tsconfig.app.json && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
