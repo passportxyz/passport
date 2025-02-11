@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { redis } from "./redis.js";
+import { RedisReply, RedisStore } from "rate-limit-redis";
+
 import axios from "axios";
 
 function parseRateLimit(rateLimitSpec: string): number {
@@ -70,12 +72,11 @@ export async function apiKeyRateLimit(req: Request, res: Response): Promise<numb
   }
 }
 
-export function keyGenerator(req: Request, res: Response): string {
-  if (req.headers["x-api-key"] !== undefined) {
-    const ret = req.headers["x-api-key"] as string;
-    return ret;
-  }
-
-  res.status(401).send({ message: "Unauthorized! No 'X-API-KEY' present in the header!" });
-  throw "ERROR";
+export function getRateLimiterStore(): RedisStore {
+  return new RedisStore({
+    sendCommand: async (...args: string[]): Promise<RedisReply> => {
+      // @ts-expect-error - Known issue: the `call` function is not present in @types/ioredis
+      return await redis.call(...args);
+    },
+  });
 }

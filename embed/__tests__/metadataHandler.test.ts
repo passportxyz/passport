@@ -1,18 +1,25 @@
-import { Request, Response } from "express";
-import { metadataHandler } from "../src/metadata.js";
-import axios from "axios";
+import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 
-// Mock axios to intercept any HTTP requests
-jest.mock("axios");
+jest.unstable_mockModule("axios", () => {
+  return {
+    default: {
+      get: jest.fn(),
+    },
+  };
+});
 
 // Mock the passport-platforms module
-jest.mock("@gitcoin/passport-platforms", () => ({
+jest.unstable_mockModule("@gitcoin/passport-platforms", () => ({
   platforms: {
     Binance: { providers: { BinanceBABT: { type: "BinanceBABT" } } },
     Holonym: { providers: { HolonymPhone: { type: "HolonymPhone" } } },
     Google: { providers: { Google: { type: "Google" } } },
   },
 }));
+
+import { Request, Response } from "express";
+const { metadataHandler } = await import("../src/metadata.js");
+const { default: axios } = await import("axios");
 
 describe("GET /embed/stamps/metadata", () => {
   let mockReq: Partial<Request>;
@@ -101,7 +108,9 @@ describe("GET /embed/stamps/metadata", () => {
     const mockScorerId = "10";
     mockReq = { query: { scorerId: mockScorerId } };
 
-    (axios.get as jest.Mock).mockRejectedValue(new Error("Failed to fetch embed weights"));
+    (axios.get as jest.Mock).mockImplementationOnce(() => {
+      throw new Error("Failed to fetch embed weights");
+    });
 
     await metadataHandler(mockReq as Request, mockRes as Response);
 

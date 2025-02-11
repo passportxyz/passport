@@ -7,13 +7,12 @@ import express from "express";
 // ---- Production plugins
 import cors from "cors";
 import { rateLimit } from "express-rate-limit";
-import { RedisReply, RedisStore } from "rate-limit-redis";
 
 // --- Relative imports
-import { keyGenerator, apiKeyRateLimit } from "./rate-limiter.js";
+import { apiKeyRateLimit, getRateLimiterStore } from "./rateLimiter.js";
+import { keyGenerator } from "./rateLimiterKeyGenerator.js";
 import { autoVerificationHandler, verificationHandler, getChallengeHandler } from "./handlers.js";
 import { metadataHandler } from "./metadata.js";
-import { redis } from "./redis.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -81,16 +80,11 @@ app.use(cors());
 // Use the rate limiting middleware
 app.use(
   rateLimit({
-    windowMs: 60 * 1000, // We calculate the limit for a 1 minute limit ...
+    windowMs: 60 * 1000, // We calculate the limit for a 1 minute interval ...
     limit: apiKeyRateLimit,
     // Redis store configuration
     keyGenerator: keyGenerator,
-    store: new RedisStore({
-      sendCommand: async (...args: string[]): Promise<RedisReply> => {
-        // @ts-expect-error - Known issue: the `call` function is not present in @types/ioredis
-        return await redis.call(...args);
-      },
-    }),
+    store: getRateLimiterStore(),
     skip: (req, res): boolean => {
       // TODO: geri review this, /verify should be removed ...
       console.log("geri --- path", req.path);
