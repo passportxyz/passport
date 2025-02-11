@@ -5,7 +5,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
-    "target": "es6",
+    "target": "ES2022",
     "noImplicitAny": true,
     "moduleResolution": "nodenext",
     "sourceMap": true,
@@ -14,5 +14,5 @@
     "resolveJsonModule": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "__tests__/**/*"]
+  "include": ["src/**/*"]
 }

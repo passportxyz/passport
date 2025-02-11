@@ -21,7 +21,7 @@ import {
   getChallenge,
   getIssuerKey,
   issueChallengeCredential,
-} from "@gitcoin/passport-identity";
+} from "./utils/identityHelper.js";
 import {
   VerifiableCredential,
   VerifyRequestBody,
@@ -29,29 +29,15 @@ import {
   RequestPayload,
   CredentialResponseBody,
 } from "@gitcoin/passport-types";
+import {
+  AutoVerificationFields,
+  AutoVerificationRequestBodyType,
+  AutoVerificationResponseBodyType,
+} from "./handlers.types.js";
 
 import axios from "axios";
 
 const apiKey = process.env.SCORER_API_KEY;
-
-export type PassportProviderPoints = {
-  score: string;
-  dedup: boolean;
-  expiration_date: string;
-};
-
-export type AutoVerificationRequestBodyType = {
-  address: string;
-  scorerId: string;
-  credentialIds?: [];
-};
-
-type AutoVerificationFields = AutoVerificationRequestBodyType;
-
-export type AutoVerificationResponseBodyType = {
-  score: string;
-  threshold: string;
-};
 
 export class EmbedAxiosError extends Error {
   constructor(
