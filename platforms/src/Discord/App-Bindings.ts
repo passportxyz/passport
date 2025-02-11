@@ -22,7 +22,7 @@ export class DiscordPlatform extends Platform {
   }
 
   async getOAuthUrl(state: string): Promise<string> {
-    const authUrl = `https://discord.com/api/oauth2/authorize?response_type=code&scope=identify&client_id=${process.env.NEXT_PUBLIC_PASSPORT_DISCORD_CLIENT_ID}&state=${state}&redirect_uri=${process.env.NEXT_PUBLIC_PASSPORT_DISCORD_CALLBACK}`;
+    const authUrl = `https://discord.com/api/oauth2/authorize?response_type=code&scope=identify&client_id=${this.clientId}&state=${state}&redirect_uri=${this.redirectUri}`;
     return authUrl;
   }
 }

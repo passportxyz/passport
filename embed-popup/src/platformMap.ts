@@ -57,16 +57,16 @@ defaultPlatformMap.set("NFT", {
 
 defaultPlatformMap.set("Github", {
   platform: new Github.GithubPlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+    clientId: process.env.VITE_PASSPORT_GITHUB_CLIENT_ID,
+    redirectUri: process.env.VITE_PASSPORT_GITHUB_CALLBACK,
   }),
   platFormGroupSpec: Github.ProviderConfig,
 });
 
 defaultPlatformMap.set("Gitcoin", {
   platform: new Gitcoin.GitcoinPlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
+    clientId: process.env.VITE_PASSPORT_GITHUB_CLIENT_ID,
+    redirectUri: process.env.VITE_PASSPORT_GITHUB_CALLBACK,
   }),
   platFormGroupSpec: Gitcoin.ProviderConfig,
 });
@@ -104,7 +104,10 @@ if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {
 }
 
 defaultPlatformMap.set("Discord", {
-  platform: new Discord.DiscordPlatform(),
+  platform: new Discord.DiscordPlatform({
+    clientId: import.meta.env.VITE_PASSPORT_DISCORD_CLIENT_ID,
+    redirectUri: import.meta.env.VITE_PASSPORT_DISCORD_CALLBACK,
+  }),
   platFormGroupSpec: Discord.ProviderConfig,
 });
 
@@ -136,8 +139,8 @@ defaultPlatformMap.set("Brightid", {
 
 defaultPlatformMap.set("Coinbase", {
   platform: new Coinbase.CoinbasePlatform({
-    clientId: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CLIENT_ID,
-    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_COINBASE_CALLBACK,
+    clientId: process.env.VITE_PASSPORT_COINBASE_CLIENT_ID,
+    redirectUri: process.env.VITE_PASSPORT_COINBASE_CALLBACK,
   }),
   platFormGroupSpec: Coinbase.ProviderConfig,
 });
