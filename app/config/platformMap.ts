@@ -98,7 +98,10 @@ if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {
 }
 
 defaultPlatformMap.set("Discord", {
-  platform: new Discord.DiscordPlatform(),
+  platform: new Discord.DiscordPlatform({
+    clientId: process.env.NEXT_PUBLIC_PASSPORT_DISCORD_CLIENT_ID,
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_DISCORD_CALLBACK,
+  }),
   platFormGroupSpec: Discord.ProviderConfig,
 });
 
