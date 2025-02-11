@@ -63,6 +63,9 @@ type HumanNetworkNullifierGeneratorOptions = {
 export const HumanNetworkNullifierGenerator =
   ({ localSecret, version, ...humanNetworkOps }: HumanNetworkNullifierGeneratorOptions): NullifierGenerator =>
   async ({ record }) => {
+    const chanceToExecute = process.env.HUMAN_NETWORK_NULLIFIER_PERCENT;
+    limitExecution(chanceToExecute ? parseInt(chanceToExecute) : undefined);
+
     try {
       const value = JSON.stringify(objToSortedArray(record));
       const humanNetworkEncrypted = await humanNetworkOprf({
@@ -78,3 +81,12 @@ export const HumanNetworkNullifierGenerator =
       throw new IgnorableNullifierGeneratorError("Error generating humanNetwork nullifier");
     }
   };
+
+const limitExecution = (integerProbabilityToExecute?: number) => {
+  if (integerProbabilityToExecute === undefined) return;
+
+  const randomValue = Math.floor(Math.random() * 100);
+  if (randomValue > integerProbabilityToExecute) {
+    throw new IgnorableNullifierGeneratorError("Limiting execution of nullifier generator");
+  }
+};
