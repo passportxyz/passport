@@ -1,7 +1,7 @@
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import { NullifierGenerators } from "credentials.js";
-import { getCurrentKeys } from "keyManager.js";
-import { HashNullifierGenerator } from "nullifierGenerators.js";
+import { NullifierGenerators } from "./credentials.js";
+import { getKeyVersions } from "./keyManager.js";
+import { HashNullifierGenerator } from "./nullifierGenerators.js";
 
 const key = process.env.IAM_JWK;
 const __issuer = DIDKit.keyToDID("key", key);
@@ -13,11 +13,11 @@ export function getIssuerInfo(signatureType: string): {
   nullifierGenerators: NullifierGenerators;
 } {
   if (signatureType === "EIP712") {
-    const keyVersions = getCurrentKeys();
+    const { activeKeyVersions, issuerKeyVersion } = getKeyVersions();
+
     return {
-      // TODO is it first or last? And probably sort by version here?
-      issuerKey: keyVersions[0].key,
-      nullifierGenerators: keyVersions.map(({ key, version }) =>
+      issuerKey: issuerKeyVersion.key,
+      nullifierGenerators: activeKeyVersions.map(({ key, version }) =>
         HashNullifierGenerator({ key, version })
       ) as NullifierGenerators,
     };
@@ -30,7 +30,10 @@ export function getIssuerInfo(signatureType: string): {
 }
 
 export function hasValidIssuer(issuer: string): boolean {
-  const validIssuers = new Set([__issuer, __eip712Issuer, ...getCurrentKeys().map(({ key }) => key)]);
+  const { initiatedKeyVersions } = getKeyVersions();
+  const initiatedIssuers = initiatedKeyVersions.map(({ key }) => DIDKit.keyToDID("key", key));
+
+  const validIssuers = new Set([__issuer, __eip712Issuer, ...initiatedIssuers]);
 
   return validIssuers.has(issuer);
 }

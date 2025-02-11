@@ -4,8 +4,9 @@ import { issueNullifiableCredential } from "../src/credentials";
 import { VerifiableCredential, RequestPayload, ProviderContext, IssuedCredential } from "@gitcoin/passport-types";
 import { providers } from "@gitcoin/passport-platforms";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import { getIssuerKey } from "../src/issuers";
 import { checkCredentialBans } from "../src/bans";
+import { generateEIP712PairJWK } from "../src/helpers";
+import { getKeyVersions } from "../src/keyManager";
 
 jest.mock("../src/credentials");
 
@@ -21,6 +22,12 @@ jest.mock("../src/verification", () => {
 jest.mock("../src/bans", () => ({
   checkCredentialBans: jest.fn().mockImplementation((input) => Promise.resolve(input)),
 }));
+
+jest.mock("../src/keyManager", () => ({
+  getKeyVersions: jest.fn(),
+}));
+
+const mockIssuerKey = generateEIP712PairJWK();
 
 const createMockVerifiableCredential = (provider: string, address: string): VerifiableCredential => ({
   "@context": ["https://www.w3.org/2018/credentials/v1", "https://w3id.org/security/suites/eip712sig-2021/v1"],
@@ -95,6 +102,12 @@ jest.mock("@gitcoin/passport-platforms", () => {
 describe("verifyTypes", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const mockKey = { key: mockIssuerKey, version: 1, startTime: new Date() };
+    (getKeyVersions as jest.Mock).mockImplementation(() => ({
+      initiatedKeyVersions: [mockKey],
+      activeKeyVersions: [mockKey],
+      issuerKeyVersion: mockKey,
+    }));
   });
 
   it("should call providers.verify for the 'regular' providers in providersByPlatform and accumulate values in the context", async () => {
@@ -357,6 +370,12 @@ describe("verifyTypes", () => {
 describe("verifyProvidersAndIssueCredentials", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const mockKey = { key: mockIssuerKey, version: 1, startTime: new Date() };
+    (getKeyVersions as jest.Mock).mockImplementation(() => ({
+      initiatedKeyVersions: [mockKey],
+      activeKeyVersions: [mockKey],
+      issuerKeyVersion: mockKey,
+    }));
   });
 
   it("should issue valid credentials via issueNullifiableCredentials", async () => {
@@ -369,8 +388,6 @@ describe("verifyProvidersAndIssueCredentials", () => {
       proofs: {},
       signatureType: "EIP712",
     };
-
-    const currentKey = getIssuerKey("EIP712");
 
     const verifySpy = (providers.verify as jest.Mock).mockImplementation(
       async (provider: string, payload: RequestPayload, context: ProviderContext) => {
@@ -398,7 +415,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
 
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: { type: "provider-1", version: "0.0.0", key: "verified-condition" },
       nullifierGenerators: expect.any(Array<Function>),
@@ -408,7 +425,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
 
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: { type: "provider-2", version: "0.0.0", key: "verified-condition" },
       nullifierGenerators: expect.any(Array<Function>),
@@ -417,7 +434,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     });
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: { type: "provider-3", version: "0.0.0", key: "verified-condition" },
       nullifierGenerators: expect.any(Array<Function>),
@@ -426,7 +443,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     });
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: { type: "provider-4", version: "0.0.0", key: "verified-condition" },
       nullifierGenerators: expect.any(Array<Function>),
@@ -497,7 +514,6 @@ describe("verifyProvidersAndIssueCredentials", () => {
       proofs: {},
       signatureType: "EIP712",
     };
-    const currentKey = getIssuerKey("EIP712");
 
     const verifySpy = (providers.verify as jest.Mock).mockImplementation(
       async (provider: string, payload: RequestPayload, context: ProviderContext) => {
@@ -540,7 +556,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     );
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: { type: "provider-1#pii-provider-1", pii: "pii-provider-1", version: "0.0.0", key: "verified-condition" },
       nullifierGenerators: expect.any(Array<Function>),
@@ -549,7 +565,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     });
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: { type: "provider-2#pii-provider-2", pii: "pii-provider-2", version: "0.0.0", key: "verified-condition" },
       nullifierGenerators: expect.any(Array<Function>),
@@ -558,7 +574,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     });
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: { type: "provider-3#pii-provider-3", pii: "pii-provider-3", version: "0.0.0", key: "verified-condition" },
       nullifierGenerators: expect.any(Array<Function>),
@@ -567,7 +583,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     });
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,
-      issuerKey: currentKey,
+      issuerKey: mockIssuerKey,
       address: mockAddress,
       record: { type: "provider-4#pii-provider-4", pii: "pii-provider-4", version: "0.0.0", key: "verified-condition" },
       nullifierGenerators: expect.any(Array<Function>),

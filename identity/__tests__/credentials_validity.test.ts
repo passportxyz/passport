@@ -1,8 +1,7 @@
 import { VerifiableEip712Credential } from "@gitcoin/passport-types";
-import { issueNullifiableCredential, NullifierGenerators } from "../src/credentials";
+import { issueNullifiableCredential } from "../src/credentials";
 import { HashNullifierGenerator } from "../src/nullifierGenerators";
-import { objToSortedArray } from "../src/helpers";
-import { getIssuerKey, getEip712Issuer } from "../src/issuers";
+import { generateEIP712PairJWK, objToSortedArray } from "../src/helpers";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 import * as base64 from "@ethersproject/base64";
 
@@ -20,10 +19,10 @@ describe("EIP712 credential", function () {
       address: "0x0",
     };
 
-    const issuerKey = getIssuerKey("EIP712");
+    const issuerKey = generateEIP712PairJWK();
 
     const expectedHash: string =
-      "v0.0.0:" +
+      "v1:" +
       base64.encode(
         createHash("sha256")
           .update(issuerKey)
@@ -34,13 +33,14 @@ describe("EIP712 credential", function () {
     // Details of this credential are created by issueNullifiableCredential - but the proof is added by DIDKit (which is mocked)
     const { credential } = await issueNullifiableCredential({
       DIDKit,
-      issuerKey: getIssuerKey("EIP712"),
+      issuerKey,
       address: "0x0",
       record,
       expiresInSeconds: 100,
       signatureType: "EIP712",
-      nullifierGenerators: [HashNullifierGenerator({ key: issuerKey })],
+      nullifierGenerators: [HashNullifierGenerator({ key: issuerKey, version: 1 })],
     });
+
     const signedCredential = credential as VerifiableEip712Credential;
 
     const standardizedTypes = signedCredential.proof.eip712Domain.types;
@@ -56,7 +56,9 @@ describe("EIP712 credential", function () {
       signedCredential.proof.proofValue
     );
 
-    const expectedEthSignerAddress = getEip712Issuer().split(":").pop();
+    const issuer = DIDKit.keyToDID("ethr", issuerKey);
+
+    const expectedEthSignerAddress = issuer.split(":").pop();
     expect(signerAddress.toLowerCase()).toEqual(expectedEthSignerAddress);
     expect(signedCredential.credentialSubject.nullifiers?.[0]).toEqual(expectedHash);
   });

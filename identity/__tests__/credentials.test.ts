@@ -4,8 +4,7 @@ import {
   NullifierGenerators,
   verifyCredential,
 } from "../src/credentials";
-import { objToSortedArray } from "../src/helpers";
-import { getIssuerKey } from "../src/issuers";
+import { generateEIP712PairJWK, objToSortedArray } from "../src/helpers";
 import { HashNullifierGenerator, MishtiNullifierGenerator } from "../src/nullifierGenerators";
 import { mishtiOprf } from "../src/mishtiOprf";
 
@@ -35,8 +34,10 @@ jest.mock("../src/mishtiOprf", () => ({
   initMishti: jest.fn(),
 }));
 
+const mockIssuerKey = generateEIP712PairJWK();
+
 // Set up nullifier generators
-const hashNullifierGenerator = HashNullifierGenerator({ key });
+const hashNullifierGenerator = HashNullifierGenerator({ key, version: "0.0.0" });
 const nullifierGenerators: NullifierGenerators = [hashNullifierGenerator];
 describe("issueChallengeCredential", function () {
   beforeEach(() => {
@@ -165,7 +166,7 @@ describe("issueNullifiableCredential", function () {
     const secret = "secret";
 
     const expectedHNHash =
-      "v0.0.0:" + base64.encode(createHash("sha256").update(secret).update(mockMishtiOprfResponse).digest());
+      "v3:" + base64.encode(createHash("sha256").update(secret).update(mockMishtiOprfResponse).digest());
 
     const { credential } = await issueNullifiableCredential({
       DIDKit,
@@ -174,7 +175,7 @@ describe("issueNullifiableCredential", function () {
       record,
       nullifierGenerators: [
         hashNullifierGenerator,
-        MishtiNullifierGenerator({ clientPrivateKey: "", relayUrl: "", localSecret: secret }),
+        MishtiNullifierGenerator({ clientPrivateKey: "", relayUrl: "", localSecret: secret, version: 3 }),
       ],
       expiresInSeconds: 100,
       signatureType: "EIP712",
@@ -280,7 +281,7 @@ describe("verifyCredential", function () {
 
     const { credential } = await issueNullifiableCredential({
       DIDKit: OriginalDIDKit,
-      issuerKey: getIssuerKey("EIP712"),
+      issuerKey: mockIssuerKey,
       address: "0x0",
       record,
       nullifierGenerators,
@@ -303,7 +304,7 @@ describe("verifyCredential", function () {
     };
 
     // we are creating this VC so that we know that we have a valid VC in this context to test against (never expired)
-    const { credential } = await issueChallengeCredential(OriginalDIDKit, getIssuerKey("EIP712"), record, "EIP712");
+    const { credential } = await issueChallengeCredential(OriginalDIDKit, mockIssuerKey, record, "EIP712");
     const signedCredential = credential as VerifiableEip712Credential;
     signedCredential.proof.proofValue = "tampered";
 

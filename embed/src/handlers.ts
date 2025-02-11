@@ -19,8 +19,8 @@ import {
   groupProviderTypesByPlatform,
   verifyProvidersAndIssueCredentials,
   getChallenge,
-  getIssuerKey,
   issueChallengeCredential,
+  getIssuerInfo,
 } from "@gitcoin/passport-identity";
 import {
   VerifiableCredential,
@@ -253,9 +253,9 @@ export const getChallengeHandler = (
         ...(challenge?.record || {}),
       };
 
-      const currentKey = getIssuerKey(payload.signatureType);
+      const { issuerKey } = getIssuerInfo(payload.signatureType);
       // generate a VC for the given payload
-      return void issueChallengeCredential(DIDKit, currentKey, record, payload.signatureType)
+      return void issueChallengeCredential(DIDKit, issuerKey, record, payload.signatureType)
         .then((credential) => {
           // return the verifiable credential
           return res.json(credential as CredentialResponseBody);

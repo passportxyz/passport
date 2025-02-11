@@ -29,7 +29,7 @@ import passportOnchainInfo from "../../deployments/onchainInfo.json" assert { ty
 import {
   getChallenge,
   hasValidIssuer,
-  getIssuerKey,
+  getIssuerInfo,
   VerifyDidChallengeBaseError,
   issueChallengeCredential,
   verifyCredential,
@@ -159,9 +159,9 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         ...(challenge?.record || {}),
       };
 
-      const currentKey = getIssuerKey(payload.signatureType);
+      const { issuerKey } = getIssuerInfo(payload.signatureType);
       // generate a VC for the given payload
-      return void issueChallengeCredential(DIDKit, currentKey, record, payload.signatureType)
+      return void issueChallengeCredential(DIDKit, issuerKey, record, payload.signatureType)
         .then((credential) => {
           // return the verifiable credential
           return res.json(credential as CredentialResponseBody);
