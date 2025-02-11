@@ -190,7 +190,7 @@ const getNullifiers = async ({
   const nullifierPromiseResults = await Promise.allSettled(nullifierGenerators.map((g) => g({ record })));
 
   const unexpectedErrors = nullifierPromiseResults
-    .filter((result) => result.status === "rejected")
+    .filter((result): result is PromiseRejectedResult => result.status === "rejected")
     .filter((result) => !(result.reason instanceof IgnorableNullifierGeneratorError));
 
   if (unexpectedErrors.length > 0) {
@@ -199,7 +199,7 @@ const getNullifiers = async ({
   }
 
   const nullifiers = nullifierPromiseResults
-    .filter((result) => result.status === "fulfilled")
+    .filter((result): result is PromiseFulfilledResult<string> => result.status === "fulfilled")
     .map((result) => result.value);
 
   if (nullifiers.length === 0) {
