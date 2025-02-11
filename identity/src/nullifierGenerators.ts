@@ -7,7 +7,7 @@ import * as base64 from "@ethersproject/base64";
 // --- Crypto lib for hashing
 import { createHash } from "crypto";
 import { objToSortedArray } from "./helpers.js";
-import { mishtiOprf } from "./mishtiOprf.js";
+import { humanNetworkOprf } from "./humanNetworkOprf.js";
 
 export type NullifierGenerator = ({ record }: { record: ProofRecord }) => Promise<string>;
 
@@ -36,7 +36,7 @@ type HashNullifierGeneratorOptions = {
       ...
       nullifierGenerators: [
         HashNullifierGenerator({ key: privateKey, version: 1 }),
-        MishtiNullifierGenerator({ clientPrivateKey: mishtiKey, relayUrl, localSecret: privateKey, version: 1 }),
+        HumanNetworkNullifierGenerator({ clientPrivateKey: humanNetworkKey, relayUrl, localSecret: privateKey, version: 1 }),
       ];
     }
 
@@ -53,22 +53,28 @@ export const HashNullifierGenerator =
     return Promise.resolve(`v${version}:${hashedRecord}`);
   };
 
-type MishtiNullifierGeneratorOptions = {
+type HumanNetworkNullifierGeneratorOptions = {
   clientPrivateKey: string;
   relayUrl: string;
   localSecret: string;
   version: NullifierVersion;
 };
 
-export const MishtiNullifierGenerator =
-  ({ localSecret, version, ...mishtiOps }: MishtiNullifierGeneratorOptions): NullifierGenerator =>
+export const HumanNetworkNullifierGenerator =
+  ({ localSecret, version, ...humanNetworkOps }: HumanNetworkNullifierGeneratorOptions): NullifierGenerator =>
   async ({ record }) => {
-    const value = JSON.stringify(objToSortedArray(record));
-    const mishtiEncrypted = await mishtiOprf({
-      value,
-      ...mishtiOps,
-    });
-    const hashed = hashValueWithSecret({ secret: localSecret, value: mishtiEncrypted });
+    try {
+      const value = JSON.stringify(objToSortedArray(record));
+      const humanNetworkEncrypted = await humanNetworkOprf({
+        value,
+        ...humanNetworkOps,
+      });
+      const hashed = hashValueWithSecret({ secret: localSecret, value: humanNetworkEncrypted });
 
-    return `v${version}:${hashed}`;
+      return `v${version}:${hashed}`;
+    } catch (e) {
+      // For now, ignore errors with humanNetwork
+      console.error("Error generating humanNetwork nullifier", e);
+      throw new IgnorableNullifierGeneratorError("Error generating humanNetwork nullifier");
+    }
   };

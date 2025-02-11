@@ -7,11 +7,11 @@ import {
 import { generateEIP712PairJWK, objToSortedArray } from "../src/helpers";
 import {
   HashNullifierGenerator,
-  MishtiNullifierGenerator,
   IgnorableNullifierGeneratorError,
+  HumanNetworkNullifierGenerator,
   NullifierGenerator,
 } from "../src/nullifierGenerators";
-import { mishtiOprf } from "../src/mishtiOprf";
+import { humanNetworkOprf } from "../src/humanNetworkOprf";
 
 // ---- original DIDKit lib
 import * as OriginalDIDKit from "@spruceid/didkit-wasm-node";
@@ -39,8 +39,8 @@ const DIDKit: DIDKitLib = mockDIDKit as unknown as DIDKitLib;
 // this would need to be a valid key but we've mocked out didkit (and no verifications are made)
 const key = "SAMPLE_KEY";
 
-jest.mock("../src/mishtiOprf", () => ({
-  mishtiOprf: jest.fn(),
+jest.mock("../src/humanNetworkOprf", () => ({
+  humanNetworkOprf: jest.fn(),
   initMishti: jest.fn(),
 }));
 
@@ -176,7 +176,7 @@ describe("issueNullifiableCredential", function () {
 
   it("can generate an eip712 signed credential containing hash", async () => {
     const mockMishtiOprfResponse = "encrypted";
-    (mishtiOprf as jest.Mock).mockResolvedValue(mockMishtiOprfResponse);
+    (humanNetworkOprf as jest.Mock).mockResolvedValue(mockMishtiOprfResponse);
 
     const record = {
       type: "Simple",
@@ -211,7 +211,7 @@ describe("issueNullifiableCredential", function () {
       record,
       nullifierGenerators: [
         hashNullifierGenerator,
-        MishtiNullifierGenerator({
+        HumanNetworkNullifierGenerator({
           clientPrivateKey: "",
           relayUrl: "",
           localSecret: secret,
@@ -384,7 +384,7 @@ describe("verifyCredential", function () {
 describe("issueNullifiableCredential with ignorable errors", () => {
   beforeEach(() => {
     mockDIDKit.clearDidkitMocks();
-    (mishtiOprf as jest.Mock).mockReset();
+    (humanNetworkOprf as jest.Mock).mockReset();
   });
 
   it("succeeds when some nullifier generators throw ignorable errors", async () => {
