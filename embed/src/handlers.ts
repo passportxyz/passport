@@ -238,7 +238,7 @@ export const getChallengeHandler = (
           // return the verifiable credential
           return res.json(credential as CredentialResponseBody);
         })
-        .catch((error) => {
+        .catch((error: any) => {
           if (error) {
             // return error msg indicating a failure producing VC
             return void errorRes(res, "Unable to produce a verifiable credential", 400);
