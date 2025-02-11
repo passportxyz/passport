@@ -1,5 +1,15 @@
-// This loads the latest 2 active keys (i.e. start time in the past) from
-// environment variables, based on start times
+// This supports ENV vars of the format:
+// IAM_JWK_EIP712_V1='{...}'
+// IAM_JWK_EIP712_V1_START_TIME=2021-01-01T00:00:00Z
+// IAM_JWK_EIP712_V2='{...}'
+// IAM_JWK_EIP712_V2_START_TIME=2021-04-01T00:00:00Z
+//
+// The latest 2 active keys are loaded. "active" means the start time is in the past.
+//
+// Versions must be consecutive after the first present version, but old
+// versions do not need to be present (i.e. just having 21 -> 22 -> 23 is fine,
+// but 21 -> 23 is not).
+
 const MAX_CONCURRENT_KEYS = 2;
 
 const KEY_ENV_PREFIX = "IAM_JWK_EIP712_V";
