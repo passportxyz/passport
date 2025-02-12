@@ -101,7 +101,7 @@
     "typescript": "^5.3.3",
     "uint8arrays": "^5.1.0",
     "vite-tsconfig-paths": "^5.1.0",
-    "vitest": "^2.1.4",
+    "vitest": "=2.1.4",
     "vitest-localstorage-mock": "^0.1.2",
     "yarn": "^1.22.21"
   },
