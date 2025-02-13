@@ -13,7 +13,12 @@ export function keyGenerator(req: Request, res: Response): string {
   try {
     return getApiKeyFromRequestHeader(req);
   } catch (error) {
-    res.status(401).send({ message: error.message });
+    let message = "Unknown error";
+    if (error instanceof Error) {
+      message = error.message;
+    }
+
+    res.status(401).send({ message });
     throw error;
   }
 }

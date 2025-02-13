@@ -1,12 +1,10 @@
 import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+import axios from "axios";
+import { metadataHandler } from "../src/metadata.js";
 
-jest.unstable_mockModule("axios", () => {
-  return {
-    default: {
-      get: jest.fn(),
-    },
-  };
-});
+jest.mock("axios");
+
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // Mock the passport-platforms module
 jest.unstable_mockModule("@gitcoin/passport-platforms", () => ({
@@ -18,8 +16,6 @@ jest.unstable_mockModule("@gitcoin/passport-platforms", () => ({
 }));
 
 import { Request, Response } from "express";
-const { metadataHandler } = await import("../src/metadata.js");
-const { default: axios } = await import("axios");
 
 describe("GET /embed/stamps/metadata", () => {
   let mockReq: Partial<Request>;
@@ -29,8 +25,8 @@ describe("GET /embed/stamps/metadata", () => {
     jest.clearAllMocks();
 
     mockRes = {
-      json: jest.fn(),
-      status: jest.fn().mockReturnThis(),
+      json: jest.fn() as any,
+      status: jest.fn().mockReturnThis() as any,
     };
   });
 
@@ -53,7 +49,7 @@ describe("GET /embed/stamps/metadata", () => {
     const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/embed/weights?community_id=${mockScorerId}`;
 
     // Mock the axios GET request
-    (axios.get as jest.Mock).mockResolvedValueOnce({
+    mockedAxios.get.mockResolvedValueOnce({
       status: 200,
       data: {
         BinanceBABT: 16.021,
@@ -85,7 +81,7 @@ describe("GET /embed/stamps/metadata", () => {
     // });
     // // Verify API call
     // // eslint-disable-next-line @typescript-eslint/unbound-method
-    // expect(axios.get).toHaveBeenCalledWith(embedWeightsUrl);
+    // expect(mockedAxios.get).toHaveBeenCalledWith(embedWeightsUrl);
     // // Verify that displayWeight has 1 decimal place
     // expect(allDisplayWeights).toEqual(
     //   expect.arrayContaining([
@@ -108,7 +104,7 @@ describe("GET /embed/stamps/metadata", () => {
     const mockScorerId = "10";
     mockReq = { query: { scorerId: mockScorerId } };
 
-    (axios.get as jest.Mock).mockImplementationOnce(() => {
+    mockedAxios.get.mockImplementationOnce(() => {
       throw new Error("Failed to fetch embed weights");
     });
 
@@ -152,7 +148,7 @@ describe("GET /embed/stamps/metadata", () => {
     //   console.log("Mocked STAMP_PAGES in test:", JSON.stringify(STAMP_PAGES, null, 2));
 
     //   // Step 3: Mock axios GET request for weights API
-    //   (axios.get as jest.Mock).mockResolvedValueOnce({
+    //   mockedAxios.get.mockResolvedValueOnce({
     //     status: 200,
     //     data: {
     //       BinanceBABT: 16.021,
@@ -168,8 +164,8 @@ describe("GET /embed/stamps/metadata", () => {
 
     //   const actualResponse = (mockRes.json as jest.Mock).mock.calls[0][0];
 
-    //   expect(axios.get).toHaveBeenCalledTimes(1);
-    //   expect(axios.get).toHaveBeenCalledWith(
+    //   expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    //   expect(mockedAxios.get).toHaveBeenCalledWith(
     //     `${process.env.SCORER_ENDPOINT}/embed/weights?community_id=${mockScorerId}`
     //   );
 

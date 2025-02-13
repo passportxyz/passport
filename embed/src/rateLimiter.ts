@@ -44,7 +44,7 @@ export async function apiKeyRateLimit(req: Request, res: Response): Promise<numb
   try {
     const apiKey = req.headers["x-api-key"] as string;
     const cacheKey = `erl:${apiKey}`;
-    const cachedRateLimit = await redis.get(cacheKey);
+    const cachedRateLimit = (await redis.get(cacheKey)) || "";
     const rateLimit = Number.parseFloat(cachedRateLimit);
 
     // Simulate an async operation (e.g., database call)

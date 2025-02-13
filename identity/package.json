@@ -2,22 +2,14 @@
   "name": "@gitcoin/passport-identity",
   "version": "1.0.0",
   "license": "MIT",
-  "main": "./dist/cjs/index.js",
+  "main": "./dist/esm/index.js",
   "module": "./dist/esm/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/esm/index.d.ts",
   "type": "module",
   "exports": {
     ".": {
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/commonjs/index.d.ts"
-      ]
+      "types": "./dist/esm/index.d.ts"
     }
   },
   "directories": {
@@ -71,9 +63,7 @@
   },
   "scripts": {
     "clean": "rimraf dist node_modules",
-    "build": "npm run build:esm && npm run build:types",
-    "build:esm": "tsc --module NodeNext --outDir dist/esm",
-    "build:types": "tsc --declaration --declarationDir dist --emitDeclarationOnly",
+    "build": "tsc --declaration --module NodeNext --outDir dist/esm",
     "test": "node --experimental-vm-modules ../node_modules/jest/bin/jest.js",
     "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
     "prettier": "prettier --write ."

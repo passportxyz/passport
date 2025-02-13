@@ -1,7 +1,6 @@
 {
-  "extends": "../tsconfig.settings.json",
   "compilerOptions": {
-    "module": "NodeNext",
+    "module": "nodenext",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
@@ -12,7 +11,9 @@
     "outDir": "dist",
     "baseUrl": ".",
     "resolveJsonModule": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "strict": true,
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "../node_modules"]
 }

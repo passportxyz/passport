@@ -1,8 +1,17 @@
 // ---- Testing libraries
-
 import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 
-jest.unstable_mockModule("../src/rateLimiter.js", () => {
+import request from "supertest";
+import { Response, Request } from "express";
+import { AutoVerificationResponseBodyType, AutoVerificationRequestBodyType } from "../src/handlers.types.js";
+import { ParamsDictionary } from "express-serve-static-core";
+import { PassportScore } from "@gitcoin/passport-identity";
+
+import { apiKeyRateLimit } from "../src/rateLimiter.js";
+import { autoVerificationHandler } from "../src/handlers.js";
+import { app } from "../src/server.js";
+
+jest.mock("../src/rateLimiter", () => {
   return {
     apiKeyRateLimit: jest.fn((req, res) => {
       return new Promise((resolve, reject) => {
@@ -17,7 +26,7 @@ jest.unstable_mockModule("../src/rateLimiter.js", () => {
   };
 });
 
-jest.unstable_mockModule("../src/handlers.js", () => {
+jest.mock("../src/handlers", () => {
   return {
     getChallengeHandler: jest.fn(),
     verificationHandler: jest.fn(),
@@ -35,23 +44,13 @@ jest.unstable_mockModule("../src/handlers.js", () => {
   };
 });
 
-jest.unstable_mockModule("../src/redis.js", () => {
+jest.mock("../src/redis", () => {
   return {
     redis: {
       call: async (...args: string[]): Promise<any> => Promise.resolve({}),
     },
   };
 });
-
-import request from "supertest";
-import { Response, Request } from "express";
-import { AutoVerificationResponseBodyType, AutoVerificationRequestBodyType } from "../src/handlers.types.js";
-import { ParamsDictionary } from "express-serve-static-core";
-import { PassportScore } from "@gitcoin/passport-identity";
-
-const { apiKeyRateLimit } = await import("../src/rateLimiter.js");
-const { autoVerificationHandler } = await import("../src/handlers.js");
-const { app } = await import("../src/index.js");
 
 const mockedScore: PassportScore = {
   address: "0x0000000000000000000000000000000000000000",

@@ -37,7 +37,7 @@ import {
 
 import axios from "axios";
 
-const apiKey = process.env.SCORER_API_KEY;
+const apiKey = process.env.SCORER_API_KEY as string;
 
 export class EmbedAxiosError extends Error {
   constructor(
@@ -88,7 +88,11 @@ export const addStampsAndGetScore = async ({
       }
     );
 
-    return scorerResponse.data?.score;
+    if (!scorerResponse.data?.score) {
+      throw new EmbedAxiosError("No score returned from Scorer Embed API", 500);
+    }
+
+    return scorerResponse.data.score;
   } catch (error) {
     handleAxiosError(error, "Scorer Embed API", EmbedAxiosError, [apiKey]);
   }
@@ -165,7 +169,7 @@ export const verificationHandler = (
           );
         }
 
-        const types = payload.types.filter((type) => type);
+        const types = payload.types?.filter((type) => type) || [];
         const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
         const credentialsVerificationResponses = await verifyProvidersAndIssueCredentials(
@@ -230,6 +234,10 @@ export const getChallengeHandler = (
         // extend/overwrite with record returned from the provider
         ...(challenge?.record || {}),
       };
+
+      if (!payload.signatureType) {
+        return void errorRes(res, "Missing signatureType from challenge request body", 400);
+      }
 
       const currentKey = getIssuerKey(payload.signatureType);
       // generate a VC for the given payload
