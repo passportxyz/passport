@@ -1,42 +1,10 @@
 import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 
-jest.unstable_mockModule("../src/utils/revocations.js", () => ({
-  filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
-}));
-
-jest.unstable_mockModule("../src/utils/easStampSchema.js", () => ({
-  formatMultiAttestationRequest: jest.fn(),
-  encodeEasScore: jest.fn(() => {
-    return "0x1234567890abcdef";
-  }),
-}));
-
-jest.unstable_mockModule("../src/utils/identityHelper.js", async () => {
-  const originalIdentity = await import("@gitcoin/passport-identity");
-  return {
-    ...originalIdentity,
-    verifyCredential: jest.fn(originalIdentity.verifyCredential),
-  };
-});
-
-jest.unstable_mockModule("axios", () => {
-  return {
-    default: {
-      get: jest.fn(),
-      isAxiosError: jest.fn(),
-    },
-    AxiosError: jest.fn(),
-  };
-});
+import axios from "axios";
 
 import request from "supertest";
 import { PassportCache, providers } from "@gitcoin/passport-platforms";
-const {
-  default: { get },
-} = await import("axios");
-const mockedAxiosGet = get as jest.Mock;
-
-const { app } = await import("../src/index.js");
+import { app } from "../src/index.js";
 
 import {
   ErrorResponseBody,
@@ -49,13 +17,38 @@ import {
 
 import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
-const identityMock = await import("../src/utils/identityHelper.js");
-const easStampSchema = await import("../src/utils/easStampSchema.js");
+import { getEip712Issuer, verifyCredential } from "../src/utils/identityHelper.js";
+import * as easStampSchema from "../src/utils/easStampSchema.js";
+import { IAMError } from "../src/utils/scorerService.js";
+import { toJsonObject } from "../src/utils/json.js";
 
-const { IAMError } = await import("../src/utils/scorerService.js");
-const { toJsonObject } = await import("../src/utils/json.js");
+jest.mock("../src/utils/revocations", () => ({
+  filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
+}));
 
-const issuer = identityMock.getEip712Issuer();
+jest.mock("../src/utils/identityHelper", () => {
+  const originalIdentity =
+    jest.requireActual<typeof import("../src/utils/identityHelper")>("../src/utils/identityHelper");
+  return {
+    ...originalIdentity,
+    verifyCredential: jest.fn(originalIdentity.verifyCredential),
+  };
+});
+
+jest.mock("../src/utils/easStampSchema", () => ({
+  formatMultiAttestationRequest: jest.fn(),
+  encodeEasScore: jest.fn(() => {
+    return "0x1234567890abcdef";
+  }),
+}));
+
+jest.mock("../src/utils/easFees", () => ({
+  getEASFeeAmount: jest.fn(() => Promise.resolve(BigInt(0))),
+}));
+
+jest.mock("axios");
+
+const issuer = getEip712Issuer();
 
 const MOCK_ADDRESS = "0xcF314CE817E25B4f784BC1F24C9a79a525fEc50f";
 
@@ -184,7 +177,9 @@ const getMockEIP712Credential = (provider: string, address: string): VerifiableC
           name: "name",
         },
         primaryType: "primaryType",
-        types: {},
+        types: {
+          "@context": {} as any,
+        },
       },
     },
   };
@@ -215,7 +210,7 @@ describe("POST /check", function () {
     const allowProvider = "AllowList#test";
     jest
       .spyOn(providers._providers.AllowList, "verify")
-      .mockImplementation(async (payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> => {
+      .mockImplementation(async (payload: RequestPayload, context?: ProviderContext): Promise<VerifiedPayload> => {
         return {
           valid: true,
           record: {
@@ -246,7 +241,7 @@ describe("POST /check", function () {
     const customGithubProvider = "DeveloperList#test#0xtest";
     jest
       .spyOn(providers._providers.DeveloperList, "verify")
-      .mockImplementation(async (payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> => {
+      .mockImplementation(async (payload: RequestPayload, context?: ProviderContext): Promise<VerifiedPayload> => {
         return {
           valid: true,
           record: {
@@ -466,7 +461,7 @@ describe("POST /eas/passport", () => {
   });
 
   it("successfully verifies and formats passport", async () => {
-    mockedAxiosGet.mockImplementationOnce(
+    jest.spyOn(axios, "get").mockImplementationOnce(
       async (): Promise<any> => ({
         data: {
           status: "DONE",
@@ -485,6 +480,7 @@ describe("POST /eas/passport", () => {
       } else if (key === "ethPriceLastUpdate") {
         return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
       }
+      return Promise.resolve(null);
     });
     const nonce = 0;
     const recipient = "0x5678000000000000000000000000000000000000";
@@ -546,12 +542,14 @@ describe("POST /eas/passport", () => {
     expect(response.body.passport.multiAttestationRequest).toEqual(toJsonObject(expectedValue));
 
     expect(response.body.passport.nonce).toEqual(nonce);
-    expect(identityMock.verifyCredential).toHaveBeenCalledTimes(credentials.length);
+    expect(verifyCredential).toHaveBeenCalledTimes(credentials.length);
   });
 
   it("handles error during the formatting of the passport", async () => {
     // We'll just trigger an error via the axios get, because this will be called in order to get the score ...
-    mockedAxiosGet.mockRejectedValue(new IAMError("Formatting error"));
+    jest.spyOn(axios, "get").mockImplementation(() => {
+      throw new IAMError("Formatting error");
+    });
 
     const nonce = 0;
     const recipient = "0x5678000000000000000000000000000000000000";
@@ -581,7 +579,9 @@ describe("POST /eas/passport", () => {
   });
 
   it("handles error during credential verification", async () => {
-    (identityMock.verifyCredential as jest.Mock).mockRejectedValueOnce(new Error("Verification error"));
+    (verifyCredential as jest.Mock).mockImplementation(async () => {
+      throw new Error("Verification error");
+    });
 
     const nonce = 0;
     const recipient = "0x5678000000000000000000000000000000000000";

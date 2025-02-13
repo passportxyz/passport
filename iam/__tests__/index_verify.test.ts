@@ -1,31 +1,5 @@
-import { jest, it, describe, expect, beforeEach } from "@jest/globals";
-
-jest.unstable_mockModule("../src/utils/revocations.js", () => ({
-  filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
-}));
-
-jest.unstable_mockModule("../src/utils/easStampSchema.js", () => ({
-  formatMultiAttestationRequest: jest.fn(),
-  encodeEasScore: jest.fn(() => {
-    return "0xEncodedData";
-  }),
-}));
-
-jest.unstable_mockModule("../src/utils/identityHelper.js", async () => {
-  const originalIdentity = await import("@gitcoin/passport-identity");
-  return {
-    ...originalIdentity,
-    verifyCredential: jest.fn(async () => Promise.resolve(true)),
-    hasValidIssuer: jest.fn(() => true),
-    verifyChallengeAndGetAddress: jest.fn(),
-    verifyProvidersAndIssueCredentials: jest.fn(),
-  };
-});
-
 import request from "supertest";
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-
-const { app } = await import("../src/index.js");
 
 import {
   ErrorResponseBody,
@@ -35,7 +9,30 @@ import {
   CredentialResponseBody,
 } from "@gitcoin/passport-types";
 
-const identityMock = await import("../src/utils/identityHelper.js");
+import { app } from "../src/index.js";
+import * as identityMock from "../src/utils/identityHelper";
+
+jest.mock("../src/utils/revocations", () => ({
+  filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
+}));
+
+jest.mock("../src/utils/easStampSchema", () => ({
+  formatMultiAttestationRequest: jest.fn(),
+  encodeEasScore: jest.fn(() => {
+    return "0xEncodedData";
+  }),
+}));
+
+jest.mock("../src/utils/identityHelper", () => {
+  const originalIdentity = jest.requireActual("../src/utils/identityHelper");
+  return {
+    ...originalIdentity,
+    verifyCredential: jest.fn(async () => Promise.resolve(true)),
+    hasValidIssuer: jest.fn(() => true),
+    verifyChallengeAndGetAddress: jest.fn(),
+    verifyProvidersAndIssueCredentials: jest.fn(),
+  };
+});
 
 const issuer = identityMock.getEip712Issuer();
 const verifyCredential = identityMock.verifyCredential;
@@ -69,7 +66,7 @@ const getMockEIP712Credential = (provider: string, address: string): VerifiableC
           name: "name",
         },
         primaryType: "primaryType",
-        types: {},
+        types: {} as any,
       },
     },
   };
@@ -92,7 +89,7 @@ describe("POST /verify", function () {
               record: {
                 type: "test-record",
                 version: "v0.0.0",
-                pii: provider === "ClearTextSimple" ? _provider : undefined,
+                pii: provider === "ClearTextSimple" ? _provider : "",
               },
             });
           });
@@ -297,7 +294,7 @@ describe("POST /verify", function () {
     });
 
     // challenge received from the challenge endpoint
-    const eip712Key = process.env.IAM_JWK_EIP712;
+    const eip712Key = process.env.IAM_JWK_EIP712 as string;
     const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
     const challenge = {
       issuer: eip712Issuer,
@@ -353,7 +350,7 @@ describe("POST /verify", function () {
       return Promise.resolve(true);
     });
     // challenge received from the challenge endpoint
-    const eip712Key = process.env.IAM_JWK_EIP712;
+    const eip712Key = process.env.IAM_JWK_EIP712 as string;
     const eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
     const challenge = {
       issuer: eip712Issuer,

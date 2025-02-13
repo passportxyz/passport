@@ -1,6 +1,12 @@
-import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+import { Request, Response } from "express";
 
-jest.unstable_mockModule("../src/utils/attestations.js", () => ({
+import { getEASFeeAmount } from "../src/utils/easFees.js";
+import { hasValidIssuer } from "@gitcoin/passport-identity";
+import { Signature, Contract } from "../src/utils/ethersHelper.js";
+import { scrollDevBadgeHandler, getScrollRpcUrl } from "../src/utils/scrollDevBadge.js";
+import { getAttestationSignerForChain } from "../src/utils/attestations.js";
+
+jest.mock("../src/utils/attestations", () => ({
   getAttestationSignerForChain: jest.fn(),
   getAttestationDomainSeparator: jest.fn(),
   ATTESTER_TYPES: {
@@ -24,30 +30,22 @@ jest.unstable_mockModule("../src/utils/attestations.js", () => ({
   },
 }));
 
-jest.unstable_mockModule("@gitcoin/passport-identity", () => ({
+jest.mock("@gitcoin/passport-identity", () => ({
   hasValidIssuer: jest.fn(() => true),
   verifyCredential: jest.fn(async () => Promise.resolve(true)),
 }));
 
-jest.unstable_mockModule("../src/utils/easFees.js", () => ({
+jest.mock("../src/utils/easFees.js", () => ({
   getEASFeeAmount: jest.fn(),
 }));
 
-jest.unstable_mockModule("../src/utils/ethersHelper.js", async () => {
-  const originalModule = await import("ethers");
+jest.mock("../src/utils/ethersHelper.js", () => {
+  const originalModule = jest.requireActual("ethers");
   return {
     ...originalModule,
     Contract: jest.fn(),
   };
 });
-
-import { Request, Response } from "express";
-
-const { getEASFeeAmount } = await import("../src/utils/easFees.js");
-const { hasValidIssuer } = await import("@gitcoin/passport-identity");
-const { Signature, Contract } = await import("../src/utils/ethersHelper.js");
-const { scrollDevBadgeHandler, getScrollRpcUrl } = await import("../src/utils/scrollDevBadge.js");
-const { getAttestationSignerForChain } = await import("../src/utils/attestations.js");
 
 describe("scrollDevBadgeHandler", () => {
   let mockReq: Partial<Request>;

@@ -1,42 +1,37 @@
-import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+import request from "supertest";
+import { VerifiableCredential } from "@gitcoin/passport-types";
 
-jest.unstable_mockModule("../src/utils/revocations.js", () => ({
+import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
+import { app } from "../src/index";
+import { getAttestationDomainSeparator } from "../src/utils/attestations";
+import { parseEther } from "ethers";
+import { toJsonObject } from "../src/utils/json";
+import * as easFees from "../src/utils/easFees";
+import * as identityMock from "../src/utils/identityHelper";
+import * as easStampSchema from "../src/utils/easStampSchema";
+
+jest.mock("../src/utils/revocations", () => ({
   filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
 }));
 
-jest.unstable_mockModule("../src/utils/easStampSchema.js", () => ({
+jest.mock("../src/utils/easStampSchema", () => ({
   formatMultiAttestationRequest: jest.fn(),
   encodeEasScore: jest.fn(() => {
     return "0x1234567890abcdef";
   }),
 }));
 
-jest.unstable_mockModule("../src/utils/easFees.js", () => ({
+jest.mock("../src/utils/easFees", () => ({
   getEASFeeAmount: jest.fn(),
 }));
 
-jest.unstable_mockModule("../src/utils/identityHelper.js", async () => {
-  const originalIdentity = await import("@gitcoin/passport-identity");
+jest.mock("../src/utils/identityHelper", () => {
+  const originalIdentity = jest.requireActual("@gitcoin/passport-identity");
   return {
     ...originalIdentity,
     verifyCredential: jest.fn(originalIdentity.verifyCredential),
   };
 });
-
-import request from "supertest";
-import {
-  VerifiableCredential,
-} from "@gitcoin/passport-types";
-
-import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
-
-const { app } = await import("../src/index.js");
-const { getAttestationDomainSeparator } = await import("../src/utils/attestations.js");
-const { parseEther } = await import("ethers");
-const easFees = await import("../src/utils/easFees.js");
-const identityMock = await import("../src/utils/identityHelper.js");
-const easStampSchema = await import("../src/utils/easStampSchema.js");
-const { toJsonObject } = await import("../src/utils/json.js");
 
 const issuer = identityMock.getEip712Issuer();
 const formatMultiAttestationRequestMock = easStampSchema.formatMultiAttestationRequest as jest.Mock;

@@ -1,21 +1,17 @@
-import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+import { parseEther } from "ethers";
+import { getEASFeeAmount } from "../src/utils/easFees.js";
+import Moralis from "moralis";
+import { PassportCache } from "@gitcoin/passport-platforms";
 
-jest.unstable_mockModule("moralis", () => ({
-  default: {
-    EvmApi: {
-      token: {
-        getTokenPrice: jest.fn().mockResolvedValue({
-          result: { usdPrice: 3000 },
-        }),
-      },
+jest.mock("moralis", () => ({
+  EvmApi: {
+    token: {
+      getTokenPrice: jest.fn().mockResolvedValue({
+        result: { usdPrice: 3000 },
+      }),
     },
   },
 }));
-
-import { parseEther } from "ethers";
-const { getEASFeeAmount } = await import("../src/utils/easFees.js");
-const Moralis = await import("moralis");
-const { PassportCache } = await import("@gitcoin/passport-platforms");
 
 jest.spyOn(PassportCache.prototype, "init").mockImplementation(() => Promise.resolve());
 
@@ -34,7 +30,7 @@ describe("EthPriceLoader", () => {
       jest.spyOn(PassportCache.prototype, "get").mockImplementation((key) => {
         if (key === "ethPrice") {
           return Promise.resolve("3000");
-        } else if (key === "ethPriceLastUpdate") {
+        } else {
           return Promise.resolve(null);
         }
       });
@@ -48,7 +44,7 @@ describe("EthPriceLoader", () => {
     });
 
     it("should handle Moralis errors gracefully", async () => {
-      const consoleSpy = jest.spyOn(console, "error");
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
       let count = 0;
       jest.spyOn(PassportCache.prototype, "get").mockImplementation((key) => {
         count += 1;
@@ -60,19 +56,18 @@ describe("EthPriceLoader", () => {
         } else if (key === "ethPriceLastUpdate") {
           return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
         }
+        return Promise.resolve(null);
       });
 
       jest.spyOn(PassportCache.prototype, "set").mockImplementation(() => Promise.resolve());
 
-      (Moralis.default.EvmApi.token.getTokenPrice as jest.Mock).mockRejectedValueOnce(
-        new Error("Failed fetching price")
-      );
+      (Moralis.EvmApi.token.getTokenPrice as jest.Mock<any>).mockRejectedValueOnce(new Error("Failed fetching price"));
       await getEASFeeAmount(2);
       expect(consoleSpy).toHaveBeenCalledWith("MORALIS ERROR: Failed to get ETH price, Error: Failed fetching price");
     });
 
     it("should handle Redis errors gracefully", async () => {
-      const consoleSpy = jest.spyOn(console, "error");
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
       let count = 0;
       jest.spyOn(PassportCache.prototype, "get").mockImplementation((key) => {
         count += 1;
@@ -84,6 +79,7 @@ describe("EthPriceLoader", () => {
         } else if (key === "ethPriceLastUpdate") {
           return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
         }
+        return Promise.resolve(null);
       });
 
       jest.spyOn(PassportCache.prototype, "set").mockRejectedValueOnce(new Error("Failed to store in cache"));
@@ -108,6 +104,7 @@ describe("EthPriceLoader", () => {
           return Promise.resolve((Date.now() - 1000).toString());
         }
       }
+      return Promise.resolve(null);
     });
 
     jest.spyOn(PassportCache.prototype, "set").mockImplementation(() => Promise.resolve());
@@ -116,7 +113,7 @@ describe("EthPriceLoader", () => {
     await getEASFeeAmount(3);
     await getEASFeeAmount(4);
 
-    expect(Moralis.default.EvmApi.token.getTokenPrice).toHaveBeenCalledTimes(1);
+    expect(Moralis.EvmApi.token.getTokenPrice).toHaveBeenCalledTimes(1);
   });
 
   it("should call Moralis API again if cachePeriod is exceeded", async () => {
@@ -128,6 +125,7 @@ describe("EthPriceLoader", () => {
       } else if (key === "ethPriceLastUpdate") {
         return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
       }
+      return Promise.resolve(null);
     });
 
     await getEASFeeAmount(2);
@@ -136,6 +134,6 @@ describe("EthPriceLoader", () => {
 
     await getEASFeeAmount(2);
 
-    expect(Moralis.default.EvmApi.token.getTokenPrice).toHaveBeenCalledTimes(2);
+    expect(Moralis.EvmApi.token.getTokenPrice).toHaveBeenCalledTimes(2);
   });
 });

@@ -1,41 +1,27 @@
-import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+import request from "supertest";
+import { PassportCache } from "@gitcoin/passport-platforms";
+import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 
-jest.unstable_mockModule("axios", () => {
-  return {
-    default: {
-      get: jest.fn(),
-      isAxiosError: jest.fn(),
-    },
-  };
-});
+import { app } from "../src/index.js";
 
-jest.unstable_mockModule("moralis", () => ({
-  default: {
-    EvmApi: {
-      token: {
-        getTokenPrice: jest.fn().mockResolvedValue({
-          result: { usdPrice: 3000 },
-        }),
-      },
+import * as easSchemaMock from "../src/utils/easStampSchema.js";
+
+import { toJsonObject } from "../src/utils/json.js";
+import axios from "axios";
+
+const mockedAxiosGet = axios.get as jest.Mock;
+
+jest.mock("axios");
+
+jest.mock("moralis", () => ({
+  EvmApi: {
+    token: {
+      getTokenPrice: jest.fn().mockResolvedValue({
+        result: { usdPrice: 3000 },
+      }),
     },
   },
 }));
-
-import request from "supertest";
-import { PassportCache } from "@gitcoin/passport-platforms";
-
-const { app } = await import("../src/index.js");
-
-import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
-
-const identityMock = await import("@gitcoin/passport-identity");
-const easSchemaMock = await import("../src/utils/easStampSchema.js");
-
-const { toJsonObject } = await import("../src/utils/json.js");
-const {
-  default: { get },
-} = await import("axios");
-const mockedAxiosGet = get as jest.Mock;
 
 const chainIdHex = "0xa";
 const mockRecipient = "0x5678000000000000000000000000000000000000";
@@ -100,6 +86,7 @@ describe("POST /eas/score", () => {
       } else if (key === "ethPriceLastUpdate") {
         return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
       }
+      return Promise.resolve(null);
     });
     const nonce = 0;
     const recipient = "0x5678000000000000000000000000000000000000";

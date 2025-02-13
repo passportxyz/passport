@@ -1,6 +1,11 @@
-import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+const passportOnchainInfo = require("../../deployments/onchainInfo.json");
+import { encodeEasScore, encodeEasStamp, formatMultiAttestationRequest } from "../src/utils/easStampSchema";
+import { VerifiableCredential } from "@gitcoin/passport-types";
+import { NO_EXPIRATION, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
+import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+import { parseUnits } from "ethers";
 
-jest.unstable_mockModule("../src/utils/scorerService.js", () => ({
+jest.mock("../src/utils/scorerService.js", () => ({
   fetchPassportScore: jest.fn().mockImplementation(() => {
     return Promise.resolve({
       score: 10,
@@ -8,13 +13,6 @@ jest.unstable_mockModule("../src/utils/scorerService.js", () => ({
     });
   }),
 }));
-
-const easStampModule = await import("../src/utils/easStampSchema.js");
-import { VerifiableCredential } from "@gitcoin/passport-types";
-const { NO_EXPIRATION, ZERO_BYTES32 } = await import("@ethereum-attestation-service/eas-sdk");
-const { SchemaEncoder } = await import("@ethereum-attestation-service/eas-sdk");
-const { parseUnits } = await import("ethers");
-import passportOnchainInfo from "../../deployments/onchainInfo.json" assert { type: "json" };
 
 const ensProviderConfig = {
   platformGroup: "Account Name",
@@ -50,7 +48,7 @@ describe("eas encoding", () => {
       },
     };
 
-    const encodedData = easStampModule.encodeEasStamp(verifiableCredential);
+    const encodedData = encodeEasStamp(verifiableCredential);
     const stampSchemaEncoder = new SchemaEncoder("bytes32 provider, bytes32 hash");
     const decodedStampData = stampSchemaEncoder.decodeData(encodedData);
     expect(decodedStampData[0].value.value).toEqual(ensProviderConfig.providers[0].hash);
@@ -62,7 +60,7 @@ it("should use encodeEasScore to format score data correctly", () => {
     score: 0.5,
     scorer_id: 1,
   };
-  const encodedData = easStampModule.encodeEasScore(score);
+  const encodedData = encodeEasScore(score);
   const scoreSchemaEncoder = new SchemaEncoder("uint256 score,uint32 scorer_id,uint8 score_decimals");
   const decodedScoreData = scoreSchemaEncoder.decodeData(encodedData);
 
@@ -107,7 +105,7 @@ describe("formatMultiAttestationRequest", () => {
     const recipient = "0x123";
 
     const chainIdHex = "0x14a33";
-    const result = await easStampModule.formatMultiAttestationRequest(validatedCredentials, recipient, chainIdHex);
+    const result = await formatMultiAttestationRequest(validatedCredentials, recipient, chainIdHex);
     const scoreSchema = passportOnchainInfo[chainIdHex].easSchemas.score.uid;
 
     expect(result).toEqual([

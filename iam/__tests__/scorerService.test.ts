@@ -1,15 +1,9 @@
 import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+import { fetchPassportScore } from "../src/utils/scorerService.js";
 
-jest.unstable_mockModule("../src/utils/scorerService.js", () => {
-  return {
-    fetchPassportScore: jest.fn(),
-  };
-});
+jest.mock("../src/utils/scorerService");
 
-// Import the entire module to help with typing
-const { fetchPassportScore } = await import("../src/utils/scorerService.js");
-
-const mockedFetchPassportScore = fetchPassportScore as jest.Mock;
+const mockedFetchPassportScore = fetchPassportScore as jest.Mock<typeof fetchPassportScore>;
 
 describe("score utilities", () => {
   beforeEach(() => {
