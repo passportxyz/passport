@@ -1,23 +1,12 @@
-import { jest, it, describe, expect, beforeEach } from "@jest/globals";
-
-jest.unstable_mockModule("axios", () => {
-  return {
-    default: {
-      get: jest.fn(),
-      post: jest.fn(),
-      patch: jest.fn(),
-      delete: jest.fn(),
-    },
-  };
-});
+jest.mock("axios");
 
 import { Stamp } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
 import { Logger } from "../src/index.js";
-const { PassportDatabase } = await import("../src/index.js");
-const { default: axios } = await import("axios");
+import { PassportDatabase } from "../src/index.js";
+import axios from "axios";
 
 const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
 

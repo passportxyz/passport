@@ -22,8 +22,8 @@
     "clean": "rimraf dist node_modules",
     "debug": "tsc --watch",
     "ceramic": "CERAMIC_ENABLE_EXPERIMENTAL_COMPOSE_DB='true' ceramic daemon --config composedb.config.json",
-    "test:integration": "yarn build && yarn node --experimental-vm-modules $(yarn bin jest) -c jest.integration.config.js",
-    "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
+    "test:integration": "yarn build && npx jest --testMatch '**/integration-tests/**/*.ts'",
+    "test": "jest"
   },
   "dependencies": {
     "@composedb/client": "^0.7.1",
@@ -55,3 +55,4 @@
     "leveldown": "6.1.1"
   }
 }
+

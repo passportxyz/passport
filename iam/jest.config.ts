@@ -9,12 +9,23 @@ const config: JestConfigWithTsJest = {
     "^multiformats$": "<rootDir>/../node_modules/multiformats/dist/index.min.js",
     "@ipld/dag-cbor": "<rootDir>/../node_modules/@ipld/dag-cbor/esm/index.js",
     uint8arrays: "<rootDir>/../node_modules/uint8arrays/dist/index.min.js",
-    // "bignumber.js": "bignumber.js",
-    // "ipaddr.js": "ipaddr.js",
     "^(..?/.*)\\.js$": "$1",
   },
   transform: {
-    "^.+\\.(j|t)s$": ["babel-jest", {}],
+    "^.+\\.(j|t)s$": [
+      // Use babel-jest to transpile both local typescript files and
+      // the dependencies that only available in esm format (dids, etc)
+      "babel-jest",
+      {
+        presets: ["@babel/preset-typescript", ["@babel/preset-env", { targets: { node: "current" } }]],
+        plugins: [
+          "@babel/plugin-syntax-import-assertions",
+          "babel-plugin-transform-import-meta",
+          ["babel-plugin-replace-import-extension", { extMapping: { ".js": "" } }],
+          "@babel/plugin-transform-modules-commonjs",
+        ],
+      },
+    ],
   },
   setupFilesAfterEnv: ["<rootDir>/src/jest.setup.ts"],
   transformIgnorePatterns: [

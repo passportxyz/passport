@@ -3,7 +3,7 @@ import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
 import { jest } from "@jest/globals";
-import mockStamps from "../__tests__/mockStamps.json" assert { type: "json" };
+const mockStamps = require("../__tests__/mockStamps.json");
 
 import { ComposeDatabase } from "../src/index.js";
 
