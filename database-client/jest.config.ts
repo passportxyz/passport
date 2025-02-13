@@ -29,7 +29,7 @@ const config: JestConfigWithTsJest = {
     ],
   },
   transformIgnorePatterns: [
-    "/node_modules/(?!(@composedb|@ceramicnetwork|dids|multiformats|uint8arrays|mapmoize|codeco|cartonne|varintes|@ipld|multihashes-sync|dag-jose|rpc-utils|@didtools|key-did-provider-ed25519|key-did-resolver|@spruceid)/)",
+    "/node_modules/(?!(@composedb|@ceramicnetwork|dids|multiformats|uint8arrays|mapmoize|codeco|cartonne|varintes|@ipld|multihashes-sync|dag-jose|dag-jose-utils|rpc-utils|@didtools|key-did-provider-ed25519|key-did-resolver|@spruceid)/)",
   ],
 };
 
