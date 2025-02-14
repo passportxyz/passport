@@ -1,24 +1,12 @@
-import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+import { ErrorResponseBody } from "@gitcoin/passport-types";
+import { checkCredentialBans } from "../src/bans";
+import { ApiError, UnexpectedApiError } from "../src/helpers";
+import axios from "axios";
 
-jest.unstable_mockModule("axios", () => {
-  return {
-    // postFn: jest.fn(),
-    default: {
-      post: jest.fn(),
-      isAxiosError: jest.fn(),
-    },
-  };
-});
+jest.mock("axios");
 
-const { checkCredentialBans } = await import("../src/bans.js");
-const { ApiError, UnexpectedApiError } = await import("../src/helpers.js");
-
-const {
-  default: { post, isAxiosError },
-} = await import("axios");
-
-const mockedAxiosPost = post as jest.Mock;
-const mockedIsAxiosError = isAxiosError as unknown as jest.Mock;
+const mockedAxiosPost = axios.post as jest.Mock;
+const mockedIsAxiosError = axios.isAxiosError as unknown as jest.Mock;
 
 describe("checkCredentialBans", () => {
   beforeEach(() => {
@@ -73,7 +61,7 @@ describe("checkCredentialBans", () => {
           },
         },
       ],
-      expect.any(Object)
+      expect.any(Object),
     );
     expect(result).toEqual(input);
   });
@@ -96,7 +84,8 @@ describe("checkCredentialBans", () => {
 
     expect(result).toEqual([
       {
-        error: "Credential is banned. Type=hash, End=2024-12-31, Reason=Suspicious activity",
+        error:
+          "Credential is banned. Type=hash, End=2024-12-31, Reason=Suspicious activity",
         code: 403,
       },
     ]);
@@ -142,11 +131,19 @@ describe("checkCredentialBans", () => {
 
   it.only("should handle API errors gracefully", async () => {
     class MockAxiosError extends Error {
-      response: { data: string; status: number; headers: { [key: string]: string } };
+      response: {
+        data: string;
+        status: number;
+        headers: { [key: string]: string };
+      };
       request: string;
       constructor() {
         super("API Error");
-        this.response = { data: "response", status: 500, headers: { TEST: "header" } };
+        this.response = {
+          data: "response",
+          status: 500,
+          headers: { TEST: "header" },
+        };
         this.request = "request";
       }
       isAxiosError: true;
@@ -162,8 +159,8 @@ describe("checkCredentialBans", () => {
 
     await expect(checkCredentialBans([validCredential])).rejects.toThrowError(
       new UnexpectedApiError(
-        'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}'
-      )
+        'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}',
+      ),
     );
   });
 
@@ -173,7 +170,10 @@ describe("checkCredentialBans", () => {
     const input = [validCredential];
 
     await expect(checkCredentialBans(input)).rejects.toThrowError(
-      new ApiError("Ban not found for hash hash123. This should not happen.", 500)
+      new ApiError(
+        "Ban not found for hash hash123. This should not happen.",
+        500,
+      ),
     );
   });
 });

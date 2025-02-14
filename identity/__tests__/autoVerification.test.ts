@@ -1,21 +1,42 @@
-import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+import {
+  autoVerifyStamps,
+  getEvmProvidersByPlatform,
+} from "../src/autoVerification.js";
+import { providers } from "@gitcoin/passport-platforms";
+import { issueHashedCredential } from "../src/credentials.js";
+import {
+  PROVIDER_ID,
+  VerifiableCredential,
+  RequestPayload,
+  ProviderContext,
+  IssuedCredential,
+} from "@gitcoin/passport-types";
+import { PassportScore } from "../src/verification.js";
 
-jest.unstable_mockModule("../src/credentials.js", () => ({
+jest.mock("../src/credentials.js", () => ({
   issueHashedCredential: jest.fn(),
 }));
 
-jest.unstable_mockModule("../src/bans.js", () => ({
-  checkCredentialBans: jest.fn().mockImplementation((input) => Promise.resolve(input)),
+jest.mock("../src/bans.js", () => ({
+  checkCredentialBans: jest
+    .fn()
+    .mockImplementation((input) => Promise.resolve(input)),
 }));
 
-jest.unstable_mockModule("@gitcoin/passport-platforms", () => ({
+jest.mock("@gitcoin/passport-platforms", () => ({
   providers: {
-    verify: jest.fn(async (type: string, payload: RequestPayload, context: ProviderContext) => {
-      return Promise.resolve({
-        valid: true,
-        record: { key: "veirfied-condition" },
-      });
-    }),
+    verify: jest.fn(
+      async (
+        type: string,
+        payload: RequestPayload,
+        context: ProviderContext,
+      ) => {
+        return Promise.resolve({
+          valid: true,
+          record: { key: "veirfied-condition" },
+        });
+      },
+    ),
   },
   platforms: {
     "provider-ok-1": {
@@ -143,23 +164,11 @@ jest.unstable_mockModule("@gitcoin/passport-platforms", () => ({
   },
 }));
 
-jest.unstable_mockModule("ethers", () => ({
+jest.mock("ethers", () => ({
   isAddress: jest.fn(() => {
     return true;
   }),
 }));
-
-const { autoVerifyStamps, getEvmProvidersByPlatform } = await import("../src/autoVerification.js");
-const { providers } = await import("@gitcoin/passport-platforms");
-const { issueHashedCredential } = await import("../src/credentials.js");
-import {
-  PROVIDER_ID,
-  VerifiableCredential,
-  RequestPayload,
-  ProviderContext,
-  IssuedCredential,
-} from "@gitcoin/passport-types";
-import { PassportScore } from "../src/verification.js";
 
 const expectedEvmProvidersToSucceed = new Set<PROVIDER_ID>([
   "ETHDaysActive#50",
@@ -168,10 +177,20 @@ const expectedEvmProvidersToSucceed = new Set<PROVIDER_ID>([
   "ETHScore#75",
 ]);
 
-const expectedEvmProvidersToFail = new Set<PROVIDER_ID>(["ETHScore#90", "HolonymGovIdProvider", "HolonymPhone"]);
+const expectedEvmProvidersToFail = new Set<PROVIDER_ID>([
+  "ETHScore#90",
+  "HolonymGovIdProvider",
+  "HolonymPhone",
+]);
 
-const createMockVerifiableCredential = (provider: string, address: string): VerifiableCredential => ({
-  "@context": ["https://www.w3.org/2018/credentials/v1", "https://w3id.org/security/suites/eip712sig-2021/v1"],
+const createMockVerifiableCredential = (
+  provider: string,
+  address: string,
+): VerifiableCredential => ({
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://w3id.org/security/suites/eip712sig-2021/v1",
+  ],
   type: ["VerifiableCredential", "EVMCredential"],
   credentialSubject: {
     id: `did:pkh:eip155:1:${address}`,
@@ -204,6 +223,7 @@ const createMockVerifiableCredential = (provider: string, address: string): Veri
       },
       primaryType: "VerifiableCredential",
       types: {
+        "@context": {} as any,
         EIP712Domain: [
           { name: "name", type: "string" },
           { name: "version", type: "string" },
@@ -217,7 +237,10 @@ const createMockVerifiableCredential = (provider: string, address: string): Veri
   },
 });
 
-function getMockedIssuedCredential(provider: string, address: string): IssuedCredential {
+function getMockedIssuedCredential(
+  provider: string,
+  address: string,
+): IssuedCredential {
   const credential: IssuedCredential = {
     credential: createMockVerifiableCredential(provider, address),
   };
@@ -232,7 +255,13 @@ const mockedScore: PassportScore = {
   expiration_timestamp: new Date().toISOString(),
   threshold: "20.000",
   error: "",
-  stamps: { "provider-1": { score: "12", dedup: true, expiration_date: new Date().toISOString() } },
+  stamps: {
+    "provider-1": {
+      score: "12",
+      dedup: true,
+      expiration_date: new Date().toISOString(),
+    },
+  },
 };
 
 describe("autoVerificationHandler", () => {
@@ -245,7 +274,11 @@ describe("autoVerificationHandler", () => {
     const mockScorerId = "test-scorer";
 
     const verifySpy = (providers.verify as jest.Mock).mockImplementation(
-      async (type: string, payload: RequestPayload, context: ProviderContext) => {
+      async (
+        type: string,
+        payload: RequestPayload,
+        context: ProviderContext,
+      ) => {
         if (expectedEvmProvidersToSucceed.has(type as PROVIDER_ID)) {
           return Promise.resolve({
             valid: true,
@@ -256,22 +289,34 @@ describe("autoVerificationHandler", () => {
             valid: false,
           });
         }
-      }
+      },
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
     (issueHashedCredential as jest.Mock).mockImplementation(
-      (DIDKit, currentKey, address, record: { type: string }, expiresInSeconds, signatureType) => {
+      (
+        DIDKit,
+        currentKey,
+        address,
+        record: { type: string },
+        expiresInSeconds,
+        signatureType,
+      ) => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
-      }
+      },
     );
 
-    const stamps = await autoVerifyStamps({ address: mockAddress, scorerId: mockScorerId });
+    const stamps = await autoVerifyStamps({
+      address: mockAddress,
+      scorerId: mockScorerId,
+    });
     expect(stamps).toEqual(issuedCredentials);
 
-    expect(verifySpy).toHaveBeenCalledTimes(expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size);
+    expect(verifySpy).toHaveBeenCalledTimes(
+      expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size,
+    );
   });
 
   it("should filter providers if valid request successfully", async () => {
@@ -279,7 +324,11 @@ describe("autoVerificationHandler", () => {
     const mockScorerId = "test-scorer";
 
     const verifySpy = (providers.verify as jest.Mock).mockImplementation(
-      async (type: string, payload: RequestPayload, context: ProviderContext) => {
+      async (
+        type: string,
+        payload: RequestPayload,
+        context: ProviderContext,
+      ) => {
         if (expectedEvmProvidersToSucceed.has(type as PROVIDER_ID)) {
           return Promise.resolve({
             valid: true,
@@ -290,16 +339,23 @@ describe("autoVerificationHandler", () => {
             valid: false,
           });
         }
-      }
+      },
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
     (issueHashedCredential as jest.Mock).mockImplementation(
-      (DIDKit, currentKey, address, record: { type: string }, expiresInSeconds, signatureType) => {
+      (
+        DIDKit,
+        currentKey,
+        address,
+        record: { type: string },
+        expiresInSeconds,
+        signatureType,
+      ) => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
-      }
+      },
     );
 
     const stamps = await autoVerifyStamps({
@@ -322,28 +378,44 @@ describe("autoVerificationHandler", () => {
     const mockScorerId = "test-scorer";
 
     const verifySpy = (providers.verify as jest.Mock).mockImplementation(
-      async (type: string, payload: RequestPayload, context: ProviderContext) => {
+      async (
+        type: string,
+        payload: RequestPayload,
+        context: ProviderContext,
+      ) => {
         return Promise.resolve({
           valid: true,
           record: { key: "verified-condition" },
         });
-      }
+      },
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
     (issueHashedCredential as jest.Mock).mockImplementation(
-      (DIDKit, currentKey, address, record: { type: string }, expiresInSeconds, signatureType) => {
+      (
+        DIDKit,
+        currentKey,
+        address,
+        record: { type: string },
+        expiresInSeconds,
+        signatureType,
+      ) => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
-      }
+      },
     );
 
-    const stamps: VerifiableCredential[] = await autoVerifyStamps({ address: mockAddress, scorerId: mockScorerId });
+    const stamps: VerifiableCredential[] = await autoVerifyStamps({
+      address: mockAddress,
+      scorerId: mockScorerId,
+    });
 
     expect(stamps).toEqual(issuedCredentials);
 
-    expect(verifySpy).toHaveBeenCalledTimes(expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size);
+    expect(verifySpy).toHaveBeenCalledTimes(
+      expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size,
+    );
   });
 });
 
@@ -359,6 +431,9 @@ describe("getEvmProvidersByPlatform", () => {
         "githubContributionActivityGte#30", // not marked as evm
       ],
     });
-    expect(providersByPlatform).toEqual([["ETHDaysActive#50"], ["HolonymGovIdProvider", "HolonymPhone"]]);
+    expect(providersByPlatform).toEqual([
+      ["ETHDaysActive#50"],
+      ["HolonymGovIdProvider", "HolonymPhone"],
+    ]);
   });
 });
