@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-export */
+ 
 // InMemoryRedisClient.ts
 type Expirations = { [key: string]: number };
 type Store = { [key: string]: any };
@@ -31,7 +31,7 @@ export class InMemoryRedisClient {
       this.store[key] = {};
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.store[key][field] = value;
     return Promise.resolve("OK");
   }
@@ -50,19 +50,9 @@ export class InMemoryRedisClient {
     return Promise.resolve(1);
   }
 
-  private async expireKeys(): Promise<void> {
-    const now = Date.now();
-    for (const [key, expiration] of Object.entries(this.expirations)) {
-      if (now > expiration) {
-        await this.del(key);
-        delete this.expirations[key];
-      }
-    }
-  }
-
   // Add an event emitter simulation for the "error" event
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/ban-types
-  on(eventName: string, callback: Function): void {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  on(eventName: string, _callback: Function): void {
     if (eventName === "error") {
       // Handle how you want to trigger errors. For this example, no errors are triggered.
     }

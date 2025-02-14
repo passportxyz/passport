@@ -26,7 +26,7 @@ export const getEvmProvidersByPlatform = ({
   const evmPlatforms = Object.values(platforms).filter(({ PlatformDetails }) => PlatformDetails.isEVM);
 
   // TODO we should use the scorerId to check for any EVM stamps particular to a community, and include those here
-  scorerId;
+  const _ = scorerId;
 
   return evmPlatforms.map(({ ProviderConfig }) =>
     ProviderConfig.reduce((acc, platformGroupSpec) => {
