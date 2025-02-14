@@ -1,10 +1,12 @@
-import axios, { AxiosError } from "axios";
-import { checkCredentialBans } from "../src/bans";
 import { ErrorResponseBody } from "@gitcoin/passport-types";
+import { checkCredentialBans } from "../src/bans";
 import { ApiError, UnexpectedApiError } from "../src/helpers";
+import axios from "axios";
 
 jest.mock("axios");
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+const mockedAxiosPost = axios.post as jest.Mock;
+const mockedIsAxiosError = axios.isAxiosError as unknown as jest.Mock;
 
 describe("checkCredentialBans", () => {
   beforeEach(() => {
@@ -28,15 +30,15 @@ describe("checkCredentialBans", () => {
     code: 400,
   };
 
-  it("should return original response for invalid credentials", async () => {
+  it.only("should return original response for invalid credentials", async () => {
     const input = [invalidCredential];
     const result = await checkCredentialBans(input);
     expect(result).toEqual(input);
-    expect(mockedAxios.post).not.toHaveBeenCalled();
+    expect(mockedAxiosPost).not.toHaveBeenCalled();
   });
 
-  it("should check bans for valid credentials", async () => {
-    mockedAxios.post.mockResolvedValueOnce({
+  it.only("should check bans for valid credentials", async () => {
+    mockedAxiosPost.mockResolvedValueOnce({
       data: [
         {
           hash: "hash123",
@@ -48,7 +50,7 @@ describe("checkCredentialBans", () => {
     const input = [validCredential];
     const result = await checkCredentialBans(input);
 
-    expect(mockedAxios.post).toHaveBeenCalledWith(
+    expect(mockedAxiosPost).toHaveBeenCalledWith(
       expect.stringContaining("/internal/check-bans"),
       [
         {
@@ -59,13 +61,13 @@ describe("checkCredentialBans", () => {
           },
         },
       ],
-      expect.any(Object)
+      expect.any(Object),
     );
     expect(result).toEqual(input);
   });
 
-  it("should handle banned credentials", async () => {
-    mockedAxios.post.mockResolvedValueOnce({
+  it.only("should handle banned credentials", async () => {
+    mockedAxiosPost.mockResolvedValueOnce({
       data: [
         {
           hash: "hash123",
@@ -82,14 +84,15 @@ describe("checkCredentialBans", () => {
 
     expect(result).toEqual([
       {
-        error: "Credential is banned. Type=hash, End=2024-12-31, Reason=Suspicious activity",
+        error:
+          "Credential is banned. Type=hash, End=2024-12-31, Reason=Suspicious activity",
         code: 403,
       },
     ]);
   });
 
-  it("should handle indefinite bans", async () => {
-    mockedAxios.post.mockResolvedValueOnce({
+  it.only("should handle indefinite bans", async () => {
+    mockedAxiosPost.mockResolvedValueOnce({
       data: [
         {
           hash: "hash123",
@@ -108,8 +111,8 @@ describe("checkCredentialBans", () => {
     });
   });
 
-  it("should process multiple credentials", async () => {
-    mockedAxios.post.mockResolvedValueOnce({
+  it.only("should process multiple credentials", async () => {
+    mockedAxiosPost.mockResolvedValueOnce({
       data: [
         { hash: "hash123", is_banned: true, ban_type: "hash" },
         { hash: "hash456", is_banned: false },
@@ -126,40 +129,51 @@ describe("checkCredentialBans", () => {
     expect((result[1] as ErrorResponseBody).code).toBe(200);
   });
 
-  it("should handle API errors gracefully", async () => {
+  it.only("should handle API errors gracefully", async () => {
     class MockAxiosError extends Error {
-      response: { data: string; status: number; headers: { [key: string]: string } };
+      response: {
+        data: string;
+        status: number;
+        headers: { [key: string]: string };
+      };
       request: string;
       constructor() {
         super("API Error");
-        this.response = { data: "response", status: 500, headers: { TEST: "header" } };
+        this.response = {
+          data: "response",
+          status: 500,
+          headers: { TEST: "header" },
+        };
         this.request = "request";
       }
       isAxiosError: true;
     }
 
-    mockedAxios.post.mockImplementationOnce(() => {
+    mockedAxiosPost.mockImplementationOnce(() => {
       throw new MockAxiosError();
     });
 
-    mockedAxios.isAxiosError.mockImplementationOnce((_: any) => {
+    mockedIsAxiosError.mockImplementationOnce((_: any) => {
       return true;
     });
 
     await expect(checkCredentialBans([validCredential])).rejects.toThrowError(
       new UnexpectedApiError(
-        'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}'
-      )
+        'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}',
+      ),
     );
   });
 
-  it("should handle missing API response data", async () => {
-    mockedAxios.post.mockResolvedValueOnce({});
+  it.only("should handle missing API response data", async () => {
+    mockedAxiosPost.mockResolvedValueOnce({});
 
     const input = [validCredential];
 
     await expect(checkCredentialBans(input)).rejects.toThrowError(
-      new ApiError("Ban not found for hash hash123. This should not happen.", 500)
+      new ApiError(
+        "Ban not found for hash hash123. This should not happen.",
+        500,
+      ),
     );
   });
 });

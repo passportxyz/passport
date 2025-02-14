@@ -14,7 +14,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true,
+    "incremental": true
   },
   "include": [
     "next-env.d.ts",
@@ -22,13 +22,13 @@
     "**/*.tsx",
     "./*.tsx",
     "jest.config.ts",
-    "jest.setup.ts",
+    "jest.setup.ts"
   ],
   "exclude": ["node_modules"],
   "ts-node": {
     "esm": true,
     "compilerOptions": {
-      "module": "nodenext",
-    },
-  },
+      "module": "nodenext"
+    }
+  }
 }

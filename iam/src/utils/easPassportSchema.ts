@@ -9,10 +9,11 @@ import { VerifiableCredential, StampBit } from "@gitcoin/passport-types";
 
 import { fetchPassportScore } from "./scorerService.js";
 import { encodeEasScore } from "./easStampSchema.js";
-import passportOnchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
+import passportOnchainInfo from "../../../deployments/onchainInfo.json" with { type: "json" };
 
-import bitMapData from "../static/providerBitMapInfo.json" assert { type: "json" };
+import bitMapData from "../static/providerBitMapInfo.json" with { type: "json" };
 
+export const bitMapDataTest = bitMapData;
 export type AttestationStampInfo = {
   hash: string;
   stampInfo: PassportAttestationStamp;

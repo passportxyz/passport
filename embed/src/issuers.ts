@@ -1,8 +1,8 @@
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
-const key = process.env.IAM_JWK;
+const key = process.env.IAM_JWK as string;
 const __issuer = DIDKit.keyToDID("key", key);
-const eip712Key = process.env.IAM_JWK_EIP712;
+const eip712Key = process.env.IAM_JWK_EIP712 as string;
 const __eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
 
 const validIssuers = new Set([__issuer, __eip712Issuer]);

@@ -1,11 +1,6 @@
-// ---- Web3 packages
-import { isAddress } from "ethers";
-
-// ---- Types
 import { Response } from "express";
 import { RequestPayload, CredentialResponseBody, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
 
-// All provider exports from platforms
 import { platforms, providers } from "@gitcoin/passport-platforms";
 import { issueHashedCredential } from "./credentials.js";
 import { checkCredentialBans } from "./bans.js";

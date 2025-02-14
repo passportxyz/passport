@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 // ---- Main App from index
-import { app } from "./index.js";
+import { app } from "./server.js";
 
 // default port to listen on
 const port = process.env.EMBED_PORT || 80;

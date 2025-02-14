@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { CustomizationTheme } from "../utils/theme/types";
 import { CUSTOMIZATION_ENDPOINT } from "../config/customization_config";
 import axios from "axios";
-import * as DOMPurify from "dompurify";
+import DOMPurify, { ElementHook } from "dompurify";
 import parse from "html-react-parser";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { PlatformGroupSpec } from "@gitcoin/passport-platforms";

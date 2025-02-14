@@ -11,6 +11,7 @@ import {
   SecondaryStorageAddResponse,
   SecondaryStorageDeleteResponse,
   SecondaryStorageBulkPatchResponse,
+  VerifiableEip712Credential,
 } from "@gitcoin/passport-types";
 
 import { definition as GitcoinPassportStampDefinition } from "@gitcoin/passport-schemas";
@@ -153,7 +154,8 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
   }
 
   formatCredentialInput = (stamp: Stamp) => {
-    const { type, proof, credentialSubject, issuanceDate, expirationDate, issuer } = stamp.credential;
+    const { type, proof, credentialSubject, issuanceDate, expirationDate, issuer } =
+      stamp.credential as VerifiableEip712Credential;
     if (!proof?.eip712Domain) {
       throw new Error("Invalid stamp");
     }
@@ -178,6 +180,7 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
             ...eip712Domain,
             types: {
               ...types,
+              "@context": types["@context"], // If this is not present explicitly, the TS compiler will scream in the delete statement below
               _context: types["@context"],
             },
           },

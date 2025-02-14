@@ -1,5 +1,5 @@
-import { getEASFeeAmount } from "../src/utils/easFees.js";
 import { parseEther } from "ethers";
+import { getEASFeeAmount } from "../src/utils/easFees.js";
 import Moralis from "moralis";
 import { PassportCache } from "@gitcoin/passport-platforms";
 
@@ -30,7 +30,7 @@ describe("EthPriceLoader", () => {
       jest.spyOn(PassportCache.prototype, "get").mockImplementation((key) => {
         if (key === "ethPrice") {
           return Promise.resolve("3000");
-        } else if (key === "ethPriceLastUpdate") {
+        } else {
           return Promise.resolve(null);
         }
       });
@@ -44,7 +44,7 @@ describe("EthPriceLoader", () => {
     });
 
     it("should handle Moralis errors gracefully", async () => {
-      const consoleSpy = jest.spyOn(console, "error");
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
       let count = 0;
       jest.spyOn(PassportCache.prototype, "get").mockImplementation((key) => {
         count += 1;
@@ -56,17 +56,18 @@ describe("EthPriceLoader", () => {
         } else if (key === "ethPriceLastUpdate") {
           return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
         }
+        return Promise.resolve(null);
       });
 
       jest.spyOn(PassportCache.prototype, "set").mockImplementation(() => Promise.resolve());
 
-      (Moralis.EvmApi.token.getTokenPrice as jest.Mock).mockRejectedValueOnce(new Error("Failed fetching price"));
+      (Moralis.EvmApi.token.getTokenPrice as jest.Mock<any>).mockRejectedValueOnce(new Error("Failed fetching price"));
       await getEASFeeAmount(2);
       expect(consoleSpy).toHaveBeenCalledWith("MORALIS ERROR: Failed to get ETH price, Error: Failed fetching price");
     });
 
     it("should handle Redis errors gracefully", async () => {
-      const consoleSpy = jest.spyOn(console, "error");
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
       let count = 0;
       jest.spyOn(PassportCache.prototype, "get").mockImplementation((key) => {
         count += 1;
@@ -78,6 +79,7 @@ describe("EthPriceLoader", () => {
         } else if (key === "ethPriceLastUpdate") {
           return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
         }
+        return Promise.resolve(null);
       });
 
       jest.spyOn(PassportCache.prototype, "set").mockRejectedValueOnce(new Error("Failed to store in cache"));
@@ -102,6 +104,7 @@ describe("EthPriceLoader", () => {
           return Promise.resolve((Date.now() - 1000).toString());
         }
       }
+      return Promise.resolve(null);
     });
 
     jest.spyOn(PassportCache.prototype, "set").mockImplementation(() => Promise.resolve());
@@ -122,6 +125,7 @@ describe("EthPriceLoader", () => {
       } else if (key === "ethPriceLastUpdate") {
         return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
       }
+      return Promise.resolve(null);
     });
 
     await getEASFeeAmount(2);

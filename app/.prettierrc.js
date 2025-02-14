@@ -1,4 +1,5 @@
-module.exports = {
-  ...require("../.prettierrc.js"),
+import base from "../.prettierrc.js";
+export default {
+  ...base,
   singleQuote: false,
 };
