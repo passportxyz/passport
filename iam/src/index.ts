@@ -159,7 +159,7 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         ...(challenge?.record || {}),
       };
 
-      const { issuerKey } = getIssuerInfo(payload.signatureType);
+      const { issuerKey } = getIssuerInfo();
       // generate a VC for the given payload
       return void issueChallengeCredential(DIDKit, issuerKey, record, payload.signatureType)
         .then((credential) => {

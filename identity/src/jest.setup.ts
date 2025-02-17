@@ -19,3 +19,4 @@ process.env.SCROLL_BADGE_PROVIDER_INFO =
 process.env.SCROLL_BADGE_ATTESTATION_SCHEMA_UID =
   "0xa35b5470ebb301aa5d309a8ee6ea258cad680ea112c86e456d5f2254448afc74";
 process.env.REDIS_URL = "redis://localhost:6379/0";
+process.env.FF_ROTATING_KEYS = "on";

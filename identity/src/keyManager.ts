@@ -15,17 +15,27 @@
 // Old keys can be removed from the ENV, and gaps are allowed. But we should
 // generally hold onto keys until any credentials issued with those keys are
 // expired
+//
+// If set in the ENV, the legacy key (IAM_JWK_EIP712) is always the first
+// key in the list, with version "0.0.0"
+
+import { checkRotatingKeysEnabled } from "./helpers.js";
 
 const MAX_CONCURRENT_KEYS = 2;
+
+const LEGACY_KEY_ENV_NAME = "IAM_JWK_EIP712";
 
 const KEY_ENV_PREFIX = "IAM_JWK_EIP712_V";
 const getKeyEnvName = (version: number) => `${KEY_ENV_PREFIX}${version}`;
 const getStartTimeEnvName = (version: number) => `${getKeyEnvName(version)}_START_TIME`;
 
+const LEGACY_VERSION = "0.0.0";
+type LegacyVersion = typeof LEGACY_VERSION;
+
 type KeyVersion = {
   key: string;
   startTime: Date;
-  version: number;
+  version: number | LegacyVersion;
 };
 
 const keyEnvNameRegex = new RegExp(`^${KEY_ENV_PREFIX}(?<version>\\d+)$`);
@@ -48,9 +58,8 @@ const loadKeyFromEnv = ({ version }: { version: number }): KeyVersion | undefine
 
 const getVersions = () =>
   Object.keys(process.env)
-    .map((key) => key.match(keyEnvNameRegex)?.groups?.version)
-    .filter((v) => v)
-    .map(Number)
+    .map((key) => Number(key.match(keyEnvNameRegex)?.groups?.version))
+    .filter((v) => v > 0)
     .sort();
 
 // Enforce monotonically increasing start times
@@ -59,13 +68,31 @@ const checkKeyOrder = (keys: KeyVersion[]) => {
     const previousKey = index ? keys[index - 1] : null;
     if (previousKey && key.startTime <= previousKey.startTime) {
       throw new Error(
-        `Key version ${key.version} start time (${key.startTime.toISOString()}) must be after previous version (${previousKey.startTime.toISOString()})`
+        `Key version ${
+          key.version
+        } start time (${key.startTime.toISOString()}) must be after previous version (${previousKey.startTime.toISOString()})`
       );
     }
   });
 };
 
-const loadInitiatedKeys = (): KeyVersion[] => {
+const getLegacyKeyVersion = (): KeyVersion | undefined => {
+  const key = process.env[LEGACY_KEY_ENV_NAME];
+
+  if (!key) {
+    console.warn(`Warning: No legacy key (${LEGACY_KEY_ENV_NAME}) found in ENV`);
+  }
+
+  return (
+    key && {
+      key,
+      startTime: new Date(0),
+      version: LEGACY_VERSION,
+    }
+  );
+};
+
+const loadInitiatedRotatingKeyVersions = (): KeyVersion[] => {
   const initiatedKeyVersions: KeyVersion[] = [];
 
   const versions = getVersions();
@@ -82,27 +109,43 @@ const loadInitiatedKeys = (): KeyVersion[] => {
   }
 
   if (initiatedKeyVersions.length === 0) {
+    console.warn("Warning: No valid IAM_JWK_EIP712_V* keys configured");
+  }
+
+  return initiatedKeyVersions;
+};
+
+const loadInitiatedKeys = (): KeyVersion[] => {
+  const rotatingKeyVersions = checkRotatingKeysEnabled() ? loadInitiatedRotatingKeyVersions() : [];
+
+  const legacyKeyVersion = getLegacyKeyVersion();
+
+  const initiatedKeyVersions = [legacyKeyVersion, ...rotatingKeyVersions].filter(Boolean);
+
+  if (initiatedKeyVersions.length === 0) {
     throw new Error("No valid keys configured");
   }
 
   return initiatedKeyVersions;
 };
 
-export const getKeyVersions = (): {
-  initiatedKeyVersions: KeyVersion[];
-  activeKeyVersions: KeyVersion[];
-  issuerKeyVersion: KeyVersion;
-} => {
-  const initiatedKeyVersions = loadInitiatedKeys();
+type GetKeyVersionsResponse = {
+  initiated: KeyVersion[];
+  active: KeyVersion[];
+  issuer: KeyVersion;
+};
 
-  checkKeyOrder(initiatedKeyVersions);
+export const getKeyVersions = (): GetKeyVersionsResponse => {
+  const initiated = loadInitiatedKeys();
 
-  const activeKeyVersions = initiatedKeyVersions.slice(-MAX_CONCURRENT_KEYS);
-  const issuerKeyVersion = activeKeyVersions[0];
+  checkKeyOrder(initiated);
+
+  const active = initiated.slice(-MAX_CONCURRENT_KEYS);
+  const issuer = active[0];
 
   return {
-    initiatedKeyVersions,
-    activeKeyVersions,
-    issuerKeyVersion,
+    initiated,
+    active,
+    issuer,
   };
 };

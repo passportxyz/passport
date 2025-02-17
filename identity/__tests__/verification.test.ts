@@ -123,9 +123,9 @@ describe("verifyTypes", () => {
     jest.clearAllMocks();
     const mockKey = { key: mockIssuerKey, version: 1, startTime: new Date() };
     (getKeyVersions as jest.Mock).mockImplementation(() => ({
-      initiatedKeyVersions: [mockKey],
-      activeKeyVersions: [mockKey],
-      issuerKeyVersion: mockKey,
+      initiated: [mockKey],
+      active: [mockKey],
+      issuer: mockKey,
     }));
   });
 
@@ -403,9 +403,9 @@ describe("verifyProvidersAndIssueCredentials", () => {
     jest.clearAllMocks();
     const mockKey = { key: mockIssuerKey, version: 1, startTime: new Date() };
     (getKeyVersions as jest.Mock).mockImplementation(() => ({
-      initiatedKeyVersions: [mockKey],
-      activeKeyVersions: [mockKey],
-      issuerKeyVersion: mockKey,
+      initiated: [mockKey],
+      active: [mockKey],
+      issuer: mockKey,
     }));
   });
 

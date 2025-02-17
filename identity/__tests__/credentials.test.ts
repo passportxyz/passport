@@ -136,7 +136,7 @@ describe("issueNullifiableCredential", function () {
     mockDIDKit.clearDidkitMocks();
   });
 
-  it("can generate a credential containing hash", async () => {
+  it("can generate a credential containing nullifiers", async () => {
     const record = {
       type: "Simple",
       version: "Test-Case-1",
@@ -378,6 +378,48 @@ describe("verifyCredential", function () {
 
     // all verifications will pass as the DIDKit response is mocked
     expect(await verifyCredential(OriginalDIDKit, credential)).toEqual(false);
+  });
+
+  describe("with legacy hash format", () => {
+    let oldFFValue: string | undefined;
+    beforeEach(() => {
+      oldFFValue = process.env.FF_ROTATING_KEYS;
+      process.env.FF_ROTATING_KEYS = "off";
+    });
+
+    afterEach(() => {
+      process.env.FF_ROTATING_KEYS = oldFFValue;
+    });
+
+    it("can generate a credential containing legacy hash", async () => {
+      const record = {
+        type: "Simple",
+        version: "Test-Case-1",
+        address: "0x0",
+      };
+
+      const expectedHash: string =
+        "v0.0.0:" +
+        base64.encode(
+          createHash("sha256")
+            .update(key)
+            .update(JSON.stringify(objToSortedArray(record)))
+            .digest()
+        );
+
+      const { credential } = await issueNullifiableCredential({
+        DIDKit,
+        issuerKey: key,
+        address: "0x0",
+        record,
+        nullifierGenerators,
+        expiresInSeconds: 3600,
+      });
+
+      expect(DIDKit.issueCredential).toHaveBeenCalled();
+      expect(credential.credentialSubject.nullifiers).toBeUndefined();
+      expect(credential.credentialSubject.hash).toEqual(expectedHash);
+    });
   });
 });
 

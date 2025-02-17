@@ -19,6 +19,7 @@ import {
   stampCredentialDocument,
 } from "./signingDocuments.js";
 import { IgnorableNullifierGeneratorError, NullifierGenerator } from "./nullifierGenerators.js";
+import { checkRotatingKeysEnabled } from "./helpers.js";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
@@ -217,7 +218,6 @@ export const issueNullifiableCredential = async ({
   record,
   nullifierGenerators,
   expiresInSeconds = CREDENTIAL_EXPIRES_AFTER_SECONDS,
-  signatureType,
 }: {
   DIDKit: DIDKitLib;
   issuerKey: string;
@@ -228,63 +228,55 @@ export const issueNullifiableCredential = async ({
   signatureType?: string;
 }): Promise<IssuedCredential> => {
   const nullifiers = await getNullifiers({ record, nullifierGenerators });
+  const legacy = !checkRotatingKeysEnabled();
 
   let credential: VerifiableCredential;
-  if (signatureType === "EIP712") {
-    const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", issuerKey);
-    // generate a verifiableCredential
-    credential = await issueEip712Credential(
-      DIDKit,
-      issuerKey,
-      { expiresInSeconds },
-      {
-        credentialSubject: {
-          "@context": {
-            nullifiers: {
-              "@container": "@list",
-              "@type": "https://schema.org/Text",
-            },
-            provider: "https://schema.org/Text",
-          },
-
-          // construct a pkh DID on mainnet (:1) for the given wallet address
-          id: `did:pkh:eip155:1:${address}`,
-          provider: record.type,
-          nullifiers,
-        },
-        // https://www.w3.org/TR/vc-status-list/#statuslist2021entry
-        // Can be added to support revocation
-        // credentialStatus: {
-        //   id: "",
-        //   type: "StatusList2021Entry",
-        //   statusPurpose: "revocation",
-        //   statusListIndex: "",
-        //   statusListCredential: "",
-        // },
-      },
-      stampCredentialDocument(verificationMethod),
-      ["https://w3id.org/vc/status-list/2021/v1"]
-    );
-  } else {
-    // generate a verifiableCredential
-    credential = await _issueEd25519Credential(DIDKit, issuerKey, expiresInSeconds, {
+  const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", issuerKey);
+  // generate a verifiableCredential
+  credential = await issueEip712Credential(
+    DIDKit,
+    issuerKey,
+    { expiresInSeconds },
+    {
       credentialSubject: {
-        "@context": [
-          {
-            nullifiers: {
-              "@container": "@list",
-              "@type": "https://schema.org/Text",
-            },
-            provider: "https://schema.org/Text",
-          },
-        ],
+        "@context": {
+          ...(legacy
+            ? {
+                hash: "https://schema.org/Text",
+              }
+            : {
+                nullifiers: {
+                  "@container": "@list",
+                  "@type": "https://schema.org/Text",
+                },
+              }),
+          provider: "https://schema.org/Text",
+        },
+
         // construct a pkh DID on mainnet (:1) for the given wallet address
         id: `did:pkh:eip155:1:${address}`,
         provider: record.type,
-        nullifiers,
+        ...(legacy
+          ? {
+              hash: nullifiers[0],
+            }
+          : {
+              nullifiers,
+            }),
       },
-    });
-  }
+      // https://www.w3.org/TR/vc-status-list/#statuslist2021entry
+      // Can be added to support revocation
+      // credentialStatus: {
+      //   id: "",
+      //   type: "StatusList2021Entry",
+      //   statusPurpose: "revocation",
+      //   statusListIndex: "",
+      //   statusListCredential: "",
+      // },
+    },
+    stampCredentialDocument(verificationMethod, legacy),
+    ["https://w3id.org/vc/status-list/2021/v1"]
+  );
 
   // didkit-wasm-node returns credential as a string - parse for JSON
   return {

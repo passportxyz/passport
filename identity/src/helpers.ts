@@ -2,6 +2,9 @@ import { Response } from "express";
 import { IAMError } from "./verification.js";
 import { generateKeyPairSync } from "crypto";
 
+// Temporary helper function to determine if we should use the new format
+export const checkRotatingKeysEnabled = () => process.env.FF_ROTATING_KEYS === "on";
+
 // return a JSON error response with a 400 status
 export const errorRes = (res: Response, error: string | object, errorCode: number): Response =>
   res.status(errorCode).json({ error });
@@ -17,10 +20,7 @@ export const addErrorDetailsToMessage = (message: string, error: any): string =>
 };
 
 export class ApiError extends Error {
-  constructor(
-    public message: string,
-    public code: number
-  ) {
+  constructor(public message: string, public code: number) {
     super(message);
     this.name = this.constructor.name;
   }

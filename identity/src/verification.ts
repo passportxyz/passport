@@ -212,9 +212,7 @@ export const verifyProvidersAndIssueCredentials = async (
               ...(verifyResult?.record || {}),
             };
 
-            const { issuerKey, nullifierGenerators } = getIssuerInfo(
-              payload.signatureType
-            );
+            const { issuerKey, nullifierGenerators } = getIssuerInfo();
 
             // generate a VC for the given payload
             ({ credential } = await issueNullifiableCredential({

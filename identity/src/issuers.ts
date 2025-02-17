@@ -3,37 +3,27 @@ import { NullifierGenerators } from "./credentials.js";
 import { getKeyVersions } from "./keyManager.js";
 import { HashNullifierGenerator } from "./nullifierGenerators.js";
 
-const key = process.env.IAM_JWK;
-const __issuer = DIDKit.keyToDID("key", key);
-const eip712Key = process.env.IAM_JWK_EIP712;
-const __eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
-
-export function getIssuerInfo(signatureType: string): {
+export function getIssuerInfo(): {
   issuerKey: string;
   nullifierGenerators: NullifierGenerators;
 } {
-  if (signatureType === "EIP712") {
-    const { activeKeyVersions, issuerKeyVersion } = getKeyVersions();
+  const { active, issuer } = getKeyVersions();
 
-    return {
-      issuerKey: issuerKeyVersion.key,
-      nullifierGenerators: activeKeyVersions.map(({ key, version }) =>
-        HashNullifierGenerator({ key, version })
-      ) as NullifierGenerators,
-    };
-  } else {
-    return {
-      issuerKey: key,
-      nullifierGenerators: [HashNullifierGenerator({ key, version: "0.0.0" })],
-    };
-  }
+  return {
+    issuerKey: issuer.key,
+    nullifierGenerators: active.map(({ key, version }) =>
+      // TODO Add some variable like HUMAN_NETWORK_START_VERSION and
+      // use it here to switch to HumanNetworkNullifierGenerators
+      HashNullifierGenerator({ key, version })
+    ) as NullifierGenerators,
+  };
 }
 
 export function hasValidIssuer(issuer: string): boolean {
-  const { initiatedKeyVersions } = getKeyVersions();
-  const initiatedIssuers = initiatedKeyVersions.map(({ key }) => DIDKit.keyToDID("key", key));
+  const { initiated } = getKeyVersions();
+  const initiatedIssuers = initiated.map(({ key }) => DIDKit.keyToDID("key", key));
 
-  const validIssuers = new Set([__issuer, __eip712Issuer, ...initiatedIssuers]);
+  const validIssuers = new Set([...initiatedIssuers]);
 
   return validIssuers.has(issuer);
 }
