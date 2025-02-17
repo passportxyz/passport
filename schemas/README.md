@@ -3,24 +3,17 @@
 ## Setup
 
 - `yarn install`
-- `yarn start:ceramic` to start local ceramic node
+- ~~`yarn start:ceramic` to start local ceramic node~~
+- run a ceramic node with preconfigured admin did: `docker run -p 7007:7007 gitcoinpassport/js-ceramic:3.2.0`
 
 ## GraphQL
 
-- Run the following commands to compile and deploy the schemas. I was unable to run them via yarn and had to run them from the command line. Will need ti fix passing the arguments via yarn.
+Run the following commands to compile and deploy the schemas:
 
-  ````bash
-  TODO: Fix
+- `yarn models:create-composite`
+- `yarn models:deploy-composite`
+- `yarn models:compile-composite`
 
-  ```bash
-  composedb composite:create models/passportStamps.graphql --output=composites/gitcoin-passport-stamps-composite.json --did-private-key=${PRIVAKE_KEY}
+## To run a graphql test server:
 
-
-  composedb composite:deploy composites/gitcoin-passport-stamps-composite.json --ceramic-url=${CERAMIC_URL} --did-private-key=${PRIVAKE_KEY}
-
-
-  composedb composite:compile composites/gitcoin-passport-stamps-composite.json definitions/gitcoin-passport-stamps.ts --ceramic-url=${CERAMIC_URL}
-  ````
-
-- Open `schemas/definitions/gitcoin-passport-stamps.ts` and copy the `definition` object into `schemas/composites/gitcoin-passport-stamps-composite.json`
-- run `yarn composedb graphql:server --ceramic-url=${CERAMIC_URL} --graphiql composites/gitcoin-passport-stamps-composite.json --did-private-key=${PRIVAKE_KEY} --port=5005`
+Run `yarn graphql-server`
