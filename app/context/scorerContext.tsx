@@ -177,6 +177,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       }
     } catch (error) {
       setPassportSubmissionState("APP_REQUEST_ERROR");
+      console.error("Error fetching stamp weights", error);
     }
   };
 
