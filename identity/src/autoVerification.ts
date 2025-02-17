@@ -1,17 +1,7 @@
-// ---- Web3 packages
 import { isAddress } from "ethers";
 
-// ---- Types
-import { Response } from "express";
-import {
-  PROVIDER_ID,
-  ValidResponseBody,
-  SignatureType,
-  VerifiableCredential,
-  VerifiedPayload,
-} from "@gitcoin/passport-types";
+import { PROVIDER_ID, ValidResponseBody, SignatureType, VerifiableCredential } from "@gitcoin/passport-types";
 
-// All provider exports from platforms
 import { platforms } from "@gitcoin/passport-platforms";
 import { verifyProvidersAndIssueCredentials, VerificationError, addErrorDetailsToMessage } from "./verification.js";
 
@@ -36,7 +26,7 @@ export const getEvmProvidersByPlatform = ({
   const evmPlatforms = Object.values(platforms).filter(({ PlatformDetails }) => PlatformDetails.isEVM);
 
   // TODO we should use the scorerId to check for any EVM stamps particular to a community, and include those here
-  scorerId;
+  const _ = scorerId;
 
   return evmPlatforms.map(({ ProviderConfig }) =>
     ProviderConfig.reduce((acc, platformGroupSpec) => {

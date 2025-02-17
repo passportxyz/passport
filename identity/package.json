@@ -2,32 +2,15 @@
   "name": "@gitcoin/passport-identity",
   "version": "1.0.0",
   "license": "MIT",
-  "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/esm/index.d.ts",
   "type": "module",
   "exports": {
     ".": {
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/esm/index.d.ts"
     }
   },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/commonjs/index.d.ts"
-      ]
-    }
-  },
-  "directories": {
-    "src": "src",
-    "dist": "dist"
-  },
-  "files": [
-    "src",
-    "dist"
-  ],
   "publishConfig": {
     "access": "public"
   },
@@ -43,14 +26,14 @@
     "multiformats": "^13.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.3",
     "@babel/cli": "^7.23.3",
+    "@babel/core": "^7.23.3",
     "@babel/plugin-syntax-import-assertions": "^7.23.3",
     "@babel/plugin-transform-modules-commonjs": "^7.23.3",
     "@babel/preset-env": "^7.23.3",
-    "@babel/preset-typescript": "^7.23.3",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
+    "@types/jest": "^29.5.14",
     "@types/luxon": "^2.3.2",
     "@types/node": "16",
     "@types/node-fetch": "latest",
@@ -64,15 +47,13 @@
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "clean": "rimraf dist node_modules",
-    "build": "npm run build:esm && npm run build:types",
-    "build:esm": "tsc --module NodeNext --outDir dist/esm",
-    "build:types": "tsc --declaration --declarationDir dist --emitDeclarationOnly",
-    "test": "jest --verbose",
-    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
+    "build": "tsc --declaration --module NodeNext --outDir dist/esm",
+    "test": "jest",
+    "lint": "tsc --noEmit && eslint",
     "prettier": "prettier --write ."
   }
 }

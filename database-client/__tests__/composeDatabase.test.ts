@@ -11,7 +11,7 @@ import { DID } from "dids";
 import { ComposeDatabaseImpl, ComposeDatabase, PassportWrapperLoadResponse } from "../src/composeDatabase";
 
 import { jest } from "@jest/globals";
-import mockStamps from "./mockStamps.json";
+const mockStamps = require("./mockStamps.json");
 import { GraphQLError } from "graphql";
 
 let database: ComposeDatabaseImpl;
@@ -31,7 +31,7 @@ const mockComposeError = {
   ],
   data: {
     viewer: {
-      gitcoinPassportStampWrapperList: null,
+      gitcoinPassportStampWrapperList: null as any,
     },
   },
 };
@@ -260,7 +260,7 @@ describe("Compose Database", () => {
       jest
         .spyOn(ComposeClient.prototype, "executeQuery")
         .mockResolvedValueOnce({ data: { deleteGitcoinPassportStamp: { document: { id: "123" } } } });
-      const results = await database.deleteStamps(mockStamps.map((stamp) => stamp.provider as PROVIDER_ID));
+      const results = await database.deleteStamps(mockStamps.map((stamp: any) => stamp.provider as PROVIDER_ID));
       expect(ComposeClient.prototype.executeQuery).toHaveBeenCalled();
       results.forEach((stamp) => {
         expect(stamp.secondaryStorageError).toBeUndefined();
@@ -285,7 +285,7 @@ describe("Compose Database", () => {
           }
         });
       // jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
-      const result = await database.deleteStamps(mockStamps.map((stamp) => stamp.provider as PROVIDER_ID));
+      const result = await database.deleteStamps(mockStamps.map((stamp: any) => stamp.provider as PROVIDER_ID));
       const errorResults = result.filter(({ secondaryStorageError }) => secondaryStorageError);
       expect(errorResults.length).toEqual(1);
       expect(ComposeClient.prototype.executeQuery).toHaveBeenCalledTimes(2);
@@ -338,7 +338,7 @@ describe("Compose Database write serialisation", () => {
     jest.resetAllMocks();
   });
 
-  // TODO: this is commented as it causes failure when running `yarn test` in the root of the repo. Shall be investigated. 
+  // TODO: this is commented as it causes failure when running `yarn test` in the root of the repo. Shall be investigated.
   it.skip("should serialize add, patch and delete operations", async () => {
     let timestamps: number[] = [];
     const database = new ComposeDatabase({ id: "id" } as unknown as DID);
@@ -349,7 +349,7 @@ describe("Compose Database write serialisation", () => {
         (): Promise<PassportWrapperLoadResponse[]> => Promise.resolve([] as PassportWrapperLoadResponse[])
       );
 
-    // Mock the implementations on database.composeImpl of add, patch and delete and 
+    // Mock the implementations on database.composeImpl of add, patch and delete and
     // register the timestamps when the methods are called.
     jest.spyOn(database.composeImpl, "addStamps").mockImplementation(
       (stamps: Stamp[]): Promise<SecondaryStorageAddResponse[]> =>

@@ -10,7 +10,6 @@ import { BigNumber}  from "bignumber.js";
 
 export const gtcStakingEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}registry/gtc-stake`;
 export const gtcStakingEndpointV2 = `${process.env.PASSPORT_SCORER_BACKEND}stake/gtc`;
-const apiKey = process.env.SCORER_API_KEY;
 
 type UserStake = {
   selfStake: BigNumber;
@@ -127,9 +126,9 @@ export class GtcStakingProvider implements Provider {
           throw new ProviderExternalVerificationError("No results returned from the GTC Staking API");
 
         // V0
-        results.forEach((stake: Stake) => {
-          stake.event_type === "SelfStake" ? selfStakes.push(stake) : communityStakes.push(stake);
-        });
+        results.forEach((stake: Stake) => 
+          stake.event_type === "SelfStake" ? selfStakes.push(stake) : communityStakes.push(stake)
+        );
 
         // V2
         let selfStakeV2 = new BigNumber(0);

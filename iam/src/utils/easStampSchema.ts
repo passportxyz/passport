@@ -6,7 +6,7 @@ import {
   MultiAttestationRequest,
   AttestationRequestData,
 } from "@ethereum-attestation-service/eas-sdk";
-import passportOnchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
+import passportOnchainInfo from "../../../deployments/onchainInfo.json" with { type: "json" };
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
 import { fetchPassportScore } from "./scorerService.js";

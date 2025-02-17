@@ -14,9 +14,9 @@
     "start": "node .",
     "debug": "concurrently --kill-others \"tsc --watch\" \"node --watch --inspect .\"",
     "prod:start": "tsc && node .",
-    "test": "jest --verbose",
+    "test": "jest",
     "prettier": "prettier --write .",
-    "lint": "tsc --noEmit",
+    "lint": "tsc --noEmit && eslint",
     "lint:fix": "eslint --fix --ext .ts,.js,.tsx .",
     "checkProviders:op-sepolia": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://opt-sepolia.g.alchemy.com/v2/ 0xaa37dc 0x19a6DCAbE629C8e71814bD9B4Ea7e2A7B90cFeC0",
     "checkProviders:op": "tsx src/scripts/checkOnChainProvidersAreInSync.ts https://opt-mainnet.g.alchemy.com/v2/ 0xa 0x5558D441779Eca04A329BcD6b47830D2C6607769",
@@ -37,14 +37,12 @@
     "brightid_sdk": "^1.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
-    "eslint-plugin-prettier": "^5.1.3",
     "ethers": "^6.13.4",
     "express": "4",
     "google-auth-library": "^7.14.1",
     "luxon": "^2.4.0",
     "moralis": "^2.24.2",
     "multiformats": "^9.9.0",
-    "tslint": "^6.1.3",
     "twitter-api-v2": "^1.15.1",
     "uuid": "^8.3.2"
   },
@@ -66,10 +64,9 @@
     "babel-plugin-transform-import-meta": "^2.2.1",
     "jest": "^29.6.4",
     "supertest": "^6.2.2",
-    "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.7.3"
   },
   "resolutions": {
     "leveldown": "6.1.1"

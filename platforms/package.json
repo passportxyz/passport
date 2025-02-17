@@ -55,7 +55,7 @@
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "clean": "rimraf dist node_modules",
@@ -63,7 +63,7 @@
     "build:esm": "tsc --module NodeNext --outDir dist/esm",
     "build:types": "tsc --declaration --declarationDir dist --emitDeclarationOnly",
     "test": "jest",
-    "lint": "tsc --noEmit && eslint --ext .ts,.js,.tsx .",
+    "lint": "tsc --noEmit && eslint",
     "prettier": "prettier --write ."
   }
 }

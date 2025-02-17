@@ -2,19 +2,18 @@
 import { Request } from "express";
 
 // ---- Web3 packages
-import { Signature, JsonRpcProvider, Contract } from "ethers";
+import { Signature, JsonRpcProvider, Contract } from "./ethersHelper.js";
 
 // ---- Types
 import { Response } from "express";
 import { EasPayload, PassportAttestation, EasRequestBody } from "@gitcoin/passport-types";
-import passportOnchainInfo from "../../../deployments/onchainInfo.json" assert { type: "json" };
+import passportOnchainInfo from "../../../deployments/onchainInfo.json" with { type: "json" };
 
 import { getEASFeeAmount } from "./easFees.js";
-import { hasValidIssuer } from "@gitcoin/passport-identity";
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
-import { verifyCredential } from "@gitcoin/passport-identity";
+import { hasValidIssuer, verifyCredential } from "@gitcoin/passport-identity";
 
 // All provider exports from platforms
 
@@ -113,7 +112,7 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): Promise<void
         };
       })
     )
-      .then(async (credentialVerifications) => {
+      .then(async (credentialVerifications): Promise<void> => {
         const SCROLL_BADGE_PROVIDER_INFO: Record<
           string,
           {
@@ -235,7 +234,7 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): Promise<void
 
         signer
           .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
-          .then((signature) => {
+          .then((signature): void => {
             const { v, r, s } = Signature.from(signature);
 
             const payload: EasPayload = {
@@ -246,12 +245,12 @@ export const scrollDevBadgeHandler = (req: Request, res: Response): Promise<void
 
             return void res.json(toJsonObject(payload));
           })
-          .catch((e) => {
+          .catch((e): void => {
             console.log("Error signing badge request", { e });
             return void errorRes(res, "Error signing badge request", 500);
           });
       })
-      .catch((e) => {
+      .catch((e): void => {
         console.log("Error formatting badge request", { e });
         return void errorRes(res, "Error formatting badge request", 500);
       });
