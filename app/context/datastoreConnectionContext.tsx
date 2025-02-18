@@ -59,12 +59,13 @@ export const useDatastoreConnection = () => {
 
   const getPassportDatabaseAccessToken = async (did: DID, address: string): Promise<string> => {
     let nonce = null;
+    console.error("Getting nonce for did:", did);
     try {
       // Get nonce from server
       const nonceResponse = await axios.get(`${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/account/nonce`);
       nonce = nonceResponse.data.nonce;
     } catch (error) {
-      const msg = `Failed to get nonce from server for user with did: ${did.parent}`;
+      const msg = `Failed to get nonce from server for user with did: ${did.parent}. Error: ${error}`;
       datadogRum.addError(msg);
       throw new Error(msg);
     }
@@ -82,7 +83,7 @@ export const useDatastoreConnection = () => {
       setConnectedAddress(address);
       return accessToken;
     } catch (error) {
-      const msg = `Failed to authenticate user with did: ${did.parent}`;
+      const msg = `Failed to authenticate user with did: ${did.parent}. Error: ${error}`;
       datadogRum.addError(msg);
       throw new Error(msg);
     }
