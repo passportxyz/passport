@@ -54,10 +54,20 @@ const formatCredentialFromCeramic = (
     "@context": encodedCredential._context,
     type: encodedCredential.type,
     credentialSubject: {
-      "@context": encodedCredential.credentialSubject._context,
+      "@context": {
+        nullifiers: encodedCredential.credentialSubject._context.nullifiers
+          ? {
+              "@container": encodedCredential.credentialSubject._context.nullifiers["_container"],
+              "@type": encodedCredential.credentialSubject._context.nullifiers["_type"],
+            }
+          : undefined,
+        hash: encodedCredential.credentialSubject._context.hash,
+        provider: encodedCredential.credentialSubject._context.provider,
+      },
       id: encodedCredential.credentialSubject.id,
       hash: encodedCredential.credentialSubject.hash,
       provider: encodedCredential.credentialSubject.provider,
+      nullifiers: encodedCredential.credentialSubject.nullifiers,
       // address: encodedCredential.credentialSubject.address,
       // challenge: encodedCredential.credentialSubject.challenge,
     },
@@ -81,6 +91,7 @@ const formatCredentialFromCeramic = (
           Document: encodedCredential.proof.eip712Domain.types.Document,
           EIP712Domain: encodedCredential.proof.eip712Domain.types.EIP712Domain,
           Proof: encodedCredential.proof.eip712Domain.types.Proof,
+          NullifiersContext: encodedCredential.proof.eip712Domain.types.NullifiersContext,
         },
       },
     },
@@ -171,7 +182,16 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
         type,
         credentialSubject: {
           ...credentialSubject,
-          _context: credentialSubject["@context"],
+          _context: {
+            ...credentialSubject["@context"],
+            nullifiers: credentialSubject["@context"]["nullifiers"]
+              ? {
+                  ...credentialSubject["@context"]["nullifiers"],
+                  _type: credentialSubject["@context"]["nullifiers"]["@type"],
+                  _container: credentialSubject["@context"]["nullifiers"]["@container"],
+                }
+              : undefined,
+          },
         },
         proof: {
           ...proof,
@@ -191,6 +211,14 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
     delete input.content.credentialSubject["@context"];
     delete input.content.proof["@context"];
     delete input.content.proof.eip712Domain.types["@context"];
+    if (input.content.credentialSubject._context.nullifiers) {
+      delete input.content.credentialSubject._context.nullifiers["@type"];
+      delete input.content.credentialSubject._context.nullifiers["@container"];
+    } else {
+      // There will be undefined nullifier in the context introduced by our code above, we need
+      // to delete that otherwise graphql will complain
+      delete input.content.credentialSubject._context["nullifiers"];
+    }
 
     return input;
   };
@@ -221,8 +249,27 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
 
     let vcID;
     const input = this.formatCredentialInput(stamp);
-    const result = (await this.compose.executeQuery(
-      `
+
+    let result = null;
+
+    if (input.content.credentialSubject._context.nullifiers) {
+      // Create a stamp with a credentialSubject.nullifiers
+      result = (await this.compose.executeQuery(
+        `
+        mutation CreateGitcoinPassportStampWithNullifiers($input: CreateGitcoinPassportStampWithNullifiersInput!) {
+          createGitcoinPassportStampWithNullifiers(input: $input) {
+            document {
+              id
+            }
+          }
+        }
+        `,
+        { input }
+      )) as GraphqlResponse<{ createGitcoinPassportStampWithNullifiers: { document: { id: string } } }>;
+    } else {
+      // Create a stamp with a credentialSubject.hash
+      result = (await this.compose.executeQuery(
+        `
         mutation CreateGitcoinPassportVc($input: CreateGitcoinPassportStampInput!) {
           createGitcoinPassportStamp(input: $input) {
             document {
@@ -231,8 +278,9 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
           }
         }
         `,
-      { input }
-    )) as GraphqlResponse<{ createGitcoinPassportStamp: { document: { id: string } } }>;
+        { input }
+      )) as GraphqlResponse<{ createGitcoinPassportStamp: { document: { id: string } } }>;
+    }
 
     let secondaryStorageError: string | undefined;
     let streamId: string | undefined;
@@ -244,7 +292,11 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
       console.error(`[ComposeDB][addStamp] ${this.did} failed to add stamp ${secondaryStorageError}`);
       this.logger.error(`[ComposeDB][addStamp] ${this.did} failed to add stamp`, { error: result.errors });
     } else {
-      vcID = result?.data?.createGitcoinPassportStamp?.document?.id;
+      if (input.content.credentialSubject._context.nullifiers) {
+        vcID = result?.data?.createGitcoinPassportStampWithNullifiers?.document?.id;
+      } else {
+        vcID = result?.data?.createGitcoinPassportStamp?.document?.id;
+      }
 
       if (vcID) {
         this.logger.info(`[ComposeDB][addStamp] ${this.did} adding stamp wrapper`);
@@ -306,11 +358,17 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
     console.log(`[ComposeDB] ${this.did} addStamps:`, { stamps });
     this.logger.info(`[ComposeDB] ${this.did} addStamps`, { stamps });
 
-    const vcPromises = stamps.map(async (stamp) => await this.addStamp(stamp));
+    // const vcPromises = stamps.map(async (stamp) => await this.addStamp(stamp));
+    const ret = [];
+    for (let i = 0; i < stamps.length; i++) {
+      const stamp = stamps[i];
+      const addStampRet = await this.addStamp(stamp);
+      ret.push(addStampRet);
+    }
 
-    const addRequests = await Promise.allSettled(vcPromises);
+    // const addRequests = await Promise.allSettled(vcPromises);
 
-    const ret = this.checkSettledResponse(addRequests);
+    // const ret = this.checkSettledResponse(addRequests);
     console.log(`[ComposeDB] ${this.did} addStamps ret:`, { ret });
     this.logger.info(`[ComposeDB] ${this.did} addStamps ret`, { ret });
     return ret;
@@ -419,6 +477,66 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
                 isRevoked
                 vcID
                 vc {
+                  ... on GitcoinPassportStampWithNullifiers {
+                    id
+                    type
+                    _context
+                    expirationDate
+                    issuanceDate
+                    issuer
+                    proof {
+                      _context
+                      created
+                      eip712Domain {
+                        domain {
+                          name
+                        }
+                        primaryType
+                        types {
+                          _context {
+                            name
+                            type
+                          }
+                          CredentialSubject {
+                            name
+                            type
+                          }
+                          Document {
+                            type
+                            name
+                          }
+                          Proof {
+                            name
+                            type
+                          }
+                          EIP712Domain {
+                            name
+                            type
+                          }
+                          NullifiersContext {
+                            name
+                            type
+                          }
+                        }
+                      }
+                      proofPurpose
+                      proofValue
+                      type
+                      verificationMethod
+                    }
+                    credentialSubject {
+                      _context {
+                        nullifiers {
+                          _type
+                          _container
+                        }
+                        provider
+                      }
+                      nullifiers
+                      id
+                      provider
+                    }
+                  }
                   ... on GitcoinPassportStamp {
                     id
                     type
