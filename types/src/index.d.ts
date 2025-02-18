@@ -64,12 +64,19 @@ export type VerifiableEip712Credential = {
   type: string[];
   credentialSubject: {
     id: string;
-    "@context": { [key: string]: string };
+    // Example @context value:
+    // "@context": {
+    //   nullifiers: {
+    //     "@type": "https://schema.org/Text",
+    //     "@container": "@list",
+    //   },
+    //   provider: "https://schema.org/Text",
+    // },
+    "@context": { [key: string]: string | { [key: string]: string } };
 
     // Deprecated, should be removed once existing
     // credentials are expired
     hash?: string;
-
     nullifiers?: string[];
     provider?: string;
     address?: string;
@@ -109,7 +116,7 @@ export type VerifiableEip712CredentialComposeEncoded = {
   type: string[];
   credentialSubject: {
     id: string;
-    _context: { [key: string]: string };
+    _context: { [key: string]: string | { [key: string]: string } };
 
     // Deprecated, should be removed once existing
     // credentials are expired
