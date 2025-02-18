@@ -610,7 +610,7 @@ export const amplifyAppInfo = newPassportDomain.apply((domainName) => {
     environmentVariables: passportXyzAppEnvironment,
     tags: { ...defaultTags, Name: `${prefix}.${domainName}` },
     buildCommand:
-      "npm install --g lerna@6.6.2 && lerna bootstrap && rm -rf ../node_modules/@tendermint && npm run build",
+      "npm install --g lerna@6.6.2 && lerna bootstrap && rm -rf ../node_modules/@tendermint && rm -rf ../node_modules/did-jwt/node_modules/uint8arrays && npm run build",
     preBuildCommand: "nvm use 20.9.0",
     artifactsBaseDirectory: "out",
     customRules: [
