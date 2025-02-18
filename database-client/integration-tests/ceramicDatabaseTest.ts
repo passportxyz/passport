@@ -125,15 +125,13 @@ describe.each(testStamps)(
       expect(result.passport.stamps.length).toEqual(0);
     });
 
-    it("stamp type: $credentialType -- should return stamp data", async () => {
+    it("stamp type: $credentialType -- should return the identical stamp data that has been put in", async () => {
       const addRequest = await composeDatabase.addStamps(stampsToAdd);
       const result = await composeDatabase.getPassport();
       expect(result.status).toEqual("Success");
       expect(result.passport.stamps.length).toEqual(1);
       const stampData = result.passport.stamps[0];
       expect(stampData.provider).toEqual(stampsToAdd[0].provider);
-      expect(stampData.credential.issuer).toEqual(stampsToAdd[0].credential.issuer);
-      expect(stampData.credential.issuanceDate).toEqual(stampsToAdd[0].credential.issuanceDate);
       expect(stampData.credential).toEqual(stampsToAdd[0].credential);
     });
   }
