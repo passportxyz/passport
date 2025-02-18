@@ -61,7 +61,6 @@ export const useLoginFlow = ({
         title: "Connection Error",
         message: (e as Error).message,
       });
-
     },
     [failure]
   );
