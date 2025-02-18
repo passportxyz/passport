@@ -119,7 +119,9 @@ export const useDatastoreConnection = () => {
 
   const connect = useCallback(
     async (address: string, walletClient: WalletClient) => {
+      console.log("DEBUG Obj Error datastoreConnectionContext connect .... ");
       if (address) {
+        console.log("DEBUG Obj Error datastoreConnectionContext connect .... address", address);
         try {
           const accountId = new AccountId({
             // We always use chain id 1 for now for all sessions, to avoid users
@@ -127,17 +129,24 @@ export const useDatastoreConnection = () => {
             chainId: "eip155:1",
             address,
           });
+          console.log("DEBUG Obj Error datastoreConnectionContext connect .... accountId", accountId);
+
           const authMethod = await EthereumWebAuth.getAuthMethod(walletClient, accountId);
-
+          console.log("DEBUG Obj Error datastoreConnectionContext connect .... authMethod", authMethod);
           let session: DIDSession = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });
-
+          console.log("DEBUG Obj Error datastoreConnectionContext connect .... DIDSession", DIDSession);
           if (session) {
+            console.log("DEBUG Obj Error datastoreConnectionContext connect .... session", session);
             await loadDbAccessToken(address, session.did);
+            console.log("DEBUG Obj Error datastoreConnectionContext connect .... done loadDbAccessToken");
             setDid(session.did);
+            console.log("DEBUG Obj Error datastoreConnectionContext connect .... done setDid");
 
             setCheckSessionIsValid(() => () => !session.isExpired);
+            console.log("DEBUG Obj Error datastoreConnectionContext connect .... complete ");
           }
         } catch (error) {
+          console.error("DEBUG Obj Error datastoreConnectionContext connect .... error", error);
           await disconnectWallet();
           throw error;
         }

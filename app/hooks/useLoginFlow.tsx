@@ -130,6 +130,8 @@ export const useLoginFlow = ({
       ) {
         isConnectingToDatabaseRef.current = true;
         try {
+          console.log("DEBUG Obj Error: ", address);
+          console.log("DEBUG Obj walletClient: ", walletClient);
           await connectDatastore(address, walletClient);
         } catch (e) {
           resetLogin();
