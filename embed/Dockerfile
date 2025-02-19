@@ -6,4 +6,4 @@ COPY . .
 RUN yarn && cd embed && yarn build
 
 EXPOSE 80 443
-CMD [ "node", "embed/dist/src/main.js" ]
+CMD [ "node", "embed/dist/main.js" ]
