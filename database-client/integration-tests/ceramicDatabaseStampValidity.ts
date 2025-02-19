@@ -32,8 +32,8 @@ beforeAll(async () => {
   composeDatabase = new ComposeDatabase(testDID, process.env.CERAMIC_CLIENT_URL || "http://localhost:7007");
 });
 
-describe("assuming a valid stamp is stored in ceramic", () => {
-  it("should return a valid stamp that can be validated successfully", async () => {
+describe.only("assuming a valid stamp is stored in ceramic", () => {
+  it("stamp with hash - should return a valid stamp that can be validated successfully", async () => {
     // Step 1: First, we need to create a valid stamp
     const verificationMethod: string = (await DIDKit.keyToVerificationMethod("ethr", eip712Key)) as string;
 
@@ -52,6 +52,68 @@ describe("assuming a valid stamp is stored in ceramic", () => {
         credentialSubject: {
           "@context": {
             hash: "https://schema.org/Text",
+            provider: "https://schema.org/Text",
+          },
+          id: "did:3:0x123",
+          hash: "0x123",
+          provider: "Discord",
+        },
+      },
+      testStampCredentialDocument,
+      ["https://w3id.org/vc/status-list/2021/v1"]
+    );
+
+    const stampsToAdd: Stamp[] = [
+      {
+        credential,
+        provider: "Discord",
+      },
+    ];
+
+    // Step 2: Write the stamp to compose
+    const addRequest = await composeDatabase.addStamps(stampsToAdd);
+    expect(addRequest[0].secondaryStorageError).toBeUndefined();
+
+    // Step 3: Read the user passport
+    const result = await composeDatabase.getPassport();
+
+    expect(result.status).toEqual("Success");
+    expect(result.passport.stamps.length).toEqual(1);
+    expect(result.passport.stamps[0].provider).toEqual(stampsToAdd[0].provider);
+
+    const readCredential = result.passport.stamps[0].credential;
+    expect(readCredential).toEqual(credential);
+
+    // Step 4: Validate the stamp
+    const verificationResult = JSON.parse(
+      await DIDKit.verifyCredential(JSON.stringify(readCredential), '{"proofPurpose":"assertionMethod"}')
+    );
+
+    expect(verificationResult).toEqual({ checks: ["proof"], warnings: [], errors: [] });
+  });
+
+  it("stamp with nullifiers - should return a valid stamp that can be validated successfully", async () => {
+    // Step 1: First, we need to create a valid stamp
+    const verificationMethod: string = (await DIDKit.keyToVerificationMethod("ethr", eip712Key)) as string;
+
+    // TODO temporary workaround until we actually make the new
+    // nullifier format work with ceramic
+    const testStampCredentialDocument = stampCredentialDocument(verificationMethod);
+    delete testStampCredentialDocument.eip712Domain.types.NullifiersContext;
+    testStampCredentialDocument.eip712Domain.types["@context"][0] = { type: "string", name: "hash" };
+    testStampCredentialDocument.eip712Domain.types.CredentialSubject[1] = { type: "string", name: "hash" };
+
+    const credential = await issueEip712Credential(
+      DIDKit,
+      eip712Key,
+      { expiresAt: new Date("2050-12-31") },
+      {
+        credentialSubject: {
+          "@context": {
+            nullifiers: {
+              "@container": "@list",
+              "@type": "https://schema.org/Text",
+            },
             provider: "https://schema.org/Text",
           },
           id: "did:3:0x123",

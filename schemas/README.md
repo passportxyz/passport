@@ -24,7 +24,7 @@ Run `yarn graphql-server`
 
 ### ceramic config file
 
-Put this file in: `~/.ceramic/daemon.config.json`.
+Replace `<USER>` with your username and put the content below in the file: `~/.ceramic/daemon.config.json`.
 The `admin-dids` values are only for testing.
 
 ```json
@@ -55,10 +55,10 @@ The `admin-dids` values are only for testing.
   },
   "state-store": {
     "mode": "fs",
-    "local-directory": "/Users/nutrina/.ceramic/statestore/"
+    "local-directory": "/Users/<USER>/.ceramic/statestore/"
   },
   "indexing": {
-    "db": "sqlite:///Users/nutrina/.ceramic/indexing.sqlite",
+    "db": "sqlite:///Users/<USER>/.ceramic/indexing.sqlite",
     "allow-queries-before-historical-sync": true,
     "disable-composedb": false,
     "enable-historical-sync": false
