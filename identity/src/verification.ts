@@ -42,13 +42,13 @@ export type PassportScore = {
 export const errorRes = (
   res: Response,
   error: string | object,
-  errorCode: number
+  errorCode: number,
 ): Response => res.status(errorCode).json({ error });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const addErrorDetailsToMessage = (
   message: string,
-  error: any
+  error: any,
 ): string => {
   if (error instanceof IAMError || error instanceof Error) {
     message += `, ${error.name}: ${error.message}`;
@@ -59,7 +59,10 @@ export const addErrorDetailsToMessage = (
 };
 
 export class VerificationError extends Error {
-  constructor(public message: string, public code: number) {
+  constructor(
+    public message: string,
+    public code: number,
+  ) {
     super(message);
     this.name = this.constructor.name;
   }
@@ -81,19 +84,22 @@ const providerTypePlatformMap = Object.entries(platforms).reduce(
     });
     return acc;
   },
-  {} as { [k: string]: string }
+  {} as { [k: string]: string },
 );
 
 export function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
-    types.reduce((groupedProviders, type) => {
-      const platform = providerTypePlatformMap[type] || "generic";
+    types.reduce(
+      (groupedProviders, type) => {
+        const platform = providerTypePlatformMap[type] || "generic";
 
-      if (!groupedProviders[platform]) groupedProviders[platform] = [];
-      groupedProviders[platform].push(type);
+        if (!groupedProviders[platform]) groupedProviders[platform] = [];
+        groupedProviders[platform].push(type);
 
-      return groupedProviders;
-    }, {} as { [k: keyof typeof platforms]: string[] })
+        return groupedProviders;
+      },
+      {} as { [k: keyof typeof platforms]: string[] },
+    ),
   );
 }
 
@@ -105,7 +111,7 @@ export function groupProviderTypesByPlatform(types: string[]): string[][] {
  */
 export async function verifyTypes(
   providersByPlatform: string[][],
-  payload: RequestPayload
+  payload: RequestPayload,
 ): Promise<VerifyTypeResult[]> {
   // define a context to be shared between providers in the verify request
   // this is intended as a temporary storage for providers to share data
@@ -166,7 +172,7 @@ export async function verifyTypes(
 
         results.push({ verifyResult, type, code, error });
       }
-    })
+    }),
   );
 
   return results;
@@ -187,7 +193,7 @@ export async function verifyTypes(
 export const verifyProvidersAndIssueCredentials = async (
   providersByPlatform: string[][],
   address: string,
-  payload: RequestPayload
+  payload: RequestPayload,
 ): Promise<CredentialResponseBody[]> => {
   const results = await verifyTypes(providersByPlatform, payload);
   const credentials = await Promise.all(
@@ -212,12 +218,12 @@ export const verifyProvidersAndIssueCredentials = async (
               ...(verifyResult?.record || {}),
             };
 
-            const { issuerKey, nullifierGenerators } = getIssuerInfo();
+            const { issuer, nullifierGenerators } = getIssuerInfo();
 
             // generate a VC for the given payload
             ({ credential } = await issueNullifiableCredential({
               DIDKit,
-              issuerKey,
+              issuerKey: issuer.key,
               address,
               record,
               expiresInSeconds: verifyResult.expiresInSeconds,
@@ -236,8 +242,8 @@ export const verifyProvidersAndIssueCredentials = async (
           code,
           error,
         };
-      }
-    )
+      },
+    ),
   );
 
   const credentialsAfterBan = await checkCredentialBans(credentials);

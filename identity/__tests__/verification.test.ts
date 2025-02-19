@@ -26,15 +26,15 @@ jest.mock("@gitcoin/passport-platforms", () => {
     providers: {
       verify: jest.fn(
         async (
-          type: string,
-          payload: RequestPayload,
-          context: ProviderContext
+          _type: string,
+          _payload: RequestPayload,
+          _context: ProviderContext,
         ) => {
           return Promise.resolve({
             valid: true,
             record: { key: "verified-condition" },
           });
-        }
+        },
       ),
     },
   };
@@ -56,7 +56,7 @@ const mockIssuerKey = generateEIP712PairJWK();
 
 const createMockVerifiableCredential = (
   provider: string,
-  address: string
+  address: string,
 ): VerifiableCredential => ({
   "@context": [
     "https://www.w3.org/2018/credentials/v1",
@@ -110,7 +110,7 @@ const createMockVerifiableCredential = (
 
 function getMockedIssuedCredential(
   provider: string,
-  address: string
+  address: string,
 ): IssuedCredential {
   const credential: IssuedCredential = {
     credential: createMockVerifiableCredential(provider, address),
@@ -129,9 +129,8 @@ describe("verifyTypes", () => {
     }));
   });
 
-  it.only("should call providers.verify for the 'regular' providers in providersByPlatform and accumulate values in the context", async () => {
+  it("should call providers.verify for the 'regular' providers in providersByPlatform and accumulate values in the context", async () => {
     const mockAddress = "0x123";
-    const mockScorerId = "test-scorer";
     let payload: RequestPayload = {
       version: "v0.0.0",
       address: mockAddress,
@@ -140,11 +139,11 @@ describe("verifyTypes", () => {
       proofs: {},
     };
 
-    const verifySpy = (verify as jest.Mock<typeof verify>).mockImplementation(
+    const verifySpy = (verify as jest.Mock).mockImplementation(
       async (
         provider: string,
-        payload: RequestPayload,
-        context: ProviderContext
+        _payload: RequestPayload,
+        context: ProviderContext,
       ) => {
         // update the context
         context[`context-${provider}`] = true;
@@ -152,7 +151,7 @@ describe("verifyTypes", () => {
           valid: true,
           record: { key: "verified-condition" },
         });
-      }
+      },
     );
 
     const result = await verifyTypes(
@@ -160,7 +159,7 @@ describe("verifyTypes", () => {
         ["provider-1", "provider-2"],
         ["provider-3", "provider-4"],
       ],
-      payload
+      payload,
     );
 
     // Verify the calls to providers.verify
@@ -230,7 +229,7 @@ describe("verifyTypes", () => {
     ]);
   });
 
-  it.only("should call providers.verify with proper providers for AllowList#... and DeveloperList#... types", async () => {
+  it("should call providers.verify with proper providers for AllowList#... and DeveloperList#... types", async () => {
     const mockAddress = "0x123";
     let payload: RequestPayload = {
       version: "v0.0.0",
@@ -239,17 +238,17 @@ describe("verifyTypes", () => {
       challenge: "test-challenge",
     };
 
-    const verifySpy = (verify as jest.Mock<typeof verify>).mockImplementation(
+    const verifySpy = (verify as jest.Mock).mockImplementation(
       async (
-        provider: string,
-        payload: RequestPayload,
-        context: ProviderContext
+        _provider: string,
+        _payload: RequestPayload,
+        _context: ProviderContext,
       ) => {
         return Promise.resolve({
           valid: true,
           record: { key: "verified-condition" },
         });
-      }
+      },
     );
 
     const result = await verifyTypes(
@@ -257,7 +256,7 @@ describe("verifyTypes", () => {
         ["AllowList#test-1", "AllowList#test-2"],
         ["DeveloperList#test-1#0x1234", "DeveloperList#test-2#0x5678"],
       ],
-      payload
+      payload,
     );
 
     // Verify the calls to providers.verify
@@ -270,7 +269,7 @@ describe("verifyTypes", () => {
           allowList: "test-1",
         },
       },
-      {}
+      {},
     );
     expect(verifySpy).toHaveBeenCalledWith(
       "AllowList",
@@ -280,7 +279,7 @@ describe("verifyTypes", () => {
           allowList: "test-2",
         },
       },
-      {}
+      {},
     );
     expect(verifySpy).toHaveBeenCalledWith(
       "DeveloperList",
@@ -291,7 +290,7 @@ describe("verifyTypes", () => {
           conditionHash: "0x1234",
         },
       },
-      {}
+      {},
     );
     expect(verifySpy).toHaveBeenCalledWith(
       "DeveloperList",
@@ -302,7 +301,7 @@ describe("verifyTypes", () => {
           conditionHash: "0x5678",
         },
       },
-      {}
+      {},
     );
     expect(result.sort((a, b) => (a.type < b.type ? -1 : 1))).toEqual([
       {
@@ -344,7 +343,7 @@ describe("verifyTypes", () => {
     ]);
   });
 
-  it.only("should return an error if providers.verify throws", async () => {
+  it("should return an error if providers.verify throws", async () => {
     const mockAddress = "0x123";
     let payload: RequestPayload = {
       version: "v0.0.0",
@@ -354,11 +353,11 @@ describe("verifyTypes", () => {
       proofs: {},
     };
 
-    const verifySpy = (verify as jest.Mock<typeof verify>).mockImplementation(
+    const verifySpy = (verify as jest.Mock).mockImplementation(
       async (
         provider: string,
-        payload: RequestPayload,
-        context: ProviderContext
+        _payload: RequestPayload,
+        _context: ProviderContext,
       ) => {
         if (provider === "test-1") {
           throw new Error("Some Error");
@@ -367,7 +366,7 @@ describe("verifyTypes", () => {
           valid: true,
           record: { key: "verified-condition" },
         });
-      }
+      },
     );
 
     const result = await verifyTypes([["test-1"], ["test-2"]], payload);
@@ -409,7 +408,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     }));
   });
 
-  it.only("should issue valid credentials via issueHashedCredentials", async () => {
+  it("should issue valid credentials via issueHashedCredentials", async () => {
     const mockAddress = "0x123";
     let payload: RequestPayload = {
       version: "v0.0.0",
@@ -420,11 +419,11 @@ describe("verifyProvidersAndIssueCredentials", () => {
       signatureType: "EIP712",
     };
 
-    const verifySpy = (providers.verify as jest.Mock).mockImplementation(
+    (providers.verify as jest.Mock).mockImplementation(
       async (
         provider: string,
-        payload: RequestPayload,
-        context: ProviderContext
+        _payload: RequestPayload,
+        context: ProviderContext,
       ) => {
         // update the context
         context[`context-${provider}`] = true;
@@ -432,7 +431,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
           valid: true,
           record: { key: "verified-condition" },
         });
-      }
+      },
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
@@ -441,7 +440,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
-      }
+      },
     );
 
     const providersByPlatform = [
@@ -451,7 +450,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     await verifyProvidersAndIssueCredentials(
       providersByPlatform,
       mockAddress,
-      payload
+      payload,
     );
 
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
@@ -520,11 +519,11 @@ describe("verifyProvidersAndIssueCredentials", () => {
       signatureType: "EIP712",
     };
 
-    const verifySpy = (providers.verify as jest.Mock).mockImplementation(
+    (providers.verify as jest.Mock).mockImplementation(
       async (
         provider: string,
-        payload: RequestPayload,
-        context: ProviderContext
+        _payload: RequestPayload,
+        context: ProviderContext,
       ) => {
         // update the context
         context[`context-${provider}`] = true;
@@ -532,7 +531,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
           valid: true,
           record: { key: "verified-condition" },
         });
-      }
+      },
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
@@ -541,7 +540,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
-      }
+      },
     );
 
     const providersByPlatform = [
@@ -551,7 +550,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     await verifyProvidersAndIssueCredentials(
       providersByPlatform,
       mockAddress,
-      payload
+      payload,
     );
 
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
@@ -609,7 +608,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     });
   });
 
-  it.only("should verify the issued credentials against the ban list", async () => {
+  it("should verify the issued credentials against the ban list", async () => {
     const mockAddress = "0x123";
     let payload: RequestPayload = {
       version: "v0.0.0",
@@ -620,11 +619,11 @@ describe("verifyProvidersAndIssueCredentials", () => {
       signatureType: "EIP712",
     };
 
-    const verifySpy = (verify as jest.Mock<typeof verify>).mockImplementation(
+    (verify as jest.Mock).mockImplementation(
       async (
         provider: string,
-        payload: RequestPayload,
-        context: ProviderContext
+        _payload: RequestPayload,
+        context: ProviderContext,
       ) => {
         // update the context
         context[`context-${provider}`] = true;
@@ -632,26 +631,16 @@ describe("verifyProvidersAndIssueCredentials", () => {
           valid: true,
           record: { key: "verified-condition" },
         });
-      }
+      },
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
-    (
-      issueNullifiableCredential as jest.Mock<typeof issueNullifiableCredential>
-    ).mockImplementation(
-      async ({
-        DIDKit,
-        issuerKey,
-        address,
-        record,
-        nullifierGenerators,
-        expiresInSeconds,
-        signatureType,
-      }) => {
+    (issueNullifiableCredential as jest.Mock).mockImplementation(
+      async ({ record }) => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
-      }
+      },
     );
 
     const providersByPlatform = [
@@ -661,7 +650,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     await verifyProvidersAndIssueCredentials(
       providersByPlatform,
       mockAddress,
-      payload
+      payload,
     );
 
     expect(checkCredentialBans).toHaveBeenCalledTimes(1);
@@ -675,11 +664,11 @@ describe("verifyProvidersAndIssueCredentials", () => {
           type: c.credentialSubject.provider,
           version: "0.0.0",
         },
-      }))
+      })),
     );
   });
 
-  it.only("should override the provider if pii is provided", async () => {
+  it("should override the provider if pii is provided", async () => {
     const mockAddress = "0x123";
     let payload: RequestPayload = {
       version: "v0.0.0",
@@ -690,11 +679,11 @@ describe("verifyProvidersAndIssueCredentials", () => {
       signatureType: "EIP712",
     };
 
-    const verifySpy = (verify as jest.Mock<typeof verify>).mockImplementation(
+    (verify as jest.Mock).mockImplementation(
       async (
         provider: string,
-        payload: RequestPayload,
-        context: ProviderContext
+        _payload: RequestPayload,
+        context: ProviderContext,
       ) => {
         // update the context
         context[`context-${provider}`] = true;
@@ -702,7 +691,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
           valid: true,
           record: { key: "verified-condition", pii: `pii-${provider}` },
         });
-      }
+      },
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
@@ -711,7 +700,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
-      }
+      },
     );
 
     const providersByPlatform = [
@@ -721,7 +710,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
     const result = await verifyProvidersAndIssueCredentials(
       providersByPlatform,
       mockAddress,
-      payload
+      payload,
     );
 
     expect(result).toEqual(
@@ -735,7 +724,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
           pii: c.credentialSubject.provider?.split("#")[1],
           version: "0.0.0",
         },
-      }))
+      })),
     );
     expect(issueNullifiableCredential).toHaveBeenCalledWith({
       DIDKit,

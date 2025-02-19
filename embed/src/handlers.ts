@@ -40,7 +40,10 @@ import axios from "axios";
 const apiKey = process.env.SCORER_API_KEY as string;
 
 export class EmbedAxiosError extends Error {
-  constructor(public message: string, public code: number) {
+  constructor(
+    public message: string,
+    public code: number,
+  ) {
     super(message);
     this.name = this.constructor.name;
     this.code = 500;
@@ -52,13 +55,13 @@ export class EmbedAxiosError extends Error {
 export const errorRes = (
   res: Response,
   error: string | object,
-  errorCode: number
+  errorCode: number,
 ): Response => res.status(errorCode).json({ error });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const addErrorDetailsToMessage = (
   message: string,
-  error: any
+  error: any,
 ): string => {
   if (error instanceof EmbedAxiosError || error instanceof Error) {
     message += `, ${error.name}: ${error.message}`;
@@ -90,7 +93,7 @@ export const addStampsAndGetScore = async ({
         headers: {
           Authorization: apiKey,
         },
-      }
+      },
     );
 
     if (!scorerResponse.data?.score) {
@@ -109,7 +112,7 @@ export const autoVerificationHandler = async (
     AutoVerificationResponseBodyType,
     AutoVerificationRequestBodyType
   >,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { address, scorerId, credentialIds } = req.body;
@@ -131,7 +134,7 @@ export const autoVerificationHandler = async (
 
     const message = addErrorDetailsToMessage(
       "Unexpected error when processing request",
-      error
+      error,
     );
     return void errorRes(res, message, 500);
   }
@@ -147,7 +150,7 @@ export const verificationHandler = (
     AutoVerificationResponseBodyType,
     EmbedVerifyRequestBody
   >,
-  res: Response
+  res: Response,
 ): void => {
   const requestBody: EmbedVerifyRequestBody = req.body;
   // each verify request should be received with a challenge credential detailing a signature contained in the RequestPayload.proofs
@@ -169,7 +172,7 @@ export const verificationHandler = (
             return void errorRes(
               res,
               `Invalid challenge signature: ${error.name}`,
-              401
+              401,
             );
           }
           throw error;
@@ -189,7 +192,7 @@ export const verificationHandler = (
                 .filter(Boolean)
                 .join("' and '") +
               "'",
-            401
+            401,
           );
         }
 
@@ -200,7 +203,7 @@ export const verificationHandler = (
           await verifyProvidersAndIssueCredentials(
             providersGroupedByPlatforms,
             address,
-            payload
+            payload,
           );
 
         const stamps = credentialsVerificationResponses.reduce(
@@ -212,7 +215,7 @@ export const verificationHandler = (
             }
             return acc;
           },
-          [] as VerifiableCredential[]
+          [] as VerifiableCredential[],
         );
 
         const score = await addStampsAndGetScore({ address, scorerId, stamps });
@@ -242,7 +245,7 @@ export const getChallengeHandler = (
     AutoVerificationResponseBodyType,
     EmbedVerifyRequestBody
   >,
-  res: Response
+  res: Response,
 ): void => {
   // get the payload from the JSON req body
   const requestBody: ChallengeRequestBody = req.body as ChallengeRequestBody;
@@ -267,13 +270,13 @@ export const getChallengeHandler = (
         ...(challenge?.record || {}),
       };
 
-      const { issuerKey } = getIssuerInfo();
+      const { issuer } = getIssuerInfo();
       // generate a VC for the given payload
       return void issueChallengeCredential(
         DIDKit,
-        issuerKey,
+        issuer.did,
         record,
-        payload.signatureType
+        payload.signatureType,
       )
         .then((credential) => {
           // return the verifiable credential
@@ -285,7 +288,7 @@ export const getChallengeHandler = (
             return void errorRes(
               res,
               "Unable to produce a verifiable credential",
-              400
+              400,
             );
           }
         });
@@ -296,7 +299,7 @@ export const getChallengeHandler = (
         res,
         (challenge.error && challenge.error.join(", ").substring(0, 1000)) ||
           "Unable to verify proofs",
-        403
+        403,
       );
     }
   }
@@ -305,7 +308,7 @@ export const getChallengeHandler = (
     return void errorRes(
       res,
       "Missing address from challenge request body",
-      400
+      400,
     );
   }
 

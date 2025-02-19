@@ -15,20 +15,30 @@ import {
   VerifiedPayload,
 } from "@gitcoin/passport-types";
 
-import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
+import {
+  MultiAttestationRequest,
+  ZERO_BYTES32,
+  NO_EXPIRATION,
+} from "@ethereum-attestation-service/eas-sdk";
 
-import { getEip712Issuer, verifyCredential } from "../src/utils/identityHelper.js";
+import {
+  getIssuerInfo,
+  verifyCredential,
+} from "../src/utils/identityHelper.js";
 import * as easStampSchema from "../src/utils/easStampSchema.js";
 import { IAMError } from "../src/utils/scorerService.js";
 import { toJsonObject } from "../src/utils/json.js";
 
 jest.mock("../src/utils/revocations", () => ({
-  filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
+  filterRevokedCredentials: jest
+    .fn()
+    .mockImplementation((input) => Promise.resolve(input)),
 }));
 
 jest.mock("../src/utils/identityHelper", () => {
-  const originalIdentity =
-    jest.requireActual<typeof import("../src/utils/identityHelper")>("../src/utils/identityHelper");
+  const originalIdentity = jest.requireActual<
+    typeof import("../src/utils/identityHelper")
+  >("../src/utils/identityHelper");
   return {
     ...originalIdentity,
     verifyCredential: jest.fn(originalIdentity.verifyCredential),
@@ -48,7 +58,7 @@ jest.mock("../src/utils/easFees", () => ({
 
 jest.mock("axios");
 
-const issuer = getEip712Issuer();
+const issuerDid = getIssuerInfo().issuer.did;
 
 const MOCK_ADDRESS = "0xcF314CE817E25B4f784BC1F24C9a79a525fEc50f";
 
@@ -75,7 +85,9 @@ describe("POST /challenge", function () {
 
     // expect the mocked credential to be returned and contain the expectedId
     // TODO: geri check for the signature type ...
-    expect((response.body as ValidResponseBody)?.credential?.credentialSubject?.id).toEqual(expectedId);
+    expect(
+      (response.body as ValidResponseBody)?.credential?.credentialSubject?.id,
+    ).toEqual(expectedId);
   });
 
   it("handles valid challenge request with signatureType", async () => {
@@ -99,7 +111,9 @@ describe("POST /challenge", function () {
 
     // expect the mocked credential to be returned and contain the expectedId
     // TODO: geri check for the signature type ...
-    expect((response.body as ValidResponseBody)?.credential?.credentialSubject?.id).toEqual(expectedId);
+    expect(
+      (response.body as ValidResponseBody)?.credential?.credentialSubject?.id,
+    ).toEqual(expectedId);
   });
 
   it("handles missing address from the challenge request body", async () => {
@@ -117,7 +131,9 @@ describe("POST /challenge", function () {
       .expect("Content-Type", /json/);
 
     // expect the mocked credential to be returned and contain the expectedId
-    expect((response.body as ErrorResponseBody).error).toEqual("Missing address from challenge request body");
+    expect((response.body as ErrorResponseBody).error).toEqual(
+      "Missing address from challenge request body",
+    );
   });
 
   it("handles missing type from the challenge request body", async () => {
@@ -135,7 +151,9 @@ describe("POST /challenge", function () {
       .expect("Content-Type", /json/);
 
     // expect the mocked credential to be returned and contain the expectedId
-    expect((response.body as ErrorResponseBody).error).toEqual("Missing type from challenge request body");
+    expect((response.body as ErrorResponseBody).error).toEqual(
+      "Missing type from challenge request body",
+    );
   });
 
   it("handles malformed payload from the challenge request body", async () => {
@@ -152,7 +170,10 @@ describe("POST /challenge", function () {
   });
 });
 
-const getMockEIP712Credential = (provider: string, address: string): VerifiableCredential => {
+const getMockEIP712Credential = (
+  provider: string,
+  address: string,
+): VerifiableCredential => {
   return {
     "@context": ["https://www.w3.org/2018/credentials/v1"],
     type: ["VerifiableCredential", "Stamp"],
@@ -210,14 +231,19 @@ describe("POST /check", function () {
     const allowProvider = "AllowList#test";
     jest
       .spyOn(providers._providers.AllowList, "verify")
-      .mockImplementation(async (payload: RequestPayload, context?: ProviderContext): Promise<VerifiedPayload> => {
-        return {
-          valid: true,
-          record: {
-            allowList: "test",
-          },
-        };
-      });
+      .mockImplementation(
+        async (
+          payload: RequestPayload,
+          context?: ProviderContext,
+        ): Promise<VerifiedPayload> => {
+          return {
+            valid: true,
+            record: {
+              allowList: "test",
+            },
+          };
+        },
+      );
     const payload = {
       types: ["Simple", allowProvider],
       address: "0x0",
@@ -241,15 +267,20 @@ describe("POST /check", function () {
     const customGithubProvider = "DeveloperList#test#0xtest";
     jest
       .spyOn(providers._providers.DeveloperList, "verify")
-      .mockImplementation(async (payload: RequestPayload, context?: ProviderContext): Promise<VerifiedPayload> => {
-        return {
-          valid: true,
-          record: {
-            conditionName: "test",
-            conditionHash: "0xtest",
-          },
-        };
-      });
+      .mockImplementation(
+        async (
+          payload: RequestPayload,
+          context?: ProviderContext,
+        ): Promise<VerifiedPayload> => {
+          return {
+            valid: true,
+            record: {
+              conditionName: "test",
+              conditionHash: "0xtest",
+            },
+          };
+        },
+      );
     const payload = {
       types: ["Simple", customGithubProvider],
       address: "0x0",
@@ -288,7 +319,9 @@ describe("POST /check", function () {
     expect(response.body.length).toBe(2);
 
     const simple = response.body.find((item: any) => item.type === "Simple");
-    const anotherType = response.body.find((item: any) => item.type === "AnotherType");
+    const anotherType = response.body.find(
+      (item: any) => item.type === "AnotherType",
+    );
 
     expect(simple.valid).toBe(true);
     expect(anotherType.valid).toBe(false);
@@ -338,40 +371,43 @@ describe("POST /check", function () {
 });
 
 const mockRecipient = "0x5678000000000000000000000000000000000000";
-const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[] = [
-  {
-    schema: "0xd7b8c4ffa4c9fd1ecb3f6db8201e916a8d7dba11f161c1b0b5ccf44ceb8e2a39",
-    data: [
-      {
-        recipient: mockRecipient,
-        data: easStampSchema.encodeEasScore({
-          score: 23.45,
-          scorer_id: 123,
-        }),
-        expirationTime: NO_EXPIRATION,
-        revocable: true,
-        refUID: ZERO_BYTES32,
-        value: BigInt("0"),
-      },
-    ],
-  },
-  {
-    schema: "0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89",
-    data: [
-      {
-        recipient: mockRecipient,
-        data: easStampSchema.encodeEasScore({
-          score: 23.45,
-          scorer_id: 123,
-        }),
-        expirationTime: NO_EXPIRATION,
-        revocable: true,
-        refUID: ZERO_BYTES32,
-        value: BigInt("0"),
-      },
-    ],
-  },
-];
+const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[] =
+  [
+    {
+      schema:
+        "0xd7b8c4ffa4c9fd1ecb3f6db8201e916a8d7dba11f161c1b0b5ccf44ceb8e2a39",
+      data: [
+        {
+          recipient: mockRecipient,
+          data: easStampSchema.encodeEasScore({
+            score: 23.45,
+            scorer_id: 123,
+          }),
+          expirationTime: NO_EXPIRATION,
+          revocable: true,
+          refUID: ZERO_BYTES32,
+          value: BigInt("0"),
+        },
+      ],
+    },
+    {
+      schema:
+        "0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89",
+      data: [
+        {
+          recipient: mockRecipient,
+          data: easStampSchema.encodeEasScore({
+            score: 23.45,
+            scorer_id: 123,
+          }),
+          expirationTime: NO_EXPIRATION,
+          revocable: true,
+          refUID: ZERO_BYTES32,
+          value: BigInt("0"),
+        },
+      ],
+    },
+  ];
 
 describe("POST /eas/passport", () => {
   beforeEach(() => {});
@@ -399,7 +435,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: issuer,
+        issuer: issuerDid,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678",
@@ -427,7 +463,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: issuer,
+        issuer: issuerDid,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000002",
@@ -439,7 +475,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: issuer,
+        issuer: issuerDid,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: "did:pkh:eip155:1:0x5678000000000000000000000000000000000003",
@@ -457,7 +493,9 @@ describe("POST /eas/passport", () => {
       .expect(400)
       .expect("Content-Type", /json/);
 
-    expect(response.body.error).toEqual("Every credential's id must be equivalent to that of the recipient");
+    expect(response.body.error).toEqual(
+      "Every credential's id must be equivalent to that of the recipient",
+    );
   });
 
   it("successfully verifies and formats passport", async () => {
@@ -469,26 +507,32 @@ describe("POST /eas/passport", () => {
             rawScore: "23.45",
           },
         },
-      })
+      }),
     );
 
-    jest.spyOn(PassportCache.prototype, "init").mockImplementation(() => Promise.resolve());
-    jest.spyOn(PassportCache.prototype, "set").mockImplementation(() => Promise.resolve());
-    jest.spyOn(PassportCache.prototype, "get").mockImplementation((key: any) => {
-      if (key === "ethPrice") {
-        return Promise.resolve("3000");
-      } else if (key === "ethPriceLastUpdate") {
-        return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
-      }
-      return Promise.resolve(null);
-    });
+    jest
+      .spyOn(PassportCache.prototype, "init")
+      .mockImplementation(() => Promise.resolve());
+    jest
+      .spyOn(PassportCache.prototype, "set")
+      .mockImplementation(() => Promise.resolve());
+    jest
+      .spyOn(PassportCache.prototype, "get")
+      .mockImplementation((key: any) => {
+        if (key === "ethPrice") {
+          return Promise.resolve("3000");
+        } else if (key === "ethPriceLastUpdate") {
+          return Promise.resolve((Date.now() - 1000 * 60 * 6).toString());
+        }
+        return Promise.resolve(null);
+      });
     const nonce = 0;
     const recipient = "0x5678000000000000000000000000000000000000";
     const credentials = [
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: issuer,
+        issuer: issuerDid,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: `did:pkh:eip155:1:${recipient}`,
@@ -509,26 +553,30 @@ describe("POST /eas/passport", () => {
     // TODO: geri, use snapshot here?
     const expectedValue = [
       {
-        schema: "0xd7b8c4ffa4c9fd1ecb3f6db8201e916a8d7dba11f161c1b0b5ccf44ceb8e2a39",
+        schema:
+          "0xd7b8c4ffa4c9fd1ecb3f6db8201e916a8d7dba11f161c1b0b5ccf44ceb8e2a39",
         data: [
           {
             recipient: "0x5678000000000000000000000000000000000000",
             expirationTime: "0",
             revocable: true,
-            refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+            refUID:
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
             value: "0",
             data: "0x00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
           },
         ],
       },
       {
-        schema: "0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89",
+        schema:
+          "0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89",
         data: [
           {
             recipient: "0x5678000000000000000000000000000000000000",
             expirationTime: "0",
             revocable: true,
-            refUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+            refUID:
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
             value: "0",
             data: "0x1234567890abcdef",
           },
@@ -539,7 +587,9 @@ describe("POST /eas/passport", () => {
     // expect(response.body.passport.multiAttestationRequest).toEqual(
     //   toJsonObject(mockMultiAttestationRequestWithPassportAndScore)
     // );
-    expect(response.body.passport.multiAttestationRequest).toEqual(toJsonObject(expectedValue));
+    expect(response.body.passport.multiAttestationRequest).toEqual(
+      toJsonObject(expectedValue),
+    );
 
     expect(response.body.passport.nonce).toEqual(nonce);
     expect(verifyCredential).toHaveBeenCalledTimes(credentials.length);
@@ -557,7 +607,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: issuer,
+        issuer: issuerDid,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: `did:pkh:eip155:1:${recipient}`,
@@ -575,7 +625,9 @@ describe("POST /eas/passport", () => {
       .expect(500)
       .expect("Content-Type", /json/);
 
-    expect(response.body.error).toEqual("Error formatting onchain passport, IAMError: Formatting error");
+    expect(response.body.error).toEqual(
+      "Error formatting onchain passport, IAMError: Formatting error",
+    );
   });
 
   it("handles error during credential verification", async () => {
@@ -589,7 +641,7 @@ describe("POST /eas/passport", () => {
       {
         "@context": "https://www.w3.org/2018/credentials/v1",
         type: ["VerifiableCredential", "Stamp"],
-        issuer: issuer,
+        issuer: issuerDid,
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: `did:pkh:eip155:1:${recipient}`,
@@ -607,7 +659,9 @@ describe("POST /eas/passport", () => {
       .expect(500)
       .expect("Content-Type", /json/);
 
-    expect(response.body.error).toEqual("Error formatting onchain passport, Error: Verification error");
+    expect(response.body.error).toEqual(
+      "Error formatting onchain passport, Error: Verification error",
+    );
   });
 });
 

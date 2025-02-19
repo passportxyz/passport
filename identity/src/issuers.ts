@@ -4,26 +4,34 @@ import { getKeyVersions } from "./keyManager.js";
 import { HashNullifierGenerator } from "./nullifierGenerators.js";
 
 export function getIssuerInfo(): {
-  issuerKey: string;
+  issuer: {
+    key: string;
+    did: string;
+  };
   nullifierGenerators: NullifierGenerators;
 } {
   const { active, issuer } = getKeyVersions();
 
   return {
-    issuerKey: issuer.key,
+    issuer: {
+      key: issuer.key,
+      did: DIDKit.keyToDID("key", issuer.key),
+    },
     nullifierGenerators: active.map(({ key, version }) =>
       // TODO Add some variable like HUMAN_NETWORK_START_VERSION and
       // use it here to switch to HumanNetworkNullifierGenerators
-      HashNullifierGenerator({ key, version })
+      HashNullifierGenerator({ key, version }),
     ) as NullifierGenerators,
   };
 }
 
-export function hasValidIssuer(issuer: string): boolean {
+export function hasValidIssuer(issuerDid: string): boolean {
   const { initiated } = getKeyVersions();
-  const initiatedIssuers = initiated.map(({ key }) => DIDKit.keyToDID("key", key));
+  const initiatedIssuerDids = initiated.map(({ key }) =>
+    DIDKit.keyToDID("key", key),
+  );
 
-  const validIssuers = new Set([...initiatedIssuers]);
+  const validIssuerDids = new Set([...initiatedIssuerDids]);
 
-  return validIssuers.has(issuer);
+  return validIssuerDids.has(issuerDid);
 }
