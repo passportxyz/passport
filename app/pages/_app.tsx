@@ -12,9 +12,6 @@ import { CeramicContextProvider } from "../context/ceramicContext";
 import { DatastoreConnectionContextProvider } from "../context/datastoreConnectionContext";
 import { ScorerContextProvider } from "../context/scorerContext";
 
-// --- Ceramic Tools
-import { Provider as SelfIdProvider } from "@self.id/framework";
-
 // --- GTM Module
 import TagManager from "react-gtm-module";
 
@@ -98,23 +95,21 @@ function App({ Component, pageProps }: AppProps) {
       </Head>
       <Web3Context>
         <QueryClientProvider client={queryClient}>
-          <SelfIdProvider client={{ ceramic: `${process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL || "testnet-clay"}` }}>
-            <DatastoreConnectionContextProvider>
-              <ScorerContextProvider>
-                <CeramicContextProvider>
-                  <StampClaimingContextProvider>
-                    <RenderOnlyOnClient>
-                      <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                        <Web3ErrorContext>
-                          <Component {...pageProps} />
-                        </Web3ErrorContext>
-                      </ThemeWrapper>
-                    </RenderOnlyOnClient>
-                  </StampClaimingContextProvider>
-                </CeramicContextProvider>
-              </ScorerContextProvider>
-            </DatastoreConnectionContextProvider>
-          </SelfIdProvider>
+          <DatastoreConnectionContextProvider>
+            <ScorerContextProvider>
+              <CeramicContextProvider>
+                <StampClaimingContextProvider>
+                  <RenderOnlyOnClient>
+                    <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                      <Web3ErrorContext>
+                        <Component {...pageProps} />
+                      </Web3ErrorContext>
+                    </ThemeWrapper>
+                  </RenderOnlyOnClient>
+                </StampClaimingContextProvider>
+              </CeramicContextProvider>
+            </ScorerContextProvider>
+          </DatastoreConnectionContextProvider>
         </QueryClientProvider>
       </Web3Context>
     </>
