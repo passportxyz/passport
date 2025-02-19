@@ -17,7 +17,8 @@ describe("checkCredentialBans", () => {
     record: { type: "test" },
     credential: {
       credentialSubject: {
-        nullifiers: ["hash123"],
+        nullifiers: ["hash123"] as string[] | undefined,
+        hash: undefined as string | undefined,
         provider: "provider123",
         id: "did:0x123",
       },
@@ -30,14 +31,14 @@ describe("checkCredentialBans", () => {
     code: 400,
   };
 
-  it.only("should return original response for invalid credentials", async () => {
+  it("should return original response for invalid credentials", async () => {
     const input = [invalidCredential];
     const result = await checkCredentialBans(input);
     expect(result).toEqual(input);
     expect(mockedAxiosPost).not.toHaveBeenCalled();
   });
 
-  it.only("should check bans for valid credentials", async () => {
+  it("should check bans for valid credentials", async () => {
     mockedAxiosPost.mockResolvedValueOnce({
       data: [
         {
@@ -61,12 +62,12 @@ describe("checkCredentialBans", () => {
           },
         },
       ],
-      expect.any(Object)
+      expect.any(Object),
     );
     expect(result).toEqual(input);
   });
 
-  it.only("should handle banned credentials", async () => {
+  it("should handle banned credentials", async () => {
     mockedAxiosPost.mockResolvedValueOnce({
       data: [
         {
@@ -91,7 +92,7 @@ describe("checkCredentialBans", () => {
     ]);
   });
 
-  it.only("should handle indefinite bans", async () => {
+  it("should handle indefinite bans", async () => {
     mockedAxiosPost.mockResolvedValueOnce({
       data: [
         {
@@ -111,7 +112,7 @@ describe("checkCredentialBans", () => {
     });
   });
 
-  it.only("should process multiple credentials", async () => {
+  it("should process multiple credentials", async () => {
     mockedAxiosPost.mockResolvedValueOnce({
       data: [
         { hash: "hash123", is_banned: true, ban_type: "hash" },
@@ -144,7 +145,32 @@ describe("checkCredentialBans", () => {
     expect((result[2] as ErrorResponseBody).code).toBe(403);
   });
 
-  it.only("should handle API errors gracefully", async () => {
+  it("should fall back to credential hashes", async () => {
+    mockedAxiosPost.mockResolvedValueOnce({
+      data: [
+        { hash: "hash123", is_banned: true, ban_type: "hash" },
+        { hash: "hash456", is_banned: false },
+      ],
+    });
+
+    const credential1 = JSON.parse(JSON.stringify(validCredential));
+
+    delete credential1.credential.credentialSubject.nullifiers;
+    expect(credential1.credential.credentialSubject.nullifiers).toBeUndefined();
+
+    credential1.credential.credentialSubject.hash = "hash123";
+
+    const credential2 = JSON.parse(JSON.stringify(credential1));
+    credential2.credential.credentialSubject.hash = "hash456";
+
+    const input = [credential1, credential2];
+    const result = await checkCredentialBans(input);
+
+    expect((result[0] as ErrorResponseBody).code).toBe(403);
+    expect((result[1] as ErrorResponseBody).code).toBe(200);
+  });
+
+  it("should handle API errors gracefully", async () => {
     class MockAxiosError extends Error {
       response: {
         data: string;
@@ -174,12 +200,12 @@ describe("checkCredentialBans", () => {
 
     await expect(checkCredentialBans([validCredential])).rejects.toThrowError(
       new UnexpectedApiError(
-        'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}'
-      )
+        'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}',
+      ),
     );
   });
 
-  it.only("should handle missing API response data", async () => {
+  it("should handle missing API response data", async () => {
     mockedAxiosPost.mockResolvedValueOnce({});
 
     const input = [validCredential];
@@ -187,8 +213,8 @@ describe("checkCredentialBans", () => {
     await expect(checkCredentialBans(input)).rejects.toThrowError(
       new ApiError(
         "Ban not found for nullifier hash123. This should not happen.",
-        500
-      )
+        500,
+      ),
     );
   });
 });

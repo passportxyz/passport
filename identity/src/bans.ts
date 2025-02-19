@@ -24,10 +24,13 @@ export const checkCredentialBans = async (
     .map(({ credential }) => credential);
 
   const bans = await fetchBans(credentialsToCheck);
-  const bansByHash = bans.reduce((acc, ban) => {
-    acc[ban.hash] = ban;
-    return acc;
-  }, {} as Record<string, Ban>);
+  const bansByHash = bans.reduce(
+    (acc, ban) => {
+      acc[ban.hash] = ban;
+      return acc;
+    },
+    {} as Record<string, Ban>
+  );
 
   return credentialResponses.map((credentialResponse) => {
     const credential = (credentialResponse as ValidResponseBody).credential;
@@ -35,9 +38,12 @@ export const checkCredentialBans = async (
       return credentialResponse;
     }
 
-    const nullifiers = credential.credentialSubject.nullifiers;
+    const { nullifiers, hash } = credential.credentialSubject;
+    // TODO Support for legacy format, can remove
+    // once fully migrated
+    const nullifiersToCheck = nullifiers || [hash];
 
-    for (const nullifier of nullifiers) {
+    for (const nullifier of nullifiersToCheck) {
       const ban = bansByHash[nullifier];
 
       if (!ban) {
@@ -63,7 +69,9 @@ const fetchBans = async (credentials: VerifiableCredential[]): Promise<Ban[]> =>
     return [];
   }
 
-  const payload: { credentialSubject: { provider: string; id: string; hash: string } }[] = [];
+  const payload: {
+    credentialSubject: { provider: string; id: string; hash: string };
+  }[] = [];
 
   credentials.forEach((credential) => {
     const { nullifiers, provider, id, hash } = credential.credentialSubject;

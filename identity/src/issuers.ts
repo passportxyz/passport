@@ -3,6 +3,8 @@ import { NullifierGenerators } from "./credentials.js";
 import { getKeyVersions } from "./keyManager.js";
 import { HashNullifierGenerator } from "./nullifierGenerators.js";
 
+const eip712keyToDID = (key: string) => DIDKit.keyToDID("ethr", key);
+
 export function getIssuerInfo(): {
   issuer: {
     key: string;
@@ -15,7 +17,7 @@ export function getIssuerInfo(): {
   return {
     issuer: {
       key: issuer.key,
-      did: DIDKit.keyToDID("key", issuer.key),
+      did: eip712keyToDID(issuer.key),
     },
     nullifierGenerators: active.map(({ key, version }) =>
       // TODO Add some variable like HUMAN_NETWORK_START_VERSION and
@@ -27,9 +29,8 @@ export function getIssuerInfo(): {
 
 export function hasValidIssuer(issuerDid: string): boolean {
   const { initiated } = getKeyVersions();
-  const initiatedIssuerDids = initiated.map(({ key }) =>
-    DIDKit.keyToDID("key", key),
-  );
+
+  const initiatedIssuerDids = initiated.map(({ key }) => eip712keyToDID(key));
 
   const validIssuerDids = new Set([...initiatedIssuerDids]);
 
