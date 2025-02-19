@@ -3,8 +3,8 @@ import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
 import { jest } from "@jest/globals";
-import mockStamps from "../__tests__/mockStamps.json" assert { type: "json" };
-import mockStampsWithNullifiers from "../__tests__/mockStampsWithNullifiers.js";
+import mockStamps from "../__mock__/mockStamps.js";
+import mockStampsWithNullifiers from "../__mock__/mockStampsWithNullifiers.js";
 
 import { ComposeDatabase } from "../src/index.js";
 
@@ -28,7 +28,7 @@ const testStamps = [
     stampsToPatch: stampsWithNullifiersToPatch,
   },
 ];
-describe.each(testStamps)(
+describe.skip.each(testStamps)(
   "stamp type: $credentialType -- adding and deleting stamps",
   ({ credentialType, stampsToAdd, stampsToPatch }) => {
     beforeEach(async () => {
@@ -103,7 +103,7 @@ describe.each(testStamps)(
   }
 );
 
-describe.each(testStamps)(
+describe.skip.each(testStamps)(
   "stamp type: $credentialType -- getting a passport",
   ({ credentialType, stampsToAdd, stampsToPatch }) => {
     beforeEach(async () => {

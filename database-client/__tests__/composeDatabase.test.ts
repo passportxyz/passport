@@ -12,8 +12,8 @@ import { DID } from "dids";
 import { ComposeDatabaseImpl, ComposeDatabase, PassportWrapperLoadResponse } from "../src/composeDatabase";
 
 import { jest } from "@jest/globals";
-import mockStampsWithHash from "./mockStamps";
-import mockStampsWithNullfiers from "./mockStampsWithNullifiers";
+import mockStampsWithHash from "../__mock__/mockStamps";
+import mockStampsWithNullfiers from "../__mock__/mockStampsWithNullifiers";
 import { GraphQLError } from "graphql";
 
 let database: ComposeDatabaseImpl;
@@ -527,7 +527,7 @@ describe("Compose Database write serialisation", () => {
   });
 
   // TODO: this is commented as it causes failure when running `yarn test` in the root of the repo. Shall be investigated.
-  it.skip("should serialize add, patch and delete operations", async () => {
+  it("should serialize add, patch and delete operations", async () => {
     let timestamps: number[] = [];
     const database = new ComposeDatabase({ id: "id" } as unknown as DID);
 
