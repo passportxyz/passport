@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, screen, waitFor, render } from "@testing-library/react";
 import Dashboard from "../../pages/Dashboard";
 import { HashRouter as Router } from "react-router-dom";
-import * as framework from "@self.id/framework";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState, IsLoadingPassportState } from "../../context/ceramicContext";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
@@ -17,12 +16,6 @@ vi.mock("react-confetti");
 vi.mock("../../components/CardList", () => ({ CardList: () => <div>Card List</div> }));
 
 vi.mock("../../components/SyncToChainButton", () => <div>Sync to Chain</div>);
-
-vi.mock("@self.id/framework", () => {
-  return {
-    useViewerConnection: vi.fn(),
-  };
-});
 
 vi.mock("../../components/Header", () => ({ default: () => <div>Header</div> }));
 
@@ -69,13 +62,6 @@ const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (framework.useViewerConnection as jest.Mock).mockImplementation(() => [
-    {
-      status: "connected",
-    },
-    vi.fn(),
-    vi.fn(),
-  ]);
 });
 
 describe("dashboard notifications", () => {
@@ -115,7 +101,6 @@ describe("dashboard notifications", () => {
     expect(screen.getByText("Stamps weren't verified. Please try again.")).toBeInTheDocument();
   });
   it("should show a loading stamps alert", () => {
-    (framework.useViewerConnection as Mock).mockReturnValue([{ status: "connected" }]);
     renderWithContext(
       {
         ...mockCeramicContext,
@@ -133,7 +118,6 @@ describe("dashboard notifications", () => {
   });
 
   it("should show an initializing passport alert", () => {
-    (framework.useViewerConnection as Mock).mockReturnValue([{ status: "connected" }]);
     renderWithContext(
       {
         ...mockCeramicContext,
@@ -223,7 +207,6 @@ describe.skip("when app fails to load ceramic stream", () => {
 
   it("when retry button is clicked, it should retry ceramic connection", () => {
     const mockCeramicConnect = vi.fn();
-    (framework.useViewerConnection as Mock).mockReturnValue([{ status: "connected" }, mockCeramicConnect]);
 
     renderWithContext(
       {
