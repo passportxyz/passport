@@ -57,8 +57,10 @@ const formatCredentialFromCeramic = (
       "@context": {
         nullifiers: encodedCredential.credentialSubject._context.nullifiers
           ? {
-              "@container": encodedCredential.credentialSubject._context.nullifiers["_container"],
-              "@type": encodedCredential.credentialSubject._context.nullifiers["_type"],
+              "@container": (encodedCredential.credentialSubject._context.nullifiers as { [key: string]: string })[
+                "_container"
+              ] as string,
+              "@type": (encodedCredential.credentialSubject._context.nullifiers as { [key: string]: string })["_type"],
             }
           : undefined,
         hash: encodedCredential.credentialSubject._context.hash,
@@ -186,9 +188,9 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
             ...credentialSubject["@context"],
             nullifiers: credentialSubject["@context"]["nullifiers"]
               ? {
-                  ...credentialSubject["@context"]["nullifiers"],
-                  _type: credentialSubject["@context"]["nullifiers"]["@type"],
-                  _container: credentialSubject["@context"]["nullifiers"]["@container"],
+                  ...(credentialSubject["@context"]["nullifiers"] as { [key: string]: string }),
+                  _type: (credentialSubject["@context"]["nullifiers"] as { [key: string]: string })["@type"],
+                  _container: (credentialSubject["@context"]["nullifiers"] as { [key: string]: string })["@container"],
                 }
               : undefined,
           },
@@ -212,8 +214,8 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
     delete input.content.proof["@context"];
     delete input.content.proof.eip712Domain.types["@context"];
     if (input.content.credentialSubject._context.nullifiers) {
-      delete input.content.credentialSubject._context.nullifiers["@type"];
-      delete input.content.credentialSubject._context.nullifiers["@container"];
+      delete (input.content.credentialSubject._context.nullifiers as { [key: string]: string })["@type"];
+      delete (input.content.credentialSubject._context.nullifiers as { [key: string]: string })["@container"];
     } else {
       // There will be undefined nullifier in the context introduced by our code above, we need
       // to delete that otherwise graphql will complain
@@ -266,6 +268,8 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
         `,
         { input }
       )) as GraphqlResponse<{ createGitcoinPassportStampWithNullifiers: { document: { id: string } } }>;
+
+      vcID = result?.data?.createGitcoinPassportStampWithNullifiers?.document?.id;
     } else {
       // Create a stamp with a credentialSubject.hash
       result = (await this.compose.executeQuery(
@@ -280,6 +284,8 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
         `,
         { input }
       )) as GraphqlResponse<{ createGitcoinPassportStamp: { document: { id: string } } }>;
+
+      vcID = result?.data?.createGitcoinPassportStamp?.document?.id;
     }
 
     let secondaryStorageError: string | undefined;
@@ -293,9 +299,11 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
       this.logger.error(`[ComposeDB][addStamp] ${this.did} failed to add stamp`, { error: result.errors });
     } else {
       if (input.content.credentialSubject._context.nullifiers) {
-        vcID = result?.data?.createGitcoinPassportStampWithNullifiers?.document?.id;
+        const data = result?.data as { createGitcoinPassportStampWithNullifiers: { document: { id: string } } };
+        vcID = data.createGitcoinPassportStampWithNullifiers?.document?.id;
       } else {
-        vcID = result?.data?.createGitcoinPassportStamp?.document?.id;
+        const data = result?.data as { createGitcoinPassportStamp: { document: { id: string } } };
+        vcID = data.createGitcoinPassportStamp?.document?.id;
       }
 
       if (vcID) {
