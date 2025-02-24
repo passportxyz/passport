@@ -140,10 +140,10 @@ describe.only("assuming a valid stamp is stored in ceramic", () => {
     const result = await composeDatabase.getPassport();
 
     expect(result.status).toEqual("Success");
-    expect(result.passport.stamps.length).toEqual(1);
-    expect(result.passport.stamps[0].provider).toEqual(stampsToAdd[0].provider);
+    expect(result.passport?.stamps.length).toEqual(1);
+    expect(result.passport?.stamps[0].provider).toEqual(stampsToAdd[0].provider);
 
-    const readCredential = result.passport.stamps[0].credential;
+    const readCredential = result.passport?.stamps[0].credential;
     expect(readCredential).toEqual(credential);
 
     // Step 4: Validate the stamp

@@ -18,6 +18,7 @@ const stampsWithHashToAdd: Stamp[] = [mockStamps[1] as Stamp];
 const stampsWithNullifiersToPatch: Stamp[] = [mockStampsWithNullifiers[0]];
 const stampsWithNullifiersToAdd: Stamp[] = [mockStampsWithNullifiers[1]];
 const badStamp = JSON.parse(JSON.stringify(mockStamps[2])) as Stamp;
+// @ts-ignore: ignore the error, we want to create an invalid stamp for testing
 delete badStamp.credential.issuer;
 
 const testStamps = [
@@ -47,12 +48,12 @@ describe.skip.each(testStamps)(
     it("stamp type: $credentialType -- should add stamps to compose-db", async () => {
       let passportResult = await composeDatabase.getPassport();
       expect(passportResult.status).toEqual("Success");
-      expect(passportResult.passport.stamps.length).toEqual(0);
+      expect(passportResult.passport?.stamps.length).toEqual(0);
       const addRequest = await composeDatabase.addStamps(stampsToAdd);
       const result = await composeDatabase.getPassport();
       expect(result.status).toEqual("Success");
-      expect(result.passport.stamps.length).toEqual(1);
-      expect(result.passport.stamps[0].provider).toEqual(stampsToAdd[0].provider);
+      expect(result.passport?.stamps.length).toEqual(1);
+      expect(result.passport?.stamps[0].provider).toEqual(stampsToAdd[0].provider);
     });
 
     it("stamp type: $credentialType -- should indicate an error when adding a stamp", async () => {
@@ -64,32 +65,32 @@ describe.skip.each(testStamps)(
       // First add a stamp
       let passportResult = await composeDatabase.getPassport();
       expect(passportResult.status).toEqual("Success");
-      expect(passportResult.passport.stamps.length).toEqual(0);
+      expect(passportResult.passport?.stamps.length).toEqual(0);
       const addRequest = await composeDatabase.addStamps(stampsToAdd);
 
       // Check that item was added
       let passportResultAfterAdd = await composeDatabase.getPassport();
       expect(passportResultAfterAdd.status).toEqual("Success");
-      expect(passportResultAfterAdd.passport.stamps.length).toEqual(1);
+      expect(passportResultAfterAdd.passport?.stamps.length).toEqual(1);
 
       // Now delete the stamp
       await composeDatabase.deleteStamps([stampsToAdd[0].provider]);
       const result = await composeDatabase.getPassport();
       expect(result.status).toEqual("Success");
-      expect(result.passport.stamps.length).toEqual(0);
+      expect(result.passport?.stamps.length).toEqual(0);
     });
 
     it("should indicate that one stamp failed to save while others were successful", async () => {
       let passportResult = await composeDatabase.getPassport();
       expect(passportResult.status).toEqual("Success");
-      expect(passportResult.passport.stamps.length).toEqual(0);
+      expect(passportResult.passport?.stamps.length).toEqual(0);
 
       const result = await composeDatabase.addStamps([badStamp, stampsToAdd[0]]);
       expect(result.filter(({ secondaryStorageError }) => secondaryStorageError).length).toEqual(1);
 
       let newPassport = await composeDatabase.getPassport();
       expect(newPassport.status).toEqual("Success");
-      expect(newPassport.passport.stamps.length).toEqual(1);
+      expect(newPassport.passport?.stamps.length).toEqual(1);
     });
     // Not sure how to test this one
     // it("should indicate an error when deleting a stamp", async () => {
@@ -122,17 +123,17 @@ describe.skip.each(testStamps)(
     it("stamp type: $credentialType -- should return a passport", async () => {
       const result = await composeDatabase.getPassport();
       expect(result.status).toEqual("Success");
-      expect(result.passport.stamps.length).toEqual(0);
+      expect(result.passport?.stamps.length).toEqual(0);
     });
 
     it("stamp type: $credentialType -- should return the identical stamp data that has been put in", async () => {
       const addRequest = await composeDatabase.addStamps(stampsToAdd);
       const result = await composeDatabase.getPassport();
       expect(result.status).toEqual("Success");
-      expect(result.passport.stamps.length).toEqual(1);
-      const stampData = result.passport.stamps[0];
-      expect(stampData.provider).toEqual(stampsToAdd[0].provider);
-      expect(stampData.credential).toEqual(stampsToAdd[0].credential);
+      expect(result.passport?.stamps.length).toEqual(1);
+      const stampData = result.passport?.stamps[0];
+      expect(stampData?.provider).toEqual(stampsToAdd[0].provider);
+      expect(stampData?.credential).toEqual(stampsToAdd[0].credential);
     });
   }
 );
@@ -157,22 +158,24 @@ describe.each(testStamps)(
       // First read should return 0 passports ...
       let passportResult = await composeDatabase.getPassport();
       expect(passportResult.status).toEqual("Success");
-      expect(passportResult.passport.stamps.length).toEqual(0);
+      expect(passportResult.passport?.stamps.length).toEqual(0);
 
       // Patch a stamp, then read again -> we expect the stamp to be created
       await composeDatabase.patchStamps(stampsToPatch);
       passportResult = await composeDatabase.getPassport();
       expect(passportResult.status).toEqual("Success");
-      expect(passportResult.passport.stamps.length).toEqual(1);
+      expect(passportResult.passport?.stamps.length).toEqual(1);
 
       // Patch a stamp again, then read again. We expect the new
       const newStampPatch: StampPatch = JSON.parse(JSON.stringify(stampsToPatch[0]));
-      newStampPatch.credential.issuer = "Dummy Issuer";
+      if (newStampPatch.credential) {
+        newStampPatch.credential.issuer = "Dummy Issuer";
+      }
       await composeDatabase.patchStamps([newStampPatch]);
       passportResult = await composeDatabase.getPassport();
       expect(passportResult.status).toEqual("Success");
-      expect(passportResult.passport.stamps.length).toEqual(1);
-      expect(passportResult.passport.stamps[0].credential.issuer).toEqual("Dummy Issuer");
+      expect(passportResult.passport?.stamps.length).toEqual(1);
+      expect(passportResult.passport?.stamps[0].credential.issuer).toEqual("Dummy Issuer");
     });
 
     it("should indicate that an error was thrown while patching stamps", async () => {
