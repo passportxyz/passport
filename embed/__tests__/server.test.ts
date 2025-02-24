@@ -20,7 +20,6 @@ jest.mock("../src/rateLimiter", () => {
     }),
     // By returning `undefined` for getRateLimiterStore we expect this to use the default which is `memory-store`
     getRateLimiterStore: jest.fn(() => {
-      console.log("geri ---- getRateLimiterStore undefined");
       return undefined;
     }),
   };

@@ -87,7 +87,6 @@ app.use(
     store: getRateLimiterStore(),
     skip: (req, res): boolean => {
       // TODO: geri review this, /verify should be removed ...
-      console.log("geri --- path", req.path);
       return req.path === "/health" || req.path === "/embed/challenge" || req.path === "/embed/verify";
     },
   })

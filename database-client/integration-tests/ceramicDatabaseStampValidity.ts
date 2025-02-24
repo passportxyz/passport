@@ -19,20 +19,20 @@ const IAM_JWK_EIP712 =
   '{"kty":"EC","crv":"secp256k1","x":"PdB2nS-knyAxc6KPuxBr65vRpW-duAXwpeXlwGJ03eU","y":"MwoGZ08hF5uv-_UEC9BKsYdJVSbJNHcFhR1BZWer5RQ","d":"z9VrSNNZXf9ywUx3v_8cLDhSw8-pvAT9qu_WZmqqfWM"}';
 const eip712Key = IAM_JWK_EIP712;
 
-beforeAll(async () => {
-  const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
+describe("assuming a valid stamp is stored in ceramic", () => {
+  beforeEach(async () => {
+    const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
 
-  // Create and authenticate the DID
-  testDID = new DID({
-    provider: new Ed25519Provider(TEST_SEED),
-    resolver: getResolver(),
+    // Create and authenticate the DID
+    testDID = new DID({
+      provider: new Ed25519Provider(TEST_SEED),
+      resolver: getResolver(),
+    });
+    await testDID.authenticate();
+
+    composeDatabase = new ComposeDatabase(testDID, process.env.CERAMIC_CLIENT_URL || "http://localhost:7007");
   });
-  await testDID.authenticate();
 
-  composeDatabase = new ComposeDatabase(testDID, process.env.CERAMIC_CLIENT_URL || "http://localhost:7007");
-});
-
-describe.only("assuming a valid stamp is stored in ceramic", () => {
   it("stamp with hash - should return a valid stamp that can be validated successfully", async () => {
     // Step 1: First, we need to create a valid stamp
     const verificationMethod: string = (await DIDKit.keyToVerificationMethod("ethr", eip712Key)) as string;
@@ -98,11 +98,7 @@ describe.only("assuming a valid stamp is stored in ceramic", () => {
 
     // TODO temporary workaround until we actually make the new
     // nullifier format work with ceramic
-    const testStampCredentialDocument = stampCredentialDocument(verificationMethod);
-    delete testStampCredentialDocument.eip712Domain.types.NullifiersContext;
-    testStampCredentialDocument.eip712Domain.types["@context"][0] = { type: "string", name: "hash" };
-    testStampCredentialDocument.eip712Domain.types.CredentialSubject[1] = { type: "string", name: "hash" };
-
+    const testStampCredentialDocument = stampCredentialDocument(verificationMethod, false);
     const credential = await issueEip712Credential(
       DIDKit,
       eip712Key,
@@ -117,7 +113,7 @@ describe.only("assuming a valid stamp is stored in ceramic", () => {
             provider: "https://schema.org/Text",
           },
           id: "did:3:0x123",
-          hash: "0x123",
+          nullifiers: ["0x123", "0x456"],
           provider: "Discord",
         },
       },

@@ -29,7 +29,7 @@ const testStamps = [
     stampsToPatch: stampsWithNullifiersToPatch,
   },
 ];
-describe.skip.each(testStamps)(
+describe.each(testStamps)(
   "stamp type: $credentialType -- adding and deleting stamps",
   ({ credentialType, stampsToAdd, stampsToPatch }) => {
     beforeEach(async () => {
@@ -104,7 +104,7 @@ describe.skip.each(testStamps)(
   }
 );
 
-describe.skip.each(testStamps)(
+describe.each(testStamps)(
   "stamp type: $credentialType -- getting a passport",
   ({ credentialType, stampsToAdd, stampsToPatch }) => {
     beforeEach(async () => {
