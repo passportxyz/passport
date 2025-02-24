@@ -11,6 +11,12 @@ import { PLATFORM_ID, CredentialResponseBody } from "@gitcoin/passport-types";
 
 const VERIFICATION_URL = import.meta.env.VITE_VERIFY_URL as string;
 
+declare global {
+  interface Window {
+    DEBUG_NO_CLOSE?: boolean;
+  }
+}
+
 const generateRandomState = (): string => {
   return Math.random().toString(36).substring(2);
 };
@@ -110,7 +116,7 @@ function App() {
         const oauthUrl = getOAuthUrl(state, platform as PLATFORM_ID);
         window.location.href = await oauthUrl;
       } else {
-        if(!isVerificationPending) {
+        if (!isVerificationPending) {
           setIsVerificationPending(true);
           setStep("Making the verify call...");
           // the code is preset, make the verify call to chaim the stamp
@@ -154,7 +160,9 @@ function App() {
             setStep("Verification successful!");
             setVerificationResponse(response);
 
-            window.close(); // Close the pop-up after sending the message
+            if (window.DEBUG_NO_CLOSE) {
+              window.close(); // Close the pop-up after sending the message
+            }
           } catch (error) {
             console.error("Error during verification:", error);
             setStep(`Verification failed to ${verifyEndpoint}`);
