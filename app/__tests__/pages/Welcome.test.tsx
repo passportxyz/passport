@@ -3,7 +3,6 @@ import { vi, describe, it, expect, Mock } from "vitest";
 import { screen } from "@testing-library/react";
 import Welcome from "../../pages/Welcome";
 import { HashRouter as Router } from "react-router-dom";
-import * as framework from "@self.id/framework";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { Stamp } from "@gitcoin/passport-types";
@@ -13,12 +12,6 @@ vi.mock("@didtools/cacao", () => ({
     fromBlockBytes: vi.fn(),
   },
 }));
-
-vi.mock("@self.id/framework", () => {
-  return {
-    useViewerConnection: vi.fn(),
-  };
-});
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
@@ -33,13 +26,6 @@ vi.mock("../../components/InitialWelcome.tsx", () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (framework.useViewerConnection as Mock).mockImplementation(() => [
-    {
-      status: "connected",
-    },
-    vi.fn(),
-    vi.fn(),
-  ]);
 });
 
 describe("Welcome", () => {
