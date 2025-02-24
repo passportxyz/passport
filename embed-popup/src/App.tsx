@@ -13,7 +13,7 @@ const VERIFICATION_URL = import.meta.env.VITE_VERIFY_URL as string;
 
 declare global {
   interface Window {
-    DEBUG_NO_CLOSE?: boolean;
+    PREVENT_CLOSE?: boolean;
   }
 }
 
@@ -160,7 +160,7 @@ function App() {
             setStep("Verification successful!");
             setVerificationResponse(response);
 
-            if (window.DEBUG_NO_CLOSE) {
+            if (!window.PREVENT_CLOSE) {
               window.close(); // Close the pop-up after sending the message
             }
           } catch (error) {
