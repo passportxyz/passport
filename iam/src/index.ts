@@ -29,7 +29,7 @@ import passportOnchainInfo from "../../deployments/onchainInfo.json" with { type
 import {
   getChallenge,
   hasValidIssuer,
-  getIssuerKey,
+  getIssuerInfo,
   VerifyDidChallengeBaseError,
   issueChallengeCredential,
   verifyCredential,
@@ -50,8 +50,16 @@ import * as DIDKit from "@spruceid/didkit-wasm-node";
 
 import path from "path";
 import { fileURLToPath } from "url";
-import { errorRes, addErrorDetailsToMessage, ApiError } from "./utils/helpers.js";
-import { ATTESTER_TYPES, getAttestationDomainSeparator, getAttestationSignerForChain } from "./utils/attestations.js";
+import {
+  errorRes,
+  addErrorDetailsToMessage,
+  ApiError,
+} from "./utils/helpers.js";
+import {
+  ATTESTER_TYPES,
+  getAttestationDomainSeparator,
+  getAttestationSignerForChain,
+} from "./utils/attestations.js";
 import { scrollDevBadgeHandler } from "./utils/scrollDevBadge.js";
 import { toJsonObject } from "./utils/json.js";
 import { filterRevokedCredentials } from "./utils/revocations.js";
@@ -159,9 +167,14 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         ...(challenge?.record || {}),
       };
 
-      const currentKey = getIssuerKey(payload.signatureType);
+      const { issuer } = getIssuerInfo();
       // generate a VC for the given payload
-      return void issueChallengeCredential(DIDKit, currentKey, record, payload.signatureType)
+      return void issueChallengeCredential(
+        DIDKit,
+        issuer.key,
+        record,
+        payload.signatureType,
+      )
         .then((credential) => {
           // return the verifiable credential
           return res.json(credential as CredentialResponseBody);
@@ -169,7 +182,11 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
         .catch((error): void => {
           if (error) {
             // return error msg indicating a failure producing VC
-            return void errorRes(res, "Unable to produce a verifiable credential", 400);
+            return void errorRes(
+              res,
+              "Unable to produce a verifiable credential",
+              400,
+            );
           }
         });
     } else {
@@ -177,14 +194,19 @@ app.post("/api/v0.0.0/challenge", (req: Request, res: Response): void => {
       // limit the error message string to 1000 chars
       return void errorRes(
         res,
-        (challenge.error && challenge.error.join(", ").substring(0, 1000)) || "Unable to verify proofs",
-        403
+        (challenge.error && challenge.error.join(", ").substring(0, 1000)) ||
+          "Unable to verify proofs",
+        403,
       );
     }
   }
 
   if (!payload.address) {
-    return void errorRes(res, "Missing address from challenge request body", 400);
+    return void errorRes(
+      res,
+      "Missing address from challenge request body",
+      400,
+    );
   }
 
   if (!payload.type) {
@@ -199,7 +221,9 @@ app.post("/api/v0.0.0/check", (req: Request, res: Response): void => {
     return void errorRes(res, "Incorrect payload", 400);
   }
 
-  const types = (payload.types?.length ? payload.types : [payload.type]).filter((type) => type);
+  const types = (payload.types?.length ? payload.types : [payload.type]).filter(
+    (type) => type,
+  );
   const typesGroupedByPlatform = groupProviderTypesByPlatform(types);
   verifyTypes(typesGroupedByPlatform, payload)
     .then((results) => {
@@ -232,7 +256,11 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
           address = await verifyChallengeAndGetAddress(requestBody);
         } catch (error) {
           if (error instanceof VerifyDidChallengeBaseError) {
-            return void errorRes(res, `Invalid challenge signature: ${error.name}`, 401);
+            return void errorRes(
+              res,
+              `Invalid challenge signature: ${error.name}`,
+              401,
+            );
           }
           throw error;
         }
@@ -240,23 +268,31 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
         payload.address = address;
 
         // Check signer and type
-        const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
-        const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
+        const isSigner =
+          challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
+        const isType =
+          challenge.credentialSubject.provider === `challenge-${payload.type}`;
 
         if (!isSigner || !isType) {
           return void errorRes(
             res,
             "Invalid challenge '" +
-              [!isSigner && "signer", !isType && "provider"].filter(Boolean).join("' and '") +
+              [!isSigner && "signer", !isType && "provider"]
+                .filter(Boolean)
+                .join("' and '") +
               "'",
-            401
+            401,
           );
         }
 
         const types = payload.types.filter((type) => type);
         const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
-        const credentials = await verifyProvidersAndIssueCredentials(providersGroupedByPlatforms, address, payload);
+        const credentials = await verifyProvidersAndIssueCredentials(
+          providersGroupedByPlatforms,
+          address,
+          payload,
+        );
 
         return void res.json(credentials);
       }
@@ -280,19 +316,34 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   try {
     const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
     if (!Object.keys(passportOnchainInfo).includes(chainIdHex)) {
-      return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
+      return void errorRes(
+        res,
+        `No onchainInfo found for chainId ${chainIdHex}`,
+        404,
+      );
     }
-    const attestationChainIdHex = chainIdHex as keyof typeof passportOnchainInfo;
+    const attestationChainIdHex =
+      chainIdHex as keyof typeof passportOnchainInfo;
 
-    if (!credentials.length) return void errorRes(res, "No stamps provided", 400);
+    if (!credentials.length)
+      return void errorRes(res, "No stamps provided", 400);
 
     const recipient = credentials[0].credentialSubject.id.split(":")[4];
 
     if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
       return void errorRes(res, "Invalid recipient", 400);
 
-    if (!credentials.every((credential) => credential.credentialSubject.id.split(":")[4] === recipient))
-      return void errorRes(res, "Every credential's id must be equivalent", 400);
+    if (
+      !credentials.every(
+        (credential) =>
+          credential.credentialSubject.id.split(":")[4] === recipient,
+      )
+    )
+      return void errorRes(
+        res,
+        "Every credential's id must be equivalent",
+        400,
+      );
 
     filterRevokedCredentials(credentials)
       .then((unrevokedCredentials) => {
@@ -300,9 +351,11 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
           unrevokedCredentials.map(async (credential) => {
             return {
               credential,
-              verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
+              verified:
+                hasValidIssuer(credential.issuer) &&
+                (await verifyCredential(DIDKit, credential)),
             };
-          })
+          }),
         )
           .then(async (credentialVerifications): Promise<void> => {
             const invalidCredentials = credentialVerifications
@@ -313,11 +366,12 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
               return void errorRes(res, { invalidCredentials }, 400);
             }
 
-            const multiAttestationRequest = await stampSchema.formatMultiAttestationRequest(
-              credentialVerifications,
-              recipient,
-              attestationChainIdHex
-            );
+            const multiAttestationRequest =
+              await stampSchema.formatMultiAttestationRequest(
+                credentialVerifications,
+                recipient,
+                attestationChainIdHex,
+              );
 
             const fee = await getEASFeeAmount(EAS_FEE_USD);
             const passportAttestation: PassportAttestation = {
@@ -326,12 +380,20 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
               fee: fee.toString(),
             };
 
-            const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
+            const domainSeparator = getAttestationDomainSeparator(
+              attestationChainIdHex,
+            );
 
-            const signer = await getAttestationSignerForChain(attestationChainIdHex);
+            const signer = await getAttestationSignerForChain(
+              attestationChainIdHex,
+            );
 
             signer
-              .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+              .signTypedData(
+                domainSeparator,
+                ATTESTER_TYPES,
+                passportAttestation,
+              )
               .then((signature): void => {
                 const { v, r, s } = Signature.from(signature);
 
@@ -341,7 +403,9 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
                   invalidCredentials,
                 };
 
-                return void res.type("application/json").send(toJsonObject(payload));
+                return void res
+                  .type("application/json")
+                  .send(toJsonObject(payload));
               })
               .catch((): void => {
                 return void errorRes(res, "Error signing passport", 500);
@@ -365,13 +429,20 @@ app.post("/api/v0.0.0/scroll/dev", scrollDevBadgeHandler);
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
   try {
-    const { recipient, credentials, nonce, chainIdHex, customScorerId } = req.body as EasRequestBody;
+    const { recipient, credentials, nonce, chainIdHex, customScorerId } =
+      req.body as EasRequestBody;
     if (!Object.keys(passportOnchainInfo).includes(chainIdHex)) {
-      return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
+      return void errorRes(
+        res,
+        `No onchainInfo found for chainId ${chainIdHex}`,
+        404,
+      );
     }
-    const attestationChainIdHex = chainIdHex as keyof typeof passportOnchainInfo;
+    const attestationChainIdHex =
+      chainIdHex as keyof typeof passportOnchainInfo;
 
-    if (!credentials || !credentials.length) return void errorRes(res, "No stamps provided", 400);
+    if (!credentials || !credentials.length)
+      return void errorRes(res, "No stamps provided", 400);
 
     if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
       return void errorRes(res, "Invalid recipient", 400);
@@ -379,10 +450,15 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
     if (
       !credentials.every(
         (credential) =>
-          credential.credentialSubject.id.split(":")[4].toLocaleLowerCase() === recipient.toLocaleLowerCase()
+          credential.credentialSubject.id.split(":")[4].toLocaleLowerCase() ===
+          recipient.toLocaleLowerCase(),
       )
     )
-      return void errorRes(res, "Every credential's id must be equivalent to that of the recipient", 400);
+      return void errorRes(
+        res,
+        "Every credential's id must be equivalent to that of the recipient",
+        400,
+      );
 
     filterRevokedCredentials(credentials)
       .then((unrevokedCredentials) => {
@@ -390,21 +466,24 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
           unrevokedCredentials.map(async (credential) => {
             return {
               credential,
-              verified: hasValidIssuer(credential.issuer) && (await verifyCredential(DIDKit, credential)),
+              verified:
+                hasValidIssuer(credential.issuer) &&
+                (await verifyCredential(DIDKit, credential)),
             };
-          })
+          }),
         )
           .then(async (credentialVerifications) => {
             const invalidCredentials = credentialVerifications
               .filter(({ verified }) => !verified)
               .map(({ credential }) => credential);
 
-            const multiAttestationRequest = await passportSchema.formatMultiAttestationRequestWithPassportAndScore(
-              credentialVerifications,
-              recipient,
-              attestationChainIdHex,
-              customScorerId
-            );
+            const multiAttestationRequest =
+              await passportSchema.formatMultiAttestationRequestWithPassportAndScore(
+                credentialVerifications,
+                recipient,
+                attestationChainIdHex,
+                customScorerId,
+              );
 
             const fee = await getEASFeeAmount(EAS_FEE_USD);
             const passportAttestation: PassportAttestation = {
@@ -413,12 +492,20 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
               fee: fee.toString(),
             };
 
-            const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
+            const domainSeparator = getAttestationDomainSeparator(
+              attestationChainIdHex,
+            );
 
-            const signer = await getAttestationSignerForChain(attestationChainIdHex);
+            const signer = await getAttestationSignerForChain(
+              attestationChainIdHex,
+            );
 
             signer
-              .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
+              .signTypedData(
+                domainSeparator,
+                ATTESTER_TYPES,
+                passportAttestation,
+              )
               .then((signature): Promise<void> => {
                 const { v, r, s } = Signature.from(signature);
 
@@ -435,16 +522,25 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
               });
           })
           .catch((error): void => {
-            const message = addErrorDetailsToMessage("Error formatting onchain passport", error);
+            const message = addErrorDetailsToMessage(
+              "Error formatting onchain passport",
+              error,
+            );
             return void errorRes(res, message, 500);
           });
       })
       .catch((error): void => {
-        const message = addErrorDetailsToMessage("Error formatting onchain passport", error);
+        const message = addErrorDetailsToMessage(
+          "Error formatting onchain passport",
+          error,
+        );
         return void errorRes(res, message, 500);
       });
   } catch (error) {
-    const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
+    const message = addErrorDetailsToMessage(
+      "Unexpected error when processing request",
+      error,
+    );
     return void errorRes(res, message, 500);
   }
 });
@@ -452,21 +548,28 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
 // Expose entry point for getting eas payload for moving only the score on-chain (Score Attestations)
 app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
   try {
-    const { recipient, nonce, chainIdHex, customScorerId } = req.body as EasRequestBody;
+    const { recipient, nonce, chainIdHex, customScorerId } =
+      req.body as EasRequestBody;
     if (!Object.keys(passportOnchainInfo).includes(chainIdHex)) {
-      return void errorRes(res, `No onchainInfo found for chainId ${chainIdHex}`, 404);
+      return void errorRes(
+        res,
+        `No onchainInfo found for chainId ${chainIdHex}`,
+        404,
+      );
     }
-    const attestationChainIdHex = chainIdHex as keyof typeof passportOnchainInfo;
+    const attestationChainIdHex =
+      chainIdHex as keyof typeof passportOnchainInfo;
 
     if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
       return void errorRes(res, "Invalid recipient", 400);
 
     try {
-      const multiAttestationRequest = await passportSchema.formatMultiAttestationRequestWithScore(
-        recipient,
-        attestationChainIdHex,
-        customScorerId
-      );
+      const multiAttestationRequest =
+        await passportSchema.formatMultiAttestationRequestWithScore(
+          recipient,
+          attestationChainIdHex,
+          customScorerId,
+        );
 
       const fee = await getEASFeeAmount(EAS_FEE_USD);
       const passportAttestation: PassportAttestation = {
@@ -475,7 +578,9 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
         fee: fee.toString(),
       };
 
-      const domainSeparator = getAttestationDomainSeparator(attestationChainIdHex);
+      const domainSeparator = getAttestationDomainSeparator(
+        attestationChainIdHex,
+      );
 
       const signer = await getAttestationSignerForChain(attestationChainIdHex);
 
@@ -496,11 +601,17 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
           return void errorRes(res, "Error signing score", 500);
         });
     } catch (error) {
-      const message = addErrorDetailsToMessage("Error formatting onchain score", error);
+      const message = addErrorDetailsToMessage(
+        "Error formatting onchain score",
+        error,
+      );
       return void errorRes(res, message, 500);
     }
   } catch (error) {
-    const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
+    const message = addErrorDetailsToMessage(
+      "Unexpected error when processing request",
+      error,
+    );
     return void errorRes(res, message, 500);
   }
 });
@@ -508,4 +619,9 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
 // procedure endpoints
 app.use("/procedure", procedureRouter);
 
-app.use("/static", express.static(path.join(path.dirname(fileURLToPath(import.meta.url)), "static")));
+app.use(
+  "/static",
+  express.static(
+    path.join(path.dirname(fileURLToPath(import.meta.url)), "static"),
+  ),
+);

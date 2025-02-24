@@ -76,7 +76,10 @@ function App({ Component, pageProps }: AppProps) {
 
       // only continue with the process if a code is returned
       if (queryCode) {
-        channel.postMessage({ target: provider, data: { code: queryCode, state: queryState } });
+        channel.postMessage({
+          target: provider,
+          data: { code: queryCode, state: queryState },
+        });
       }
 
       // always close the redirected window

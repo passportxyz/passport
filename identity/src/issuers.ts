@@ -1,32 +1,38 @@
 import * as DIDKit from "@spruceid/didkit-wasm-node";
+import { NullifierGenerators } from "./credentials.js";
+import { getKeyVersions } from "./keyManager.js";
+import { HashNullifierGenerator } from "./nullifierGenerators.js";
 
-const key = process.env.IAM_JWK;
-const __issuer = DIDKit.keyToDID("key", key);
-const eip712Key = process.env.IAM_JWK_EIP712;
-const __eip712Issuer = DIDKit.keyToDID("ethr", eip712Key);
+const eip712keyToDID = (key: string) => DIDKit.keyToDID("ethr", key);
 
-const validIssuers = new Set([__issuer, __eip712Issuer]);
+export function getIssuerInfo(): {
+  issuer: {
+    key: string;
+    did: string;
+  };
+  nullifierGenerators: NullifierGenerators;
+} {
+  const { active, issuer } = getKeyVersions();
 
-export function getEd25519IssuerKey(): string {
-  return key;
+  return {
+    issuer: {
+      key: issuer.key,
+      did: eip712keyToDID(issuer.key),
+    },
+    nullifierGenerators: active.map(({ key, version }) =>
+      // TODO Add some variable like HUMAN_NETWORK_START_VERSION and
+      // use it here to switch to HumanNetworkNullifierGenerators
+      HashNullifierGenerator({ key, version }),
+    ) as NullifierGenerators,
+  };
 }
 
-export function getEd25519Issuer(): string {
-  return __issuer;
-}
+export function hasValidIssuer(issuerDid: string): boolean {
+  const { initiated } = getKeyVersions();
 
-export function getEip712IssuerKey(): string {
-  return eip712Key;
-}
+  const initiatedIssuerDids = initiated.map(({ key }) => eip712keyToDID(key));
 
-export function getEip712Issuer(): string {
-  return __eip712Issuer;
-}
+  const validIssuerDids = new Set([...initiatedIssuerDids]);
 
-export function getIssuerKey(signatureType: string): string {
-  return signatureType === "EIP712" ? eip712Key : key;
-}
-
-export function hasValidIssuer(issuer: string): boolean {
-  return validIssuers.has(issuer);
+  return validIssuerDids.has(issuerDid);
 }

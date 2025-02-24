@@ -3,7 +3,7 @@ import {
   getEvmProvidersByPlatform,
 } from "../src/autoVerification.js";
 import { providers } from "@gitcoin/passport-platforms";
-import { issueHashedCredential } from "../src/credentials.js";
+import { issueNullifiableCredential } from "../src/credentials.js";
 import {
   PROVIDER_ID,
   VerifiableCredential,
@@ -11,13 +11,12 @@ import {
   ProviderContext,
   IssuedCredential,
 } from "@gitcoin/passport-types";
-import { PassportScore } from "../src/verification.js";
 
-jest.mock("../src/credentials.js", () => ({
-  issueHashedCredential: jest.fn(),
+jest.mock("../src/credentials", () => ({
+  issueNullifiableCredential: jest.fn(),
 }));
 
-jest.mock("../src/bans.js", () => ({
+jest.mock("../src/bans", () => ({
   checkCredentialBans: jest
     .fn()
     .mockImplementation((input) => Promise.resolve(input)),
@@ -27,13 +26,13 @@ jest.mock("@gitcoin/passport-platforms", () => ({
   providers: {
     verify: jest.fn(
       async (
-        type: string,
-        payload: RequestPayload,
-        context: ProviderContext,
+        _type: string,
+        _payload: RequestPayload,
+        _context: ProviderContext,
       ) => {
         return Promise.resolve({
           valid: true,
-          record: { key: "veirfied-condition" },
+          record: { key: "verified-condition" },
         });
       },
     ),
@@ -247,23 +246,6 @@ function getMockedIssuedCredential(
   return credential;
 }
 
-const mockedScore: PassportScore = {
-  address: "0x0000000000000000000000000000000000000000",
-  score: "12",
-  passing_score: true,
-  last_score_timestamp: new Date().toISOString(),
-  expiration_timestamp: new Date().toISOString(),
-  threshold: "20.000",
-  error: "",
-  stamps: {
-    "provider-1": {
-      score: "12",
-      dedup: true,
-      expiration_date: new Date().toISOString(),
-    },
-  },
-};
-
 describe("autoVerificationHandler", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -276,8 +258,8 @@ describe("autoVerificationHandler", () => {
     const verifySpy = (providers.verify as jest.Mock).mockImplementation(
       async (
         type: string,
-        payload: RequestPayload,
-        context: ProviderContext,
+        _payload: RequestPayload,
+        _context: ProviderContext,
       ) => {
         if (expectedEvmProvidersToSucceed.has(type as PROVIDER_ID)) {
           return Promise.resolve({
@@ -293,15 +275,8 @@ describe("autoVerificationHandler", () => {
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
-    (issueHashedCredential as jest.Mock).mockImplementation(
-      (
-        DIDKit,
-        currentKey,
-        address,
-        record: { type: string },
-        expiresInSeconds,
-        signatureType,
-      ) => {
+    (issueNullifiableCredential as jest.Mock).mockImplementation(
+      async ({ record }) => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
@@ -326,8 +301,8 @@ describe("autoVerificationHandler", () => {
     const verifySpy = (providers.verify as jest.Mock).mockImplementation(
       async (
         type: string,
-        payload: RequestPayload,
-        context: ProviderContext,
+        _payload: RequestPayload,
+        _context: ProviderContext,
       ) => {
         if (expectedEvmProvidersToSucceed.has(type as PROVIDER_ID)) {
           return Promise.resolve({
@@ -343,15 +318,8 @@ describe("autoVerificationHandler", () => {
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
-    (issueHashedCredential as jest.Mock).mockImplementation(
-      (
-        DIDKit,
-        currentKey,
-        address,
-        record: { type: string },
-        expiresInSeconds,
-        signatureType,
-      ) => {
+    (issueNullifiableCredential as jest.Mock).mockImplementation(
+      async ({ record }) => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);
@@ -379,9 +347,9 @@ describe("autoVerificationHandler", () => {
 
     const verifySpy = (providers.verify as jest.Mock).mockImplementation(
       async (
-        type: string,
-        payload: RequestPayload,
-        context: ProviderContext,
+        _type: string,
+        _payload: RequestPayload,
+        _context: ProviderContext,
       ) => {
         return Promise.resolve({
           valid: true,
@@ -391,15 +359,8 @@ describe("autoVerificationHandler", () => {
     );
 
     const issuedCredentials: VerifiableCredential[] = [];
-    (issueHashedCredential as jest.Mock).mockImplementation(
-      (
-        DIDKit,
-        currentKey,
-        address,
-        record: { type: string },
-        expiresInSeconds,
-        signatureType,
-      ) => {
+    (issueNullifiableCredential as jest.Mock).mockImplementation(
+      async ({ record }) => {
         const credential = getMockedIssuedCredential(record.type, mockAddress);
         issuedCredentials.push(credential.credential);
         return Promise.resolve(credential);

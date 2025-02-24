@@ -1,10 +1,16 @@
+// ---- Types
 import { Response } from "express";
-import { RequestPayload, CredentialResponseBody, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
+import {
+  RequestPayload,
+  CredentialResponseBody,
+  VerifiedPayload,
+  ProviderContext,
+} from "@gitcoin/passport-types";
 
 import { platforms, providers } from "@gitcoin/passport-platforms";
-import { issueHashedCredential } from "./credentials.js";
+import { issueNullifiableCredential } from "./credentials.js";
 import { checkCredentialBans } from "./bans.js";
-import { getIssuerKey } from "./issuers.js";
+import { getIssuerInfo } from "./issuers.js";
 
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
@@ -33,11 +39,17 @@ export type PassportScore = {
 };
 
 // return a JSON error response with a 400 status
-export const errorRes = (res: Response, error: string | object, errorCode: number): Response =>
-  res.status(errorCode).json({ error });
+export const errorRes = (
+  res: Response,
+  error: string | object,
+  errorCode: number,
+): Response => res.status(errorCode).json({ error });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const addErrorDetailsToMessage = (message: string, error: any): string => {
+export const addErrorDetailsToMessage = (
+  message: string,
+  error: any,
+): string => {
   if (error instanceof IAMError || error instanceof Error) {
     message += `, ${error.name}: ${error.message}`;
   } else if (typeof error === "string") {
@@ -49,7 +61,7 @@ export const addErrorDetailsToMessage = (message: string, error: any): string =>
 export class VerificationError extends Error {
   constructor(
     public message: string,
-    public code: number
+    public code: number,
   ) {
     super(message);
     this.name = this.constructor.name;
@@ -64,15 +76,15 @@ export type VerifyTypeResult = {
 };
 
 const providerTypePlatformMap = Object.entries(platforms).reduce(
-  (acc, [platformName, { PlatformDetails, ProviderConfig }]) => {
-    ProviderConfig.forEach(({ platformGroup, providers }) => {
+  (acc, [platformName, { ProviderConfig }]) => {
+    ProviderConfig.forEach(({ providers }) => {
       providers.forEach(({ name }) => {
         acc[name] = platformName;
       });
     });
     return acc;
   },
-  {} as { [k: string]: string }
+  {} as { [k: string]: string },
 );
 
 export function groupProviderTypesByPlatform(types: string[]): string[][] {
@@ -86,8 +98,8 @@ export function groupProviderTypesByPlatform(types: string[]): string[][] {
 
         return groupedProviders;
       },
-      {} as { [k: keyof typeof platforms]: string[] }
-    )
+      {} as { [k: keyof typeof platforms]: string[] },
+    ),
   );
 }
 
@@ -99,7 +111,7 @@ export function groupProviderTypesByPlatform(types: string[]): string[][] {
  */
 export async function verifyTypes(
   providersByPlatform: string[][],
-  payload: RequestPayload
+  payload: RequestPayload,
 ): Promise<VerifyTypeResult[]> {
   // define a context to be shared between providers in the verify request
   // this is intended as a temporary storage for providers to share data
@@ -126,7 +138,8 @@ export async function verifyTypes(
           type = "AllowList";
         } else if (type.startsWith("DeveloperList")) {
           // Here we handle the custom DeveloperList stamps
-          const [__type, conditionName, conditionHash, ..._rest] = type.split("#");
+          const [__type, conditionName, conditionHash, ..._rest] =
+            type.split("#");
           payloadForType.proofs = {
             ...payload.proofs,
             conditionName,
@@ -142,7 +155,9 @@ export async function verifyTypes(
             code = 403;
             // TODO to be changed to just verifyResult.errors when all providers are updated
             const resultErrors = verifyResult.errors;
-            error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
+            error =
+              resultErrors?.join(", ")?.substring(0, 1000) ||
+              "Unable to verify provider";
             if (error.includes(`Request timeout while verifying ${type}.`)) {
               console.log(`Request timeout while verifying ${type}`);
               // If a request times out exit loop and return results so additional requests are not made
@@ -157,7 +172,7 @@ export async function verifyTypes(
 
         results.push({ verifyResult, type, code, error });
       }
-    })
+    }),
   );
 
   return results;
@@ -171,59 +186,64 @@ export async function verifyTypes(
  * @returns An array of issued credentials
  *
  * This function will verify the request for all the providers listed in providersByPlatform and
- * return an credential for each verification that is succeful or an error where this failed.
+ * return an credential for each verification that is successful or an error where this failed.
  *
  * Credentials are verified against existing bans in the scorer service.
  */
 export const verifyProvidersAndIssueCredentials = async (
   providersByPlatform: string[][],
   address: string,
-  payload: RequestPayload
+  payload: RequestPayload,
 ): Promise<CredentialResponseBody[]> => {
   const results = await verifyTypes(providersByPlatform, payload);
   const credentials = await Promise.all(
-    results.map(async ({ verifyResult, code: verifyCode, error: verifyError, type }) => {
-      let code = verifyCode;
-      let error = verifyError;
-      let record, credential;
+    results.map(
+      async ({ verifyResult, code: verifyCode, error: verifyError, type }) => {
+        let code = verifyCode;
+        let error = verifyError;
+        let record, credential;
 
-      try {
-        // check if the request is valid against the selected Identity Provider
-        if (verifyResult.valid === true) {
-          // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
-          record = {
-            // type and address will always be known and can be obtained from the resultant credential
-            type: verifyResult.record.pii ? `${type}#${verifyResult.record.pii}` : type,
-            // version is defined by entry point
-            version: "0.0.0",
-            // extend/overwrite with record returned from the provider
-            ...(verifyResult?.record || {}),
-          };
+        try {
+          // check if the request is valid against the selected Identity Provider
+          if (verifyResult.valid === true) {
+            // construct a set of Proofs to issue a credential against (this record will be used to generate a sha256 hash of any associated PII)
+            record = {
+              // type and address will always be known and can be obtained from the resultant credential
+              type: verifyResult.record.pii
+                ? `${type}#${verifyResult.record.pii}`
+                : type,
+              // version is defined by entry point
+              version: "0.0.0",
+              // extend/overwrite with record returned from the provider
+              ...(verifyResult?.record || {}),
+            };
 
-          const currentKey = getIssuerKey(payload.signatureType);
+            const { issuer, nullifierGenerators } = getIssuerInfo();
 
-          // generate a VC for the given payload
-          ({ credential } = await issueHashedCredential(
-            DIDKit,
-            currentKey,
-            address,
-            record,
-            verifyResult.expiresInSeconds,
-            payload.signatureType
-          ));
+            // generate a VC for the given payload
+            ({ credential } = await issueNullifiableCredential({
+              DIDKit,
+              issuerKey: issuer.key,
+              address,
+              record,
+              expiresInSeconds: verifyResult.expiresInSeconds,
+              signatureType: payload.signatureType,
+              nullifierGenerators,
+            }));
+          }
+        } catch {
+          error = "Unable to produce a verifiable credential";
+          code = 500;
         }
-      } catch {
-        error = "Unable to produce a verifiable credential";
-        code = 500;
-      }
 
-      return {
-        record,
-        credential,
-        code,
-        error,
-      };
-    })
+        return {
+          record,
+          credential,
+          code,
+          error,
+        };
+      },
+    ),
   );
 
   const credentialsAfterBan = await checkCredentialBans(credentials);

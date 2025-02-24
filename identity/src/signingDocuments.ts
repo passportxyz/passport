@@ -70,7 +70,10 @@ export const challengeSignatureDocument = (verificationMethod: string): Document
   },
 });
 
-export const stampCredentialDocument = (verificationMethod: string): DocumentSignatureTypes<DocumentType> => ({
+export const stampCredentialDocument = (
+  verificationMethod: string,
+  legacyNullifier?: boolean
+): DocumentSignatureTypes<DocumentType> => ({
   type: "EthereumEip712Signature2021",
   verificationMethod,
   eip712Domain: {
@@ -84,11 +87,30 @@ export const stampCredentialDocument = (verificationMethod: string): DocumentSig
           name: "name",
         },
       ],
+      ...(legacyNullifier
+        ? {}
+        : {
+            NullifiersContext: [
+              {
+                type: "string",
+                name: "@container",
+              },
+              {
+                type: "string",
+                name: "@type",
+              },
+            ],
+          }),
       "@context": [
-        {
-          type: "string",
-          name: "hash",
-        },
+        legacyNullifier
+          ? {
+              type: "string",
+              name: "hash",
+            }
+          : {
+              type: "NullifiersContext",
+              name: "nullifiers",
+            },
         {
           type: "string",
           name: "provider",
@@ -151,10 +173,15 @@ export const stampCredentialDocument = (verificationMethod: string): DocumentSig
           type: "@context",
           name: "@context",
         },
-        {
-          type: "string",
-          name: "hash",
-        },
+        legacyNullifier
+          ? {
+              type: "string",
+              name: "hash",
+            }
+          : {
+              type: "string[]",
+              name: "nullifiers",
+            },
         {
           type: "string",
           name: "id",

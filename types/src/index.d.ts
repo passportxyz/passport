@@ -27,7 +27,12 @@ export type VerifiableEd25519Credential = {
   credentialSubject: {
     id: string;
     "@context": { [key: string]: string }[];
+
+    // Deprecated, should be removed once existing
+    // credentials are expired
     hash?: string;
+
+    nullifiers?: string[];
     provider?: string;
     address?: string;
     challenge?: string;
@@ -60,7 +65,12 @@ export type VerifiableEip712Credential = {
   credentialSubject: {
     id: string;
     "@context": { [key: string]: string };
+
+    // Deprecated, should be removed once existing
+    // credentials are expired
     hash?: string;
+
+    nullifiers?: string[];
     provider?: string;
     address?: string;
     challenge?: string;
@@ -101,7 +111,12 @@ export type VerifiableEip712CredentialComposeEncoded = {
   credentialSubject: {
     id: string;
     _context: { [key: string]: string };
+
+    // Deprecated, should be removed once existing
+    // credentials are expired
     hash?: string;
+
+    nullifiers?: string[];
     provider?: string;
     address?: string;
     challenge?: string;

@@ -19,8 +19,8 @@ import {
   groupProviderTypesByPlatform,
   verifyProvidersAndIssueCredentials,
   getChallenge,
-  getIssuerKey,
   issueChallengeCredential,
+  getIssuerInfo,
 } from "./utils/identityHelper.js";
 import {
   VerifiableCredential,
@@ -42,7 +42,7 @@ const apiKey = process.env.SCORER_API_KEY as string;
 export class EmbedAxiosError extends Error {
   constructor(
     public message: string,
-    public code: number
+    public code: number,
   ) {
     super(message);
     this.name = this.constructor.name;
@@ -52,11 +52,17 @@ export class EmbedAxiosError extends Error {
 
 // TODO: check if these functions are redundant ... are they also defined in platforms?
 // return a JSON error response with a 400 status
-export const errorRes = (res: Response, error: string | object, errorCode: number): Response =>
-  res.status(errorCode).json({ error });
+export const errorRes = (
+  res: Response,
+  error: string | object,
+  errorCode: number,
+): Response => res.status(errorCode).json({ error });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const addErrorDetailsToMessage = (message: string, error: any): string => {
+export const addErrorDetailsToMessage = (
+  message: string,
+  error: any,
+): string => {
   if (error instanceof EmbedAxiosError || error instanceof Error) {
     message += `, ${error.name}: ${error.message}`;
   } else if (typeof error === "string") {
@@ -69,7 +75,9 @@ export const addStampsAndGetScore = async ({
   address,
   scorerId,
   stamps,
-}: AutoVerificationFields & { stamps: VerifiableCredential[] }): Promise<PassportScore> => {
+}: AutoVerificationFields & {
+  stamps: VerifiableCredential[];
+}): Promise<PassportScore> => {
   try {
     const scorerResponse: {
       data?: {
@@ -85,7 +93,7 @@ export const addStampsAndGetScore = async ({
         headers: {
           Authorization: apiKey,
         },
-      }
+      },
     );
 
     if (!scorerResponse.data?.score) {
@@ -99,8 +107,12 @@ export const addStampsAndGetScore = async ({
 };
 
 export const autoVerificationHandler = async (
-  req: Request<ParamsDictionary, AutoVerificationResponseBodyType, AutoVerificationRequestBodyType>,
-  res: Response
+  req: Request<
+    ParamsDictionary,
+    AutoVerificationResponseBodyType,
+    AutoVerificationRequestBodyType
+  >,
+  res: Response,
 ): Promise<void> => {
   try {
     const { address, scorerId, credentialIds } = req.body;
@@ -120,7 +132,10 @@ export const autoVerificationHandler = async (
       return void errorRes(res, error.message, error.code);
     }
 
-    const message = addErrorDetailsToMessage("Unexpected error when processing request", error);
+    const message = addErrorDetailsToMessage(
+      "Unexpected error when processing request",
+      error,
+    );
     return void errorRes(res, message, 500);
   }
 };
@@ -130,8 +145,12 @@ type EmbedVerifyRequestBody = VerifyRequestBody & {
 };
 
 export const verificationHandler = (
-  req: Request<ParamsDictionary, AutoVerificationResponseBodyType, EmbedVerifyRequestBody>,
-  res: Response
+  req: Request<
+    ParamsDictionary,
+    AutoVerificationResponseBodyType,
+    EmbedVerifyRequestBody
+  >,
+  res: Response,
 ): void => {
   const requestBody: EmbedVerifyRequestBody = req.body;
   // each verify request should be received with a challenge credential detailing a signature contained in the RequestPayload.proofs
@@ -150,42 +169,54 @@ export const verificationHandler = (
           address = await verifyChallengeAndGetAddress(requestBody);
         } catch (error) {
           if (error instanceof VerifyDidChallengeBaseError) {
-            return void errorRes(res, `Invalid challenge signature: ${error.name}`, 401);
+            return void errorRes(
+              res,
+              `Invalid challenge signature: ${error.name}`,
+              401,
+            );
           }
           throw error;
         }
 
         // Check signer and type
-        const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
-        const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
+        const isSigner =
+          challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
+        const isType =
+          challenge.credentialSubject.provider === `challenge-${payload.type}`;
 
         if (!isSigner || !isType) {
           return void errorRes(
             res,
             "Invalid challenge '" +
-              [!isSigner && "signer", !isType && "provider"].filter(Boolean).join("' and '") +
+              [!isSigner && "signer", !isType && "provider"]
+                .filter(Boolean)
+                .join("' and '") +
               "'",
-            401
+            401,
           );
         }
 
         const types = payload.types?.filter((type) => type) || [];
         const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
-        const credentialsVerificationResponses = await verifyProvidersAndIssueCredentials(
-          providersGroupedByPlatforms,
-          address,
-          payload
-        );
+        const credentialsVerificationResponses =
+          await verifyProvidersAndIssueCredentials(
+            providersGroupedByPlatforms,
+            address,
+            payload,
+          );
 
-        const stamps = credentialsVerificationResponses.reduce((acc, response) => {
-          if ("credential" in response && response.credential) {
-            if (response.credential) {
-              acc.push(response.credential);
+        const stamps = credentialsVerificationResponses.reduce(
+          (acc, response) => {
+            if ("credential" in response && response.credential) {
+              if (response.credential) {
+                acc.push(response.credential);
+              }
             }
-          }
-          return acc;
-        }, [] as VerifiableCredential[]);
+            return acc;
+          },
+          [] as VerifiableCredential[],
+        );
 
         const score = await addStampsAndGetScore({ address, scorerId, stamps });
 
@@ -209,8 +240,12 @@ export const verificationHandler = (
 };
 
 export const getChallengeHandler = (
-  req: Request<ParamsDictionary, AutoVerificationResponseBodyType, EmbedVerifyRequestBody>,
-  res: Response
+  req: Request<
+    ParamsDictionary,
+    AutoVerificationResponseBodyType,
+    EmbedVerifyRequestBody
+  >,
+  res: Response,
 ): void => {
   // get the payload from the JSON req body
   const requestBody: ChallengeRequestBody = req.body as ChallengeRequestBody;
@@ -235,13 +270,14 @@ export const getChallengeHandler = (
         ...(challenge?.record || {}),
       };
 
-      if (!payload.signatureType) {
-        return void errorRes(res, "Missing signatureType from challenge request body", 400);
-      }
-
-      const currentKey = getIssuerKey(payload.signatureType);
+      const { issuer } = getIssuerInfo();
       // generate a VC for the given payload
-      return void issueChallengeCredential(DIDKit, currentKey, record, payload.signatureType)
+      return void issueChallengeCredential(
+        DIDKit,
+        issuer.did,
+        record,
+        payload.signatureType,
+      )
         .then((credential) => {
           // return the verifiable credential
           return res.json(credential as CredentialResponseBody);
@@ -249,7 +285,11 @@ export const getChallengeHandler = (
         .catch((error): any => {
           if (error) {
             // return error msg indicating a failure producing VC
-            return void errorRes(res, "Unable to produce a verifiable credential", 400);
+            return void errorRes(
+              res,
+              "Unable to produce a verifiable credential",
+              400,
+            );
           }
         });
     } else {
@@ -257,14 +297,19 @@ export const getChallengeHandler = (
       // limit the error message string to 1000 chars
       return void errorRes(
         res,
-        (challenge.error && challenge.error.join(", ").substring(0, 1000)) || "Unable to verify proofs",
-        403
+        (challenge.error && challenge.error.join(", ").substring(0, 1000)) ||
+          "Unable to verify proofs",
+        403,
       );
     }
   }
 
   if (!payload.address) {
-    return void errorRes(res, "Missing address from challenge request body", 400);
+    return void errorRes(
+      res,
+      "Missing address from challenge request body",
+      400,
+    );
   }
 
   if (!payload.type) {
