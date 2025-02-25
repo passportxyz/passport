@@ -22,18 +22,6 @@ if (!process.env.IAM_JWK) {
   configErrors.push("IAM_JWK is required");
 }
 
-if (!process.env.ATTESTATION_SIGNER_PRIVATE_KEY) {
-  configErrors.push("ATTESTATION_SIGNER_PRIVATE_KEY is required");
-}
-
-if (!process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY) {
-  configErrors.push("TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY is required");
-}
-
-if (!process.env.ALLO_SCORER_ID) {
-  configErrors.push("ALLO_SCORER_ID is required");
-}
-
 if (!process.env.SCORER_ENDPOINT) {
   configErrors.push("SCORER_ENDPOINT is required");
 }
@@ -42,20 +30,8 @@ if (!process.env.SCORER_API_KEY) {
   configErrors.push("SCORER_API_KEY is required");
 }
 
-if (!process.env.EAS_GITCOIN_STAMP_SCHEMA) {
-  configErrors.push("EAS_GITCOIN_STAMP_SCHEMA is required");
-}
-
-if (!process.env.MORALIS_API_KEY) {
-  configErrors.push("MORALIS_API_KEY is required");
-}
-
 if (!process.env.IAM_JWK_EIP712) {
   configErrors.push("IAM_JWK_EIP712 is required");
-}
-
-if (!process.env.EAS_FEE_USD) {
-  configErrors.push("EAS_FEE_USD is required");
 }
 
 // Check for DB configuration
