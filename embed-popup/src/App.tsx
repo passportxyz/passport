@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import Loader from "./components/Loader";
 
-console.log("geri --- import.meta.env", import.meta.env);
-console.log("geri --- process.env", process.env);
 process.env = import.meta.env;
-console.log("geri --- process.env", process.env);
 
 import { defaultPlatformMap } from "./platformMap";
 import { PLATFORM_ID, CredentialResponseBody } from "@gitcoin/passport-types";
@@ -81,21 +78,12 @@ function App() {
     localStorage.setItem("scorerId", scorerId);
   }
 
-  console.log("geri --- urlParams", urlParams);
-  console.log("geri --- code", code);
-  console.log("geri --- state", state);
-  console.log("geri --- address", address);
-  console.log("geri --- platform", platform);
-  console.log("geri --- signature", signature);
-  console.log("geri --- credential", credential);
-  console.log("geri --- scorerId", scorerId);
   useEffect(() => {
     const handleOAuthFlow = async () => {
       const verifyEndpoint = VERIFICATION_URL;
 
       // Check if the required values are missing
       const isBadRequest = (!code || !state) && (!address || !signature || !credential || !platform);
-      console.log("geri --- isBadRequest", isBadRequest);
 
       if (isBadRequest) {
         setLoading(false);
@@ -128,12 +116,6 @@ function App() {
           const _platform = localStorage.getItem("platform") || "";
           const _scorerId = localStorage.getItem("scorerId") || "";
 
-          console.log("geri --- _address", _address);
-          console.log("geri --- _signature", _signature);
-          console.log("geri --- _scorerId", _scorerId);
-
-          console.log("geri --- code", code);
-          console.log("geri --- making verify call");
           try {
             const payload = {
               payload: {
