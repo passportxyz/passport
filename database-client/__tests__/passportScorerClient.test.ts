@@ -1,12 +1,11 @@
-jest.mock("axios");
-
+import axios from "axios";
 import { Stamp } from "@gitcoin/passport-types";
+import { Logger } from "../src/logger";
+import { PassportDatabase } from "../src/passportScorerClient";
+import { jest } from "@jest/globals";
 import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
-import { Logger } from "../src/index.js";
-import { PassportDatabase } from "../src/index.js";
-import axios from "axios";
 
 const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
 

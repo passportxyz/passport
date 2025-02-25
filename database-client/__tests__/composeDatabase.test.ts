@@ -6,12 +6,14 @@ import {
   SecondaryStorageAddResponse,
   SecondaryStorageBulkPatchResponse,
   SecondaryStorageDeleteResponse,
+  VerifiableEip712CredentialComposeEncoded,
 } from "@gitcoin/passport-types";
 import { DID } from "dids";
 import { ComposeDatabaseImpl, ComposeDatabase, PassportWrapperLoadResponse } from "../src/composeDatabase";
 
 import { jest } from "@jest/globals";
-const mockStamps = require("./mockStamps.json");
+import mockStampsWithHash from "../__mock__/mockStamps";
+import mockStampsWithNullfiers from "../__mock__/mockStampsWithNullifiers";
 import { GraphQLError } from "graphql";
 
 let database: ComposeDatabaseImpl;
@@ -38,7 +40,9 @@ const mockComposeError = {
 
 const document = { id: "123" };
 
-const mockComposeVc = {
+const mockComposeVcWithHash: {
+  content: VerifiableEip712CredentialComposeEncoded;
+} = {
   content: {
     _context: ["https://www.w3.org/2018/credentials/v1", "https://w3id.org/vc/status-list/2021/v1"],
     issuer: "did:ethr:0xd6fc34345bc8c8e5659a35bed9629d5558d48c4e",
@@ -160,8 +164,145 @@ const mockComposeVc = {
   },
 };
 
+const mockComposeVcWithNullifier: {
+  content: VerifiableEip712CredentialComposeEncoded;
+} = {
+  content: {
+    type: ["VerifiableCredential"],
+    proof: {
+      type: "EthereumEip712Signature2021",
+      created: "2024-01-18T15:20:18.055Z",
+      _context: "https://w3id.org/security/suites/eip712sig-2021/v1",
+      proofValue:
+        "0xcd009c8caabd5549c0d20ce729271a10324c3c316972af5a715f801f387fefe76fbdcd657078d84a87fd452dbada03acfa2ce3e6efb829c086b31edeca4d54ae1b",
+      eip712Domain: {
+        types: {
+          Proof: [
+            {
+              name: "@context",
+              type: "string",
+            },
+            {
+              name: "created",
+              type: "string",
+            },
+            {
+              name: "proofPurpose",
+              type: "string",
+            },
+            {
+              name: "type",
+              type: "string",
+            },
+            {
+              name: "verificationMethod",
+              type: "string",
+            },
+          ],
+          _context: [
+            {
+              name: "nullifiers",
+              type: "NullifiersContext",
+            },
+            {
+              name: "provider",
+              type: "string",
+            },
+          ],
+          Document: [
+            {
+              name: "@context",
+              type: "string[]",
+            },
+            {
+              name: "credentialSubject",
+              type: "CredentialSubject",
+            },
+            {
+              name: "expirationDate",
+              type: "string",
+            },
+            {
+              name: "issuanceDate",
+              type: "string",
+            },
+            {
+              name: "issuer",
+              type: "string",
+            },
+            {
+              name: "proof",
+              type: "Proof",
+            },
+            {
+              name: "type",
+              type: "string[]",
+            },
+          ],
+          EIP712Domain: [
+            {
+              name: "name",
+              type: "string",
+            },
+          ],
+          CredentialSubject: [
+            {
+              name: "@context",
+              type: "@context",
+            },
+            {
+              name: "nullifiers",
+              type: "string[]",
+            },
+            {
+              name: "id",
+              type: "string",
+            },
+            {
+              name: "provider",
+              type: "string",
+            },
+          ],
+          NullifiersContext: [
+            {
+              name: "@container",
+              type: "string",
+            },
+            {
+              name: "@type",
+              type: "string",
+            },
+          ],
+        },
+        domain: {
+          name: "VerifiableCredential",
+        },
+        primaryType: "Document",
+      },
+      proofPurpose: "assertionMethod",
+      verificationMethod: "did:ethr:0xd6fc34345bc8c8e5659a35bed9629d5558d48c4e#controller",
+    },
+    issuer: "did:ethr:0xd6fc34345bc8c8e5659a35bed9629d5558d48c4e",
+    _context: ["https://www.w3.org/2018/credentials/v1", "https://w3id.org/vc/status-list/2021/v1"],
+    issuanceDate: "2024-01-18T15:20:18.055Z",
+    expirationDate: "2024-04-17T14:20:18.055Z",
+    credentialSubject: {
+      id: "did:pkh:eip155:1:0x0636F974D29d947d4946b2091d769ec6D2d415DE",
+      nullifiers: ["v1:ABCDEFGHIJK", "v2:LMNOPQRSTUVW"],
+      _context: {
+        nullifiers: {
+          _type: "https://schema.org/Text",
+          _container: "@list",
+        },
+        provider: "https://schema.org/Text",
+      },
+      provider: "GitcoinContributorStatistics#totalContributionAmountGte#10",
+    },
+  },
+};
+
 const mockWrapperId = "456";
-const executeQueryMockReturn = {
+const executeQueryMockReturnForStampWithHash = {
   data: {
     createGitcoinPassportStamp: {
       document,
@@ -174,163 +315,210 @@ const executeQueryMockReturn = {
   },
 };
 
-describe("Compose Database", () => {
-  beforeEach(() => {
-    database = new ComposeDatabaseImpl({ id: "id" } as unknown as DID);
-    jest.clearAllMocks();
-  });
-  it("should format a vc to compose specifications", () => {
-    const result = database.formatCredentialInput(mockStamps[0] as Stamp);
-    expect(result).toEqual(mockComposeVc);
-  });
-  describe("adding stamps", () => {
-    it("should add a single stamp successfully", async () => {
-      jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValue(executeQueryMockReturn);
+const executeQueryMockReturnForStampWitNullifiers = {
+  data: {
+    createGitcoinPassportStampWithNullifiers: {
+      document,
+    },
+    createGitcoinPassportStampWrapper: {
+      document: {
+        id: mockWrapperId,
+      },
+    },
+  },
+};
 
-      const result = await database.addStamp(mockStamps[0] as unknown as Stamp);
-      console.log("RESULT", result);
-      expect(result.secondaryStorageError).toBeUndefined();
-      expect(result.secondaryStorageId).toEqual(mockWrapperId);
-    });
-    it("should indicate that an error was thrown from the add vc request", async () => {
-      jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
-      const addStampResponse = await database.addStamp(mockStamps[0] as unknown as Stamp);
-      expect(addStampResponse.secondaryStorageError).toEqual(
-        `[ComposeDB] error from mutation CreateGitcoinPassportVc, error: ` + JSON.stringify(mockComposeError.errors)
-      );
-    });
-    it("should indicate that an error was thrown from the add wrapper request", async () => {
-      jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(executeQueryMockReturn);
-      jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
-      const addStampResponse = await database.addStamp(mockStamps[0] as unknown as Stamp);
-      expect(addStampResponse.secondaryStorageError).toEqual(
-        `[ComposeDB] error thrown from mutation CreateGitcoinStampWrapper, vcID: ${document.id} error: ${JSON.stringify(
-          mockComposeError.errors
-        )}`
-      );
-    });
+const testStamps: {
+  credentialType: string;
+  mockStamps: Stamp[];
+  mockComposeFormatedVc: {
+    content: VerifiableEip712CredentialComposeEncoded;
+  };
+  executeQueryMockReturn: any;
+  createMutationInput: string;
+}[] = [
+  {
+    credentialType: "with hash",
+    mockStamps: mockStampsWithHash,
+    mockComposeFormatedVc: mockComposeVcWithHash,
+    executeQueryMockReturn: executeQueryMockReturnForStampWithHash,
+    createMutationInput: "CreateGitcoinPassportStampInput",
+  },
+  {
+    credentialType: "with nullifier",
+    mockStamps: mockStampsWithNullfiers,
+    mockComposeFormatedVc: mockComposeVcWithNullifier,
+    executeQueryMockReturn: executeQueryMockReturnForStampWitNullifiers,
+    createMutationInput: "CreateGitcoinPassportStampWithNullifiersInput",
+  },
+];
 
-    it("should allow bulk addition of stamps", async () => {
-      jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValue(executeQueryMockReturn);
+describe.each(testStamps)(
+  "Compose Database - $credentialType",
+  ({ credentialType, mockStamps, mockComposeFormatedVc, executeQueryMockReturn, createMutationInput }) => {
+    beforeEach(() => {
+      database = new ComposeDatabaseImpl({ id: "id" } as unknown as DID);
+      jest.clearAllMocks();
+    });
+    it("should format a vc to compose specifications", () => {
+      const result = database.formatCredentialInput(mockStamps[0] as Stamp);
+      expect(result).toEqual(mockComposeFormatedVc);
+    });
+    describe("adding stamps", () => {
+      it("should add a single stamp successfully", async () => {
+        jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValue(executeQueryMockReturn);
 
-      const result = await database.addStamps(mockStamps as unknown as Stamp[]);
-      result.forEach((stamp) => {
-        expect(stamp.secondaryStorageError).toBeUndefined();
-        expect(stamp.secondaryStorageId).toEqual(mockWrapperId);
+        const result = await database.addStamp(mockStamps[0] as unknown as Stamp);
+        console.log("RESULT", result);
+        expect(result.secondaryStorageError).toBeUndefined();
+        expect(result.secondaryStorageId).toEqual(mockWrapperId);
+      });
+      it("should indicate that an error was thrown from the add vc request", async () => {
+        jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
+        const addStampResponse = await database.addStamp(mockStamps[0] as unknown as Stamp);
+        expect(addStampResponse.secondaryStorageError).toEqual(
+          `[ComposeDB] error from mutation CreateGitcoinPassportVc, error: ` + JSON.stringify(mockComposeError.errors)
+        );
+      });
+      it("should indicate that an error was thrown from the add wrapper request", async () => {
+        jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(executeQueryMockReturn);
+        jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
+        const addStampResponse = await database.addStamp(mockStamps[0] as unknown as Stamp);
+        expect(addStampResponse.secondaryStorageError).toEqual(
+          `[ComposeDB] error thrown from mutation CreateGitcoinStampWrapper, vcID: ${
+            document.id
+          } error: ${JSON.stringify(mockComposeError.errors)}`
+        );
+      });
+
+      it("should allow bulk addition of stamps", async () => {
+        jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValue(executeQueryMockReturn);
+
+        const result = await database.addStamps(mockStamps as unknown as Stamp[]);
+        result.forEach((stamp) => {
+          expect(stamp.secondaryStorageError).toBeUndefined();
+          expect(stamp.secondaryStorageId).toEqual(mockWrapperId);
+        });
+      });
+
+      it("should indicate where errors were thrown when creating bulk addition of stamps", async () => {
+        let i = 0;
+        jest
+          .spyOn(ComposeClient.prototype, "executeQuery")
+          .mockImplementation(async (query, variableValues): Promise<any> => {
+            // There are multiple query reqeusts for each stamp:
+            // 1. CreateGitcoinPassportStampInput!
+            // 2. CreateGitcoinPassportStampWrapperInput!
+            if ((query as string).includes(createMutationInput)) {
+              i++;
+            }
+            if (i >= 2) {
+              return await Promise.resolve(mockComposeError);
+            } else {
+              return await Promise.resolve(executeQueryMockReturn);
+            }
+          });
+
+        const result = await database.addStamps(mockStamps as unknown as Stamp[]);
+        const errorResults = result.filter(({ secondaryStorageError }) => secondaryStorageError);
+        expect(errorResults.length).toEqual(3);
       });
     });
-
-    it("should indicate where errors were thrown when creating bulk addition of stamps", async () => {
-      let i = 0;
-      jest
-        .spyOn(ComposeClient.prototype, "executeQuery")
-        .mockImplementation(async (query, variableValues): Promise<any> => {
-          i++;
-          if (i > 3) {
-            return await Promise.resolve(mockComposeError);
-          } else {
-            return await Promise.resolve(executeQueryMockReturn);
-          }
-        });
-      const result = await database.addStamps(mockStamps as unknown as Stamp[]);
-      const errorResults = result.filter(({ secondaryStorageError }) => secondaryStorageError);
-      expect(errorResults.length).toEqual(3);
-    });
-  });
-  describe("getting stamps", () => {
-    it("should get stamps", async () => {
-      jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce({
-        data: {
-          viewer: {
-            gitcoinPassportStampWrapperList: { edges: [{ node: { vc: mockComposeVc.content } }] },
+    describe("getting stamps", () => {
+      it("should get stamps", async () => {
+        jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce({
+          data: {
+            viewer: {
+              gitcoinPassportStampWrapperList: { edges: [{ node: { vc: mockComposeFormatedVc.content } }] },
+            },
           },
-        },
+        });
+        const passport = await database.getPassport();
+        expect(passport.passport?.stamps).toEqual([mockStamps[0]]);
       });
-      const passport = await database.getPassport();
-      expect(passport.passport?.stamps).toEqual([mockStamps[0]]);
-    });
-    it("should indicate the an error occurred while getting passport", async () => {
-      jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
-      const stamps = await database.getPassport();
-      expect(stamps.status).toEqual("ExceptionRaised");
-    });
-  });
-  describe("deleting stamps", () => {
-    it("should delete stamps", async () => {
-      jest
-        .spyOn(ComposeClient.prototype, "executeQuery")
-        .mockResolvedValueOnce({ data: { deleteGitcoinPassportStamp: { document: { id: "123" } } } });
-      const results = await database.deleteStamps(mockStamps.map((stamp: any) => stamp.provider as PROVIDER_ID));
-      expect(ComposeClient.prototype.executeQuery).toHaveBeenCalled();
-      results.forEach((stamp) => {
-        expect(stamp.secondaryStorageError).toBeUndefined();
-        expect(stamp.secondaryStorageId).toEqual(mockWrapperId);
+      it("should indicate the an error occurred while getting passport", async () => {
+        jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
+        const stamps = await database.getPassport();
+        expect(stamps.status).toEqual("ExceptionRaised");
       });
     });
-    it("indicate the an error occurred while querying", async () => {
-      jest
-        .spyOn(ComposeClient.prototype, "executeQuery")
-        .mockImplementation(async (query, variableValues): Promise<any> => {
-          const queryStr = query as string;
-          if (queryStr.includes("query passport")) {
-            return await Promise.resolve({
-              data: {
-                viewer: {
-                  gitcoinPassportStampWrapperList: { edges: [{ node: { vc: mockComposeVc.content } }] },
-                },
-              },
-            });
-          } else {
-            return await Promise.resolve(mockComposeError);
-          }
+    describe("deleting stamps", () => {
+      it("should delete stamps", async () => {
+        jest
+          .spyOn(ComposeClient.prototype, "executeQuery")
+          .mockResolvedValueOnce({ data: { deleteGitcoinPassportStamp: { document: { id: "123" } } } });
+        const results = await database.deleteStamps(mockStamps.map((stamp) => stamp.provider as PROVIDER_ID));
+        expect(ComposeClient.prototype.executeQuery).toHaveBeenCalled();
+        results.forEach((stamp) => {
+          expect(stamp.secondaryStorageError).toBeUndefined();
+          expect(stamp.secondaryStorageId).toEqual(mockWrapperId);
         });
-      // jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
-      const result = await database.deleteStamps(mockStamps.map((stamp: any) => stamp.provider as PROVIDER_ID));
-      const errorResults = result.filter(({ secondaryStorageError }) => secondaryStorageError);
-      expect(errorResults.length).toEqual(1);
-      expect(ComposeClient.prototype.executeQuery).toHaveBeenCalledTimes(2);
-    });
-  });
-  describe("patching stamps", () => {
-    it("should patch stamps successfully when passport has no existing stamps", async () => {
-      jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValue(executeQueryMockReturn);
-
-      const result = await database.patchStamps(mockStamps as unknown as StampPatch[]);
-      expect(ComposeClient.prototype.executeQuery).toHaveBeenCalledTimes(7);
-      const errorResults = [
-        ...result.adds.filter(({ secondaryStorageError }) => secondaryStorageError),
-        ...result.deletes.filter(({ secondaryStorageError }) => secondaryStorageError),
-      ];
-      expect(errorResults.length).toEqual(0);
-    });
-
-    it("should delete existing stamps and create new ones", async () => {
-      jest
-        .spyOn(ComposeClient.prototype, "executeQuery")
-        .mockImplementation(async (query, variableValues): Promise<any> => {
-          const queryStr = query as string;
-          if (queryStr.includes("query passport")) {
-            return await Promise.resolve({
-              data: {
-                viewer: {
-                  gitcoinPassportStampWrapperList: { edges: [{ node: { vc: mockComposeVc.content } }] },
+      });
+      it("indicate the an error occurred while querying", async () => {
+        jest
+          .spyOn(ComposeClient.prototype, "executeQuery")
+          .mockImplementation(async (query, variableValues): Promise<any> => {
+            const queryStr = query as string;
+            if (queryStr.includes("query passport")) {
+              return await Promise.resolve({
+                data: {
+                  viewer: {
+                    gitcoinPassportStampWrapperList: { edges: [{ node: { vc: mockComposeFormatedVc.content } }] },
+                  },
                 },
-              },
-            });
-          } else {
-            return await Promise.resolve(executeQueryMockReturn);
-          }
-        });
-      const result = await database.patchStamps(mockStamps as unknown as StampPatch[]);
-      expect(ComposeClient.prototype.executeQuery).toHaveBeenCalledTimes(8);
-      const errorResults = [
-        ...result.adds.filter(({ secondaryStorageError }) => secondaryStorageError),
-        ...result.deletes.filter(({ secondaryStorageError }) => secondaryStorageError),
-      ];
-      expect(errorResults.length).toEqual(0);
+              });
+            } else {
+              return await Promise.resolve(mockComposeError);
+            }
+          });
+        // jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValueOnce(mockComposeError);
+        const result = await database.deleteStamps(mockStamps.map((stamp) => stamp.provider as PROVIDER_ID));
+        const errorResults = result.filter(({ secondaryStorageError }) => secondaryStorageError);
+        expect(errorResults.length).toEqual(1);
+        expect(ComposeClient.prototype.executeQuery).toHaveBeenCalledTimes(2);
+      });
     });
-  });
-});
+    describe("patching stamps", () => {
+      it("should patch stamps successfully when passport has no existing stamps", async () => {
+        jest.spyOn(ComposeClient.prototype, "executeQuery").mockResolvedValue(executeQueryMockReturn);
+
+        const result = await database.patchStamps(mockStamps as unknown as StampPatch[]);
+        expect(ComposeClient.prototype.executeQuery).toHaveBeenCalledTimes(7);
+        const errorResults = [
+          ...result.adds.filter(({ secondaryStorageError }) => secondaryStorageError),
+          ...result.deletes.filter(({ secondaryStorageError }) => secondaryStorageError),
+        ];
+        expect(errorResults.length).toEqual(0);
+      });
+
+      it("should delete existing stamps and create new ones", async () => {
+        jest
+          .spyOn(ComposeClient.prototype, "executeQuery")
+          .mockImplementation(async (query, variableValues): Promise<any> => {
+            const queryStr = query as string;
+            if (queryStr.includes("query passport")) {
+              return await Promise.resolve({
+                data: {
+                  viewer: {
+                    gitcoinPassportStampWrapperList: { edges: [{ node: { vc: mockComposeFormatedVc.content } }] },
+                  },
+                },
+              });
+            } else {
+              return await Promise.resolve(executeQueryMockReturn);
+            }
+          });
+        const result = await database.patchStamps(mockStamps as unknown as StampPatch[]);
+        expect(ComposeClient.prototype.executeQuery).toHaveBeenCalledTimes(8);
+        const errorResults = [
+          ...result.adds.filter(({ secondaryStorageError }) => secondaryStorageError),
+          ...result.deletes.filter(({ secondaryStorageError }) => secondaryStorageError),
+        ];
+        expect(errorResults.length).toEqual(0);
+      });
+    });
+  }
+);
 
 describe("Compose Database write serialisation", () => {
   beforeEach(() => {
@@ -339,7 +527,7 @@ describe("Compose Database write serialisation", () => {
   });
 
   // TODO: this is commented as it causes failure when running `yarn test` in the root of the repo. Shall be investigated.
-  it.skip("should serialize add, patch and delete operations", async () => {
+  it("should serialize add, patch and delete operations", async () => {
     let timestamps: number[] = [];
     const database = new ComposeDatabase({ id: "id" } as unknown as DID);
 

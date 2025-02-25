@@ -61,6 +61,14 @@ const passportEmbedSecrets = secretsManager
         name: "IAM_JWK_EIP712",
         valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK_EIP712::`,
       },
+      {
+        name: "IAM_JWK_EIP712_V1",
+        valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK_EIP712_V1::`,
+      },
+      {
+        name: "IAM_JWK_EIP712_V1_START_TIME",
+        valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK_EIP712_V1_START_TIME::`,
+      },
     ].sort(secretsManager.sortByName)
   );
 
