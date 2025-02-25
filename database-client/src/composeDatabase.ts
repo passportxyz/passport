@@ -366,17 +366,10 @@ export class ComposeDatabaseImpl implements WriteOnlySecondaryDataStorageBase {
     console.log(`[ComposeDB] ${this.did} addStamps:`, { stamps });
     this.logger.info(`[ComposeDB] ${this.did} addStamps`, { stamps });
 
-    // const vcPromises = stamps.map(async (stamp) => await this.addStamp(stamp));
-    const ret = [];
-    for (let i = 0; i < stamps.length; i++) {
-      const stamp = stamps[i];
-      const addStampRet = await this.addStamp(stamp);
-      ret.push(addStampRet);
-    }
+    const vcPromises = stamps.map(async (stamp) => await this.addStamp(stamp));
+    const addRequests = await Promise.allSettled(vcPromises);
+    const ret = this.checkSettledResponse(addRequests);
 
-    // const addRequests = await Promise.allSettled(vcPromises);
-
-    // const ret = this.checkSettledResponse(addRequests);
     console.log(`[ComposeDB] ${this.did} addStamps ret:`, { ret });
     this.logger.info(`[ComposeDB] ${this.did} addStamps ret`, { ret });
     return ret;

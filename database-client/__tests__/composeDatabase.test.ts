@@ -421,7 +421,7 @@ describe.each(testStamps)(
 
         const result = await database.addStamps(mockStamps as unknown as Stamp[]);
         const errorResults = result.filter(({ secondaryStorageError }) => secondaryStorageError);
-        expect(errorResults.length).toEqual(2);
+        expect(errorResults.length).toEqual(3);
       });
     });
     describe("getting stamps", () => {
