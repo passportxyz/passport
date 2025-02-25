@@ -66,16 +66,18 @@ function App() {
   const state = urlParams.get("state");
   const address = urlParams.get("address");
   const platform = urlParams.get("platform");
+  const providers = urlParams.get("providers");
   const signature = urlParams.get("signature");
   const credential = urlParams.get("credential");
   const scorerId = urlParams.get("scorerId");
 
-  if (address && signature && credential && platform && scorerId) {
+  if (address && signature && credential && platform && providers && scorerId) {
     // preserve the values in local storage
     // when the OAuth flow is complete, the code will be present but the address, signature, platform and credential will be null
     // so we only store them in the localStorage if they are not null.
     localStorage.setItem("address", address);
     localStorage.setItem("platform", platform);
+    localStorage.setItem("providers", providers);
     localStorage.setItem("signature", signature);
     localStorage.setItem("credential", credential);
     localStorage.setItem("scorerId", scorerId);
@@ -86,6 +88,7 @@ function App() {
   console.log("geri --- state", state);
   console.log("geri --- address", address);
   console.log("geri --- platform", platform);
+  console.log("geri --- providers", providers);
   console.log("geri --- signature", signature);
   console.log("geri --- credential", credential);
   console.log("geri --- scorerId", scorerId);
@@ -126,6 +129,7 @@ function App() {
           const _signature = localStorage.getItem("signature");
           const _credential = localStorage.getItem("credential") || "";
           const _platform = localStorage.getItem("platform") || "";
+          const _providers = localStorage.getItem("providers") || "";
           const _scorerId = localStorage.getItem("scorerId") || "";
 
           console.log("geri --- _address", _address);
@@ -138,7 +142,7 @@ function App() {
             const payload = {
               payload: {
                 type: _platform || "unknown", // Ensure type is a string
-                types: [_platform || "unknown"], // Ensure types contains strings
+                types: _providers,
                 version: "0.0.0",
                 address: _address || "unknown",
                 proofs: {
@@ -183,7 +187,7 @@ function App() {
     data: {
       payload: {
         type: string;
-        types: string[];
+        types: string;
         version: string;
         address: string;
         proofs: { code: string; sessionKey: string };
@@ -192,9 +196,10 @@ function App() {
       scorerId: string;
     }
   ): Promise<VerificationResponseType | null> => {
-    let parsedChallenge;
+    let parsedChallenge, parsedTypes;
     try {
       parsedChallenge = data.challenge ? JSON.parse(data.challenge) : null;
+      parsedTypes = data.payload.types ? JSON.parse(data.payload.types) : null;
     } catch (error) {
       setStep("Error parsing local storage values.");
       setErrorMessages(`Invalid JSON format in local storage. ${error}`);
@@ -207,7 +212,7 @@ function App() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        payload: { ...data.payload },
+        payload: { ...data.payload, types: parsedTypes },
         challenge: parsedChallenge,
         scorerId: data.scorerId,
       }),
