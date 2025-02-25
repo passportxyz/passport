@@ -274,7 +274,7 @@ export const getChallengeHandler = (
       // generate a VC for the given payload
       return void issueChallengeCredential(
         DIDKit,
-        issuer.did,
+        issuer.key,
         record,
         payload.signatureType,
       )
