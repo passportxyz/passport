@@ -100,15 +100,15 @@ export const STAMP_PAGES: StampPage[] = [
         requiresPopup: true,
         popupUrl: oAuthPopupUrl,
       },
-      {
-        name: "Coinbase",
-        description: "<div>Confirm Your Coinbase Verified ID</div>",
-        documentationLink:
-          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-coinbase-stamp",
-        requiresSignature: true,
-        requiresPopup: true,
-        popupUrl: oAuthPopupUrl,
-      },
+      // {
+      //   name: "Coinbase",
+      //   description: "<div>Confirm Your Coinbase Verified ID</div>",
+      //   documentationLink:
+      //     "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-coinbase-stamp",
+      //   requiresSignature: true,
+      //   requiresPopup: true,
+      //   popupUrl: oAuthPopupUrl,
+      // },
     ],
   },
 ];
