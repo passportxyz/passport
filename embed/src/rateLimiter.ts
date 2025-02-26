@@ -10,7 +10,9 @@ function parseRateLimit(rateLimitSpec: string): number {
   const match = rateLimitSpec.match(regex);
 
   if (!match) {
-    throw new Error("Invalid rate limit spec format. Expected format: '<requests>/<time><unit>'");
+    throw new Error(
+      "Invalid rate limit spec format. Expected format: '<requests>/<time><unit>'",
+    );
   }
 
   const totalRequests = parseInt(match[1], 10); // e.g., 125
@@ -40,7 +42,10 @@ function parseRateLimit(rateLimitSpec: string): number {
   return totalRequests / timeInMinutes;
 }
 
-export async function apiKeyRateLimit(req: Request, res: Response): Promise<number> {
+export async function apiKeyRateLimit(
+  req: Request,
+  res: Response,
+): Promise<number> {
   try {
     const apiKey = req.headers["x-api-key"] as string;
     const cacheKey = `erl:${apiKey}`;
@@ -49,13 +54,18 @@ export async function apiKeyRateLimit(req: Request, res: Response): Promise<numb
 
     // Simulate an async operation (e.g., database call)
     if (Number.isNaN(rateLimit)) {
-      const rateLimits = await axios.get(`${process.env.SCORER_ENDPOINT}/embed/validate-api-key`, {
-        headers: {
-          "X-API-KEY": apiKey,
+      const rateLimits = await axios.get(
+        `${process.env.SCORER_ENDPOINT}/internal/embed/validate-api-key`,
+        {
+          headers: {
+            "X-API-KEY": apiKey,
+          },
         },
-      });
+      );
 
-      const rateLimitSpec = (rateLimits.data as { rate_limit: string })["rate_limit"];
+      const rateLimitSpec = (rateLimits.data as { rate_limit: string })[
+        "rate_limit"
+      ];
       const rateLimit = parseRateLimit(rateLimitSpec);
 
       // Cache the limit and set to expire in 5 minutes
@@ -67,7 +77,9 @@ export async function apiKeyRateLimit(req: Request, res: Response): Promise<numb
       return rateLimit;
     }
   } catch (err) {
-    res.status(500).send({ message: "Unauthorized! Unexpected error validating API key" });
+    res
+      .status(500)
+      .send({ message: "Unauthorized! Unexpected error validating API key" });
     throw "ERROR";
   }
 }

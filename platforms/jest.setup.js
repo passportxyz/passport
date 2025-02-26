@@ -1,5 +1,5 @@
 process.env.ZKSYNC_ERA_MAINNET_ENDPOINT = "https://zksync-era-api-endpoint.io";
-process.env.PASSPORT_SCORER_BACKEND = "https://scorer-gtc.com";
+process.env.SCORER_ENDPOINT = "https://scorer-gtc.com";
 process.env.SCORER_API_KEY = "abcdefg12345567";
 
 jest.mock("redis", () => {

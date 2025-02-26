@@ -84,7 +84,7 @@ export const addStampsAndGetScore = async ({
         score?: PassportScore;
       };
     } = await axios.post(
-      `${process.env.SCORER_ENDPOINT}/embed/stamps/${address}`,
+      `${process.env.SCORER_ENDPOINT}/internal/embed/stamps/${address}`,
       {
         stamps,
         scorer_id: scorerId,

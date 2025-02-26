@@ -18,7 +18,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 const MOCK_ADDRESS = "0xae314CE417E25b4F744bC1f24c9A79A525fEC50f";
 const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLowerCase();
 const round = 1;
-const gtcStakingEndpoint = `${process.env.PASSPORT_SCORER_BACKEND}registry/gtc-stake`;
+const gtcStakingEndpoint = `${process.env.SCORER_ENDPOINT}/internal/stake/legacy-gtc`;
 const apiKey = process.env.SCORER_API_KEY;
 
 process.env.GTC_STAKING_ROUNDS =
@@ -95,7 +95,7 @@ describe("Attempt verification", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -112,9 +112,11 @@ describe("Attempt verification", function () {
         {
           address: "NOT_ADDRESS",
         } as unknown as RequestPayload,
-        {}
+        {},
       );
-    }).rejects.toThrow(new ProviderExternalVerificationError("Not a proper ethereum address"));
+    }).rejects.toThrow(
+      new ProviderExternalVerificationError("Not a proper ethereum address"),
+    );
   });
 
   it("handles invalid subgraph response", async () => {
@@ -126,7 +128,7 @@ describe("Attempt verification", function () {
         {
           address: MOCK_ADDRESS_LOWER,
         } as unknown as RequestPayload,
-        {}
+        {},
       );
     }).rejects.toThrow("No results returned from the GTC Staking API");
   });
@@ -141,7 +143,7 @@ describe("Attempt verification", function () {
         {
           address: MOCK_ADDRESS_LOWER,
         } as unknown as RequestPayload,
-        {}
+        {},
       );
     }).rejects.toThrow("SelfStakingBronze verifyStake Error");
   });
@@ -168,7 +170,7 @@ describe("should return invalid payload", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -194,7 +196,7 @@ describe("should return invalid payload", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -221,7 +223,7 @@ describe("should return invalid payload", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -248,7 +250,7 @@ describe("should return valid payload", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -269,7 +271,7 @@ describe("should return valid payload", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -290,7 +292,7 @@ describe("should return valid payload", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -312,7 +314,7 @@ describe("should return valid payload", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -333,7 +335,7 @@ describe("should return valid payload", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -354,7 +356,7 @@ describe("should return valid payload", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -373,7 +375,9 @@ describe("Attempt verification V2", function () {
   it("handles valid verification attempt with 1 self-stake", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "10", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "10", chain: 1 }]),
+        );
       }
     });
 
@@ -382,7 +386,7 @@ describe("Attempt verification V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -400,7 +404,7 @@ describe("Attempt verification V2", function () {
             { amount: "2", chain: 1 },
             { amount: "2", chain: 2 },
             { amount: "1", chain: 3 },
-          ])
+          ]),
         );
       }
     });
@@ -410,7 +414,7 @@ describe("Attempt verification V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -428,7 +432,7 @@ describe("Attempt verification V2", function () {
             { amount: "2", chain: 1 },
             { amount: "8", chain: 2 },
             { amount: "10", chain: 3 },
-          ])
+          ]),
         );
       }
     });
@@ -438,7 +442,7 @@ describe("Attempt verification V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -456,7 +460,7 @@ describe("Attempt verification V2", function () {
             { amount: "35", chain: 1 },
             { amount: "80", chain: 2 },
             { amount: "10", chain: 3 },
-          ])
+          ]),
         );
       }
     });
@@ -466,7 +470,7 @@ describe("Attempt verification V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
     expect(verifiedPayload).toEqual({
       valid: true,
@@ -487,18 +491,21 @@ describe("should return invalid payload V2", function () {
     jest.clearAllMocks();
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "4", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "4", chain: 1 }]),
+        );
       }
     });
 
-    const gtcStakeAmount = gtcStakingResponseV2([{ amount: "4", chain: 1 }]).data.items[0].amount;
+    const gtcStakeAmount = gtcStakingResponseV2([{ amount: "4", chain: 1 }])
+      .data.items[0].amount;
 
     const selfstaking = new SelfStakingBronzeProvider();
     const selfstakingPayload = await selfstaking.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -513,18 +520,21 @@ describe("should return invalid payload V2", function () {
     jest.clearAllMocks();
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "18", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "18", chain: 1 }]),
+        );
       }
     });
 
-    const gtcStakeAmount = gtcStakingResponseV2([{ amount: "18", chain: 1 }]).data.items[0].amount;
+    const gtcStakeAmount = gtcStakingResponseV2([{ amount: "18", chain: 1 }])
+      .data.items[0].amount;
 
     const selfstaking = new SelfStakingSilverProvider();
     const selfstakingPayload = await selfstaking.verify(
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -539,11 +549,14 @@ describe("should return invalid payload V2", function () {
     jest.clearAllMocks();
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "122", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "122", chain: 1 }]),
+        );
       }
     });
 
-    const gtcStakeAmount = gtcStakingResponseV2([{ amount: "122", chain: 1 }]).data.items[0].amount;
+    const gtcStakeAmount = gtcStakingResponseV2([{ amount: "122", chain: 1 }])
+      .data.items[0].amount;
 
     const selfstaking = new SelfStakingGoldProvider();
 
@@ -551,7 +564,7 @@ describe("should return invalid payload V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -568,7 +581,9 @@ describe("should return valid payload V2", function () {
   it("when stake amount above 5 GTC for Bronze", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "6", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "6", chain: 1 }]),
+        );
       }
     });
 
@@ -578,7 +593,7 @@ describe("should return valid payload V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -589,7 +604,9 @@ describe("should return valid payload V2", function () {
   it("when stake amount above 20 GTC for Silver", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "21", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "21", chain: 1 }]),
+        );
       }
     });
 
@@ -599,7 +616,7 @@ describe("should return valid payload V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -610,7 +627,9 @@ describe("should return valid payload V2", function () {
   it("when stake amount above 125 GTC for Gold", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "126", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "126", chain: 1 }]),
+        );
       }
     });
 
@@ -620,7 +639,7 @@ describe("should return valid payload V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -632,7 +651,9 @@ describe("should return valid payload V2", function () {
   it("when stake amount equal to 5 GTC for Bronze", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "5", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "5", chain: 1 }]),
+        );
       }
     });
 
@@ -642,7 +663,7 @@ describe("should return valid payload V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -653,7 +674,9 @@ describe("should return valid payload V2", function () {
   it("when stake amount equal to 20 GTC for Silver", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "20", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "20", chain: 1 }]),
+        );
       }
     });
 
@@ -663,7 +686,7 @@ describe("should return valid payload V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -674,7 +697,9 @@ describe("should return valid payload V2", function () {
   it("when stake amount equal to 125 GTC for Gold", async () => {
     (axios.get as jest.Mock).mockImplementation((url: string) => {
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "125", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "125", chain: 1 }]),
+        );
       }
     });
 
@@ -684,7 +709,7 @@ describe("should return valid payload V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -702,7 +727,9 @@ describe("should return valid payload V1 & V2", function () {
         return Promise.resolve(gtcStakingResponse("3"));
       }
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "3", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "3", chain: 1 }]),
+        );
       }
     });
 
@@ -712,7 +739,7 @@ describe("should return valid payload V1 & V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -727,7 +754,9 @@ describe("should return valid payload V1 & V2", function () {
         return Promise.resolve(gtcStakingResponse("10"));
       }
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "11", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "11", chain: 1 }]),
+        );
       }
     });
 
@@ -737,7 +766,7 @@ describe("should return valid payload V1 & V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -752,7 +781,9 @@ describe("should return valid payload V1 & V2", function () {
         return Promise.resolve(gtcStakingResponse("50"));
       }
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "76", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "76", chain: 1 }]),
+        );
       }
     });
 
@@ -762,7 +793,7 @@ describe("should return valid payload V1 & V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -778,7 +809,9 @@ describe("should return valid payload V1 & V2", function () {
         return Promise.resolve(gtcStakingResponse("2"));
       }
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "3", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "3", chain: 1 }]),
+        );
       }
     });
 
@@ -788,7 +821,7 @@ describe("should return valid payload V1 & V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -803,7 +836,9 @@ describe("should return valid payload V1 & V2", function () {
         return Promise.resolve(gtcStakingResponse("10"));
       }
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "10", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "10", chain: 1 }]),
+        );
       }
     });
 
@@ -813,7 +848,7 @@ describe("should return valid payload V1 & V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({
@@ -828,7 +863,9 @@ describe("should return valid payload V1 & V2", function () {
         return Promise.resolve(gtcStakingResponse("100"));
       }
       if (url.startsWith(gtcStakingEndpointV2)) {
-        return Promise.resolve(gtcStakingResponseV2([{ amount: "25", chain: 1 }]));
+        return Promise.resolve(
+          gtcStakingResponseV2([{ amount: "25", chain: 1 }]),
+        );
       }
     });
 
@@ -838,7 +875,7 @@ describe("should return valid payload V1 & V2", function () {
       {
         address: MOCK_ADDRESS_LOWER,
       } as unknown as RequestPayload,
-      {}
+      {},
     );
 
     expect(selfstakingPayload).toMatchObject({

@@ -46,7 +46,7 @@ describe("GET /embed/stamps/metadata", () => {
     process.env.SCORER_ENDPOINT = "https://api.passport.xyz";
     mockReq = { query: { scorerId: mockScorerId } };
 
-    const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/embed/weights?community_id=${mockScorerId}`;
+    const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/weights?community_id=${mockScorerId}`;
 
     // Mock the axios GET request
     mockedAxios.get.mockResolvedValueOnce({
@@ -112,7 +112,8 @@ describe("GET /embed/stamps/metadata", () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(500);
     expect(mockRes.json).toHaveBeenCalledWith({
-      error: "Unexpected error when processing request, Error: Failed to fetch embed weights",
+      error:
+        "Unexpected error when processing request, Error: Failed to fetch embed weights",
     });
   });
 
@@ -166,7 +167,7 @@ describe("GET /embed/stamps/metadata", () => {
 
     //   expect(mockedAxios.get).toHaveBeenCalledTimes(1);
     //   expect(mockedAxios.get).toHaveBeenCalledWith(
-    //     `${process.env.SCORER_ENDPOINT}/embed/weights?community_id=${mockScorerId}`
+    //     `${process.env.SCORER_ENDPOINT}/internal/embed/weights?community_id=${mockScorerId}`
     //   );
 
     //   expect(actualResponse).toEqual(
