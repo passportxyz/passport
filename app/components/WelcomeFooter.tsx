@@ -58,14 +58,14 @@ const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean
       </div>
       <div className="flex flex-col md:flex-row gap-y-1 items-center md:items-end justify-center md:justify-end flex-wrap">
         {displayPrivacyPolicy ? (
-          <Link href="https://www.gitcoin.co/privacy" className="hover:underline px-2">
+          <Link href="https://passport.human.tech/privacy" className="hover:underline px-2">
             Privacy Policy
           </Link>
         ) : null}
         <Link href="https://support.passport.xyz/passport-knowledge-base" className="hover:underline px-2">
           Learn More
         </Link>
-        <Link href="https://scorer.gitcoin.co/" className="hover:underline px-2">
+        <Link href="https://scorer.passport.xyz/" className="hover:underline px-2">
           Passport XYZ Scorer
         </Link>
         <div className="flex flex-col md:flex-row gap-y-1 items-end justify-end flex-wrap">
