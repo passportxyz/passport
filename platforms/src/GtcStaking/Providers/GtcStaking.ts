@@ -17,7 +17,7 @@ import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.j
 
 import { BigNumber } from "bignumber.js";
 
-export const gtcStakingEndpoint = `${process.env.SCORER_ENDPOINT}/registry/gtc-stake`;
+export const gtcStakingEndpoint = `${process.env.SCORER_ENDPOINT}/internal/stake/legacy-gtc`;
 export const gtcStakingEndpointV2 = `${process.env.SCORER_ENDPOINT}/internal/stake/gtc`;
 
 type UserStake = {
@@ -134,6 +134,9 @@ export class GtcStakingProvider implements Provider {
 
         const response: StakeResponse = await axios.get(
           `${gtcStakingEndpoint}/${address}/${round}`,
+          {
+            headers: { Authorization: process.env.SCORER_API_KEY },
+          },
         );
         const results: Stake[] = response?.data?.results || [];
 

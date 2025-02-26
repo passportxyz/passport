@@ -18,7 +18,7 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 const MOCK_ADDRESS = "0xae314CE417E25b4F744bC1f24c9A79A525fEC50f";
 const MOCK_ADDRESS_LOWER = MOCK_ADDRESS.toLowerCase();
 const round = 1;
-const gtcStakingEndpoint = `${process.env.SCORER_ENDPOINT}/registry/gtc-stake`;
+const gtcStakingEndpoint = `${process.env.SCORER_ENDPOINT}/internal/stake/legacy-gtc`;
 const apiKey = process.env.SCORER_API_KEY;
 
 process.env.GTC_STAKING_ROUNDS =
