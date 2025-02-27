@@ -5,7 +5,7 @@ import { RedisReply, RedisStore } from "rate-limit-redis";
 import axios from "axios";
 
 function parseRateLimit(rateLimitSpec: string): number {
-  if (rateLimitSpec === "") {
+  if (rateLimitSpec === "" || rateLimitSpec === null) {
     return Infinity;
   }
   
@@ -71,6 +71,7 @@ export async function apiKeyRateLimit(req: Request, res: Response): Promise<numb
       return rateLimit;
     }
   } catch (err) {
+    console.error("error checking rate limit:", err)
     res.status(500).send({ message: "Unauthorized! Unexpected error validating API key" });
     throw "ERROR";
   }
