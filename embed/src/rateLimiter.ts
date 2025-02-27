@@ -5,6 +5,10 @@ import { RedisReply, RedisStore } from "rate-limit-redis";
 import axios from "axios";
 
 function parseRateLimit(rateLimitSpec: string): number {
+  if (rateLimitSpec === "") {
+    return Infinity;
+  }
+  
   // Regular expression to match the format "<requests>/<time>"
   const regex = /^(\d+)\/(\d+)([smhd])$/; // Supports seconds (s), minutes (m), hours (h), and days (d)
   const match = rateLimitSpec.match(regex);
