@@ -106,7 +106,8 @@ class BaseAttestationProvider implements AttestationProvider {
   }
 
   async getMultiAttestationRequest(payload: {}): Promise<AxiosResponse<any, any>> {
-    return jsonRequest(`${iamUrl}v0.0.0/eas/passport`, payload);
+    // TODO feature flag
+    return jsonRequest(`${iamUrl}v0.0.0/eas/scoreV2`, payload);
   }
 
   checkOnChainStatus(

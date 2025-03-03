@@ -63,6 +63,7 @@ import {
 import { scrollDevBadgeHandler } from "./utils/scrollDevBadge.js";
 import { toJsonObject } from "./utils/json.js";
 import { filterRevokedCredentials } from "./utils/revocations.js";
+import { generateScoreAttestationRequest } from "./utils/easScoreSchema.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -310,20 +311,88 @@ app.post("/api/v0.0.0/verify", (req: Request, res: Response): void => {
     });
 });
 
+const isChainIdHexValid = (
+  value: string,
+): value is keyof typeof passportOnchainInfo =>
+  Object.keys(passportOnchainInfo).includes(value);
+
+// TODO Once we've fully migrated, we should probably remove
+// all the other eas endpoints and the relevant code in the
+// utils folder and just keep this one
+// TODO is this a good endpoint path?
+app.post(
+  "/api/v0.0.0/eas/scoreV2",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { recipient, nonce, chainIdHex, customScorerId } =
+        req.body as EasRequestBody;
+
+      if (!isChainIdHexValid(chainIdHex)) {
+        return void errorRes(
+          res,
+          `No onchainInfo found for chainId ${chainIdHex}`,
+          404,
+        );
+      }
+
+      if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
+        return void errorRes(res, "Invalid recipient", 400);
+
+      const scoreAttestationRequest = await generateScoreAttestationRequest({
+        recipient,
+        chainIdHex,
+        customScorerId,
+      });
+
+      const fee = await getEASFeeAmount(EAS_FEE_USD);
+      const scoreAttestation: PassportAttestation = {
+        multiAttestationRequest: scoreAttestationRequest,
+        nonce: Number(nonce),
+        fee: fee.toString(),
+      };
+
+      const domainSeparator = getAttestationDomainSeparator(chainIdHex);
+
+      const signer = await getAttestationSignerForChain(chainIdHex);
+
+      const signature = await signer.signTypedData(
+        domainSeparator,
+        ATTESTER_TYPES,
+        scoreAttestation,
+      );
+      const { v, r, s } = Signature.from(signature);
+
+      const payload: EasPayload = {
+        passport: scoreAttestation,
+        signature: { v, r, s },
+        invalidCredentials: [],
+      };
+
+      return void res.json(toJsonObject(payload));
+    } catch (error) {
+      // TODO remove
+      console.error(error);
+      const message = addErrorDetailsToMessage(
+        "Unexpected error generating score attestation",
+        error,
+      );
+      return void errorRes(res, message, 500);
+    }
+  },
+);
+
 // Expose entry point for getting eas payload for moving stamps on-chain (Stamp Attestations)
 // This function will receive an array of stamps, validate them and return an array of eas payloads
 app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
   try {
     const { credentials, nonce, chainIdHex } = req.body as EasRequestBody;
-    if (!Object.keys(passportOnchainInfo).includes(chainIdHex)) {
+    if (!isChainIdHexValid(chainIdHex)) {
       return void errorRes(
         res,
         `No onchainInfo found for chainId ${chainIdHex}`,
         404,
       );
     }
-    const attestationChainIdHex =
-      chainIdHex as keyof typeof passportOnchainInfo;
 
     if (!credentials.length)
       return void errorRes(res, "No stamps provided", 400);
@@ -370,7 +439,7 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
               await stampSchema.formatMultiAttestationRequest(
                 credentialVerifications,
                 recipient,
-                attestationChainIdHex,
+                chainIdHex,
               );
 
             const fee = await getEASFeeAmount(EAS_FEE_USD);
@@ -380,13 +449,9 @@ app.post("/api/v0.0.0/eas", (req: Request, res: Response): void => {
               fee: fee.toString(),
             };
 
-            const domainSeparator = getAttestationDomainSeparator(
-              attestationChainIdHex,
-            );
+            const domainSeparator = getAttestationDomainSeparator(chainIdHex);
 
-            const signer = await getAttestationSignerForChain(
-              attestationChainIdHex,
-            );
+            const signer = await getAttestationSignerForChain(chainIdHex);
 
             signer
               .signTypedData(
@@ -431,15 +496,13 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
   try {
     const { recipient, credentials, nonce, chainIdHex, customScorerId } =
       req.body as EasRequestBody;
-    if (!Object.keys(passportOnchainInfo).includes(chainIdHex)) {
+    if (!isChainIdHexValid(chainIdHex)) {
       return void errorRes(
         res,
         `No onchainInfo found for chainId ${chainIdHex}`,
         404,
       );
     }
-    const attestationChainIdHex =
-      chainIdHex as keyof typeof passportOnchainInfo;
 
     if (!credentials || !credentials.length)
       return void errorRes(res, "No stamps provided", 400);
@@ -481,7 +544,7 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
               await passportSchema.formatMultiAttestationRequestWithPassportAndScore(
                 credentialVerifications,
                 recipient,
-                attestationChainIdHex,
+                chainIdHex,
                 customScorerId,
               );
 
@@ -492,13 +555,9 @@ app.post("/api/v0.0.0/eas/passport", (req: Request, res: Response): void => {
               fee: fee.toString(),
             };
 
-            const domainSeparator = getAttestationDomainSeparator(
-              attestationChainIdHex,
-            );
+            const domainSeparator = getAttestationDomainSeparator(chainIdHex);
 
-            const signer = await getAttestationSignerForChain(
-              attestationChainIdHex,
-            );
+            const signer = await getAttestationSignerForChain(chainIdHex);
 
             signer
               .signTypedData(
@@ -550,15 +609,13 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
   try {
     const { recipient, nonce, chainIdHex, customScorerId } =
       req.body as EasRequestBody;
-    if (!Object.keys(passportOnchainInfo).includes(chainIdHex)) {
+    if (!isChainIdHexValid(chainIdHex)) {
       return void errorRes(
         res,
         `No onchainInfo found for chainId ${chainIdHex}`,
         404,
       );
     }
-    const attestationChainIdHex =
-      chainIdHex as keyof typeof passportOnchainInfo;
 
     if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
       return void errorRes(res, "Invalid recipient", 400);
@@ -567,7 +624,7 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
       const multiAttestationRequest =
         await passportSchema.formatMultiAttestationRequestWithScore(
           recipient,
-          attestationChainIdHex,
+          chainIdHex,
           customScorerId,
         );
 
@@ -578,11 +635,9 @@ app.post("/api/v0.0.0/eas/score", async (req: Request, res: Response) => {
         fee: fee.toString(),
       };
 
-      const domainSeparator = getAttestationDomainSeparator(
-        attestationChainIdHex,
-      );
+      const domainSeparator = getAttestationDomainSeparator(chainIdHex);
 
-      const signer = await getAttestationSignerForChain(attestationChainIdHex);
+      const signer = await getAttestationSignerForChain(chainIdHex);
 
       signer
         .signTypedData(domainSeparator, ATTESTER_TYPES, passportAttestation)
