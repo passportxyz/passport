@@ -221,16 +221,11 @@ export const EmbedCampaign = () => {
   const [collapseType, setCollapseType] = React.useState<"Shift" | "Overlay" | "None">("Shift");
   const { signMessageAsync } = useSignMessage();
 
-  const hexToUtf8 = (hexString: string): string => {
-    return Buffer.from(hexString.replace(/^0x/, ""), "hex").toString("utf8");
-  };
-
   const generateSignature = async (message: string) => {
-    const strMsg = hexToUtf8(message);
     try {
       const signature = signMessageAsync({
         account: address,
-        message: strMsg,
+        message: message,
       });
       return signature;
     } catch (error) {

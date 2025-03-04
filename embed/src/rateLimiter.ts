@@ -4,14 +4,18 @@ import { RedisReply, RedisStore } from "rate-limit-redis";
 
 import axios from "axios";
 
-function parseRateLimit(rateLimitSpec: string): number {
+export function parseRateLimit(rateLimitSpec: string | null): number {
+  if (rateLimitSpec === "" || rateLimitSpec === null) {
+    return Infinity;
+  }
+
   // Regular expression to match the format "<requests>/<time>"
   const regex = /^(\d+)\/(\d+)([smhd])$/; // Supports seconds (s), minutes (m), hours (h), and days (d)
   const match = rateLimitSpec.match(regex);
 
   if (!match) {
     throw new Error(
-      "Invalid rate limit spec format. Expected format: '<requests>/<time><unit>'",
+      "Invalid rate limit spec format. Expected format: '<requests>/<time><unit> where unit is one of 'smhd'"
     );
   }
 
@@ -77,9 +81,9 @@ export async function apiKeyRateLimit(
       return rateLimit;
     }
   } catch (err) {
-    res
-      .status(500)
-      .send({ message: "Unauthorized! Unexpected error validating API key" });
+    console.error("error checking rate limit:", err);
+    res.status(500).send({ message: "Unauthorized! Unexpected error validating API key" });
+
     throw "ERROR";
   }
 }
