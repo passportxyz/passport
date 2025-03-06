@@ -108,7 +108,6 @@ async function requestV2Score(
   address: string,
   scorerId: number,
 ): Promise<V2ScoreResponseData> {
-  // TODO this endpoint doesn't exist yet
   const getScoreUrl = `${process.env.SCORER_ENDPOINT}/internal/score/v2/${scorerId}/${address}`;
 
   try {
@@ -127,17 +126,18 @@ async function requestV2Score(
 const parseScore = ({
   score,
   threshold,
-  expiration_timestamp,
   passing_score,
   stamps,
   scorer_id,
+  /* Can be used if we decide to implement expiration
+     time based on score data */
+  // expiration_timestamp,
 }: V2ScoreResponseData & {
   scorer_id: number;
 }): ParsedScore => ({
   expirationTime: BigInt(
-    // TODO Do we want to do this, or just today + 90 days?
-    // Or leave blank and use creation + 90 days?
-    Math.floor(new Date(expiration_timestamp).getTime() / 1000),
+    // 90 days from now
+    Math.floor(new Date().getTime() / 1000) + 90 * 24 * 60 * 60,
   ),
   attestationData: {
     scorer_id: BigInt(scorer_id),
