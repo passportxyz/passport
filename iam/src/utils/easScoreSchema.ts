@@ -14,8 +14,14 @@ import { handleAxiosError } from "@gitcoin/passport-platforms";
 const SCORER_API_KEY = process.env.SCORER_API_KEY;
 const SCORE_DECIMALS = 4;
 
-const parseDecimal = (decimalStr: string): bigint =>
-  ethers.parseUnits(decimalStr, SCORE_DECIMALS);
+const parseDecimal = (decimalStr: string): bigint => {
+  // Turns e.g. 2.12345 into 2.1234 without using float math
+  const truncated = decimalStr.replace(
+    new RegExp(String.raw`(?<=\.\d{${SCORE_DECIMALS}})\d+`),
+    "",
+  );
+  return ethers.parseUnits(truncated, SCORE_DECIMALS);
+};
 
 type ScoreAttestationData = {
   scorer_id: bigint;
@@ -51,7 +57,7 @@ type V2ScoreResponseData = {
   };
 };
 
-const ATTESTATION_SCHEMA_ENCODER = new SchemaEncoder(
+export const ATTESTATION_SCHEMA_ENCODER = new SchemaEncoder(
   "bool passing_score, uint8 score_decimals, uint128 scorer_id, uint32 score, uint32 threshold, uint48 reserved, tuple(string provider, uint32 score)[] stamps",
 );
 
