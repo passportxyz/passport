@@ -58,7 +58,7 @@ type V2ScoreResponseData = {
 };
 
 export const ATTESTATION_SCHEMA_ENCODER = new SchemaEncoder(
-  "bool passing_score, uint8 score_decimals, uint128 scorer_id, uint32 score, uint32 threshold, tuple(string provider, uint32 score)[] stamps",
+  "bool passing_score, uint8 score_decimals, uint128 scorer_id, uint32 score, uint32 threshold, tuple(string provider, uint256 score)[] stamps",
 );
 
 export const generateScoreAttestationRequest = async ({
@@ -175,6 +175,6 @@ const encodeScoreData = ({
     {
       name: "stamps",
       value: stamps,
-      type: "(string,uint32)[]",
+      type: "(string,uint256)[]",
     },
   ]);

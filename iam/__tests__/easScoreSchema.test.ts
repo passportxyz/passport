@@ -110,11 +110,11 @@ describe("generateScoreAttestationRequest", () => {
       },
       {
         name: "stamps",
-        type: "(string,uint32)[]",
-        signature: "(string provider,uint32 score)[] stamps",
+        type: "(string,uint256)[]",
+        signature: "(string provider,uint256 score)[] stamps",
         value: {
           name: "stamps",
-          type: "(string,uint32)[]",
+          type: "(string,uint256)[]",
           value: [
             [
               {
@@ -124,7 +124,7 @@ describe("generateScoreAttestationRequest", () => {
               },
               {
                 name: "score",
-                type: "uint32",
+                type: "uint256",
                 value: 200001n,
               },
             ],
@@ -136,7 +136,7 @@ describe("generateScoreAttestationRequest", () => {
               },
               {
                 name: "score",
-                type: "uint32",
+                type: "uint256",
                 value: 101000n,
               },
             ],
