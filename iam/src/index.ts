@@ -1,4 +1,3 @@
-// import { EnsProvider } from './providers/ens';
 // Should this file be an app factory? If it was, we could move the provider config to main.ts and test in isolation
 
 // ---- Server
@@ -67,55 +66,26 @@ import { generateScoreAttestationRequest } from "./utils/easScoreSchema.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
-const configErrors = [];
-
-if (!process.env.IAM_JWK) {
-  configErrors.push("IAM_JWK is required");
-}
-
-if (!process.env.ATTESTATION_SIGNER_PRIVATE_KEY) {
-  configErrors.push("ATTESTATION_SIGNER_PRIVATE_KEY is required");
-}
-
-if (!process.env.TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY) {
-  configErrors.push("TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY is required");
-}
-
-if (!process.env.ALLO_SCORER_ID) {
-  configErrors.push("ALLO_SCORER_ID is required");
-}
-
-if (!process.env.SCORER_ENDPOINT) {
-  configErrors.push("SCORER_ENDPOINT is required");
-}
-
-if (!process.env.SCORER_API_KEY) {
-  configErrors.push("SCORER_API_KEY is required");
-}
-
-if (!process.env.EAS_GITCOIN_STAMP_SCHEMA) {
-  configErrors.push("EAS_GITCOIN_STAMP_SCHEMA is required");
-}
-
-if (!process.env.MORALIS_API_KEY) {
-  configErrors.push("MORALIS_API_KEY is required");
-}
-
-if (!process.env.IAM_JWK_EIP712) {
-  configErrors.push("IAM_JWK_EIP712 is required");
-}
-
-if (!process.env.EAS_FEE_USD) {
-  configErrors.push("EAS_FEE_USD is required");
-}
-
-if (!process.env.SCROLL_BADGE_PROVIDER_INFO) {
-  configErrors.push("SCROLL_BADGE_PROVIDER_INFO is required");
-}
-
-if (!process.env.SCROLL_BADGE_ATTESTATION_SCHEMA_UID) {
-  configErrors.push("SCROLL_BADGE_ATTESTATION_SCHEMA_UID is required");
-}
+const configErrors = [
+  "IAM_JWK",
+  "ATTESTATION_SIGNER_PRIVATE_KEY",
+  "TESTNET_ATTESTATION_SIGNER_PRIVATE_KEY",
+  "ALLO_SCORER_ID",
+  "SCORER_ENDPOINT",
+  "SCORER_API_KEY",
+  "EAS_GITCOIN_STAMP_SCHEMA",
+  "MORALIS_API_KEY",
+  "IAM_JWK_EIP712",
+  "EAS_FEE_USD",
+  "SCROLL_BADGE_PROVIDER_INFO",
+  "SCROLL_BADGE_ATTESTATION_SCHEMA_UID",
+  "HUMAN_NETWORK_CLIENT_PRIVATE_KEY",
+  "HUMAN_NETWORK_RELAY_URL",
+]
+  .map((env) => {
+    process.env[env] ? null : `${env} is required`;
+  })
+  .filter(Boolean);
 
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
