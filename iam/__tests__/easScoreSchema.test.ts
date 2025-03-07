@@ -109,12 +109,6 @@ describe("generateScoreAttestationRequest", () => {
         value: { name: "threshold", type: "uint32", value: 200000n },
       },
       {
-        name: "reserved",
-        type: "uint48",
-        signature: "uint48 reserved",
-        value: { name: "reserved", type: "uint48", value: 0n },
-      },
-      {
         name: "stamps",
         type: "(string,uint32)[]",
         signature: "(string provider,uint32 score)[] stamps",

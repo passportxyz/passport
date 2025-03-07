@@ -62,7 +62,6 @@ export const useSyncToChainButton = ({
           };
 
           const { data }: { data: EasPayload } = await chain.attestationProvider.getMultiAttestationRequest(payload);
-          console.log("attestation data: ", data);
 
           if (data.error) {
             console.error(

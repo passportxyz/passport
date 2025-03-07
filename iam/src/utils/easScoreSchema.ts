@@ -58,7 +58,7 @@ type V2ScoreResponseData = {
 };
 
 export const ATTESTATION_SCHEMA_ENCODER = new SchemaEncoder(
-  "bool passing_score, uint8 score_decimals, uint128 scorer_id, uint32 score, uint32 threshold, uint48 reserved, tuple(string provider, uint32 score)[] stamps",
+  "bool passing_score, uint8 score_decimals, uint128 scorer_id, uint32 score, uint32 threshold, tuple(string provider, uint32 score)[] stamps",
 );
 
 export const generateScoreAttestationRequest = async ({
@@ -172,8 +172,6 @@ const encodeScoreData = ({
     { name: "scorer_id", value: scorer_id, type: "uint128" },
     { name: "score", value: score, type: "uint32" },
     { name: "threshold", value: threshold, type: "uint32" },
-    // Gap to fill out 256 bit word, could potentially be used for metadata
-    { name: "reserved", value: BigInt(0), type: "uint48" },
     {
       name: "stamps",
       value: stamps,
