@@ -29,6 +29,8 @@ type VeraxAndEASConfig = BaseProviderConfig & {
   easScanUrl?: string;
 };
 
+const ATTEST_V2_ENABLED = process.env.NEXT_PUBLIC_FF_ATTEST_V2 === "on";
+
 export type AttestationProviderConfig = EASConfig | VeraxAndEASConfig;
 
 export interface AttestationProvider {
@@ -106,7 +108,8 @@ class BaseAttestationProvider implements AttestationProvider {
   }
 
   async getMultiAttestationRequest(payload: {}): Promise<AxiosResponse<any, any>> {
-    return jsonRequest(`${iamUrl}v0.0.0/eas/passport`, payload);
+    const url = `${iamUrl}v0.0.0/eas/${ATTEST_V2_ENABLED ? "scoreV2" : "passport"}`;
+    return jsonRequest(url, payload);
   }
 
   checkOnChainStatus(
@@ -132,13 +135,7 @@ class BaseAttestationProvider implements AttestationProvider {
     );
 
     const equivalentProviders = verifiedDbProviders.reduce((eq, provider) => {
-      if (
-        onChainProviders.some(
-          (onChainProvider) =>
-            onChainProvider.providerName === provider.stamp.provider &&
-            onChainProvider.credentialHash === provider.stamp.credential.credentialSubject?.hash
-        )
-      ) {
+      if (onChainProviders.some((onChainProvider) => onChainProvider.providerName === provider.stamp.provider)) {
         eq.add(provider.stamp.provider);
       }
       return eq;
@@ -194,43 +191,10 @@ export class EASAttestationProvider extends BaseAttestationProvider {
 }
 
 export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
-  name = "Verax, Ethereum Attestation Service (Score only)";
+  name = `Verax, Ethereum Attestation Service${ATTEST_V2_ENABLED ? "" : " (Score only)"}`;
   attestationExplorerLinkText = "Check attestation on Verax";
 
   viewerUrl(address: string): string {
     return this.easScanUrl || "";
-  }
-
-  checkOnChainStatus(
-    allProvidersState: AllProvidersState,
-    onChainProviders: OnChainProviderType[],
-    rawScore: number,
-    scoreState: ScoreStateType,
-    onChainScore: number,
-    expirationDate?: Date
-  ): OnChainStatus {
-    // This is specific implementation for Verax where we only check for the score to be different
-    if (scoreState !== "DONE" || onChainScore === undefined) {
-      return OnChainStatus.LOADING;
-    }
-
-    if (expirationDate && new Date() > expirationDate) return OnChainStatus.MOVED_EXPIRED;
-
-    if (Number.isNaN(onChainScore)) return OnChainStatus.NOT_MOVED;
-
-    if (onChainProviders.length === 0) {
-      // This is a special case for users who previously pushed the score-only
-      // attestation to the chain, but have not yet pushed the passport attestation
-      return rawScore !== onChainScore ? OnChainStatus.MOVED_OUT_OF_DATE : OnChainStatus.MOVED_UP_TO_DATE;
-    }
-
-    return super.checkOnChainStatus(
-      allProvidersState,
-      onChainProviders,
-      rawScore,
-      scoreState,
-      onChainScore,
-      expirationDate
-    );
   }
 }

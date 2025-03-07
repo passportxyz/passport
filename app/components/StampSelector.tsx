@@ -1,14 +1,12 @@
 import React, { useContext, useMemo } from "react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
-import { PlatformSpec, PlatformGroupSpec } from "@gitcoin/passport-platforms";
-import { useOnChainData } from "../hooks/useOnChainData";
+import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
 import { CeramicContext } from "../context/ceramicContext";
 import { ScorerContext } from "../context/scorerContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { customSideBarGradient } from "./PlatformDetails";
 
 type StampSelectorProps = {
-  currentPlatform?: PlatformSpec | undefined;
   currentProviders: PlatformGroupSpec[] | undefined;
   verifiedProviders: PROVIDER_ID[] | undefined;
 };
@@ -25,23 +23,10 @@ const checkMark = () => (
   </svg>
 );
 
-export function StampSelector({ currentPlatform, currentProviders, verifiedProviders }: StampSelectorProps) {
-  const { allProvidersState, expiredProviders } = useContext(CeramicContext);
-  const { activeChainProviders } = useOnChainData();
+export function StampSelector({ currentProviders, verifiedProviders }: StampSelectorProps) {
+  const { expiredProviders } = useContext(CeramicContext);
   const { stampWeights } = useContext(ScorerContext);
   const includedGroupsAndProviders = useIncludedGroupsAndProviders(currentProviders || []);
-
-  // check if provider is on-chain
-  const isProviderOnChain = (provider: PROVIDER_ID) => {
-    if (currentPlatform) {
-      const providerObj = activeChainProviders.find((p) => p.providerName === provider);
-      if (providerObj) {
-        return providerObj.credentialHash === allProvidersState[provider]?.stamp?.credential.credentialSubject.hash;
-      }
-    }
-
-    return false;
-  };
 
   return (
     <>

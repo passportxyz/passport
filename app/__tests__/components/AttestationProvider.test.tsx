@@ -126,28 +126,10 @@ describe.each([easAttestationProvider, veraxAttestationProvider])("AttestationPr
       ).toBe(OnChainStatus.MOVED_OUT_OF_DATE);
     });
   });
-});
 
-describe("EASAttestationProvider", () => {
   it("should return NOT_MOVED when onChainProviders is an empty array", () => {
-    expect(
-      easAttestationProvider.checkOnChainStatus(mockAllProvidersState, [], onChainScore, "DONE", onChainScore)
-    ).toBe(OnChainStatus.NOT_MOVED);
-  });
-});
-
-describe("VeraxAndEASAttestationProvider", () => {
-  describe("When only score has previously been pushed", () => {
-    it("should return NOT_MOVED when the score has not been pushed", () => {
-      expect(veraxAttestationProvider.checkOnChainStatus(mockAllProvidersState, [], onChainScore, "DONE", NaN)).toBe(
-        OnChainStatus.NOT_MOVED
-      );
-    });
-
-    it("should return MOVED_OUT_OF_DATE when the score does not match and there are 0 onchain providers", () => {
-      expect(
-        veraxAttestationProvider.checkOnChainStatus(mockAllProvidersState, [], onChainScore + 1, "DONE", onChainScore)
-      ).toBe(OnChainStatus.MOVED_OUT_OF_DATE);
-    });
+    expect(attestationProvider.checkOnChainStatus(mockAllProvidersState, [], onChainScore, "DONE", onChainScore)).toBe(
+      OnChainStatus.NOT_MOVED
+    );
   });
 });

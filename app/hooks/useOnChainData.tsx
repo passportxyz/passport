@@ -36,7 +36,6 @@ export interface OnChainScores {
 
 export type OnChainProviderType = {
   providerName: PROVIDER_ID;
-  credentialHash: string;
   expirationDate: Date;
   issuanceDate: Date;
 };

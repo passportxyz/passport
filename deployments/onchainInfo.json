@@ -11,7 +11,7 @@
       "address": "0x4200000000000000000000000000000000000020"
     },
     "GitcoinResolver": {
-      "address": "0x074761E1Dc6E6cF9cdeE67dd180E01E818716Ce0"
+      "address": "0xa2c832b63A20C06CCc2Ca31c12b8248452729a4D"
     },
     "GitcoinVerifier": {
       "address": "0x8D21C3360dcE1a9EBD3Da4373c4dAB7F81dd7233"
@@ -20,18 +20,18 @@
       "address": "0x8B1A76795e3CbadD79C5410d2C4D4827D9C1503a"
     },
     "easSchemas": {
-      "namingSchema": {
-        "uid": ""
-      },
       "passport": {
-        "uid": "0x7026a3d524ee3dae5859aa00cfc0f17a3dac05af70eb758b5c0a40692f1e60f3"
+        "uid": "0x838ceca409bb6b6d1423f9f31b439ecba38b9c89b917408624614216e0be70ba"
       },
       "score": {
-        "uid": "0xe9071177c724d1bd712e4b05b4ce5426e60e141d8aaec86e4e03f25901d0cd91"
+        "uid": "0x2e8b2534361637d20d91ad4de4d373d9418a2f8db1fcd5de66280d4249f3a161"
+      },
+      "scoreV2": {
+        "uid": "0x81d8758ccd97bbeea7642df29001f6046a676b3c24f808c4297db5ee36838dd8"
       }
     },
     "GitcoinPassportDecoder": {
-      "address": "0x19a6DCAbE629C8e71814bD9B4Ea7e2A7B90cFeC0"
+      "address": "0x5e9AA91850Fa444E99dEaA6c521a01639f6e6236"
     }
   },
   "0x1a4": {
@@ -63,6 +63,9 @@
       },
       "score": {
         "uid": "0x1b3881ffb4a1311e7ffd27db310346d058c7fa435fe9de9426db9daa8de6abf5"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     },
     "GitcoinPassportDecoder": {
@@ -98,6 +101,9 @@
       },
       "score": {
         "uid": "0x9937aea3a59cd2cc008aeaa9ec9dd1d15739d0532809428f755d4d72b94ed916"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     },
     "GitcoinPassportDecoder": {
@@ -133,6 +139,9 @@
       },
       "score": {
         "uid": "0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     },
     "GitcoinPassportDecoder": {
@@ -168,6 +177,9 @@
       },
       "score": {
         "uid": "0x4da1eaac6346b8b79a705e3898a308062ca607f56c07762ef7b7ff8a7661843c"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     },
     "Verax": {
@@ -180,6 +192,9 @@
         },
         "score": {
           "uid": "0x01f031da36192c34057c764239eb77bb6ec8ebfb808f72a7bb172f37a5bec31f"
+        },
+        "scoreV2": {
+          "uid": ""
         }
       }
     },
@@ -219,6 +234,9 @@
       },
       "score": {
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     },
     "GitcoinPassportDecoder": {
@@ -257,6 +275,9 @@
       },
       "score": {
         "uid": "0xfa8f39bf31b38893697a46f2607ef58ef3ec66308840a1e351304d26823a297c"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     }
   },
@@ -291,6 +312,9 @@
         "uid": ""
       },
       "score": {
+        "uid": ""
+      },
+      "scoreV2": {
         "uid": ""
       }
     }
@@ -327,6 +351,9 @@
       },
       "score": {
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     }
   },
@@ -362,6 +389,9 @@
       },
       "score": {
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     }
   },
@@ -397,6 +427,9 @@
       },
       "score": {
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     }
   },
@@ -432,6 +465,9 @@
       },
       "score": {
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     }
   },
@@ -467,6 +503,9 @@
       },
       "score": {
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     }
   }
