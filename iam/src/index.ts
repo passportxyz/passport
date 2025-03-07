@@ -319,7 +319,6 @@ const isChainIdHexValid = (
 // TODO Once we've fully migrated, we should probably remove
 // all the other eas endpoints and the relevant code in the
 // utils folder and just keep this one
-// TODO is this a good endpoint path?
 app.post(
   "/api/v0.0.0/eas/scoreV2",
   async (req: Request, res: Response): Promise<void> => {
@@ -370,8 +369,6 @@ app.post(
 
       return void res.json(toJsonObject(payload));
     } catch (error) {
-      // TODO remove
-      console.error(error);
       const message = addErrorDetailsToMessage(
         "Unexpected error generating score attestation",
         error,

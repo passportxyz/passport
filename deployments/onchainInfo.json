@@ -28,6 +28,9 @@
       },
       "score": {
         "uid": "0xe9071177c724d1bd712e4b05b4ce5426e60e141d8aaec86e4e03f25901d0cd91"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     },
     "GitcoinPassportDecoder": {
@@ -63,6 +66,9 @@
       },
       "score": {
         "uid": "0x1b3881ffb4a1311e7ffd27db310346d058c7fa435fe9de9426db9daa8de6abf5"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     },
     "GitcoinPassportDecoder": {
@@ -98,6 +104,9 @@
       },
       "score": {
         "uid": "0x9937aea3a59cd2cc008aeaa9ec9dd1d15739d0532809428f755d4d72b94ed916"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     },
     "GitcoinPassportDecoder": {
@@ -133,6 +142,9 @@
       },
       "score": {
         "uid": "0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     },
     "GitcoinPassportDecoder": {
@@ -168,6 +180,9 @@
       },
       "score": {
         "uid": "0x4da1eaac6346b8b79a705e3898a308062ca607f56c07762ef7b7ff8a7661843c"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     },
     "Verax": {
@@ -180,6 +195,9 @@
         },
         "score": {
           "uid": "0x01f031da36192c34057c764239eb77bb6ec8ebfb808f72a7bb172f37a5bec31f"
+        },
+        "scoreV2": {
+          "uid": ""
         }
       }
     },
@@ -219,6 +237,9 @@
       },
       "score": {
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     },
     "GitcoinPassportDecoder": {
@@ -257,6 +278,9 @@
       },
       "score": {
         "uid": "0xfa8f39bf31b38893697a46f2607ef58ef3ec66308840a1e351304d26823a297c"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     }
   },
@@ -291,6 +315,9 @@
         "uid": ""
       },
       "score": {
+        "uid": ""
+      },
+      "scoreV2": {
         "uid": ""
       }
     }
@@ -327,6 +354,9 @@
       },
       "score": {
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     }
   },
@@ -362,6 +392,9 @@
       },
       "score": {
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     }
   },
@@ -397,6 +430,9 @@
       },
       "score": {
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     }
   },
@@ -432,6 +468,9 @@
       },
       "score": {
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     }
   },
@@ -467,7 +506,11 @@
       },
       "score": {
         "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
+      },
+      "scoreV2": {
+        "uid": ""
       }
     }
   }
 }
+

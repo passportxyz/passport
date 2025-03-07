@@ -61,8 +61,7 @@ describe("generateScoreAttestationRequest", () => {
       chainIdHex,
     });
 
-    // TODO
-    const scoreSchema = passportOnchainInfo[chainIdHex].easSchemas.score.uid;
+    const scoreSchema = passportOnchainInfo[chainIdHex].easSchemas.scoreV2.uid;
 
     expect(result).toEqual([
       {
@@ -162,8 +161,7 @@ describe("generateScoreAttestationRequest", () => {
       customScorerId: scorerId,
     });
 
-    // TODO
-    const scoreSchema = passportOnchainInfo[chainIdHex].easSchemas.score.uid;
+    const scoreSchema = passportOnchainInfo[chainIdHex].easSchemas.scoreV2.uid;
 
     expect(result).toEqual([
       {

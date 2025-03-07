@@ -79,9 +79,7 @@ export const generateScoreAttestationRequest = async ({
 
   return [
     {
-      // TODO
-      // schema: passportOnchainInfo[chainIdHex].easSchemas.scoreV2.uid,
-      schema: passportOnchainInfo[chainIdHex].easSchemas.score.uid,
+      schema: passportOnchainInfo[chainIdHex].easSchemas.scoreV2.uid,
       data: [
         {
           recipient,
