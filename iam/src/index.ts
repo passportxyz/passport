@@ -82,9 +82,7 @@ const configErrors = [
   "HUMAN_NETWORK_CLIENT_PRIVATE_KEY",
   "HUMAN_NETWORK_RELAY_URL",
 ]
-  .map((env) => {
-    process.env[env] ? null : `${env} is required`;
-  })
+  .map((env) => (process.env[env] ? null : `${env} is required`))
   .filter(Boolean);
 
 if (configErrors.length > 0) {
