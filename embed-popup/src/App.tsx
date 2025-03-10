@@ -8,12 +8,6 @@ import { PLATFORM_ID, CredentialResponseBody } from "@gitcoin/passport-types";
 
 const VERIFICATION_URL = import.meta.env.VITE_VERIFY_URL as string;
 
-declare global {
-  interface Window {
-    PREVENT_CLOSE?: boolean;
-  }
-}
-
 const generateRandomState = (): string => {
   return Math.random().toString(36).substring(2);
 };
@@ -145,7 +139,8 @@ function App() {
             setStep("Verification successful!");
             setVerificationResponse(response);
 
-            if (!window.PREVENT_CLOSE) {
+            const preventClose = localStorage.getItem("PREVENT_CLOSE") === "true";
+            if (!preventClose) {
               window.close(); // Close the pop-up after sending the message
             }
           } catch (error) {
