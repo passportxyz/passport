@@ -92,6 +92,10 @@ const passportXyzIamSecrets = secretsManager
         name: "IAM_JWK_EIP712_V1_START_TIME",
         valueFrom: `${PASSPORT_VC_SECRETS_ARN}:IAM_JWK_EIP712_V1_START_TIME::`,
       },
+      {
+        name: "HUMAN_NETWORK_CLIENT_PRIVATE_KEY",
+        valueFrom: `${PASSPORT_VC_SECRETS_ARN}:HUMAN_NETWORK_CLIENT_PRIVATE_KEY::`,
+      },
     ].sort(secretsManager.sortByName),
   );
 
