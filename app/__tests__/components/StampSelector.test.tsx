@@ -23,13 +23,7 @@ describe("<StampSelector />", () => {
       (useCustomization as Mock).mockReturnValue(customization);
       renderWithContext(
         testCeramicContext,
-        <StampSelector
-          currentPlatform={GtcStaking.PlatformDetails}
-          currentProviders={GtcStaking.ProviderConfig}
-          selectedProviders={[] as PROVIDER_ID[]}
-          verifiedProviders={[] as PROVIDER_ID[]}
-          setSelectedProviders={() => {}}
-        />,
+        <StampSelector currentProviders={GtcStaking.ProviderConfig} verifiedProviders={[] as PROVIDER_ID[]} />,
         undefined,
         {
           stampScores: {

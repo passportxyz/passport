@@ -69,11 +69,7 @@ export const SideBarContent = ({
             }}
           >
             <div>
-              <StampSelector
-                currentPlatform={currentPlatform}
-                currentProviders={currentProviders}
-                verifiedProviders={verifiedProviders}
-              />
+              <StampSelector currentProviders={currentProviders} verifiedProviders={verifiedProviders} />
             </div>
           </DrawerBody>
         </div>

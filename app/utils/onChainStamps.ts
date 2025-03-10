@@ -16,7 +16,6 @@ type CachedScore = {
 
 type CachedStamp = {
   provider: string;
-  hash: string;
   issuanceDate: bigint;
   expirationDate: bigint;
 };
@@ -24,7 +23,6 @@ type CachedStamp = {
 export type AttestationData = {
   providers: {
     providerName: PROVIDER_ID;
-    credentialHash: string;
     issuanceDate: Date;
     expirationDate: Date;
   }[];
@@ -86,7 +84,11 @@ export async function getAttestationData({
 
     const score = {
       value: parseFloat(formatUnits(BigInt(cachedScore.score), 4)),
-      expirationDate: new Date(parseInt(cachedScore.time.toString()) * 1000 + SCORE_MAX_AGE_MILLISECONDS),
+      expirationDate: new Date(
+        cachedScore.expirationTime > 0
+          ? parseInt(cachedScore.expirationTime.toString()) * 1000
+          : parseInt(cachedScore.time.toString()) * 1000 + SCORE_MAX_AGE_MILLISECONDS
+      ),
     };
 
     const passportSchema = onchainInfo[chainId].easSchemas.passport.uid;
@@ -107,9 +109,8 @@ export async function getAttestationData({
         decoderAbi,
       });
 
-      providers = cachedPassport.map(({ provider, hash, issuanceDate, expirationDate }) => ({
+      providers = cachedPassport.map(({ provider, issuanceDate, expirationDate }) => ({
         providerName: provider as PROVIDER_ID,
-        credentialHash: `v0.0.0:${Buffer.from(hash.slice(2), "hex").toString("base64")}`,
         issuanceDate: new Date(Number(issuanceDate) * 1000),
         expirationDate: new Date(Number(expirationDate) * 1000),
       }));

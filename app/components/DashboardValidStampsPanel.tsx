@@ -51,14 +51,7 @@ export const DashboardValidStampsPanel = ({ className }: { className: string }) 
         .map(({ providers }) => providers.map(({ name }) => name))
         .flat();
 
-      return providerIds?.some((providerId) => {
-        const providerObj = activeChainProviders.find((p) => p.providerName === providerId);
-        if (providerObj) {
-          return providerObj.credentialHash === allProvidersState[providerId]?.stamp?.credential.credentialSubject.hash;
-        }
-
-        return false;
-      });
+      return providerIds?.some((providerId) => activeChainProviders.find((p) => p.providerName === providerId));
     },
     [activeChainProviders, allProvidersState, verifiedPlatforms]
   );
