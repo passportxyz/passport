@@ -9,7 +9,20 @@ import { createHash } from "crypto";
 import { objToSortedArray } from "./helpers.js";
 import { humanNetworkOprf } from "./humanNetworkOprf.js";
 
-export type NullifierGenerator = ({ record }: { record: ProofRecord }) => Promise<string>;
+export type NullifierGenerator = ({
+  record,
+}: {
+  record: ProofRecord;
+}) => Promise<string>;
+
+const HUMAN_NETWORK_TIMEOUT_MS = process.env.HUMAN_NETWORK_TIMEOUT_MS
+  ? parseInt(process.env.HUMAN_NETWORK_TIMEOUT_MS)
+  : 5000;
+
+// Percent of credentials in which to use the new human network nullifier
+const HUMAN_NETWORK_NULLIFIER_PERCENT =
+  process.env.HUMAN_NETWORK_NULLIFIER_PERCENT &&
+  parseInt(process.env.HUMAN_NETWORK_NULLIFIER_PERCENT);
 
 // Used during roll out of new nullifier generators
 export class IgnorableNullifierGeneratorError extends Error {
@@ -21,13 +34,24 @@ export class IgnorableNullifierGeneratorError extends Error {
 
 type NullifierVersion = number | "0.0.0";
 
-const hashValueWithSecret = ({ secret, value }: { secret: string; value: string }) =>
-  base64.encode(createHash("sha256").update(secret, "utf-8").update(value, "utf-8").digest());
-
 type HashNullifierGeneratorOptions = {
   key: string;
   version: NullifierVersion;
 };
+
+const hashValueWithSecret = ({
+  secret,
+  value,
+}: {
+  secret: string;
+  value: string;
+}) =>
+  base64.encode(
+    createHash("sha256")
+      .update(secret, "utf-8")
+      .update(value, "utf-8")
+      .digest(),
+  );
 
 /*
   Example usage:
@@ -60,33 +84,82 @@ type HumanNetworkNullifierGeneratorOptions = {
   version: NullifierVersion;
 };
 
+class NullifierTimeoutError extends Error {
+  constructor() {
+    super("Timeout generating nullifier");
+    this.name = "NullifierTimeoutError";
+  }
+}
+
+const withTimeout = async <T>(
+  timeout: number,
+  promise: Promise<T>,
+): Promise<T> => {
+  let timer: NodeJS.Timeout;
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new NullifierTimeoutError());
+    }, timeout);
+  });
+
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+const createHumanNetworkNullifier = async ({
+  localSecret,
+  version,
+  record,
+  ...humanNetworkOps
+}: HumanNetworkNullifierGeneratorOptions & { record: ProofRecord }) => {
+  const value = JSON.stringify(objToSortedArray(record));
+  const humanNetworkEncrypted = await humanNetworkOprf({
+    value,
+    ...humanNetworkOps,
+  });
+  const hashed = hashValueWithSecret({
+    secret: localSecret,
+    value: humanNetworkEncrypted,
+  });
+
+  return `v${version}:${hashed}`;
+};
+
 export const HumanNetworkNullifierGenerator =
-  ({ localSecret, version, ...humanNetworkOps }: HumanNetworkNullifierGeneratorOptions): NullifierGenerator =>
+  (
+    humanNetworkOps: HumanNetworkNullifierGeneratorOptions,
+  ): NullifierGenerator =>
   async ({ record }) => {
-    const chanceToExecute = process.env.HUMAN_NETWORK_NULLIFIER_PERCENT;
-    limitExecution(chanceToExecute ? parseInt(chanceToExecute) : undefined);
-
+    limitExecution(HUMAN_NETWORK_NULLIFIER_PERCENT);
     try {
-      const value = JSON.stringify(objToSortedArray(record));
-      const humanNetworkEncrypted = await humanNetworkOprf({
-        value,
-        ...humanNetworkOps,
-      });
-      const hashed = hashValueWithSecret({ secret: localSecret, value: humanNetworkEncrypted });
-
-      return `v${version}:${hashed}`;
+      return await withTimeout(
+        HUMAN_NETWORK_TIMEOUT_MS,
+        createHumanNetworkNullifier({
+          ...humanNetworkOps,
+          record,
+        }),
+      );
     } catch (e) {
       // For now, ignore errors with humanNetwork
-      console.error("Error generating humanNetwork nullifier", e);
-      throw new IgnorableNullifierGeneratorError("Error generating humanNetwork nullifier");
+      // TODO remove this once beta testing is complete
+      console.error("Error generating humanNetwork nullifier (ignoring): ", e);
+      throw new IgnorableNullifierGeneratorError(
+        "Error generating humanNetwork nullifier",
+      );
     }
   };
 
 const limitExecution = (integerProbabilityToExecute?: number) => {
   if (integerProbabilityToExecute === undefined) return;
 
-  const randomValue = Math.floor(Math.random() * 100);
+  // Integer in [1, 100]
+  const randomValue = Math.floor(Math.random() * 100) + 1;
   if (randomValue > integerProbabilityToExecute) {
-    throw new IgnorableNullifierGeneratorError("Limiting execution of nullifier generator");
+    throw new IgnorableNullifierGeneratorError(
+      "Limiting execution of nullifier generator",
+    );
   }
 };
