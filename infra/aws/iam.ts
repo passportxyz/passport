@@ -575,6 +575,7 @@ export const passportXyzService = new aws.ecs.Service(
   },
   {
     dependsOn: [albPassportXyzTargetGroup, passportXyzTaskDefinition],
+    ignoreChanges: ["desiredCount"],
   },
 );
 

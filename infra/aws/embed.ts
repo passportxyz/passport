@@ -482,6 +482,7 @@ export const passportEmbedService = new aws.ecs.Service(
   },
   {
     dependsOn: [albPassportEmbedTargetGroup, passportEmbedTaskDefinition],
+    ignoreChanges: ["desiredCount"],
   }
 );
 
