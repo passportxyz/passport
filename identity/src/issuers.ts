@@ -1,9 +1,20 @@
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 import { NullifierGenerators } from "./credentials.js";
 import { getKeyVersions } from "./keyManager.js";
-import { HashNullifierGenerator } from "./nullifierGenerators.js";
+import {
+  HashNullifierGenerator,
+  HumanNetworkNullifierGenerator,
+} from "./nullifierGenerators.js";
 
 const eip712keyToDID = (key: string) => DIDKit.keyToDID("ethr", key);
+
+const HUMAN_NETWORK_START_VERSION = 2;
+
+const HUMAN_NETWORK_CLIENT_PRIVATE_KEY =
+  process.env.HUMAN_NETWORK_CLIENT_PRIVATE_KEY;
+const HUMAN_NETWORK_RELAY_URL = process.env.HUMAN_NETWORK_RELAY_URL;
+
+const isInteger = (value: any): value is number => Number.isInteger(value);
 
 export function getIssuerInfo(): {
   issuer: {
@@ -20,9 +31,14 @@ export function getIssuerInfo(): {
       did: eip712keyToDID(issuer.key),
     },
     nullifierGenerators: active.map(({ key, version }) =>
-      // TODO Add some variable like HUMAN_NETWORK_START_VERSION and
-      // use it here to switch to HumanNetworkNullifierGenerators
-      HashNullifierGenerator({ key, version }),
+      isInteger(version) && version >= HUMAN_NETWORK_START_VERSION
+        ? HumanNetworkNullifierGenerator({
+            clientPrivateKey: HUMAN_NETWORK_CLIENT_PRIVATE_KEY,
+            relayUrl: HUMAN_NETWORK_RELAY_URL,
+            localSecret: key,
+            version,
+          })
+        : HashNullifierGenerator({ key, version }),
     ) as NullifierGenerators,
   };
 }
