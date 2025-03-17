@@ -28,6 +28,9 @@
       },
       "scoreV2": {
         "uid": "0x81d8758ccd97bbeea7642df29001f6046a676b3c24f808c4297db5ee36838dd8"
+      },
+      "namingSchema": {
+        "uid": "0x44d562ac1d7cd77e232978687fea027ace48f719cf1d58c7888e509663bb87fc"
       }
     },
     "GitcoinPassportDecoder": {
@@ -132,7 +135,7 @@
     },
     "easSchemas": {
       "namingSchema": {
-        "uid": ""
+        "uid": "0x44d562ac1d7cd77e232978687fea027ace48f719cf1d58c7888e509663bb87fc"
       },
       "passport": {
         "uid": "0xd7b8c4ffa4c9fd1ecb3f6db8201e916a8d7dba11f161c1b0b5ccf44ceb8e2a39"
@@ -170,7 +173,7 @@
     },
     "easSchemas": {
       "namingSchema": {
-        "uid": ""
+        "uid": "0x44d562ac1d7cd77e232978687fea027ace48f719cf1d58c7888e509663bb87fc"
       },
       "passport": {
         "uid": "0x69b9d63ff6b161097cb4930e197a722bcf423f832d4e4cd3692449d5a1e1319f"
@@ -227,7 +230,7 @@
     },
     "easSchemas": {
       "namingSchema": {
-        "uid": ""
+        "uid": "0x44d562ac1d7cd77e232978687fea027ace48f719cf1d58c7888e509663bb87fc"
       },
       "passport": {
         "uid": "0x8ae6ee946bf1c936584cacc969bf7e9d0b274631c818df7e45c246051b364341"
@@ -268,7 +271,7 @@
     },
     "easSchemas": {
       "namingSchema": {
-        "uid": ""
+        "uid": "0x44d562ac1d7cd77e232978687fea027ace48f719cf1d58c7888e509663bb87fc"
       },
       "passport": {
         "uid": "0x71b9da9e4a2ecd8c87ad57d29ef64b9e63887d54039c97c294a6ecba8a8dfb4e"
@@ -277,7 +280,7 @@
         "uid": "0xfa8f39bf31b38893697a46f2607ef58ef3ec66308840a1e351304d26823a297c"
       },
       "scoreV2": {
-        "uid": ""
+        "uid": "0xb68405dffc0b727188de5a3af2ecbbc544ab01aef5353409c5006ffff342d143"
       }
     }
   },
