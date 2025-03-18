@@ -3,8 +3,12 @@ import { join, dirname } from "path";
 
 import { initSync as humanNetworkInitSync, generate_oprf } from "@holonym-foundation/mishtiwasm";
 
+// TODO: ideally this would be handled in the wasm module
 process.on("uncaughtException", (err) => {
-  console.error("Uncaught WASM exception:", err);
+  console.error("Uncaught exception:", err);
+  if(!err.toString().includes("RuntimeError: unreachable")) {
+    throw err;
+  }
 });
 
 let humanNetworkInitialized = false;
