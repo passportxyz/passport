@@ -8,7 +8,7 @@ import {
 
 const eip712keyToDID = (key: string) => DIDKit.keyToDID("ethr", key);
 
-const HUMAN_NETWORK_START_VERSION = 2;
+const HUMAN_NETWORK_START_VERSION = parseInt(process.env.HUMAN_NETWORK_START_VERSION);
 
 const HUMAN_NETWORK_CLIENT_PRIVATE_KEY =
   process.env.HUMAN_NETWORK_CLIENT_PRIVATE_KEY;

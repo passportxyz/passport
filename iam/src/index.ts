@@ -81,6 +81,7 @@ const configErrors = [
   "SCROLL_BADGE_ATTESTATION_SCHEMA_UID",
   "HUMAN_NETWORK_CLIENT_PRIVATE_KEY",
   "HUMAN_NETWORK_RELAY_URL",
+  "HUMAN_NETWORK_START_VERSION"
 ]
   .map((env) => (process.env[env] ? null : `${env} is required`))
   .filter(Boolean);
