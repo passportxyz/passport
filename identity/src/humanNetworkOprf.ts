@@ -3,6 +3,10 @@ import { join, dirname } from "path";
 
 import { initSync as humanNetworkInitSync, generate_oprf } from "@holonym-foundation/mishtiwasm";
 
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught WASM exception:", err);
+});
+
 let humanNetworkInitialized = false;
 const initializeHumanNetwork = () => {
   if (humanNetworkInitialized) return;
