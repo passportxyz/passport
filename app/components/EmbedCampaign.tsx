@@ -49,21 +49,26 @@ const OptionSelect = <const T extends readonly string[]>({
   const optionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    const selectedIndex = options.indexOf(selectedOption);
-    if (optionRefs.current[selectedIndex]) {
-      const optionElement = optionRefs.current[selectedIndex];
-      const containerElement = containerRef.current;
+    const updateOverlay = () => {
+      const selectedIndex = options.indexOf(selectedOption);
+      if (optionRefs.current[selectedIndex]) {
+        const optionElement = optionRefs.current[selectedIndex];
+        const containerElement = containerRef.current;
 
-      if (optionElement && containerElement) {
-        const optionRect = optionElement.getBoundingClientRect();
-        const containerRect = containerElement.getBoundingClientRect();
+        if (optionElement && containerElement) {
+          const optionRect = optionElement.getBoundingClientRect();
+          const containerRect = containerElement.getBoundingClientRect();
 
-        setSlidePosition({
-          left: optionRect.left - containerRect.left,
-          width: optionRect.width,
-        });
+          setSlidePosition({
+            left: optionRect.left - containerRect.left,
+            width: optionRect.width,
+          });
+        }
       }
-    }
+    };
+    updateOverlay();
+    window.addEventListener("resize", updateOverlay);
+    return () => window.removeEventListener("resize", updateOverlay);
   }, [selectedOption, options]);
 
   return (
