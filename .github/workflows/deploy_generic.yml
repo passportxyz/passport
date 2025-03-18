@@ -25,12 +25,6 @@ jobs:
         with:
           ref: ${{ inputs.refspec }}
           fetch-depth: 0
-      # - name: Install 1Password CLI
-      #   uses: 1password/install-cli-action@v1
-      # - name: Configure 1Password Service Account
-      #   uses: 1password/load-secrets-action/configure@v1
-      #   with:
-      #     service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
       - name: Load secret
         id: op-load-secret
         uses: 1password/load-secrets-action@v1
@@ -47,9 +41,11 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
       - name: Install AWS CLI
+        # Install AWS CLI as per instructions here: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
         run: |
-          sudo apt-get update
-          sudo apt-get install -y awscli
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
 
       - name: Check if ECR image exists
         id: ecr_check
