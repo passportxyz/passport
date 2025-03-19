@@ -16,7 +16,10 @@ const initializeHumanNetwork = () => {
   if (humanNetworkInitialized) return;
 
   const monorepoBaseDir = dirname(process.cwd());
-  const wasmPath = join(monorepoBaseDir, "node_modules/@holonym-foundation/mishtiwasm/pkg/esm", "mishtiwasm_bg.wasm");
+
+  // TODO: this is a hack to get the wasm path.
+  // For docker builds, the wasm path is different and can be set in the Dockerfile
+  const wasmPath = process.env.HUMAN_NETWORK_WASM_PATH || join(monorepoBaseDir, "node_modules/@holonym-foundation/mishtiwasm/pkg/esm", "mishtiwasm_bg.wasm");
 
   // TODO leaving in in case there are any weird
   // issues in other environments, but can be removed
