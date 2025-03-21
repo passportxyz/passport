@@ -172,6 +172,7 @@ const alarmConfigurations: AlarmConfigurations = {
 //////////////////////////////////////////////////////////////
 
 const serviceRole = new aws.iam.Role("passport-embed-ecs-role", {
+  name: "passport-embed-ecs-role",
   assumeRolePolicy: JSON.stringify({
     Version: "2012-10-17",
     Statement: [
@@ -531,7 +532,7 @@ export const passportEmbedService = new aws.ecs.Service(
   {
     dependsOn: [albPassportEmbedTargetGroup, passportEmbedTaskDefinition],
     ignoreChanges: ["desiredCount"],
-  }
+  },
 );
 
 const ecsAutoScalingTargetXyz = new aws.appautoscaling.Target(

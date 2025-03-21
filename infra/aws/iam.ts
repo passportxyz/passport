@@ -184,6 +184,7 @@ const alarmConfigurations: AlarmConfigurations = {
 //////////////////////////////////////////////////////////////
 
 const serviceRole = new aws.iam.Role("passport-ecs-role", {
+  name: "passport-ecs-role",
   assumeRolePolicy: JSON.stringify({
     Version: "2012-10-17",
     Statement: [
