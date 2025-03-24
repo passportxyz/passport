@@ -18,13 +18,6 @@ jest.mock("../src/utils/revocations", () => ({
     .mockImplementation((input) => Promise.resolve(input)),
 }));
 
-jest.mock("../src/utils/easStampSchema", () => ({
-  formatMultiAttestationRequest: jest.fn(),
-  encodeEasScore: jest.fn(() => {
-    return "0xEncodedData";
-  }),
-}));
-
 jest.mock("../src/utils/identityHelper", () => {
   const originalIdentity = jest.requireActual("../src/utils/identityHelper");
   return {
@@ -597,7 +590,7 @@ describe("POST /verify", function () {
       .expect("Content-Type", /json/);
 
     expect((response.body as ErrorResponseBody).error).toEqual(
-      "Unable to verify payload",
+      "Invalid issuer",
     );
   });
 

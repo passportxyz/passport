@@ -100,7 +100,6 @@ export const issueChallengeCredential = async (
   DIDKit: DIDKitLib,
   key: string,
   record: RequestPayload,
-  _signatureType?: SignatureType,
 ): Promise<IssuedCredential> => {
   // generate a verifiableCredential (60s ttl)
   const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);

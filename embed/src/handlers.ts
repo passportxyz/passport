@@ -7,7 +7,10 @@ import { Response, Request } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
 
 // All provider exports from platforms
-import { handleAxiosError } from "@gitcoin/passport-platforms";
+import {
+  formatExceptionMessages,
+  handleAxiosError,
+} from "@gitcoin/passport-platforms";
 import {
   autoVerifyStamps,
   PassportScore,
@@ -18,7 +21,7 @@ import {
   helpers,
   groupProviderTypesByPlatform,
   verifyProvidersAndIssueCredentials,
-  getChallenge,
+  getChallengeRecord,
   issueChallengeCredential,
   getIssuerInfo,
 } from "./utils/identityHelper.js";
@@ -239,70 +242,14 @@ export const verificationHandler = (
     });
 };
 
-export const getChallengeHandler = (
-  req: Request<
-    ParamsDictionary,
-    AutoVerificationResponseBodyType,
-    EmbedVerifyRequestBody
-  >,
+// TODO This is copied from the iam/, should we source it from identity/ or something?
+export const getChallengeHandler = async (
+  req: Request,
   res: Response,
-): void => {
+): Promise<void> => {
   // get the payload from the JSON req body
   const requestBody: ChallengeRequestBody = req.body as ChallengeRequestBody;
   const payload: RequestPayload = requestBody.payload;
-
-  // check for a valid payload
-  if (payload.address && payload.type) {
-    // ensure address is check-summed
-    payload.address = getAddress(payload.address);
-    // generate a challenge for the given payload
-    const challenge = getChallenge(payload);
-    // if the request is valid then proceed to generate a challenge credential
-    if (challenge && challenge.valid === true) {
-      // construct a request payload to issue a credential against
-      const record: RequestPayload = {
-        // add fields to identify the bearer of the challenge
-        type: payload.type,
-        address: payload.address,
-        // version as defined by entry point
-        version: "0.0.0",
-        // extend/overwrite with record returned from the provider
-        ...(challenge?.record || {}),
-      };
-
-      const { issuer } = getIssuerInfo();
-      // generate a VC for the given payload
-      return void issueChallengeCredential(
-        DIDKit,
-        issuer.key,
-        record,
-        payload.signatureType,
-      )
-        .then((credential) => {
-          // return the verifiable credential
-          return res.json(credential as CredentialResponseBody);
-        })
-        .catch((error): any => {
-          if (error) {
-            // return error msg indicating a failure producing VC
-            return void errorRes(
-              res,
-              "Unable to produce a verifiable credential",
-              400,
-            );
-          }
-        });
-    } else {
-      // return error message if an error present
-      // limit the error message string to 1000 chars
-      return void errorRes(
-        res,
-        (challenge.error && challenge.error.join(", ").substring(0, 1000)) ||
-          "Unable to verify proofs",
-        403,
-      );
-    }
-  }
 
   if (!payload.address) {
     return void errorRes(
@@ -314,5 +261,38 @@ export const getChallengeHandler = (
 
   if (!payload.type) {
     return void errorRes(res, "Missing type from challenge request body", 400);
+  }
+
+  // ensure address is check-summed
+  payload.address = getAddress(payload.address);
+
+  // generate a challenge for the given payload
+  const record = {
+    version: "0.0.0",
+    ...getChallengeRecord(payload),
+  };
+
+  const { issuer } = getIssuerInfo();
+
+  try {
+    // generate a VC for the given payload
+    const credential = await issueChallengeCredential(
+      DIDKit,
+      issuer.key,
+      record,
+    );
+
+    // return the verifiable credential
+    return void res.json(credential as CredentialResponseBody);
+  } catch (error: unknown) {
+    const { userMessage, systemMessage } = formatExceptionMessages(
+      error,
+      "Unable to produce a verifiable credential",
+    );
+
+    // TODO Is this what we want to do? Do we want to add any additional context?
+    console.log(systemMessage); // eslint-disable-line no-console
+
+    return void errorRes(res, userMessage, 400);
   }
 };

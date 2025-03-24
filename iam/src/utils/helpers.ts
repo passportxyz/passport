@@ -1,12 +1,25 @@
 import { Response } from "express";
-import { IAMError } from "./scorerService.js";
+
+// TODO
+export class IAMError extends Error {
+  constructor(public message: string) {
+    super(message);
+    this.name = this.constructor.name;
+  }
+}
 
 // return a JSON error response with a 400 status
-export const errorRes = (res: Response, error: string | object, errorCode: number): Response =>
-  res.status(errorCode).json({ error });
+export const errorRes = (
+  res: Response,
+  error: string | object,
+  errorCode: number,
+): Response => res.status(errorCode).json({ error });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const addErrorDetailsToMessage = (message: string, error: any): string => {
+export const addErrorDetailsToMessage = (
+  message: string,
+  error: any,
+): string => {
   if (error instanceof IAMError || error instanceof Error) {
     message += `, ${error.name}: ${error.message}`;
   } else if (typeof error === "string") {
@@ -18,7 +31,7 @@ export const addErrorDetailsToMessage = (message: string, error: any): string =>
 export class ApiError extends Error {
   constructor(
     public message: string,
-    public code: number
+    public code: number,
   ) {
     super(message);
     this.name = this.constructor.name;

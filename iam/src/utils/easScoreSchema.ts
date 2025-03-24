@@ -158,7 +158,7 @@ const parseScore = ({
   },
 });
 
-const encodeScoreData = ({
+export const encodeScoreData = ({
   stamps,
   scorer_id,
   score,
