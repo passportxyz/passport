@@ -36,45 +36,6 @@ const addSeconds = (date: Date, seconds: number): Date => {
   return result;
 };
 
-// Internal method to issue a verifiable credential
-const _issueEd25519Credential = async (
-  DIDKit: DIDKitLib,
-  key: string,
-  expiresInSeconds: number,
-  fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
-  issuanceDate?: string,
-  expirationDate?: string,
-): Promise<VerifiableCredential> => {
-  // get DID from key
-  const issuer = DIDKit.keyToDID("key", key);
-  // read method from key
-  const verificationMethod = await DIDKit.keyToVerificationMethod("key", key);
-  // stringify assertionMethod we feed to didkit-wasm-node
-  const verifyWithMethod = JSON.stringify({
-    proofPurpose: "assertionMethod",
-    verificationMethod,
-  });
-
-  // generate a verifiableCredential
-  const credential = await DIDKit.issueCredential(
-    JSON.stringify({
-      "@context": ["https://www.w3.org/2018/credentials/v1"],
-      type: ["VerifiableCredential"],
-      issuer,
-      issuanceDate: issuanceDate ? issuanceDate : new Date().toISOString(),
-      expirationDate: expirationDate
-        ? expirationDate
-        : addSeconds(new Date(), expiresInSeconds).toISOString(),
-      ...fields,
-    }),
-    verifyWithMethod,
-    key,
-  );
-
-  // parse the response of the DIDKit wasm
-  return JSON.parse(credential) as VerifiableCredential;
-};
-
 type CredentialExpiresInSeconds = {
   expiresInSeconds: number;
 };
@@ -139,59 +100,32 @@ export const issueChallengeCredential = async (
   DIDKit: DIDKitLib,
   key: string,
   record: RequestPayload,
-  signatureType?: SignatureType,
+  _signatureType?: SignatureType,
 ): Promise<IssuedCredential> => {
   // generate a verifiableCredential (60s ttl)
-  let credential: VerifiableCredential;
-  if (signatureType === "EIP712") {
-    const verificationMethod = await DIDKit.keyToVerificationMethod(
-      "ethr",
-      key,
-    );
+  const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
 
-    credential = await issueEip712Credential(
-      DIDKit,
-      key,
-      { expiresInSeconds: CHALLENGE_EXPIRES_AFTER_SECONDS },
-      {
-        credentialSubject: {
-          "@context": {
-            provider: "https://schema.org/Text",
-            challenge: "https://schema.org/Text",
-            address: "https://schema.org/Text",
-          },
-
-          id: `did:pkh:eip155:1:${record.address}`,
-          provider: `challenge-${record.type}`,
-          // extra fields to convey challenge data
-          challenge: record.challenge,
-          address: record.address,
+  const credential = await issueEip712Credential(
+    DIDKit,
+    key,
+    { expiresInSeconds: CHALLENGE_EXPIRES_AFTER_SECONDS },
+    {
+      credentialSubject: {
+        "@context": {
+          provider: "https://schema.org/Text",
+          challenge: "https://schema.org/Text",
+          address: "https://schema.org/Text",
         },
-      },
-      challengeSignatureDocument(verificationMethod),
-    );
-  } else {
-    credential = await _issueEd25519Credential(
-      DIDKit,
-      key,
-      CHALLENGE_EXPIRES_AFTER_SECONDS,
-      {
-        credentialSubject: {
-          "@context": {
-            provider: "https://schema.org/Text",
-            challenge: "https://schema.org/Text",
-            address: "https://schema.org/Text",
-          },
 
-          id: `did:pkh:eip155:1:${record.address}`,
-          provider: `challenge-${record.type}`,
-          // extra fields to convey challenge data
-          challenge: record.challenge,
-          address: record.address,
-        },
+        id: `did:pkh:eip155:1:${record.address}`,
+        provider: `challenge-${record.type}`,
+        // extra fields to convey challenge data
+        challenge: record.challenge,
+        address: record.address,
       },
-    );
-  }
+    },
+    challengeSignatureDocument(verificationMethod),
+  );
 
   // didkit-wasm-node returns credential as a string - parse for JSON
   return {
