@@ -9,7 +9,6 @@ import type {
   VerifiedPayload,
   ProviderContext,
 } from "@gitcoin/passport-types";
-import { formatExceptionMessages } from "./errors.js";
 
 class NoFailureReasonError extends Error {
   constructor() {
@@ -18,20 +17,20 @@ class NoFailureReasonError extends Error {
   }
 }
 
-function reportUnhandledError(
-  type: string,
-  address: string,
-  error: unknown,
-  errorMessage: string,
-) {
+function reportUnhandledError(type: string, address: string, e: unknown) {
   if (
     process.env.EXIT_ON_UNHANDLED_ERROR === "true" &&
     process.env.NODE_ENV === "development"
   ) {
     // To be used when running locally to ensure that unhandled errors are fixed
-    console.error(`Unhandled error for type ${type}`, error);
+    console.error(`Unhandled error for type ${type}`, e);
     process.exit(1);
   } else {
+    let errorMessage = "unable to parse, not derived from Error";
+    if (e instanceof Error) {
+      // Don't log the message (or first line of stack) as it may contain PII
+      errorMessage = `${e.name} ${e.stack.replace(/^.*\n *(?=at)/m, "")}`;
+    }
     console.error(
       `UNHANDLED ERROR: for type ${type} and address ${address} -`,
       errorMessage,
@@ -95,12 +94,11 @@ export class Providers {
           type,
         );
         if (!result.valid && !result.errors) {
-          const error = new NoFailureReasonError();
-          const { systemMessage } = formatExceptionMessages(
-            error,
-            "No failure reason provided",
+          reportUnhandledError(
+            type,
+            payload.address,
+            new NoFailureReasonError(),
           );
-          reportUnhandledError(type, payload.address, error, systemMessage);
         }
         return result;
       } catch (e) {
@@ -117,22 +115,18 @@ export class Providers {
             errors: [e.message],
           };
         } else {
-          let baseUserMessage =
-            "An error occurred while verifying your account";
+          reportUnhandledError(type, payload.address, e);
+
+          let message = "There was an unexpected error during verification.";
+
           // The first line of the stack contains the error name and message. We'll keep this
           // and the second line, the lowest level of the backtrace. The rest is dropped.
           if (e instanceof Error)
-            baseUserMessage += ` ${e.stack.replace(/\n\s*(?= )/, "").replace(/\n.*$/gm, "")}`;
-
-          const { systemMessage, userMessage } = formatExceptionMessages(
-            e,
-            baseUserMessage,
-          );
-          reportUnhandledError(type, payload.address, e, systemMessage);
+            message += ` ${e.stack.replace(/\n\s*(?= )/, "").replace(/\n.*$/gm, "")}`;
 
           return {
             valid: false,
-            errors: [userMessage],
+            errors: [message],
           };
         }
       }

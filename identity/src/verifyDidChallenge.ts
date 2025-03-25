@@ -6,7 +6,7 @@ import * as dagCBOR from "@ipld/dag-cbor";
 import { encode } from "multiformats/block";
 import { sha256 } from "multiformats/hashes/sha2";
 import { Cacao } from "@didtools/cacao";
-import { ApiError } from "serverUtils/apiError.js";
+import { ApiError } from "./serverUtils/apiError.js";
 
 class ChallengeMismatchError extends ApiError {
   constructor() {

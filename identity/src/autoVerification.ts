@@ -10,7 +10,7 @@ import {
 
 import { platforms } from "@gitcoin/passport-platforms";
 import { verifyProvidersAndIssueCredentials } from "./verification.js";
-import { ApiError } from "serverUtils/apiError.js";
+import { ApiError } from "./serverUtils/apiError.js";
 
 export type AutoVerificationFields = {
   address: string;

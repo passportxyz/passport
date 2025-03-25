@@ -33,9 +33,10 @@ const issuerDid = identityMock.getIssuerInfo().issuer.did;
 const verifyCredential = identityMock.verifyCredential;
 const hasValidIssuer = identityMock.hasValidIssuer;
 const verifyChallengeAndGetAddress = identityMock.verifyChallengeAndGetAddress;
-const VerifyDidChallengeBaseError = identityMock.VerifyDidChallengeBaseError;
 const verifyProvidersAndIssueCredentialsMock =
   identityMock.verifyProvidersAndIssueCredentials as jest.Mock;
+
+const { ApiError, InternalApiError } = identityMock.serverUtils;
 
 const getMockEIP712Credential = (
   provider: string,
@@ -234,8 +235,9 @@ describe("POST /verify", function () {
 
   it("handles invalid did-session signed challenge requests", async () => {
     (verifyChallengeAndGetAddress as jest.Mock).mockImplementationOnce(() => {
-      throw new VerifyDidChallengeBaseError(
+      throw new ApiError(
         "Verification failed, challenge mismatch",
+        "UNAUTHORIZED",
       );
     });
 
@@ -282,7 +284,7 @@ describe("POST /verify", function () {
       .expect("Content-Type", /json/);
 
     expect((response.body as ErrorResponseBody).error).toEqual(
-      "Invalid challenge signature: Error",
+      "Verification failed, challenge mismatch",
     );
   });
 
@@ -637,9 +639,70 @@ describe("POST /verify", function () {
     );
   });
 
-  it("handles exception if verify challenge credential throws", async () => {
+  describe("for unexpected errors", () => {
+    let logSpy: jest.SpyInstance;
+    beforeEach(() => {
+      logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    });
+    afterEach(() => {
+      logSpy.mockRestore();
+    });
+
+    it("handles unexpected errors", async () => {
+      (identityMock.verifyCredential as jest.Mock).mockRejectedValueOnce(
+        // new identityMock.serverUtils.InternalApiError("Verify Credential Error"),
+        new Error("Verify Credential Error"),
+      );
+
+      // challenge received from the challenge endpoint
+      const challenge = {
+        issuer: issuerDid,
+        credentialSubject: {
+          id: "did:pkh:eip155:1:0xNotAnEthereumAddress",
+          type: "challenge-Simple",
+          address: "0xNotAnEthereumAddress",
+          challenge: "123456789ABDEFGHIJKLMNOPQRSTUVWXYZ",
+        },
+      };
+      // payload containing a signature of the challenge in the challenge credential
+      const payload = {
+        type: "Simple",
+        address: "0x0",
+        proofs: {
+          valid: "false",
+          username: "test",
+          signature: "pass",
+        },
+      };
+
+      // create a req against the express app
+      const response = await request(app)
+        .post("/api/v0.0.0/verify")
+        .send({ challenge, payload })
+        .set("Accept", "application/json")
+        .expect(500)
+        .expect("Content-Type", /json/);
+
+      expect(response.body as ErrorResponseBody).toMatchObject({
+        error: "Unexpected server error",
+        code: 500,
+        details: {
+          id: expect.any(String),
+          name: "Error",
+          message: "Verify Credential Error",
+        },
+      });
+
+      expect(logSpy).toHaveBeenCalledWith(
+        "Unexpected error: ",
+        expect.stringMatching(/^Error at/),
+      );
+    });
+  });
+
+  it("handles ApiError errors", async () => {
     (identityMock.verifyCredential as jest.Mock).mockRejectedValueOnce(
-      new Error("Verify Credential Error"),
+      new InternalApiError("Verify Credential Error"),
     );
 
     // challenge received from the challenge endpoint
@@ -671,9 +734,10 @@ describe("POST /verify", function () {
       .expect(500)
       .expect("Content-Type", /json/);
 
-    expect((response.body as ErrorResponseBody).error).toEqual(
-      "Unable to verify payload: Error",
-    );
+    expect(response.body as ErrorResponseBody).toMatchObject({
+      error: "Verify Credential Error",
+      code: 500,
+    });
   });
 
   it("handles exception if verify challenge credential returns false", async () => {
@@ -709,7 +773,7 @@ describe("POST /verify", function () {
       .expect("Content-Type", /json/);
 
     expect((response.body as ErrorResponseBody).error).toEqual(
-      "Unable to verify payload",
+      "Invalid challenge",
     );
   });
 

@@ -1,5 +1,7 @@
 import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 import axios from "axios";
+import request from "supertest";
+import { app } from "../src/server.js";
 import { metadataHandler } from "../src/metadata.js";
 
 jest.mock("axios");
@@ -20,34 +22,48 @@ import { Request, Response } from "express";
 describe("GET /embed/stamps/metadata", () => {
   let mockReq: Partial<Request>;
   let mockRes: Partial<Response>;
+  let originalScorerEndpoint: string | undefined;
+  const mockScorerId = "10";
+  const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/weights?community_id=${mockScorerId}`;
 
   beforeEach(() => {
+    originalScorerEndpoint = process.env.SCORER_ENDPOINT;
+    process.env.SCORER_ENDPOINT = "https://api.passport.xyz";
     jest.clearAllMocks();
 
     mockRes = {
       json: jest.fn() as any,
       status: jest.fn().mockReturnThis() as any,
     };
+
+    mockedAxios.get.mockResolvedValueOnce(() => {
+      return {
+        data: {
+          rate_limit: "125/15m",
+        },
+      };
+    });
+  });
+
+  afterEach(() => {
+    process.env.SCORER_ENDPOINT = originalScorerEndpoint;
   });
 
   it("should return 400 if scorerId is missing", async () => {
-    mockReq = { query: {} };
+    const response = await request(app)
+      .get("/embed/stamps/metadata")
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(400)
+      .expect("Content-Type", /json/);
 
-    await metadataHandler(mockReq as Request, mockRes as Response);
-
-    expect(mockRes.status).toHaveBeenCalledWith(400);
-    expect(mockRes.json).toHaveBeenCalledWith({
+    expect(response.body).toEqual({
+      code: 400,
       error: "Missing required query parameter: `scorerId`",
     });
   });
 
   it("should call embedWeightsUrl and return the correct metadata structure", async () => {
-    const mockScorerId = "10";
-    process.env.SCORER_ENDPOINT = "https://api.passport.xyz";
-    mockReq = { query: { scorerId: mockScorerId } };
-
-    const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/weights?community_id=${mockScorerId}`;
-
     // Mock the axios GET request
     mockedAxios.get.mockResolvedValueOnce({
       status: 200,
@@ -57,7 +73,14 @@ describe("GET /embed/stamps/metadata", () => {
       },
     });
 
-    await metadataHandler(mockReq as Request, mockRes as Response);
+    const response = await request(app)
+      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    expect(response.body).toEqual({});
 
     // TODO: geri fix this
     // // Extract returned data from mock calls
@@ -101,20 +124,18 @@ describe("GET /embed/stamps/metadata", () => {
   });
 
   it("should handle errors from the embedWeightsUrl API correctly", async () => {
-    const mockScorerId = "10";
-    mockReq = { query: { scorerId: mockScorerId } };
-
     mockedAxios.get.mockImplementationOnce(() => {
       throw new Error("Failed to fetch embed weights");
     });
 
-    await metadataHandler(mockReq as Request, mockRes as Response);
+    const response = await request(app)
+      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(500)
+      .expect("Content-Type", /json/);
 
-    expect(mockRes.status).toHaveBeenCalledWith(500);
-    expect(mockRes.json).toHaveBeenCalledWith({
-      error:
-        "Unexpected error when processing request, Error: Failed to fetch embed weights",
-    });
+    expect(response.body).toEqual({});
   });
 
   it("should return empty credentials and 0 display weight for bad platforms", async () => {

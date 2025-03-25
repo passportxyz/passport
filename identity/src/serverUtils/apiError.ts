@@ -1,20 +1,14 @@
-export type Code =
-  | "BAD_REQUEST"
-  | "NOT_FOUND"
-  | "UNAUTHORIZED"
-  | "FORBIDDEN"
-  | "SERVER_ERROR";
+export type Code = "BAD_REQUEST" | "UNAUTHORIZED" | "SERVER_ERROR";
 
 const codeMap: Record<Code, number> = {
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
   SERVER_ERROR: 500,
 };
 
 export class ApiError extends Error {
   public statusCode: number;
+
   constructor(
     public message: string,
     statusCode: Code,
@@ -31,11 +25,5 @@ export class ApiError extends Error {
 export class InternalApiError extends ApiError {
   constructor(message: string) {
     super(message, "SERVER_ERROR");
-  }
-}
-
-export class UnauthorizedApiError extends ApiError {
-  constructor(message: string) {
-    super(message, "UNAUTHORIZED");
   }
 }

@@ -5,7 +5,7 @@ import {
 } from "@gitcoin/passport-types";
 import { handleAxiosError } from "@gitcoin/passport-platforms";
 import axios from "axios";
-import { ApiError, InternalApiError } from "serverUtils/apiError.js";
+import { ApiError, InternalApiError } from "./serverUtils/apiError.js";
 
 const SCORER_ENDPOINT = process.env.SCORER_ENDPOINT;
 const SCORER_API_KEY = process.env.SCORER_API_KEY;

@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { formatExceptionMessages } from "@gitcoin/passport-platforms";
 import { ApiError } from "./apiError.js";
 
 // Middleware to handle errors
@@ -11,29 +10,37 @@ export const errorHandlerMiddleware = (
   _next: unknown,
 ) => {
   // TODO
-  console.error("HERE", err);
-
   if (err instanceof ApiError) {
-    // TODO log if 500?
     return res.status(err.statusCode).json({
       error: err.message,
+      code: err.statusCode,
     });
   }
 
   // Otherwise, format error messages for unexpected errors
   // - Server will log just the error name and backtrace (no error message)
   // - Client will get a generic error message
-  // - Both include a tag that can be used to tie the error
+  // - Both include a random ID that can be used to tie the error
   //   to the trace if a user reaches out with issues
-  const { systemMessage, userMessage } = formatExceptionMessages(
-    err,
-    "Unexpected server error",
-  );
+  const randomID = Math.random().toString(36).substring(2, 8);
 
-  console.log("Unexpected error: ", systemMessage); // eslint-disable-line no-console
+  console.log("Unexpected error: ", formatSystemMessage(err, randomID));
 
-  return res.status(500).json({
-    status: "error",
-    message: userMessage,
-  });
+  return res.status(500).json(formatUserResponse(err, randomID));
 };
+
+const formatSystemMessage = (exception: Error, randomID: string): string =>
+  // Drop the message (and first line of stack, which is just the message) as it may contain PII
+  `${exception.name} ${exception.stack.replace(/^.*\n *(?=at)/m, "")} (ID: ${randomID})`;
+
+const formatUserResponse = (exception: Error, randomID: string) => ({
+  error: "Unexpected server error",
+  code: 500,
+  details: {
+    id: randomID,
+    // Do we want to include this info at all?
+    // Do we want to include it here, or in `error` above?
+    name: exception.name,
+    message: exception.message,
+  },
+});

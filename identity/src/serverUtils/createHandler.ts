@@ -16,7 +16,7 @@ export const createHandler =
   (
     req: Request<ParamsDictionary, ResponseBodyType, RequestBodyType>,
     res: Response<ResponseBodyType>,
-    next: NextFunction,
+    next?: NextFunction,
   ): void => {
     handler(req, res, next).catch(next);
   };

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { checkCredentialBans } from "../src/bans";
 import { ErrorResponseBody } from "@gitcoin/passport-types";
-import { ApiError, UnexpectedApiError } from "../src/helpers";
+import { ApiError, InternalApiError } from "../src/serverUtils/apiError";
 
 jest.mock("axios");
 
@@ -199,7 +199,7 @@ describe("checkCredentialBans", () => {
     });
 
     await expect(checkCredentialBans([validCredential])).rejects.toThrowError(
-      new UnexpectedApiError(
+      new InternalApiError(
         'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}',
       ),
     );
@@ -213,7 +213,7 @@ describe("checkCredentialBans", () => {
     await expect(checkCredentialBans(input)).rejects.toThrowError(
       new ApiError(
         "Ban not found for nullifier hash123. This should not happen.",
-        500,
+        "SERVER_ERROR",
       ),
     );
   });

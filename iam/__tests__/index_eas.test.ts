@@ -111,7 +111,7 @@ describe("POST /eas/scoreV2", () => {
       .post("/api/v0.0.0/eas/scoreV2")
       .send({ recipient, nonce, chainIdHex: "0x694206969" })
       .set("Accept", "application/json")
-      .expect(404)
+      .expect(400)
       .expect("Content-Type", /json/);
 
     expect(response.body.error).toEqual(

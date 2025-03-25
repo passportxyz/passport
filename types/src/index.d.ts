@@ -205,10 +205,17 @@ export type ValidResponseBody = {
   credential: VerifiableCredential;
   record?: ProofRecord;
 };
+
 export type ErrorResponseBody = {
-  error?: string;
-  code?: number;
+  error: string;
+  code: number;
+  details?: {
+    id: string;
+    name: string;
+    message: string;
+  }
 };
+
 export type CredentialResponseBody = ValidResponseBody | ErrorResponseBody;
 
 // Issued Credential response

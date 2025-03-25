@@ -114,4 +114,3 @@ export { handleAxiosError } from "./utils/handleAxiosError.js";
 export { PassportCache } from "./utils/passport-cache.js";
 export { PlatformPreCheckError } from "./utils/platform.js";
 export { Hyperlink } from "./utils/Hyperlink.js";
-export { formatExceptionMessages } from "./utils/errors.js";
