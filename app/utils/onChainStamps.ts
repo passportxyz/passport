@@ -91,30 +91,18 @@ export async function getAttestationData({
       ),
     };
 
-    const passportSchema = onchainInfo[chainId].easSchemas.passport.uid;
-    // check if user has attestations
-    const passportUid = (await publicClient.readContract({
-      abi: resolverAbi,
-      address: resolverAddress as `0x${string}`,
-      functionName: "userAttestations", // Name of the function in your contract ABI
-      args: [address, passportSchema], // Arguments to the function
-    })) as `0x${string}`;
+    const cachedPassport = await getPassport({
+      publicClient,
+      address,
+      decoderAddress,
+      decoderAbi,
+    });
 
-    let providers: AttestationData["providers"] = [];
-    if (passportUid !== ZERO_BYTES32) {
-      const cachedPassport = await getPassport({
-        publicClient,
-        address,
-        decoderAddress,
-        decoderAbi,
-      });
-
-      providers = cachedPassport.map(({ provider, issuanceDate, expirationDate }) => ({
-        providerName: provider as PROVIDER_ID,
-        issuanceDate: new Date(Number(issuanceDate) * 1000),
-        expirationDate: new Date(Number(expirationDate) * 1000),
-      }));
-    }
+    const providers = cachedPassport.map(({ provider, issuanceDate, expirationDate }) => ({
+      providerName: provider as PROVIDER_ID,
+      issuanceDate: new Date(Number(issuanceDate) * 1000),
+      expirationDate: new Date(Number(expirationDate) * 1000),
+    }));
 
     return {
       providers,
