@@ -1,6 +1,7 @@
-import { Request } from "express";
-import { Response } from "express";
-import { VerifyRequestBody } from "@gitcoin/passport-types";
+import {
+  CredentialResponseBody,
+  VerifyRequestBody,
+} from "@gitcoin/passport-types";
 
 import {
   hasValidIssuer,
@@ -11,21 +12,18 @@ import {
   verifyChallengeAndGetAddress,
 } from "../utils/identityHelper.js";
 
-const { ApiError } = serverUtils;
+const { ApiError, createHandler } = serverUtils;
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
 // All provider exports from platforms
-export const verifyHandler = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  const requestBody: VerifyRequestBody = req.body as VerifyRequestBody;
+export const verifyHandler = createHandler<
+  VerifyRequestBody,
+  CredentialResponseBody[]
+>(async (req, res) => {
   // each verify request should be received with a challenge credential detailing a signature contained in the RequestPayload.proofs
-  const challenge = requestBody.challenge;
-  // get the payload from the JSON req body
-  const payload = requestBody.payload;
+  const { challenge, payload } = req.body;
 
   // Check the challenge and the payload is valid before issuing a credential from a registered provider
   const verified = await verifyCredential(DIDKit, challenge);
@@ -38,7 +36,7 @@ export const verifyHandler = async (
     throw new ApiError("Invalid challenge", "UNAUTHORIZED");
   }
 
-  const address = await verifyChallengeAndGetAddress(requestBody);
+  const address = await verifyChallengeAndGetAddress(req.body);
 
   payload.address = address;
 
@@ -69,4 +67,4 @@ export const verifyHandler = async (
   );
 
   return void res.json(credentials);
-};
+});

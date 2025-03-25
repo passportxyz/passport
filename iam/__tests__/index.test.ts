@@ -1,9 +1,7 @@
-import { jest, it, describe, expect, beforeEach } from "@jest/globals";
-
-import axios from "axios";
+import { jest, it, describe, expect } from "@jest/globals";
 
 import request from "supertest";
-import { PassportCache, providers } from "@gitcoin/passport-platforms";
+import { providers } from "@gitcoin/passport-platforms";
 import { app } from "../src/index.js";
 
 import {
@@ -14,13 +12,6 @@ import {
   VerifiableCredential,
   VerifiedPayload,
 } from "@gitcoin/passport-types";
-
-import {
-  getIssuerInfo,
-  verifyCredential,
-} from "../src/utils/identityHelper.js";
-import { IAMError } from "../src/utils/scorerService.js";
-import { toJsonObject } from "../src/utils/json.js";
 
 jest.mock("../src/utils/revocations", () => ({
   filterRevokedCredentials: jest
@@ -44,11 +35,7 @@ jest.mock("../src/utils/easFees", () => ({
 
 jest.mock("axios");
 
-const issuerDid = getIssuerInfo().issuer.did;
-
 const MOCK_ADDRESS = "0xcF314CE817E25B4f784BC1F24C9a79a525fEc50f";
-
-const chainIdHex = "0xa";
 
 describe("POST /challenge", function () {
   it("handles valid challenge requests", async () => {

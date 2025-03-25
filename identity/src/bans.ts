@@ -1,7 +1,11 @@
-import { CredentialResponseBody, ValidResponseBody, VerifiableCredential } from "@gitcoin/passport-types";
+import {
+  CredentialResponseBody,
+  ValidResponseBody,
+  VerifiableCredential,
+} from "@gitcoin/passport-types";
 import { handleAxiosError } from "@gitcoin/passport-platforms";
-import { UnexpectedApiError } from "./helpers.js";
 import axios from "axios";
+import { ApiError, InternalApiError } from "serverUtils/apiError.js";
 
 const SCORER_ENDPOINT = process.env.SCORER_ENDPOINT;
 const SCORER_API_KEY = process.env.SCORER_API_KEY;
@@ -15,11 +19,11 @@ type Ban = {
 };
 
 export const checkCredentialBans = async (
-  credentialResponses: CredentialResponseBody[]
+  credentialResponses: CredentialResponseBody[],
 ): Promise<CredentialResponseBody[]> => {
   const credentialsToCheck = credentialResponses
     .filter((credentialResponse): credentialResponse is ValidResponseBody =>
-      Boolean((credentialResponse as ValidResponseBody).credential)
+      Boolean((credentialResponse as ValidResponseBody).credential),
     )
     .map(({ credential }) => credential);
 
@@ -29,7 +33,7 @@ export const checkCredentialBans = async (
       acc[ban.hash] = ban;
       return acc;
     },
-    {} as Record<string, Ban>
+    {} as Record<string, Ban>,
   );
 
   return credentialResponses.map((credentialResponse) => {
@@ -47,7 +51,10 @@ export const checkCredentialBans = async (
       const ban = bansByHash[nullifier];
 
       if (!ban) {
-        throw new UnexpectedApiError(`Ban not found for nullifier ${nullifier}. This should not happen.`);
+        throw new ApiError(
+          `Ban not found for nullifier ${nullifier}. This should not happen.`,
+          "SERVER_ERROR",
+        );
       }
 
       if (ban.is_banned) {
@@ -64,7 +71,9 @@ export const checkCredentialBans = async (
   });
 };
 
-const fetchBans = async (credentials: VerifiableCredential[]): Promise<Ban[]> => {
+const fetchBans = async (
+  credentials: VerifiableCredential[],
+): Promise<Ban[]> => {
   if (!credentials.length) {
     return [];
   }
@@ -103,6 +112,6 @@ const fetchBans = async (credentials: VerifiableCredential[]): Promise<Ban[]> =>
 
     return banResponse.data || [];
   } catch (e) {
-    handleAxiosError(e, "Bans", UnexpectedApiError, [SCORER_API_KEY]);
+    handleAxiosError(e, "Bans", InternalApiError, [SCORER_API_KEY]);
   }
 };

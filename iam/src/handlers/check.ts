@@ -1,6 +1,4 @@
-import { Request } from "express";
-import { Response } from "express";
-import { CheckRequestBody } from "@gitcoin/passport-types";
+import { CheckRequestBody, CheckResponseBody } from "@gitcoin/passport-types";
 
 import {
   verifyTypes,
@@ -8,13 +6,13 @@ import {
   serverUtils,
 } from "../utils/identityHelper.js";
 
-const { ApiError } = serverUtils;
+const { ApiError, createHandler } = serverUtils;
 
-export const checkHandler = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  const { payload } = req.body as CheckRequestBody;
+export const checkHandler = createHandler<
+  CheckRequestBody,
+  CheckResponseBody[]
+>(async (req, res) => {
+  const { payload } = req.body;
 
   if (!payload || !(payload.type || payload.types)) {
     throw new ApiError("Incorrect payload", "BAD_REQUEST");
@@ -33,5 +31,6 @@ export const checkHandler = async (
     error,
     code,
   }));
+
   return void res.json(responses);
-};
+});

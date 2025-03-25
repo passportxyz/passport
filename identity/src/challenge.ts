@@ -7,6 +7,7 @@ import {
 import crypto from "crypto";
 import { verifyDidChallenge } from "./verifyDidChallenge.js";
 import { getAddress, verifyMessage } from "ethers";
+import { ApiError } from "./serverUtils/apiError.js";
 
 const getChallengeString = (provider: string): string => {
   const nonce = crypto.randomBytes(32).toString("hex");
@@ -39,15 +40,26 @@ export const verifyChallengeAndGetAddress = async ({
 }: VerifyRequestBody): Promise<string> => {
   // If signedChallenge is provided, use the did-session signed challenge
   // otherwise, use the old wallet signed challenge
-  const uncheckedAddress = signedChallenge
-    ? await verifyDidChallenge(
-        signedChallenge,
-        challenge.credentialSubject.challenge,
-      )
-    : verifyMessage(
+  let uncheckedAddress: string;
+
+  if (signedChallenge) {
+    uncheckedAddress = await verifyDidChallenge(
+      signedChallenge,
+      challenge.credentialSubject.challenge,
+    );
+  } else {
+    try {
+      uncheckedAddress = verifyMessage(
         challenge.credentialSubject.challenge,
         payload.proofs.signature,
       );
+    } catch {
+      throw new ApiError(
+        "Unable to verify challenge signature",
+        "UNAUTHORIZED",
+      );
+    }
+  }
 
   return getAddress(uncheckedAddress);
 };

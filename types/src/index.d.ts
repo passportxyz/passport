@@ -125,7 +125,7 @@ export type SignatureType = "EIP712" | "Ed25519";
 
 export type SignedDidChallenge = {
   signatures: JWSSignature[];
-  payload: any;
+  payload: string;
   cid: number[];
   cacao: number[];
   issuer: string;
@@ -288,7 +288,15 @@ export type PassportLoadResponse = {
 export type PassportAttestation = {
   multiAttestationRequest: MultiAttestationRequest[];
   nonce: number;
-  fee: any;
+  fee: string;
+};
+
+export type EasRequestBody = {
+  nonce: number;
+  recipient: string;
+  credentials?: VerifiableCredential[];
+  chainIdHex: string;
+  customScorerId?: number;
 };
 
 export type EasPayload = {
@@ -302,13 +310,16 @@ export type EasPayload = {
   error?: string;
 };
 
-export type EasRequestBody = {
-  nonce: number;
-  recipient: string;
-  credentials?: VerifiableCredential[];
-  chainIdHex: string;
-  customScorerId?: number;
-};
+// In a complex type, replace all instances of bigint with string
+export type ReplaceBigIntWithString<T> = T extends bigint
+  ? string
+  : T extends Array<infer U>
+    ? Array<ReplaceBigIntWithString<U>>
+    : T extends object
+      ? { [K in keyof T]: ReplaceBigIntWithString<T[K]> }
+      : T;
+
+export type EasResponseBody = ReplaceBigIntWithString<EasPayload>;
 
 // Passport DID
 export type DID = string;

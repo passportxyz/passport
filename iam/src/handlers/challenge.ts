@@ -1,10 +1,5 @@
-import { Request } from "express";
-
 import { getAddress } from "ethers";
-
-import { Response } from "express";
 import {
-  RequestPayload,
   ChallengeRequestBody,
   CredentialResponseBody,
 } from "@gitcoin/passport-types";
@@ -16,20 +11,18 @@ import {
   serverUtils,
 } from "../utils/identityHelper.js";
 
-const { ApiError } = serverUtils;
+const { ApiError, createHandler } = serverUtils;
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
-export const challengeHandler = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  // get the payload from the JSON req body
-  const requestBody: ChallengeRequestBody = req.body as ChallengeRequestBody;
-  const payload: RequestPayload = requestBody.payload;
+export const challengeHandler = createHandler<
+  ChallengeRequestBody,
+  CredentialResponseBody
+>(async (req, res) => {
+  const payload = req.body.payload;
 
-  ["address", "type"].forEach((key: keyof RequestPayload) => {
+  (["address", "type"] as const).forEach((key) => {
     if (!payload[key]) {
       throw new ApiError(
         `Missing ${key} from challenge request body`,
@@ -53,5 +46,5 @@ export const challengeHandler = async (
   const credential = await issueChallengeCredential(DIDKit, issuer.key, record);
 
   // return the verifiable credential
-  return void res.json(credential as CredentialResponseBody);
-};
+  return void res.json(credential);
+});

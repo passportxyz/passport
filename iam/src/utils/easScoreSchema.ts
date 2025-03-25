@@ -7,9 +7,11 @@ import {
 import passportOnchainInfo from "../../../deployments/onchainInfo.json" with { type: "json" };
 import { ethers } from "ethers";
 
-import { IAMError } from "@gitcoin/passport-identity";
 import axios from "axios";
 import { handleAxiosError } from "@gitcoin/passport-platforms";
+import { serverUtils } from "../utils/identityHelper.js";
+
+const { InternalApiError } = serverUtils;
 
 const SCORER_API_KEY = process.env.SCORER_API_KEY;
 const SCORE_DECIMALS = 4;
@@ -123,7 +125,9 @@ async function requestV2Score(
       })
     ).data;
   } catch (error) {
-    handleAxiosError(error, "Passport V2 score", IAMError, [SCORER_API_KEY]);
+    handleAxiosError(error, "Passport V2 score", InternalApiError, [
+      SCORER_API_KEY,
+    ]);
   }
 }
 

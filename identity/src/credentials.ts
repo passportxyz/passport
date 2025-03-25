@@ -5,7 +5,6 @@ import {
   RequestPayload,
   VerifiableCredential,
   IssuedCredential,
-  SignatureType,
 } from "@gitcoin/passport-types";
 
 const ONE_DAY_IN_MS = 1000 * 60 * 60 * 24;
@@ -155,7 +154,7 @@ const getNullifiers = async ({
     );
 
   if (unexpectedErrors.length > 0) {
-    console.error("Unexpected errors generating nullifiers", unexpectedErrors);
+    console.error("Unexpected errors generating nullifiers", unexpectedErrors); // eslint-disable-line no-console
     throw new Error("Unable to generate nullifiers");
   }
 
@@ -270,7 +269,6 @@ export const verifyCredential = async (
       // did we get any errors when we attempted to verify?
       return verify.errors.length === 0;
     } catch (e) {
-      console.error("Failed to verify credential", e);
       // if didkit throws, etc.
       return false;
     }

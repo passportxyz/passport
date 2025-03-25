@@ -8,23 +8,21 @@ import { sha256 } from "multiformats/hashes/sha2";
 import { Cacao } from "@didtools/cacao";
 import { ApiError } from "serverUtils/apiError.js";
 
-export class VerifyDidChallengeBaseError extends ApiError {}
-
-class ChallengeMismatchError extends VerifyDidChallengeBaseError {
+class ChallengeMismatchError extends ApiError {
   constructor() {
     super("Verification failed, challenge mismatch", "UNAUTHORIZED");
     this.name = "ChallengeMismatchError";
   }
 }
 
-class InvalidSignatureError extends VerifyDidChallengeBaseError {
+class InvalidSignatureError extends ApiError {
   constructor() {
     super("Verification failed, invalid signature", "UNAUTHORIZED");
     this.name = "InvalidSignatureError";
   }
 }
 
-class CredentialTooOldError extends VerifyDidChallengeBaseError {
+class CredentialTooOldError extends ApiError {
   constructor() {
     super("Credential is too old", "UNAUTHORIZED");
     this.name = "CredentialTooOldError";
