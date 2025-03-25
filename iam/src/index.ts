@@ -1,5 +1,4 @@
 // Should this file be an app factory? If it was, we could move the provider config to main.ts and test in isolation
-
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -12,6 +11,8 @@ import {
   easScoreV2Handler,
   verifyHandler,
 } from "./handlers/index.js";
+
+import { serverUtils } from "./utils/identityHelper.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -80,3 +81,6 @@ app.use(
     path.join(path.dirname(fileURLToPath(import.meta.url)), "static"),
   ),
 );
+
+// This custom error handler needs to be last
+app.use(serverUtils.errorHandlerMiddleware);

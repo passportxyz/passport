@@ -5,9 +5,10 @@ import { CheckRequestBody } from "@gitcoin/passport-types";
 import {
   verifyTypes,
   groupProviderTypesByPlatform,
+  serverUtils,
 } from "../utils/identityHelper.js";
-import { errorRes } from "../utils/helpers.js";
-import { formatExceptionMessages } from "@gitcoin/passport-platforms";
+
+const { ApiError } = serverUtils;
 
 export const checkHandler = async (
   req: Request,
@@ -16,7 +17,7 @@ export const checkHandler = async (
   const { payload } = req.body as CheckRequestBody;
 
   if (!payload || !(payload.type || payload.types)) {
-    return void errorRes(res, "Incorrect payload", 400);
+    throw new ApiError("Incorrect payload", "BAD_REQUEST");
   }
 
   const types = (payload.types?.length ? payload.types : [payload.type]).filter(
@@ -25,24 +26,12 @@ export const checkHandler = async (
 
   const typesGroupedByPlatform = groupProviderTypesByPlatform(types);
 
-  try {
-    const results = await verifyTypes(typesGroupedByPlatform, payload);
-    const responses = results.map(({ verifyResult, type, error, code }) => ({
-      valid: verifyResult.valid,
-      type,
-      error,
-      code,
-    }));
-    return void res.json(responses);
-  } catch (error) {
-    const { userMessage, systemMessage } = formatExceptionMessages(
-      error,
-      "Unable to check payload",
-    );
-
-    // TODO Is this what we want to do? Do we want to add any additional context?
-    console.log(systemMessage); // eslint-disable-line no-console
-
-    return void errorRes(res, userMessage, 500);
-  }
+  const results = await verifyTypes(typesGroupedByPlatform, payload);
+  const responses = results.map(({ verifyResult, type, error, code }) => ({
+    valid: verifyResult.valid,
+    type,
+    error,
+    code,
+  }));
+  return void res.json(responses);
 };

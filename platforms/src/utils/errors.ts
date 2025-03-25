@@ -23,9 +23,9 @@ export const formatExceptionMessages = (
 
   const systemMessage =
     e instanceof Error
-      ? // Don't log the message (or first line of stack, which is just the message) as it may contain PII
+      ? // Drop the message (and first line of stack, which is just the message) as it may contain PII
         `${e.name} ${e.stack.replace(/^.*\n *(?=at)/m, "")} (ID: ${randomID})`
-      : "Unknown error";
+      : "Unknown error (unable to parse error message)";
 
   // TODO do we want to include the error message in the user message?
   // Otherwise, it's not logged anywhere (unless it's passed in as
