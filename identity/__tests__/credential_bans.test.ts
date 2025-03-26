@@ -14,14 +14,26 @@ describe("checkCredentialBans", () => {
   });
 
   const validCredential = {
-    record: { type: "test" },
+    record: { type: "test", version: "0.0.0" },
     credential: {
+      "@context": ["https://www.w3.org/2018/credentials/v1"],
       credentialSubject: {
+        "@context": {
+          nullifiers: {
+            "@container": "@list",
+            "@type": "https://schema.org/Text",
+          },
+        },
         nullifiers: ["hash123"] as string[] | undefined,
         hash: undefined as string | undefined,
         provider: "provider123",
         id: "did:0x123",
       },
+      type: ["VerifiableCredential"],
+      issuer: "did:0x123",
+      issuanceDate: "2021-01-01",
+      expirationDate: "2022-01-01",
+      proof: {} as any,
     },
     code: 200,
   };

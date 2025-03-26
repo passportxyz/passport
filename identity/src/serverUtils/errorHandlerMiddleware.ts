@@ -9,7 +9,7 @@ export const errorHandlerMiddleware = (
   res: Response,
   _next: unknown,
 ) => {
-  // TODO
+  // If we have an API Error, use the provided code and message
   if (err instanceof ApiError) {
     return res.status(err.statusCode).json({
       error: err.message,
@@ -19,12 +19,12 @@ export const errorHandlerMiddleware = (
 
   // Otherwise, format error messages for unexpected errors
   // - Server will log just the error name and backtrace (no error message)
-  // - Client will get a generic error message
-  // - Both include a random ID that can be used to tie the error
-  //   to the trace if a user reaches out with issues
+  // - Client will get a generic error message with additional details under `details`
+  // - Both include a random ID that can be used to tie the error to the trace if a
+  //   user reaches out with issues
   const randomID = Math.random().toString(36).substring(2, 8);
 
-  console.log("Unexpected error: ", formatSystemMessage(err, randomID));
+  console.log("Unexpected error:", formatSystemMessage(err, randomID));
 
   return res.status(500).json(formatUserResponse(err, randomID));
 };

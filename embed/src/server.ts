@@ -68,7 +68,7 @@ app.use(
     // Redis store configuration
     keyGenerator: keyGenerator,
     store: getRateLimiterStore(),
-    skip: (req, res): boolean => {
+    skip: (req, _res): boolean => {
       // TODO: geri review this, /verify should be removed ...
       return (
         req.path === "/health" ||

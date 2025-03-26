@@ -2,7 +2,6 @@ import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 import axios from "axios";
 import request from "supertest";
 import { app } from "../src/server.js";
-import { metadataHandler } from "../src/metadata.js";
 
 jest.mock("axios");
 
@@ -17,11 +16,7 @@ jest.unstable_mockModule("@gitcoin/passport-platforms", () => ({
   },
 }));
 
-import { Request, Response } from "express";
-
 describe("GET /embed/stamps/metadata", () => {
-  let mockReq: Partial<Request>;
-  let mockRes: Partial<Response>;
   let originalScorerEndpoint: string | undefined;
   const mockScorerId = "10";
   const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/weights?community_id=${mockScorerId}`;
@@ -31,17 +26,10 @@ describe("GET /embed/stamps/metadata", () => {
     process.env.SCORER_ENDPOINT = "https://api.passport.xyz";
     jest.clearAllMocks();
 
-    mockRes = {
-      json: jest.fn() as any,
-      status: jest.fn().mockReturnThis() as any,
-    };
-
-    mockedAxios.get.mockResolvedValueOnce(() => {
-      return {
-        data: {
-          rate_limit: "125/15m",
-        },
-      };
+    mockedAxios.get.mockResolvedValueOnce({
+      data: {
+        rate_limit: "125/15m",
+      },
     });
   });
 
@@ -80,62 +68,63 @@ describe("GET /embed/stamps/metadata", () => {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body).toEqual({});
-
-    // TODO: geri fix this
-    // // Extract returned data from mock calls
-    // // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    // const actualResponse = (mockRes.json as jest.Mock).mock.calls[0][0];
-    // // Flatten all credentials from platforms
-    // // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-    // const allCredentials = actualResponse.flatMap((section: any) =>
-    //   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-    //   section.platforms.flatMap((platform: any) => platform.credentials || [])
-    // );
-
-    // // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    // const allDisplayWeights = actualResponse.flatMap((section: unknown) => {
-    //   return section.platforms.flatMap((platform) => ({
-    //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    //     platform: platform.name,
-    //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    //     displayWeight: platform.displayWeight || [],
-    //   }));
-    // });
-    // // Verify API call
-    // // eslint-disable-next-line @typescript-eslint/unbound-method
-    // expect(mockedAxios.get).toHaveBeenCalledWith(embedWeightsUrl);
-    // // Verify that displayWeight has 1 decimal place
-    // expect(allDisplayWeights).toEqual(
-    //   expect.arrayContaining([
-    //     expect.objectContaining({ platform: "Binance", displayWeight: "16.0" }),
-    //     expect.objectContaining({ platform: "Holonym", displayWeight: "1.5" }),
-    //     expect.objectContaining({ platform: "Google", displayWeight: "0.0" }),
-    //   ])
-    // );
-    // // Verifies that credentials are returned in the wright format
-    // expect(allCredentials).toEqual(
-    //   expect.arrayContaining([
-    //     expect.objectContaining({ id: "BinanceBABT", weight: "16.021" }),
-    //     expect.objectContaining({ id: "HolonymPhone", weight: "1.521" }),
-    //     expect.objectContaining({ id: "Google", weight: "0" }), // If Google is missing from the weights response, but it's present in the STAMP_PAGES.
-    //   ])
-    // );
+    expect(response.body.length).toBeGreaterThan(1);
+    expect(response.body).toMatchObject(
+      expect.arrayContaining([
+        {
+          header: expect.any(String),
+          platforms: expect.arrayContaining([
+            expect.objectContaining({
+              description: expect.any(String),
+              name: expect.any(String),
+              credentials: expect.any(Array),
+              displayWeight: expect.any(String),
+              documentationLink: expect.any(String),
+            }),
+          ]),
+        },
+      ]),
+    );
   });
 
-  it("should handle errors from the embedWeightsUrl API correctly", async () => {
-    mockedAxios.get.mockImplementationOnce(() => {
-      throw new Error("Failed to fetch embed weights");
+  describe("unexpected errors", () => {
+    let logSpy: any;
+
+    beforeEach(() => {
+      logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
     });
 
-    const response = await request(app)
-      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
-      .set("Accept", "application/json")
-      .set("x-api-key", "test")
-      .expect(500)
-      .expect("Content-Type", /json/);
+    afterEach(() => {
+      logSpy.mockRestore();
+    });
 
-    expect(response.body).toEqual({});
+    it("should handle errors from the embedWeightsUrl API correctly", async () => {
+      mockedAxios.get.mockImplementationOnce(() => {
+        throw new Error("Failed to fetch embed weights");
+      });
+
+      const response = await request(app)
+        .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+        .set("Accept", "application/json")
+        .set("x-api-key", "test")
+        .expect(500)
+        .expect("Content-Type", /json/);
+
+      expect(response.body).toEqual({
+        code: 500,
+        error: "Unexpected server error",
+        details: {
+          id: expect.any(String),
+          name: "Error",
+          message: "Failed to fetch embed weights",
+        },
+      });
+
+      expect(logSpy).toHaveBeenCalledWith(
+        "Unexpected error:",
+        expect.any(String),
+      );
+    });
   });
 
   it("should return empty credentials and 0 display weight for bad platforms", async () => {

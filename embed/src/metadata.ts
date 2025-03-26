@@ -6,7 +6,27 @@ import axios from "axios";
 
 const { ApiError, createHandler } = serverUtils;
 
-export const metadataHandler = createHandler<{}, any>(async (req, res) => {
+// No request body
+type MetadataRequestBody = object;
+
+type MetadataResponseBody = {
+  header: string;
+  platforms: {
+    name: string;
+    credentials: {
+      id: string;
+      weight: string;
+    }[];
+    displayWeight: string;
+    requiresSignature?: boolean;
+    requiresPopup?: boolean;
+  }[];
+}[];
+
+export const metadataHandler = createHandler<
+  MetadataRequestBody,
+  MetadataResponseBody
+>(async (req, res) => {
   const { scorerId } = req.query;
   if (!scorerId) {
     throw new ApiError(

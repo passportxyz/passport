@@ -694,7 +694,7 @@ describe("POST /verify", function () {
       });
 
       expect(logSpy).toHaveBeenCalledWith(
-        "Unexpected error: ",
+        "Unexpected error:",
         expect.stringMatching(/^Error at/),
       );
     });
