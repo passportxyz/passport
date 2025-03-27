@@ -2,4 +2,8 @@
 . "$(dirname "$0")/_/husky.sh"
 
 yarn lint
-yarn prettier
+
+if [ $? -ne 0 ]; then
+  echo "❌ Linting / Prettier found unformatted files. Please run 'yarn prettier' before committing!"
+  exit 1
+fi
