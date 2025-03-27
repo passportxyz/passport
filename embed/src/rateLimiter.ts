@@ -46,10 +46,7 @@ export function parseRateLimit(rateLimitSpec: string | null): number {
   return totalRequests / timeInMinutes;
 }
 
-export async function apiKeyRateLimit(
-  req: Request,
-  res: Response,
-): Promise<number> {
+export async function apiKeyRateLimit(req: Request, res: Response): Promise<number> {
   try {
     const apiKey = req.headers["x-api-key"] as string;
     const cacheKey = `erl:${apiKey}`;
@@ -58,18 +55,13 @@ export async function apiKeyRateLimit(
 
     // Simulate an async operation (e.g., database call)
     if (Number.isNaN(rateLimit)) {
-      const rateLimits = await axios.get(
-        `${process.env.SCORER_ENDPOINT}/internal/embed/validate-api-key`,
-        {
-          headers: {
-            "X-API-KEY": apiKey,
-          },
+      const rateLimits = await axios.get(`${process.env.SCORER_ENDPOINT}/internal/embed/validate-api-key`, {
+        headers: {
+          "X-API-KEY": apiKey,
         },
-      );
+      });
 
-      const rateLimitSpec = (rateLimits.data as { rate_limit: string })[
-        "rate_limit"
-      ];
+      const rateLimitSpec = (rateLimits.data as { rate_limit: string })["rate_limit"];
       const rateLimit = parseRateLimit(rateLimitSpec);
 
       // Cache the limit and set to expire in 5 minutes
