@@ -1,8 +1,4 @@
-import {
-  ProviderInternalVerificationError,
-  type Provider,
-  type ProviderOptions,
-} from "../../types.js";
+import { ProviderInternalVerificationError, type Provider, type ProviderOptions } from "../../types.js";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 
 export class TrustaLabsProvider implements Provider {
@@ -17,8 +13,6 @@ export class TrustaLabsProvider implements Provider {
   }
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    throw new ProviderInternalVerificationError(
-      "TrustaLabs provider is deprecated.",
-    );
+    throw new ProviderInternalVerificationError("TrustaLabs provider is deprecated.");
   }
 }

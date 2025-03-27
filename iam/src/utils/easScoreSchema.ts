@@ -1,8 +1,4 @@
-import {
-  SchemaEncoder,
-  ZERO_BYTES32,
-  MultiAttestationRequest,
-} from "@ethereum-attestation-service/eas-sdk";
+import { SchemaEncoder, ZERO_BYTES32, MultiAttestationRequest } from "@ethereum-attestation-service/eas-sdk";
 
 import passportOnchainInfo from "../../../deployments/onchainInfo.json" with { type: "json" };
 import { ethers } from "ethers";
@@ -16,10 +12,7 @@ const SCORE_DECIMALS = 4;
 
 const parseDecimal = (decimalStr: string): bigint => {
   // Turns e.g. 2.12345 into 2.1234 without using float math
-  const truncated = decimalStr.replace(
-    new RegExp(String.raw`(?<=\.\d{${SCORE_DECIMALS}})\d+`),
-    "",
-  );
+  const truncated = decimalStr.replace(new RegExp(String.raw`(?<=\.\d{${SCORE_DECIMALS}})\d+`), "");
   return ethers.parseUnits(truncated, SCORE_DECIMALS);
 };
 
@@ -58,7 +51,7 @@ type V2ScoreResponseData = {
 };
 
 export const ATTESTATION_SCHEMA_ENCODER = new SchemaEncoder(
-  "bool passing_score, uint8 score_decimals, uint128 scorer_id, uint32 score, uint32 threshold, tuple(string provider, uint256 score)[] stamps",
+  "bool passing_score, uint8 score_decimals, uint128 scorer_id, uint32 score, uint32 threshold, tuple(string provider, uint256 score)[] stamps"
 );
 
 export const generateScoreAttestationRequest = async ({
@@ -70,10 +63,7 @@ export const generateScoreAttestationRequest = async ({
   chainIdHex: keyof typeof passportOnchainInfo;
   customScorerId?: number;
 }): Promise<MultiAttestationRequest[]> => {
-  const { attestationData, expirationTime } = await getParsedScore(
-    recipient,
-    customScorerId,
-  );
+  const { attestationData, expirationTime } = await getParsedScore(recipient, customScorerId);
 
   const encodedData = encodeScoreData(attestationData);
 
@@ -94,10 +84,7 @@ export const generateScoreAttestationRequest = async ({
   ];
 };
 
-export async function getParsedScore(
-  address: string,
-  customScorerId?: number,
-): Promise<ParsedScore> {
+export async function getParsedScore(address: string, customScorerId?: number): Promise<ParsedScore> {
   const scorer_id = customScorerId || Number(process.env.ALLO_SCORER_ID);
 
   const score = await requestV2Score(address, scorer_id);
@@ -108,10 +95,7 @@ export async function getParsedScore(
   });
 }
 
-async function requestV2Score(
-  address: string,
-  scorerId: number,
-): Promise<V2ScoreResponseData> {
+async function requestV2Score(address: string, scorerId: number): Promise<V2ScoreResponseData> {
   const getScoreUrl = `${process.env.SCORER_ENDPOINT}/internal/score/v2/${scorerId}/${address}`;
 
   try {
@@ -141,7 +125,7 @@ const parseScore = ({
 }): ParsedScore => ({
   expirationTime: BigInt(
     // 90 days from now
-    Math.floor(new Date().getTime() / 1000) + 90 * 24 * 60 * 60,
+    Math.floor(new Date().getTime() / 1000) + 90 * 24 * 60 * 60
   ),
   attestationData: {
     scorer_id: BigInt(scorer_id),

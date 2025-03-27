@@ -304,7 +304,7 @@ describe("Attempt verification", function () {
       proofs: {
         code,
       },
-      address: "0x123"
+      address: "0x123",
     } as unknown as RequestPayload);
 
     expect(mockedAxios.post).toBeCalledTimes(2);

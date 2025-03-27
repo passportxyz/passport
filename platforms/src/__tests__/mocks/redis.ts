@@ -1,4 +1,3 @@
- 
 // InMemoryRedisClient.ts
 type Expirations = { [key: string]: number };
 type Store = { [key: string]: any };

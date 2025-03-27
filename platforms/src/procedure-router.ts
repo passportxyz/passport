@@ -179,4 +179,3 @@ router.post("/outdid/connect", (req: Request, res: Response): void => {
     res.status(400).send();
   }
 });
-

@@ -2,17 +2,12 @@ import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 import { Response, Request } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
 import { autoVerificationHandler } from "../src/handlers.js";
-import {
-  AutoVerificationRequestBodyType,
-  AutoVerificationResponseBodyType,
-} from "../src/handlers.types.js";
+import { AutoVerificationRequestBodyType, AutoVerificationResponseBodyType } from "../src/handlers.types.js";
 import axios from "axios";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 import { autoVerifyStamps } from "../src/utils/identityHelper.js";
 
-const mockedAutoVerifyStamps = autoVerifyStamps as jest.MockedFunction<
-  typeof autoVerifyStamps
->;
+const mockedAutoVerifyStamps = autoVerifyStamps as jest.MockedFunction<typeof autoVerifyStamps>;
 
 jest.mock("axios");
 
@@ -25,23 +20,19 @@ describe("autoVerificationHandler", function () {
     // Clear the spy stats
     jest.clearAllMocks();
 
-    jest
-      .spyOn(axios, "post")
-      .mockImplementation((autoVerificationFields: any): Promise<any> => {
-        return new Promise((resolve, reject) => {
-          resolve({
-            data: { score: {} },
-          });
+    jest.spyOn(axios, "post").mockImplementation((autoVerificationFields: any): Promise<any> => {
+      return new Promise((resolve, reject) => {
+        resolve({
+          data: { score: {} },
         });
       });
+    });
 
-    mockedAutoVerifyStamps.mockImplementation(
-      async (autoVerificationFields: any): Promise<VerifiableCredential[]> => {
-        return new Promise((resolve, reject) => {
-          resolve([] as VerifiableCredential[]);
-        });
-      },
-    );
+    mockedAutoVerifyStamps.mockImplementation(async (autoVerificationFields: any): Promise<VerifiableCredential[]> => {
+      return new Promise((resolve, reject) => {
+        resolve([] as VerifiableCredential[]);
+      });
+    });
   });
 
   it("properly calls autoVerifyStamps and addStampsAndGetScore", async () => {
@@ -59,12 +50,8 @@ describe("autoVerificationHandler", function () {
     };
 
     await autoVerificationHandler(
-      request as Request<
-        ParamsDictionary,
-        AutoVerificationResponseBodyType,
-        AutoVerificationRequestBodyType
-      >,
-      response as unknown as Response,
+      request as Request<ParamsDictionary, AutoVerificationResponseBodyType, AutoVerificationRequestBodyType>,
+      response as unknown as Response
     );
 
     expect(autoVerifyStamps).toHaveBeenCalledTimes(1);
@@ -81,7 +68,7 @@ describe("autoVerificationHandler", function () {
         headers: {
           Authorization: apiKey,
         },
-      },
+      }
     );
   });
 
@@ -101,12 +88,8 @@ describe("autoVerificationHandler", function () {
     };
 
     await autoVerificationHandler(
-      request as Request<
-        ParamsDictionary,
-        AutoVerificationResponseBodyType,
-        AutoVerificationRequestBodyType
-      >,
-      response as unknown as Response,
+      request as Request<ParamsDictionary, AutoVerificationResponseBodyType, AutoVerificationRequestBodyType>,
+      response as unknown as Response
     );
 
     expect(autoVerifyStamps).toHaveBeenCalledTimes(1);
@@ -123,7 +106,7 @@ describe("autoVerificationHandler", function () {
         headers: {
           Authorization: apiKey,
         },
-      },
+      }
     );
   });
 });

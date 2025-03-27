@@ -7,8 +7,8 @@ const RedisMock = jest.fn().mockImplementation(() => {
     }),
     on: jest.fn((key, func) => {}),
     call: jest.fn((type, ...args) => {
-      if(type === "EVALSHA") {
-        return Promise.resolve([ 1, 60000 ]);
+      if (type === "EVALSHA") {
+        return Promise.resolve([1, 60000]);
       }
       return Promise.resolve("OK");
     }),

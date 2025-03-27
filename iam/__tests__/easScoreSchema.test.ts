@@ -1,9 +1,6 @@
 const passportOnchainInfo = require("../../deployments/onchainInfo.json");
 import { ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
-import {
-  ATTESTATION_SCHEMA_ENCODER,
-  generateScoreAttestationRequest,
-} from "../src/utils/easScoreSchema";
+import { ATTESTATION_SCHEMA_ENCODER, generateScoreAttestationRequest } from "../src/utils/easScoreSchema";
 import axios from "axios";
 
 const formatDate = (date: Date): string =>

@@ -18,7 +18,7 @@ const config: JestConfigWithTsJest = {
         presets: [["@babel/preset-env", { targets: { node: "current" } }]],
         plugins: ["@babel/plugin-transform-modules-commonjs"],
       },
-    ]
+    ],
   },
   setupFilesAfterEnv: ["<rootDir>/src/jest.setup.ts"],
   transformIgnorePatterns: [
