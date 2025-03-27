@@ -77,7 +77,7 @@ app.get("/health", (_req, res) => {
   res.status(200).send(data);
 });
 
-// Verify and auto-verify endpoints
+// Auto-verify and verify endpoints
 app.post("/embed/auto-verify", autoVerificationHandler);
 app.post("/embed/verify", verificationHandler);
 // Returns the metadata for the stamps
