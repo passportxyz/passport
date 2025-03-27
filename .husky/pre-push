@@ -1,6 +1,7 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+yarn lint
 yarn run test
 # yarn run test:ceramic-integration
 # disabled integration test May 30 2023
