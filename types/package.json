@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -b .",
     "clean": "rimraf dist *.tsbuildinfo",
-    "lint": "tsc --noEmit && eslint",
+    "lint": "tsc --noEmit && eslint && prettier --check .",
     "prettier": "prettier --write .",
     "precommit": "lint-staged",
     "ethers": "^5.0.32"

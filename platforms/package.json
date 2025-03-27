@@ -63,7 +63,7 @@
     "build:esm": "tsc --module NodeNext --outDir dist/esm",
     "build:types": "tsc --declaration --declarationDir dist --emitDeclarationOnly",
     "test": "jest",
-    "lint": "tsc --noEmit && eslint",
+    "lint": "tsc --noEmit && eslint && prettier --check .",
     "prettier": "prettier --write ."
   }
 }

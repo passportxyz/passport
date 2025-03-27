@@ -54,7 +54,7 @@
     "clean": "rimraf dist node_modules",
     "build": "tsc --declaration --module NodeNext --outDir dist/esm",
     "test": "jest",
-    "lint": "tsc --noEmit && eslint",
+    "lint": "tsc --noEmit && eslint && prettier --check .",
     "prettier": "prettier --write ."
   }
 }

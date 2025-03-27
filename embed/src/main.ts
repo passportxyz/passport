@@ -17,6 +17,7 @@ const startServer = (): void => {
 };
 
 try {
+  // Start server
   startServer();
 } catch (error) {
   // eslint-disable-next-line no-console

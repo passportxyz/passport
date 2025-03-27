@@ -17,8 +17,7 @@
     "prod:start": "tsc && node .",
     "test": "jest",
     "prettier": "prettier --write .",
-    "lint": "tsc --noEmit && eslint",
-    "lint:fix": "eslint --fix --ext .ts,.js,.tsx ."
+    "lint": "tsc --noEmit && eslint && prettier --check ."
   },
   "dependencies": {
     "@gitcoin/passport-identity": "^1.0.0",
