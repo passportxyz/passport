@@ -11,8 +11,7 @@ import { createHash } from "crypto";
 // this would need to be a valid key but we've mocked out didkit (and no verifications are made)
 describe("EIP712 credential", function () {
   it("can issue credentials with valid EIP712 signature, and ethers can validate the credential", async () => {
-    const originalEthers =
-      jest.requireActual<typeof import("ethers")>("ethers");
+    const originalEthers = jest.requireActual<typeof import("ethers")>("ethers");
 
     const record = {
       type: "Simple",
@@ -28,7 +27,7 @@ describe("EIP712 credential", function () {
         createHash("sha256")
           .update(issuerKey)
           .update(JSON.stringify(objToSortedArray(record)))
-          .digest(),
+          .digest()
       );
 
     // Details of this credential are created by issueNullifiableCredential - but the proof is added by DIDKit (which is mocked)
@@ -39,9 +38,7 @@ describe("EIP712 credential", function () {
       record,
       expiresInSeconds: 100,
       signatureType: "EIP712",
-      nullifierGenerators: [
-        HashNullifierGenerator({ key: issuerKey, version: 1 }),
-      ],
+      nullifierGenerators: [HashNullifierGenerator({ key: issuerKey, version: 1 })],
     });
 
     const signedCredential = credential as VerifiableEip712Credential;
@@ -56,16 +53,14 @@ describe("EIP712 credential", function () {
       domain,
       standardizedTypes,
       signedCredential,
-      signedCredential.proof.proofValue,
+      signedCredential.proof.proofValue
     );
 
     const issuer = DIDKit.keyToDID("ethr", issuerKey);
 
     const expectedEthSignerAddress = issuer.split(":").pop();
     expect(signerAddress.toLowerCase()).toEqual(expectedEthSignerAddress);
-    expect(signedCredential.credentialSubject.nullifiers?.[0]).toEqual(
-      expectedHash,
-    );
+    expect(signedCredential.credentialSubject.nullifiers?.[0]).toEqual(expectedHash);
   });
 
   describe("with legacy credential format", () => {
@@ -80,8 +75,7 @@ describe("EIP712 credential", function () {
     });
 
     it("can issue credentials with valid EIP712 signature, and ethers can validate the credential", async () => {
-      const originalEthers =
-        jest.requireActual<typeof import("ethers")>("ethers");
+      const originalEthers = jest.requireActual<typeof import("ethers")>("ethers");
 
       const record = {
         type: "Simple",
@@ -97,7 +91,7 @@ describe("EIP712 credential", function () {
           createHash("sha256")
             .update(issuerKey)
             .update(JSON.stringify(objToSortedArray(record)))
-            .digest(),
+            .digest()
         );
 
       // Details of this credential are created by issueNullifiableCredential - but the proof is added by DIDKit (which is mocked)
@@ -108,9 +102,7 @@ describe("EIP712 credential", function () {
         record,
         expiresInSeconds: 100,
         signatureType: "EIP712",
-        nullifierGenerators: [
-          HashNullifierGenerator({ key: issuerKey, version: "0.0.0" }),
-        ],
+        nullifierGenerators: [HashNullifierGenerator({ key: issuerKey, version: "0.0.0" })],
       });
 
       const signedCredential = credential as VerifiableEip712Credential;
@@ -125,7 +117,7 @@ describe("EIP712 credential", function () {
         domain,
         standardizedTypes,
         signedCredential,
-        signedCredential.proof.proofValue,
+        signedCredential.proof.proofValue
       );
 
       const issuer = DIDKit.keyToDID("ethr", issuerKey);

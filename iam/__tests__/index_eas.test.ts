@@ -1,11 +1,7 @@
 import request from "supertest";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
-import {
-  MultiAttestationRequest,
-  ZERO_BYTES32,
-  NO_EXPIRATION,
-} from "@ethereum-attestation-service/eas-sdk";
+import { MultiAttestationRequest, ZERO_BYTES32, NO_EXPIRATION } from "@ethereum-attestation-service/eas-sdk";
 import { app } from "../src/index";
 import { getAttestationDomainSeparator } from "../src/utils/attestations";
 import { parseEther } from "ethers";
@@ -15,9 +11,7 @@ import * as identityMock from "../src/utils/identityHelper";
 import * as easStampSchema from "../src/utils/easStampSchema";
 
 jest.mock("../src/utils/revocations", () => ({
-  filterRevokedCredentials: jest
-    .fn()
-    .mockImplementation((input) => Promise.resolve(input)),
+  filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
 }));
 
 jest.mock("../src/utils/easStampSchema", () => ({
@@ -40,51 +34,47 @@ jest.mock("../src/utils/identityHelper", () => {
 });
 
 const issuerDid = identityMock.getIssuerInfo().issuer.did;
-const formatMultiAttestationRequestMock =
-  easStampSchema.formatMultiAttestationRequest as jest.Mock;
+const formatMultiAttestationRequestMock = easStampSchema.formatMultiAttestationRequest as jest.Mock;
 const getEASFeeAmountMock = easFees.getEASFeeAmount as jest.Mock;
 const verifyCredentialMock = identityMock.verifyCredential as jest.Mock;
 
 const chainIdHex = "0xa";
 
 const mockRecipient = "0x5678000000000000000000000000000000000000";
-const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[] =
-  [
-    {
-      schema:
-        "0xd7b8c4ffa4c9fd1ecb3f6db8201e916a8d7dba11f161c1b0b5ccf44ceb8e2a39",
-      data: [
-        {
-          recipient: mockRecipient,
-          data: easStampSchema.encodeEasScore({
-            score: 23.45,
-            scorer_id: 123,
-          }),
-          expirationTime: NO_EXPIRATION,
-          revocable: true,
-          refUID: ZERO_BYTES32,
-          value: BigInt("0"),
-        },
-      ],
-    },
-    {
-      schema:
-        "0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89",
-      data: [
-        {
-          recipient: mockRecipient,
-          data: easStampSchema.encodeEasScore({
-            score: 23.45,
-            scorer_id: 123,
-          }),
-          expirationTime: NO_EXPIRATION,
-          revocable: true,
-          refUID: ZERO_BYTES32,
-          value: BigInt("0"),
-        },
-      ],
-    },
-  ];
+const mockMultiAttestationRequestWithPassportAndScore: MultiAttestationRequest[] = [
+  {
+    schema: "0xd7b8c4ffa4c9fd1ecb3f6db8201e916a8d7dba11f161c1b0b5ccf44ceb8e2a39",
+    data: [
+      {
+        recipient: mockRecipient,
+        data: easStampSchema.encodeEasScore({
+          score: 23.45,
+          scorer_id: 123,
+        }),
+        expirationTime: NO_EXPIRATION,
+        revocable: true,
+        refUID: ZERO_BYTES32,
+        value: BigInt("0"),
+      },
+    ],
+  },
+  {
+    schema: "0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89",
+    data: [
+      {
+        recipient: mockRecipient,
+        data: easStampSchema.encodeEasScore({
+          score: 23.45,
+          scorer_id: 123,
+        }),
+        expirationTime: NO_EXPIRATION,
+        revocable: true,
+        refUID: ZERO_BYTES32,
+        value: BigInt("0"),
+      },
+    ],
+  },
+];
 
 describe("POST /eas", () => {
   beforeEach(() => {
@@ -97,9 +87,7 @@ describe("POST /eas", () => {
   });
 
   it("handles valid requests including some invalid credentials", async () => {
-    formatMultiAttestationRequestMock.mockReturnValue(
-      Promise.resolve(mockMultiAttestationRequestWithPassportAndScore),
-    );
+    formatMultiAttestationRequestMock.mockReturnValue(Promise.resolve(mockMultiAttestationRequestWithPassportAndScore));
     const nonce = 0;
     const failedCredential = {
       "@context": "https://www.w3.org/2018/credentials/v1",
@@ -198,9 +186,7 @@ describe("POST /eas", () => {
       .expect(404)
       .expect("Content-Type", /json/);
 
-    expect(response.body.error).toEqual(
-      "No onchainInfo found for chainId 0x694206969",
-    );
+    expect(response.body.error).toEqual("No onchainInfo found for chainId 0x694206969");
   });
 
   it("handles invalid recipient in the request body", async () => {
@@ -235,9 +221,7 @@ describe("POST /eas", () => {
       return Promise.resolve(true);
     });
 
-    formatMultiAttestationRequestMock.mockReturnValue(
-      Promise.resolve(mockMultiAttestationRequestWithPassportAndScore),
-    );
+    formatMultiAttestationRequestMock.mockReturnValue(Promise.resolve(mockMultiAttestationRequestWithPassportAndScore));
     const nonce = 0;
     const expectedFeeUsd = parseFloat(process.env.EAS_FEE_USD as string);
 
@@ -262,9 +246,7 @@ describe("POST /eas", () => {
 
     const expectedPayload = {
       passport: {
-        multiAttestationRequest: toJsonObject(
-          mockMultiAttestationRequestWithPassportAndScore,
-        ),
+        multiAttestationRequest: toJsonObject(mockMultiAttestationRequestWithPassportAndScore),
         fee: "25000000000000000",
         nonce,
       },
@@ -315,8 +297,6 @@ describe("POST /eas", () => {
       .send({ credentials, nonce, chainIdHex })
       .set("Accept", "application/json");
     expect(response.status).toBe(400);
-    expect(response.body.error).toBe(
-      "Every credential's id must be equivalent",
-    );
+    expect(response.body.error).toBe("Every credential's id must be equivalent");
   });
 });

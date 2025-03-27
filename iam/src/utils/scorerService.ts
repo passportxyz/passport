@@ -21,10 +21,7 @@ export type GetScoreResponse = {
 const apiKey = process.env.SCORER_API_KEY;
 
 // Use public endpoint and static api key to fetch score
-export async function fetchPassportScore(
-  address: string,
-  customScorerId?: number,
-): Promise<Score> {
+export async function fetchPassportScore(address: string, customScorerId?: number): Promise<Score> {
   const scorer_id = customScorerId || Number(process.env.ALLO_SCORER_ID);
 
   const response = await requestScore(address, scorer_id);
@@ -42,10 +39,7 @@ export async function fetchPassportScore(
   return score;
 }
 
-async function requestScore(
-  address: string,
-  scorerId: number,
-): Promise<GetScoreResponse> {
+async function requestScore(address: string, scorerId: number): Promise<GetScoreResponse> {
   const getScoreUrl = `${process.env.SCORER_ENDPOINT}/internal/score/${scorerId}/${address}`;
 
   try {

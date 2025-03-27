@@ -112,8 +112,7 @@ describe("GET /embed/stamps/metadata", () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(500);
     expect(mockRes.json).toHaveBeenCalledWith({
-      error:
-        "Unexpected error when processing request, Error: Failed to fetch embed weights",
+      error: "Unexpected error when processing request, Error: Failed to fetch embed weights",
     });
   });
 

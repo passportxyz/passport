@@ -1,10 +1,6 @@
 /* eslint-disable */
 import { RequestPayload } from "@gitcoin/passport-types";
-import {
-  GuildAdminProvider,
-  GuildPassportMemberProvider,
-  PASSPORT_GUILD_ID,
-} from "../Providers/guildXYZ.js";
+import { GuildAdminProvider, GuildPassportMemberProvider, PASSPORT_GUILD_ID } from "../Providers/guildXYZ.js";
 
 import { createGuildClient } from "@guildxyz/sdk";
 
