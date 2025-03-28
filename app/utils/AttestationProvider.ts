@@ -29,8 +29,6 @@ type VeraxAndEASConfig = BaseProviderConfig & {
   easScanUrl?: string;
 };
 
-const ATTEST_V2_ENABLED = process.env.NEXT_PUBLIC_FF_ATTEST_V2 === "on";
-
 export type AttestationProviderConfig = EASConfig | VeraxAndEASConfig;
 
 export interface AttestationProvider {
@@ -108,7 +106,7 @@ class BaseAttestationProvider implements AttestationProvider {
   }
 
   async getMultiAttestationRequest(payload: {}): Promise<AxiosResponse<any, any>> {
-    const url = `${iamUrl}v0.0.0/eas/${ATTEST_V2_ENABLED ? "scoreV2" : "passport"}`;
+    const url = `${iamUrl}v0.0.0/eas/scoreV2`;
     return jsonRequest(url, payload);
   }
 
@@ -191,7 +189,7 @@ export class EASAttestationProvider extends BaseAttestationProvider {
 }
 
 export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
-  name = `Verax, Ethereum Attestation Service${ATTEST_V2_ENABLED ? "" : " (Score only)"}`;
+  name = "Verax, Ethereum Attestation Service";
   attestationExplorerLinkText = "Check attestation on Verax";
 
   viewerUrl(address: string): string {

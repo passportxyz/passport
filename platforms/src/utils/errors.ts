@@ -1,3 +1,4 @@
+// These are just used in a couple providers, could probably be removed
 export type ProviderError = {
   name?: string;
   message?: string;

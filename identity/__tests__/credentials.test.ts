@@ -72,10 +72,10 @@ describe("issueChallengeCredential", function () {
     expect(DIDKit.issueCredential).toHaveBeenCalled();
     // expect the structure/details added by issueChallengeCredential to be correct
     expect(credential.credentialSubject.id).toEqual(
-      `did:pkh:eip155:1:${record.address}`
+      `did:pkh:eip155:1:${record.address}`,
     );
     expect(credential.credentialSubject.provider).toEqual(
-      `challenge-${record.type}`
+      `challenge-${record.type}`,
     );
     expect(credential.credentialSubject.challenge).toEqual(record.challenge);
     expect(credential.credentialSubject.address).toEqual(record.address);
@@ -93,21 +93,16 @@ describe("issueChallengeCredential", function () {
     };
 
     // details of this credential are created by issueChallengeCredential - but the proof is added by DIDKit (which is mocked)
-    const { credential } = await issueChallengeCredential(
-      DIDKit,
-      key,
-      record,
-      "EIP712"
-    );
+    const { credential } = await issueChallengeCredential(DIDKit, key, record);
 
     // expect to have called issueCredential
     expect(DIDKit.issueCredential).toHaveBeenCalled();
     // expect the structure/details added by issueChallengeCredential to be correct
     expect(credential.credentialSubject.id).toEqual(
-      `did:pkh:eip155:1:${record.address}`
+      `did:pkh:eip155:1:${record.address}`,
     );
     expect(credential.credentialSubject.provider).toEqual(
-      `challenge-${record.type}`
+      `challenge-${record.type}`,
     );
     expect(credential.credentialSubject.challenge).toEqual(record.challenge);
     expect(credential.credentialSubject.address).toEqual(record.address);
@@ -149,7 +144,7 @@ describe("issueNullifiableCredential", function () {
         createHash("sha256")
           .update(key)
           .update(JSON.stringify(objToSortedArray(record)))
-          .digest()
+          .digest(),
       );
 
     const { credential } = await issueNullifiableCredential({
@@ -164,11 +159,11 @@ describe("issueNullifiableCredential", function () {
     expect(DIDKit.issueCredential).toHaveBeenCalled();
     // expect the structure/details added by issueHashedCredential to be correct
     expect(credential.credentialSubject.id).toEqual(
-      `did:pkh:eip155:1:${record.address}`
+      `did:pkh:eip155:1:${record.address}`,
     );
     expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
     expect(Array.isArray(credential.credentialSubject.nullifiers)).toEqual(
-      true
+      true,
     );
     expect(credential.credentialSubject.nullifiers).toEqual([expectedHash]);
     expect(typeof credential.proof).toEqual("object");
@@ -190,7 +185,7 @@ describe("issueNullifiableCredential", function () {
         createHash("sha256")
           .update(key)
           .update(JSON.stringify(objToSortedArray(record)))
-          .digest()
+          .digest(),
       );
 
     const secret = "secret";
@@ -201,7 +196,7 @@ describe("issueNullifiableCredential", function () {
         createHash("sha256")
           .update(secret)
           .update(mockMishtiOprfResponse)
-          .digest()
+          .digest(),
       );
 
     const { credential } = await issueNullifiableCredential({
@@ -225,11 +220,11 @@ describe("issueNullifiableCredential", function () {
     expect(DIDKit.issueCredential).toHaveBeenCalled();
     // expect the structure/details added by issueHashedCredential to be correct
     expect(credential.credentialSubject.id).toEqual(
-      `did:pkh:eip155:1:${record.address}`
+      `did:pkh:eip155:1:${record.address}`,
     );
     expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
     expect(Array.isArray(credential.credentialSubject.nullifiers)).toEqual(
-      true
+      true,
     );
     expect(credential.credentialSubject.nullifiers).toEqual([
       expectedStandardHash,
@@ -237,10 +232,10 @@ describe("issueNullifiableCredential", function () {
     ]);
     expect(typeof credential.proof).toEqual("object");
     expect(credential["@context"]).toContain(
-      "https://w3id.org/vc/status-list/2021/v1"
+      "https://w3id.org/vc/status-list/2021/v1",
     );
     expect(credential["@context"]).toContain(
-      "https://w3id.org/vc/status-list/2021/v1"
+      "https://w3id.org/vc/status-list/2021/v1",
     );
   });
 });
@@ -265,7 +260,7 @@ describe("verifyCredential", function () {
         record,
         nullifierGenerators,
         expiresInSeconds: 3600,
-      }
+      },
     );
 
     // all verifications will pass as the DIDKit response is mocked
@@ -274,7 +269,7 @@ describe("verifyCredential", function () {
     expect(DIDKit.verifyCredential).toHaveBeenCalled();
     expect(DIDKit.verifyCredential).toHaveBeenCalledWith(
       JSON.stringify(credentialToVerify),
-      expect.anything()
+      expect.anything(),
     );
   });
 
@@ -310,7 +305,7 @@ describe("verifyCredential", function () {
         checks: ["proof"],
         warnings: [],
         errors: ["signature error"],
-      })
+      }),
     );
 
     expect(await verifyCredential(DIDKit, credentialToVerify)).toEqual(false);
@@ -328,7 +323,7 @@ describe("verifyCredential", function () {
     } as VerifiableCredential;
 
     mockDIDKit.verifyCredential.mockRejectedValue(
-      new Error("something went wrong :(")
+      new Error("something went wrong :("),
     );
 
     expect(await verifyCredential(DIDKit, credentialToVerify)).toEqual(false);
@@ -371,7 +366,6 @@ describe("verifyCredential", function () {
       OriginalDIDKit,
       mockIssuerKey,
       record,
-      "EIP712"
     );
     const signedCredential = credential as VerifiableEip712Credential;
     signedCredential.proof.proofValue = "tampered";
@@ -404,7 +398,7 @@ describe("verifyCredential", function () {
           createHash("sha256")
             .update(key)
             .update(JSON.stringify(objToSortedArray(record)))
-            .digest()
+            .digest(),
         );
 
       const { credential } = await issueNullifiableCredential({
@@ -446,7 +440,7 @@ describe("issueNullifiableCredential with ignorable errors", () => {
         createHash("sha256")
           .update(key)
           .update(JSON.stringify(objToSortedArray(record)))
-          .digest()
+          .digest(),
       );
 
     const { credential } = await issueNullifiableCredential({
@@ -487,7 +481,7 @@ describe("issueNullifiableCredential with ignorable errors", () => {
           throwingGenerator as NullifierGenerator,
         ],
         expiresInSeconds: 3600,
-      })
+      }),
     ).rejects.toThrow("No valid nullifiers generated");
   });
 
@@ -525,7 +519,7 @@ describe("issueNullifiableCredential with ignorable errors", () => {
             unexpectedErrorGenerator as NullifierGenerator,
           ],
           expiresInSeconds: 3600,
-        })
+        }),
       ).rejects.toThrow("Unable to generate nullifiers");
 
       expect(console.error).toHaveBeenCalled();
@@ -558,7 +552,7 @@ describe("issueNullifiableCredential with ignorable errors", () => {
             unexpectedErrorGenerator as NullifierGenerator,
           ],
           expiresInSeconds: 3600,
-        })
+        }),
       ).rejects.toThrow("Unable to generate nullifiers");
 
       expect(console.error).toHaveBeenCalled();

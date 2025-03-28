@@ -109,13 +109,20 @@ describe("SyncToChainButton component", () => {
     });
 
     vi.spyOn(axios, "post").mockResolvedValueOnce({
-      data: { invalidCredentials: [], passport: [], signature: { v: 8, r: "s", s: "a" } },
+      data: {
+        invalidCredentials: [],
+        passport: [],
+        signature: { v: 8, r: "s", s: "a" },
+      },
     });
 
     renderWithContext(
       {
         ...mockCeramicContext,
-        passport: { ...mockCeramicContext.passport, stamps: [{ id: "test" } as any] },
+        passport: {
+          ...mockCeramicContext.passport,
+          stamps: [{ id: "test" } as any],
+        },
       },
       <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={anotherChainWithEas} isLoading={false} />
     );
@@ -133,17 +140,26 @@ describe("SyncToChainButton component", () => {
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     fireEvent.click(btn);
-    await screen.findByText("You do not have any Stamps to bring onchain.", { exact: false });
+    await screen.findByText("You do not have any Stamps to bring onchain.", {
+      exact: false,
+    });
   });
 
   it("should render success toast if stamps are brought on chain", async () => {
     vi.spyOn(axios, "post").mockResolvedValueOnce({
-      data: { invalidCredentials: [], passport: [], signature: { v: 8, r: "s", s: "a" } },
+      data: {
+        invalidCredentials: [],
+        passport: { fee: "100000000000000000" },
+        signature: { v: 8, r: "s", s: "a" },
+      },
     });
     renderWithContext(
       {
         ...mockCeramicContext,
-        passport: { ...mockCeramicContext.passport, stamps: [{ id: "test" } as any] },
+        passport: {
+          ...mockCeramicContext.passport,
+          stamps: [{ id: "test" } as any],
+        },
       },
       <ChakraProvider>
         <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} isLoading={false} />
@@ -161,7 +177,10 @@ describe("SyncToChainButton component", () => {
     renderWithContext(
       {
         ...mockCeramicContext,
-        passport: { ...mockCeramicContext.passport, stamps: [{ id: "test" } as any] },
+        passport: {
+          ...mockCeramicContext.passport,
+          stamps: [{ id: "test" } as any],
+        },
       },
       <ChakraProvider>
         <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} isLoading={false} />

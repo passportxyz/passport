@@ -6,23 +6,31 @@ const getCredential = (): VerifiableCredential => {
     type: ["VerifiableCredential"],
     credentialSubject: {
       id: "did:ethr:Test",
-      "@context": [
-        {
-          hash: "https://schema.org/Text",
-          provider: "https://schema.org/Text",
-        },
-      ],
+      "@context": {
+        hash: "https://schema.org/Text",
+        provider: "https://schema.org/Text",
+      },
       hash: "randomValuesHash",
       provider: "randomValuesProvider",
     },
     issuer: "did:key:randomValuesIssuer",
     issuanceDate: "2022-04-15T21:04:01.708Z",
     proof: {
-      type: "Ed25519Signature2018",
+      "@context": "https://www.w3.org/2018/credentials/v1",
+      type: "EIP712",
       proofPurpose: "assertionMethod",
       verificationMethod: "did:key:randomValues",
       created: "2022-04-15T21:04:01.708Z",
-      jws: "randomValues",
+      proofValue: "randomValuesProofValue",
+      eip712Domain: {
+        domain: {
+          name: "randomValuesDomainName",
+        },
+        primaryType: "randomValuesPrimaryType",
+        types: {
+          "@context": [{ name: "dummy", type: "string" }],
+        },
+      },
     },
     expirationDate: "2022-05-15T21:04:01.708Z",
   };

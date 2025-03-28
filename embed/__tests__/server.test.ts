@@ -3,7 +3,10 @@ import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 
 import request from "supertest";
 import { Response, Request } from "express";
-import { AutoVerificationResponseBodyType, AutoVerificationRequestBodyType } from "../src/handlers.types.js";
+import {
+  AutoVerificationResponseBodyType,
+  AutoVerificationRequestBodyType,
+} from "../src/handlers.types.js";
 import { ParamsDictionary } from "express-serve-static-core";
 import { PassportScore } from "@gitcoin/passport-identity";
 
@@ -31,14 +34,18 @@ jest.mock("../src/handlers", () => {
     verificationHandler: jest.fn(),
     autoVerificationHandler: jest.fn(
       (
-        req: Request<ParamsDictionary, AutoVerificationResponseBodyType, AutoVerificationRequestBodyType>,
-        res: Response
+        req: Request<
+          ParamsDictionary,
+          AutoVerificationResponseBodyType,
+          AutoVerificationRequestBodyType
+        >,
+        res: Response,
       ): Promise<void> => {
         return new Promise((resolve, reject) => {
           res.status(200).json(mockedScore);
           resolve();
         });
-      }
+      },
     ),
   };
 });
@@ -59,7 +66,13 @@ const mockedScore: PassportScore = {
   expiration_timestamp: new Date().toISOString(),
   threshold: "20.000",
   error: "",
-  stamps: { "provider-1": { score: "12", dedup: true, expiration_date: new Date().toISOString() } },
+  stamps: {
+    "provider-1": {
+      score: "12",
+      dedup: true,
+      expiration_date: new Date().toISOString(),
+    },
+  },
 };
 
 beforeEach(() => {
@@ -96,11 +109,17 @@ describe("autoVerificationHandler", function () {
     };
 
     // create a req against the express app
-    const verifyRequest = await request(app).post("/embed/auto-verify").send(payload).set("Accept", "application/json");
+    const verifyRequest = await request(app)
+      .post("/embed/auto-verify")
+      .send(payload)
+      .set("Accept", "application/json");
 
     expect(apiKeyRateLimit as jest.Mock).toHaveBeenCalledTimes(0);
     expect(verifyRequest.status).toBe(401);
-    expect(verifyRequest.body).toStrictEqual({ message: "Unauthorized! No 'X-API-KEY' present in the header!" });
+    expect(verifyRequest.body).toStrictEqual({
+      error: "Unauthorized! No 'X-API-KEY' present in the header!",
+      code: 401,
+    });
   });
 
   it("handles invalid verify requests - api key validation fails", async () => {
@@ -129,7 +148,9 @@ describe("autoVerificationHandler", function () {
 describe("POST /health", function () {
   it("handles valid health requests", async () => {
     // create a req against the express app
-    const verifyRequest = await request(app).get("/health").set("Accept", "application/json");
+    const verifyRequest = await request(app)
+      .get("/health")
+      .set("Accept", "application/json");
 
     expect(apiKeyRateLimit as jest.Mock).toHaveBeenCalledTimes(0);
     expect(verifyRequest.status).toBe(200);

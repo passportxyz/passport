@@ -8,13 +8,15 @@ import {
 
 const eip712keyToDID = (key: string) => DIDKit.keyToDID("ethr", key);
 
-const HUMAN_NETWORK_START_VERSION = parseInt(process.env.HUMAN_NETWORK_START_VERSION);
+const HUMAN_NETWORK_START_VERSION = parseInt(
+  process.env.HUMAN_NETWORK_START_VERSION,
+);
 
 const HUMAN_NETWORK_CLIENT_PRIVATE_KEY =
   process.env.HUMAN_NETWORK_CLIENT_PRIVATE_KEY;
 const HUMAN_NETWORK_RELAY_URL = process.env.HUMAN_NETWORK_RELAY_URL;
 
-const isInteger = (value: any): value is number => Number.isInteger(value);
+const isInteger = (value: unknown): value is number => Number.isInteger(value);
 
 export function getIssuerInfo(): {
   issuer: {
