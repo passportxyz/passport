@@ -23,7 +23,7 @@ const mockResponse = ({
   gasSpent?: number;
   numberDaysActive?: number;
   numberTransactions?: number;
-}): { status:number, data: ModelResponse } => ({
+}): { status: number; data: ModelResponse } => ({
   status: 200,
   data: {
     data: {
@@ -85,14 +85,16 @@ describe("AccountAnalysis Providers", () => {
       let counter = 0;
       mockedAxios.post.mockImplementation(() => {
         counter += 1;
-        if(counter === 2) {
+        if (counter === 2) {
           // We just fail the 2-nd request
           return Promise.reject(new Error("Error with model!"));
         }
         return Promise.resolve(mockedResponse);
       });
       const providerInstance = new provider();
-      await expect(providerInstance.verify({ address: mockAddress } as RequestPayload, mockContext)).rejects.toThrow(new Error("Error with model!"));
+      await expect(providerInstance.verify({ address: mockAddress } as RequestPayload, mockContext)).rejects.toThrow(
+        new Error("Error with model!")
+      );
     });
   });
 
@@ -101,14 +103,16 @@ describe("AccountAnalysis Providers", () => {
       const mockedResponse = mockResponse({ score });
       mockedAxios.post.mockImplementation((url) => {
         const model = url.split("/").pop();
-        if (model === "aggregate-model-predict") { 
+        if (model === "aggregate-model-predict") {
           // We just fail the request to aggregate-model-predict
           return Promise.reject(new Error("Error with model!"));
         }
         return Promise.resolve(mockedResponse);
       });
       const providerInstance = new provider();
-      await expect(providerInstance.verify({ address: mockAddress } as RequestPayload, mockContext)).rejects.toThrow(new Error("Error with model!"));
+      await expect(providerInstance.verify({ address: mockAddress } as RequestPayload, mockContext)).rejects.toThrow(
+        new Error("Error with model!")
+      );
     });
   });
 

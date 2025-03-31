@@ -1,14 +1,6 @@
 // ---- Types
-import {
-  Provider,
-  ProviderExternalVerificationError,
-  ProviderInternalVerificationError,
-} from "../types.js";
-import type {
-  RequestPayload,
-  VerifiedPayload,
-  ProviderContext,
-} from "@gitcoin/passport-types";
+import { Provider, ProviderExternalVerificationError, ProviderInternalVerificationError } from "../types.js";
+import type { RequestPayload, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
 
 class NoFailureReasonError extends Error {
   constructor() {
@@ -18,10 +10,7 @@ class NoFailureReasonError extends Error {
 }
 
 function reportUnhandledError(type: string, address: string, e: unknown) {
-  if (
-    process.env.EXIT_ON_UNHANDLED_ERROR === "true" &&
-    process.env.NODE_ENV === "development"
-  ) {
+  if (process.env.EXIT_ON_UNHANDLED_ERROR === "true" && process.env.NODE_ENV === "development") {
     // To be used when running locally to ensure that unhandled errors are fixed
     console.error(`Unhandled error for type ${type}`, e);
     process.exit(1);
@@ -31,17 +20,14 @@ function reportUnhandledError(type: string, address: string, e: unknown) {
       // Don't log the message (or first line of stack) as it may contain PII
       errorMessage = `${e.name} ${e.stack.replace(/^.*\n *(?=at)/m, "")}`;
     }
-    console.error(
-      `UNHANDLED ERROR: for type ${type} and address ${address} -`,
-      errorMessage,
-    );
+    console.error(`UNHANDLED ERROR: for type ${type} and address ${address} -`, errorMessage);
   }
 }
 
 export const withTimeout = async (
   millis: number,
   promise: Promise<VerifiedPayload>,
-  type: string,
+  type: string
 ): Promise<VerifiedPayload> => {
   let timeoutPid: NodeJS.Timeout | null = null;
   const timeout = new Promise<VerifiedPayload>(
@@ -49,10 +35,10 @@ export const withTimeout = async (
       (timeoutPid = setTimeout(() => {
         reject(
           new ProviderExternalVerificationError(
-            `Request timeout while verifying ${type}. It took over ${millis} ms to complete.`,
-          ),
+            `Request timeout while verifying ${type}. It took over ${millis} ms to complete.`
+          )
         );
-      }, millis)),
+      }, millis))
   );
   const result = await Promise.race([promise, timeout]);
   clearTimeout(timeoutPid);
@@ -75,37 +61,22 @@ export class Providers {
 
         return providers;
       },
-      {} as { [k: string]: Provider },
+      {} as { [k: string]: Provider }
     );
   }
 
-  async verify(
-    type: string,
-    payload: RequestPayload,
-    context: ProviderContext,
-  ): Promise<VerifiedPayload> {
+  async verify(type: string, payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     const provider = this._providers[type];
 
     if (provider) {
       try {
-        const result = await withTimeout(
-          30000,
-          provider.verify(payload, context),
-          type,
-        );
+        const result = await withTimeout(30000, provider.verify(payload, context), type);
         if (!result.valid && !result.errors) {
-          reportUnhandledError(
-            type,
-            payload.address,
-            new NoFailureReasonError(),
-          );
+          reportUnhandledError(type, payload.address, new NoFailureReasonError());
         }
         return result;
       } catch (e) {
-        if (
-          e instanceof ProviderExternalVerificationError ||
-          e instanceof ProviderInternalVerificationError
-        ) {
+        if (e instanceof ProviderExternalVerificationError || e instanceof ProviderInternalVerificationError) {
           return {
             valid: false,
             // Also consider maybe not using error/errors as a key within the verification,
@@ -121,8 +92,7 @@ export class Providers {
 
           // The first line of the stack contains the error name and message. We'll keep this
           // and the second line, the lowest level of the backtrace. The rest is dropped.
-          if (e instanceof Error)
-            message += ` ${e.stack.replace(/\n\s*(?= )/, "").replace(/\n.*$/gm, "")}`;
+          if (e instanceof Error) message += ` ${e.stack.replace(/\n\s*(?= )/, "").replace(/\n.*$/gm, "")}`;
 
           return {
             valid: false,

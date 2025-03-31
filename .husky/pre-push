@@ -1,7 +1,11 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-yarn run test
+# Disabling linter and tests
+#   - linting is run using stage-lint in pre-commit
+#   - tests are run in CI
+# yarn lint
+# yarn run test
 # yarn run test:ceramic-integration
 # disabled integration test May 30 2023
 # it was causing too many errors and is 

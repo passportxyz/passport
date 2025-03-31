@@ -27,21 +27,13 @@ function difference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
 async function main() {
   let exitCode = 0;
   const provider = new JsonRpcProvider(apiUrl);
-  const decoderContract = new Contract(
-    decoderContractAddress,
-    passportDecoderAbi[chainId],
-    provider,
-  );
+  const decoderContract = new Contract(decoderContractAddress, passportDecoderAbi[chainId], provider);
 
   const latestOnChainProviderVersion = await decoderContract.currentVersion();
   console.log("latestOnChainProviderVersion:", latestOnChainProviderVersion);
 
-  const decoderProviders: string[] = await decoderContract.getProviders(
-    Number(latestOnChainProviderVersion),
-  );
-  const onChainProviders = new Set(
-    decoderProviders.map((p: string, idx: number) => `${idx} => ${p}`),
-  );
+  const decoderProviders: string[] = await decoderContract.getProviders(Number(latestOnChainProviderVersion));
+  const onChainProviders = new Set(decoderProviders.map((p: string, idx: number) => `${idx} => ${p}`));
   const providerBitmapProviders = providerBitMapInfo.reduce((acc, cur) => {
     const idx = cur.index * 256 + cur.bit;
     acc.add(`${idx} => ${cur.name}`);
@@ -58,26 +50,17 @@ async function main() {
   console.log("missingOffChain  :", missingOffChain);
 
   if (missingOnChain.size > 0) {
-    console.log(
-      "❌ on-chain configuration is not up to date",
-      missingOnChain.size,
-    );
-    console.log(
-      "❌ the following providers are missing on-chain",
-      missingOnChain,
-    );
+    console.log("❌ on-chain configuration is not up to date", missingOnChain.size);
+    console.log("❌ the following providers are missing on-chain", missingOnChain);
     exitCode = 1;
   }
 
   if (missingOffChain.size > 0) {
     console.log(
       "❌ off-chain configuration is broken. Some on-chain providers are not available in the off-chain configuration. Number of missing providers: ",
-      missingOffChain.size,
+      missingOffChain.size
     );
-    console.log(
-      "❌ the following providers are missing on-chain",
-      missingOffChain,
-    );
+    console.log("❌ the following providers are missing on-chain", missingOffChain);
     exitCode = 1;
   }
 

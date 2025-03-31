@@ -18,7 +18,7 @@ interface SnapshotProposalQueryResult {
       id?: string;
       scores_total?: number;
       author?: string;
-    }
+    },
   ];
 }
 

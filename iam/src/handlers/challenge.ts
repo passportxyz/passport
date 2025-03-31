@@ -1,33 +1,19 @@
 import { getAddress } from "ethers";
-import {
-  ChallengeRequestBody,
-  CredentialResponseBody,
-} from "@gitcoin/passport-types";
+import { ChallengeRequestBody, CredentialResponseBody } from "@gitcoin/passport-types";
 
-import {
-  getChallengeRecord,
-  getIssuerInfo,
-  issueChallengeCredential,
-  serverUtils,
-} from "../utils/identityHelper.js";
+import { getChallengeRecord, getIssuerInfo, issueChallengeCredential, serverUtils } from "../utils/identityHelper.js";
 
 const { ApiError, createHandler } = serverUtils;
 
 // ---- Generate & Verify methods
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
-export const challengeHandler = createHandler<
-  ChallengeRequestBody,
-  CredentialResponseBody
->(async (req, res) => {
+export const challengeHandler = createHandler<ChallengeRequestBody, CredentialResponseBody>(async (req, res) => {
   const payload = req.body.payload;
 
   (["address", "type"] as const).forEach((key) => {
     if (!payload[key]) {
-      throw new ApiError(
-        `Missing ${key} from challenge request body`,
-        "400_BAD_REQUEST",
-      );
+      throw new ApiError(`Missing ${key} from challenge request body`, "400_BAD_REQUEST");
     }
   });
 

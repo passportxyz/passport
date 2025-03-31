@@ -1,9 +1,6 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { Provider } from "../../types.js";
-import {
-  getGithubUserData,
-  requestAccessToken,
-} from "../../utils/githubClient.js";
+import { getGithubUserData, requestAccessToken } from "../../utils/githubClient.js";
 import { GithubContext } from "../../utils/githubClient.js";
 import axios from "axios";
 
@@ -28,11 +25,7 @@ type ConditionResponse = {
   };
 };
 
-const getCondition = async (
-  type: string,
-  conditionName: string,
-  conditionHash: string,
-): Promise<Condition> => {
+const getCondition = async (type: string, conditionName: string, conditionHash: string): Promise<Condition> => {
   try {
     const url = `${githubConditionEndpoint}/${type}%23${conditionName}%23${conditionHash}`;
     const response: ConditionResponse = await axios.get(url, {
@@ -49,21 +42,14 @@ export class CustomGithubProvider implements Provider {
   _options = {
     threshold: "1",
   };
-  async verify(
-    payload: RequestPayload,
-    context: GithubContext,
-  ): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: GithubContext): Promise<VerifiedPayload> {
     const errors: string[] = [];
     let record = undefined,
       valid = false;
     const { conditionName, conditionHash } = payload.proofs;
     let githubId: string | null = null;
 
-    const condition = await getCondition(
-      this.type,
-      conditionName,
-      conditionHash,
-    );
+    const condition = await getCondition(this.type, conditionName, conditionHash);
 
     // Call requestAccessToken to exchange the code for an access token and store it in the context
     await requestAccessToken(payload.proofs?.code, context);

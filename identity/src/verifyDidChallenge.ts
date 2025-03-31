@@ -31,7 +31,7 @@ class CredentialTooOldError extends ApiError {
 
 const verifyMatchesExpectedChallenge = async (
   signedChallenge: SignedDidChallenge,
-  expectedChallenge: string,
+  expectedChallenge: string
 ): Promise<void> => {
   try {
     const expectedBlock = await encode({
@@ -50,10 +50,7 @@ const verifyMatchesExpectedChallenge = async (
   throw new ChallengeMismatchError();
 };
 
-const verifySignature = async (
-  signedChallenge: SignedDidChallenge,
-  cacao: Cacao,
-): Promise<void> => {
+const verifySignature = async (signedChallenge: SignedDidChallenge, cacao: Cacao): Promise<void> => {
   try {
     const jws_restored = {
       signatures: signedChallenge.signatures,
@@ -75,13 +72,9 @@ const verifySignature = async (
   }
 };
 
-const verifyAgeAndGetCacao = async (
-  signedChallenge: SignedDidChallenge,
-): Promise<Cacao> => {
+const verifyAgeAndGetCacao = async (signedChallenge: SignedDidChallenge): Promise<Cacao> => {
   try {
-    const cacao = await Cacao.fromBlockBytes(
-      new Uint8Array(signedChallenge.cacao),
-    );
+    const cacao = await Cacao.fromBlockBytes(new Uint8Array(signedChallenge.cacao));
     // if (Date.now() - new Date(cacao.p.iat).getTime() < MAX_VALID_DID_SESSION_AGE) {
     return cacao;
     // }
@@ -93,7 +86,7 @@ const verifyAgeAndGetCacao = async (
 
 export const verifyDidChallenge = async (
   signedChallenge: SignedDidChallenge,
-  expectedChallenge: string,
+  expectedChallenge: string
 ): Promise<string> => {
   const cacao = await verifyAgeAndGetCacao(signedChallenge);
   await verifyMatchesExpectedChallenge(signedChallenge, expectedChallenge);

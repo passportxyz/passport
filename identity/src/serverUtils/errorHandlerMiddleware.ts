@@ -3,12 +3,7 @@ import { ApiError } from "./apiError.js";
 
 // Middleware to handle errors
 // Must define 4 params for express to recognize this as an error handler
-export const errorHandlerMiddleware = (
-  err: Error,
-  _req: Request,
-  res: Response,
-  _next: unknown,
-) => {
+export const errorHandlerMiddleware = (err: Error, _req: Request, res: Response, _next: unknown) => {
   // If we have an API Error, use the provided code and message
   if (err instanceof ApiError) {
     return res.status(err.statusCode).json({

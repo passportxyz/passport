@@ -10,13 +10,13 @@ export const createHandler =
     handler: (
       req: Request<ParamsDictionary, ResponseBodyType, RequestBodyType>,
       res: Response<ResponseBodyType>,
-      next?: NextFunction,
-    ) => Promise<void>,
+      next?: NextFunction
+    ) => Promise<void>
   ) =>
   (
     req: Request<ParamsDictionary, ResponseBodyType, RequestBodyType>,
     res: Response<ResponseBodyType>,
-    next?: NextFunction,
+    next?: NextFunction
   ): void => {
     handler(req, res, next).catch(next);
   };

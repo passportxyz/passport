@@ -5,16 +5,12 @@ import { autoVerifyStamps } from "../src/utils/identityHelper.js";
 import request from "supertest";
 import { app } from "../src/server.js";
 
-const mockedAutoVerifyStamps = autoVerifyStamps as jest.MockedFunction<
-  typeof autoVerifyStamps
->;
+const mockedAutoVerifyStamps = autoVerifyStamps as jest.MockedFunction<typeof autoVerifyStamps>;
 
 jest.mock("axios");
 
 jest.mock("../src/utils/identityHelper", () => ({
-  ...jest.requireActual<typeof import("../src/utils/identityHelper")>(
-    "../src/utils/identityHelper",
-  ),
+  ...jest.requireActual<typeof import("../src/utils/identityHelper")>("../src/utils/identityHelper"),
   autoVerifyStamps: jest.fn(),
 }));
 
@@ -27,31 +23,25 @@ describe("autoVerificationHandler", function () {
     // Clear the spy stats
     jest.clearAllMocks();
 
-    (
-      axios.get as jest.Mock<() => Promise<{ data: { rate_limit: string } }>>
-    ).mockResolvedValueOnce({
+    (axios.get as jest.Mock<() => Promise<{ data: { rate_limit: string } }>>).mockResolvedValueOnce({
       data: {
         rate_limit: "125/15m",
       },
     });
 
-    jest
-      .spyOn(axios, "post")
-      .mockImplementation((autoVerificationFields: any): Promise<any> => {
-        return new Promise((resolve, reject) => {
-          resolve({
-            data: { score: mockScore },
-          });
+    jest.spyOn(axios, "post").mockImplementation((autoVerificationFields: any): Promise<any> => {
+      return new Promise((resolve, reject) => {
+        resolve({
+          data: { score: mockScore },
         });
       });
+    });
 
-    mockedAutoVerifyStamps.mockImplementation(
-      async (autoVerificationFields: any): Promise<VerifiableCredential[]> => {
-        return new Promise((resolve, reject) => {
-          resolve([] as VerifiableCredential[]);
-        });
-      },
-    );
+    mockedAutoVerifyStamps.mockImplementation(async (autoVerificationFields: any): Promise<VerifiableCredential[]> => {
+      return new Promise((resolve, reject) => {
+        resolve([] as VerifiableCredential[]);
+      });
+    });
   });
 
   it("properly calls autoVerifyStamps and addStampsAndGetScore", async () => {
@@ -85,7 +75,7 @@ describe("autoVerificationHandler", function () {
         headers: {
           Authorization: apiKey,
         },
-      },
+      }
     );
   });
 
@@ -121,7 +111,7 @@ describe("autoVerificationHandler", function () {
         headers: {
           Authorization: apiKey,
         },
-      },
+      }
     );
   });
 });

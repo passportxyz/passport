@@ -150,7 +150,7 @@ export type ChallengeRecord = {
   address: string;
   type: string;
   [k: string]: string;
-}
+};
 
 // response Object return by verify procedure
 export type ChallengePayload = {

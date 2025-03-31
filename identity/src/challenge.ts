@@ -1,9 +1,5 @@
 // ---- Return randomBytes as a challenge to test that the user has control of a provided address
-import {
-  ChallengeRecord,
-  RequestPayload,
-  VerifyRequestBody,
-} from "@gitcoin/passport-types";
+import { ChallengeRecord, RequestPayload, VerifyRequestBody } from "@gitcoin/passport-types";
 import crypto from "crypto";
 import { verifyDidChallenge } from "./verifyDidChallenge.js";
 import { getAddress, verifyMessage } from "ethers";
@@ -21,9 +17,7 @@ const getChallengeString = (provider: string): string => {
   }
 };
 
-export const getChallengeRecord = (
-  payload: RequestPayload,
-): ChallengeRecord => {
+export const getChallengeRecord = (payload: RequestPayload): ChallengeRecord => {
   const challenge = getChallengeString(payload.type);
 
   return {
@@ -43,21 +37,12 @@ export const verifyChallengeAndGetAddress = async ({
   let uncheckedAddress: string;
 
   if (signedChallenge) {
-    uncheckedAddress = await verifyDidChallenge(
-      signedChallenge,
-      challenge.credentialSubject.challenge,
-    );
+    uncheckedAddress = await verifyDidChallenge(signedChallenge, challenge.credentialSubject.challenge);
   } else {
     try {
-      uncheckedAddress = verifyMessage(
-        challenge.credentialSubject.challenge,
-        payload.proofs.signature,
-      );
+      uncheckedAddress = verifyMessage(challenge.credentialSubject.challenge, payload.proofs.signature);
     } catch {
-      throw new ApiError(
-        "Unable to verify challenge signature",
-        "401_UNAUTHORIZED",
-      );
+      throw new ApiError("Unable to verify challenge signature", "401_UNAUTHORIZED");
     }
   }
 

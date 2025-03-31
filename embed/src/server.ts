@@ -11,11 +11,7 @@ import { rateLimit } from "express-rate-limit";
 // --- Relative imports
 import { apiKeyRateLimit, getRateLimiterStore } from "./rateLimiter.js";
 import { keyGenerator } from "./rateLimiterKeyGenerator.js";
-import {
-  autoVerificationHandler,
-  verificationHandler,
-  getChallengeHandler,
-} from "./handlers.js";
+import { autoVerificationHandler, verificationHandler, getChallengeHandler } from "./handlers.js";
 import { metadataHandler } from "./metadata.js";
 import { serverUtils } from "./utils/identityHelper.js";
 
@@ -46,9 +42,7 @@ if (!process.env.REDIS_URL) {
 
 if (configErrors.length > 0) {
   configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
-  throw new Error(
-    "Missing required configuration: " + configErrors.join(",\n"),
-  );
+  throw new Error("Missing required configuration: " + configErrors.join(",\n"));
 }
 
 // create the app and run on port
@@ -70,13 +64,9 @@ app.use(
     store: getRateLimiterStore(),
     skip: (req, _res): boolean => {
       // TODO: geri review this, /verify should be removed ...
-      return (
-        req.path === "/health" ||
-        req.path === "/embed/challenge" ||
-        req.path === "/embed/verify"
-      );
+      return req.path === "/health" || req.path === "/embed/challenge" || req.path === "/embed/verify";
     },
-  }),
+  })
 );
 
 // health check endpoint

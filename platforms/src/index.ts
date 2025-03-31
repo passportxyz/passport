@@ -8,18 +8,9 @@ import { PlatformGroupSpec } from "./types.js";
 // Check that all platforms have a ProviderConfig, PlatformDetails, and providers
 Object.entries(platforms).map(([platformName, platform]) => {
   const { ProviderConfig, PlatformDetails, providers } = platform;
-  if (!ProviderConfig)
-    throw new Error(
-      `No ProviderConfig defined in ${platformName}/Providers-config.ts`,
-    );
-  if (!PlatformDetails)
-    throw new Error(
-      `No PlatformDetails defined in ${platformName}/Providers-config.ts`,
-    );
-  if (!providers?.length)
-    throw new Error(
-      `No providers defined in ${platformName}/Providers-config.ts`,
-    );
+  if (!ProviderConfig) throw new Error(`No ProviderConfig defined in ${platformName}/Providers-config.ts`);
+  if (!PlatformDetails) throw new Error(`No PlatformDetails defined in ${platformName}/Providers-config.ts`);
+  if (!providers?.length) throw new Error(`No providers defined in ${platformName}/Providers-config.ts`);
 });
 
 // Set hash on each provider spec
@@ -73,43 +64,35 @@ const formatPlatformGroups = (providerConfig: PlatformGroupSpec[]) =>
         }),
       },
     ],
-    [] as GroupData[],
+    [] as GroupData[]
   );
 
-export const platformsData = Object.entries(platforms).reduce(
-  (data, [id, platform]) => {
-    if (skipPlatforms.includes(id)) return data;
+export const platformsData = Object.entries(platforms).reduce((data, [id, platform]) => {
+  if (skipPlatforms.includes(id)) return data;
 
-    const { name, icon, description, connectMessage } =
-      platform.PlatformDetails;
-    if (!icon) throw new Error(`No icon defined for ${id}`);
+  const { name, icon, description, connectMessage } = platform.PlatformDetails;
+  if (!icon) throw new Error(`No icon defined for ${id}`);
 
-    const groups = formatPlatformGroups(platform.ProviderConfig);
+  const groups = formatPlatformGroups(platform.ProviderConfig);
 
-    return [
-      ...data,
-      {
-        id,
-        name,
-        icon,
-        description,
-        connectMessage,
-        groups,
-      },
-    ];
-  },
-  [] as PlatformData[],
-);
+  return [
+    ...data,
+    {
+      id,
+      name,
+      icon,
+      description,
+      connectMessage,
+      groups,
+    },
+  ];
+}, [] as PlatformData[]);
 
 export * from "./types.js";
 export { type PlatformConfig };
 export { Platform as PlatformClass } from "./utils/platform.js";
 export { platforms as platforms };
-export {
-  initCacheSession,
-  loadCacheSession,
-  clearCacheSession,
-} from "./utils/platform-cache.js";
+export { initCacheSession, loadCacheSession, clearCacheSession } from "./utils/platform-cache.js";
 export { handleAxiosError } from "./utils/handleAxiosError.js";
 export { PassportCache } from "./utils/passport-cache.js";
 export { PlatformPreCheckError } from "./utils/platform.js";

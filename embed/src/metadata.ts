@@ -23,24 +23,17 @@ type MetadataResponseBody = {
   }[];
 }[];
 
-export const metadataHandler = createHandler<
-  MetadataRequestBody,
-  MetadataResponseBody
->(async (req, res) => {
+export const metadataHandler = createHandler<MetadataRequestBody, MetadataResponseBody>(async (req, res) => {
   const { scorerId } = req.query;
   if (!scorerId) {
-    throw new ApiError(
-      "Missing required query parameter: `scorerId`",
-      "400_BAD_REQUEST",
-    );
+    throw new ApiError("Missing required query parameter: `scorerId`", "400_BAD_REQUEST");
   }
   // TODO: in the future return specific stamp metadata based on the scorerId
   // TODO: clarify the returned response
   // get weight for scorerId
   const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/weights?community_id=${scorerId as string}`;
   const weightsResponse = await axios.get(embedWeightsUrl);
-  const weightsResponseData: { [key: string]: number } =
-    weightsResponse.data as { [key: string]: number };
+  const weightsResponseData: { [key: string]: number } = weightsResponse.data as { [key: string]: number };
 
   // get providers / credential ids from passport-platforms
   // for each provider, get the weight from the weights response
@@ -59,23 +52,14 @@ export const metadataHandler = createHandler<
       }
       // Extract provider types
       const providers = platformData.providers;
-      const credentials = Object.values(providers).map(
-        (provider: { type: string }) => ({
-          id: provider.type,
-          weight: weightsResponseData[provider.type]
-            ? weightsResponseData[provider.type].toString()
-            : "0",
-        }),
-      );
+      const credentials = Object.values(providers).map((provider: { type: string }) => ({
+        id: provider.type,
+        weight: weightsResponseData[provider.type] ? weightsResponseData[provider.type].toString() : "0",
+      }));
       return {
         ...platform,
         credentials,
-        displayWeight: displayNumber(
-          credentials.reduce(
-            (acc, credential) => acc + parseFloat(credential.weight),
-            0,
-          ),
-        ),
+        displayWeight: displayNumber(credentials.reduce((acc, credential) => acc + parseFloat(credential.weight), 0)),
       };
     }),
   }));

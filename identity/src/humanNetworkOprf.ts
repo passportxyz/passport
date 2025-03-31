@@ -1,10 +1,7 @@
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
 
-import {
-  initSync as humanNetworkInitSync,
-  generate_oprf,
-} from "@holonym-foundation/mishtiwasm";
+import { initSync as humanNetworkInitSync, generate_oprf } from "@holonym-foundation/mishtiwasm";
 
 // TODO: ideally this would be handled in the wasm module
 process.on("uncaughtException", (err): void => {
@@ -24,11 +21,7 @@ const initializeHumanNetwork = () => {
   // For docker builds, the wasm path is different and can be set in the Dockerfile
   const wasmPath =
     process.env.HUMAN_NETWORK_WASM_PATH ||
-    join(
-      monorepoBaseDir,
-      "node_modules/@holonym-foundation/mishtiwasm/pkg/esm",
-      "mishtiwasm_bg.wasm",
-    );
+    join(monorepoBaseDir, "node_modules/@holonym-foundation/mishtiwasm/pkg/esm", "mishtiwasm_bg.wasm");
 
   // TODO leaving in in case there are any weird
   // issues in other environments, but can be removed
@@ -53,12 +46,7 @@ export const humanNetworkOprf = async ({
 }): Promise<string> => {
   initializeHumanNetwork();
 
-  const encrypted = await generate_oprf(
-    clientPrivateKey,
-    value,
-    "OPRFSecp256k1",
-    relayUrl,
-  );
+  const encrypted = await generate_oprf(clientPrivateKey, value, "OPRFSecp256k1", relayUrl);
 
   return encrypted;
 };

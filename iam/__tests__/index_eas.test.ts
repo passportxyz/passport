@@ -1,10 +1,7 @@
 import request from "supertest";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
-import {
-  MultiAttestationRequest,
-  ZERO_BYTES32,
-} from "@ethereum-attestation-service/eas-sdk";
+import { MultiAttestationRequest, ZERO_BYTES32 } from "@ethereum-attestation-service/eas-sdk";
 import { app } from "../src/index";
 import { getAttestationDomainSeparator } from "../src/utils/attestations";
 import { parseEther } from "ethers";
@@ -14,9 +11,7 @@ import * as identityMock from "../src/utils/identityHelper";
 import * as easScoreSchema from "../src/utils/easScoreSchema";
 
 jest.mock("../src/utils/revocations", () => ({
-  filterRevokedCredentials: jest
-    .fn()
-    .mockImplementation((input) => Promise.resolve(input)),
+  filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
 }));
 
 jest.mock("../src/utils/easScoreSchema", () => ({
@@ -37,8 +32,7 @@ jest.mock("../src/utils/identityHelper", () => {
 });
 
 const issuerDid = identityMock.getIssuerInfo().issuer.did;
-const generateScoreAttestationRequest =
-  easScoreSchema.generateScoreAttestationRequest as jest.Mock;
+const generateScoreAttestationRequest = easScoreSchema.generateScoreAttestationRequest as jest.Mock;
 const getEASFeeAmountMock = easFees.getEASFeeAmount as jest.Mock;
 const verifyCredentialMock = identityMock.verifyCredential as jest.Mock;
 
@@ -47,8 +41,7 @@ const chainIdHex = "0xa";
 const mockRecipient = "0x5678000000000000000000000000000000000000";
 const mockMultiAttestationRequest: MultiAttestationRequest[] = [
   {
-    schema:
-      "0xda0257756063c891659fed52fd36ef7557f7b45d66f59645fd3c3b263b747254",
+    schema: "0xda0257756063c891659fed52fd36ef7557f7b45d66f59645fd3c3b263b747254",
     data: [
       {
         recipient: mockRecipient,
@@ -69,9 +62,7 @@ const mockMultiAttestationRequest: MultiAttestationRequest[] = [
             },
           ],
         }),
-        expirationTime: BigInt(
-          Math.floor(new Date().getTime() / 1000) + 60 * 60 * 24 * 70,
-        ),
+        expirationTime: BigInt(Math.floor(new Date().getTime() / 1000) + 60 * 60 * 24 * 70),
         revocable: true,
         refUID: ZERO_BYTES32,
         value: BigInt("0"),
@@ -85,9 +76,7 @@ describe("POST /eas/scoreV2", () => {
 
   beforeEach(() => {
     getEASFeeAmountMock.mockReturnValue(Promise.resolve(parseEther("0.025")));
-    generateScoreAttestationRequest.mockResolvedValue(
-      mockMultiAttestationRequest,
-    );
+    generateScoreAttestationRequest.mockResolvedValue(mockMultiAttestationRequest);
   });
 
   afterEach(() => {
@@ -114,9 +103,7 @@ describe("POST /eas/scoreV2", () => {
       .expect(400)
       .expect("Content-Type", /json/);
 
-    expect(response.body.error).toEqual(
-      "No onchainInfo found for chainId 0x694206969",
-    );
+    expect(response.body.error).toEqual("No onchainInfo found for chainId 0x694206969");
   });
 
   it("handles invalid recipient in the request body", async () => {

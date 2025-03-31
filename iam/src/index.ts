@@ -5,12 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import { router as procedureRouter } from "@gitcoin/passport-platforms/procedure-router";
-import {
-  challengeHandler,
-  checkHandler,
-  easScoreV2Handler,
-  verifyHandler,
-} from "./handlers/index.js";
+import { challengeHandler, checkHandler, easScoreV2Handler, verifyHandler } from "./handlers/index.js";
 
 import { serverUtils } from "./utils/identityHelper.js";
 
@@ -75,12 +70,7 @@ app.post("/api/v0.0.0/eas/scoreV2", easScoreV2Handler);
 // procedure endpoints
 app.use("/procedure", procedureRouter);
 
-app.use(
-  "/static",
-  express.static(
-    path.join(path.dirname(fileURLToPath(import.meta.url)), "static"),
-  ),
-);
+app.use("/static", express.static(path.join(path.dirname(fileURLToPath(import.meta.url)), "static")));
 
 // This custom error handler needs to be last
 app.use(serverUtils.errorHandlerMiddleware);

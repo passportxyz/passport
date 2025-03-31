@@ -14,15 +14,12 @@ import {
 } from "@gitcoin/passport-types";
 
 jest.mock("../src/utils/revocations", () => ({
-  filterRevokedCredentials: jest
-    .fn()
-    .mockImplementation((input) => Promise.resolve(input)),
+  filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
 }));
 
 jest.mock("../src/utils/identityHelper", () => {
-  const originalIdentity = jest.requireActual<
-    typeof import("../src/utils/identityHelper")
-  >("../src/utils/identityHelper");
+  const originalIdentity =
+    jest.requireActual<typeof import("../src/utils/identityHelper")>("../src/utils/identityHelper");
   return {
     ...originalIdentity,
     verifyCredential: jest.fn(originalIdentity.verifyCredential),
@@ -58,9 +55,7 @@ describe("POST /challenge", function () {
 
     // expect the mocked credential to be returned and contain the expectedId
     // TODO: geri check for the signature type ...
-    expect(
-      (response.body as ValidResponseBody)?.credential?.credentialSubject?.id,
-    ).toEqual(expectedId);
+    expect((response.body as ValidResponseBody)?.credential?.credentialSubject?.id).toEqual(expectedId);
   });
 
   it("handles valid challenge request with signatureType", async () => {
@@ -84,9 +79,7 @@ describe("POST /challenge", function () {
 
     // expect the mocked credential to be returned and contain the expectedId
     // TODO: geri check for the signature type ...
-    expect(
-      (response.body as ValidResponseBody)?.credential?.credentialSubject?.id,
-    ).toEqual(expectedId);
+    expect((response.body as ValidResponseBody)?.credential?.credentialSubject?.id).toEqual(expectedId);
   });
 
   it("handles missing address from the challenge request body", async () => {
@@ -104,9 +97,7 @@ describe("POST /challenge", function () {
       .expect("Content-Type", /json/);
 
     // expect the mocked credential to be returned and contain the expectedId
-    expect((response.body as ErrorResponseBody).error).toEqual(
-      "Missing address from challenge request body",
-    );
+    expect((response.body as ErrorResponseBody).error).toEqual("Missing address from challenge request body");
   });
 
   it("handles missing type from the challenge request body", async () => {
@@ -124,9 +115,7 @@ describe("POST /challenge", function () {
       .expect("Content-Type", /json/);
 
     // expect the mocked credential to be returned and contain the expectedId
-    expect((response.body as ErrorResponseBody).error).toEqual(
-      "Missing type from challenge request body",
-    );
+    expect((response.body as ErrorResponseBody).error).toEqual("Missing type from challenge request body");
   });
 
   it("handles malformed payload from the challenge request body", async () => {
@@ -143,10 +132,7 @@ describe("POST /challenge", function () {
   });
 });
 
-const getMockEIP712Credential = (
-  provider: string,
-  address: string,
-): VerifiableCredential => {
+const getMockEIP712Credential = (provider: string, address: string): VerifiableCredential => {
   return {
     "@context": ["https://www.w3.org/2018/credentials/v1"],
     type: ["VerifiableCredential", "Stamp"],
@@ -204,19 +190,14 @@ describe("POST /check", function () {
     const allowProvider = "AllowList#test";
     jest
       .spyOn(providers._providers.AllowList, "verify")
-      .mockImplementation(
-        async (
-          payload: RequestPayload,
-          context?: ProviderContext,
-        ): Promise<VerifiedPayload> => {
-          return {
-            valid: true,
-            record: {
-              allowList: "test",
-            },
-          };
-        },
-      );
+      .mockImplementation(async (payload: RequestPayload, context?: ProviderContext): Promise<VerifiedPayload> => {
+        return {
+          valid: true,
+          record: {
+            allowList: "test",
+          },
+        };
+      });
     const payload = {
       types: ["Simple", allowProvider],
       address: "0x0",
@@ -240,20 +221,15 @@ describe("POST /check", function () {
     const customGithubProvider = "DeveloperList#test#0xtest";
     jest
       .spyOn(providers._providers.DeveloperList, "verify")
-      .mockImplementation(
-        async (
-          payload: RequestPayload,
-          context?: ProviderContext,
-        ): Promise<VerifiedPayload> => {
-          return {
-            valid: true,
-            record: {
-              conditionName: "test",
-              conditionHash: "0xtest",
-            },
-          };
-        },
-      );
+      .mockImplementation(async (payload: RequestPayload, context?: ProviderContext): Promise<VerifiedPayload> => {
+        return {
+          valid: true,
+          record: {
+            conditionName: "test",
+            conditionHash: "0xtest",
+          },
+        };
+      });
     const payload = {
       types: ["Simple", customGithubProvider],
       address: "0x0",
@@ -292,9 +268,7 @@ describe("POST /check", function () {
     expect(response.body.length).toBe(2);
 
     const simple = response.body.find((item: any) => item.type === "Simple");
-    const anotherType = response.body.find(
-      (item: any) => item.type === "AnotherType",
-    );
+    const anotherType = response.body.find((item: any) => item.type === "AnotherType");
 
     expect(simple.valid).toBe(true);
     expect(anotherType.valid).toBe(false);
