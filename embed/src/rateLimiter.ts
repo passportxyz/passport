@@ -19,7 +19,7 @@ export function parseRateLimit(rateLimitSpec: string | null): number {
   if (!match) {
     throw new ApiError(
       "Invalid rate limit spec format. Expected format: '<requests>/<time><unit> where unit is one of 'smhd'",
-      "400_BAD_REQUEST",
+      "400_BAD_REQUEST"
     );
   }
 
@@ -43,20 +43,14 @@ export function parseRateLimit(rateLimitSpec: string | null): number {
       timeInMinutes = timeValue * 1440;
       break;
     default:
-      throw new ApiError(
-        "Invalid time unit. Supported units are: s, m, h, d",
-        "400_BAD_REQUEST",
-      );
+      throw new ApiError("Invalid time unit. Supported units are: s, m, h, d", "400_BAD_REQUEST");
   }
 
   // Calculate rate limit per minute
   return totalRequests / timeInMinutes;
 }
 
-export async function apiKeyRateLimit(
-  req: Request,
-  _res: Response,
-): Promise<number> {
+export async function apiKeyRateLimit(req: Request, _res: Response): Promise<number> {
   const apiKey = req.headers["x-api-key"] as string;
   const cacheKey = `erl:${apiKey}`;
   const cachedRateLimit = (await redis.get(cacheKey)) || "";
@@ -64,18 +58,13 @@ export async function apiKeyRateLimit(
 
   // Simulate an async operation (e.g., database call)
   if (Number.isNaN(rateLimit)) {
-    const rateLimits = await axios.get(
-      `${process.env.SCORER_ENDPOINT}/internal/embed/validate-api-key`,
-      {
-        headers: {
-          "X-API-KEY": apiKey,
-        },
+    const rateLimits = await axios.get(`${process.env.SCORER_ENDPOINT}/internal/embed/validate-api-key`, {
+      headers: {
+        "X-API-KEY": apiKey,
       },
-    );
+    });
 
-    const rateLimitSpec = (rateLimits.data as { rate_limit: string })[
-      "rate_limit"
-    ];
+    const rateLimitSpec = (rateLimits.data as { rate_limit: string })["rate_limit"];
     const rateLimit = parseRateLimit(rateLimitSpec);
 
     // Cache the limit and set to expire in 5 minutes

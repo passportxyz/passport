@@ -8,8 +8,5 @@ export function keyGenerator(req: Request, _res: Response): string {
     return ret;
   }
 
-  throw new ApiError(
-    "Unauthorized! No 'X-API-KEY' present in the header!",
-    "401_UNAUTHORIZED",
-  );
+  throw new ApiError("Unauthorized! No 'X-API-KEY' present in the header!", "401_UNAUTHORIZED");
 }

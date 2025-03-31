@@ -74,7 +74,7 @@ describe("checkCredentialBans", () => {
           },
         },
       ],
-      expect.any(Object),
+      expect.any(Object)
     );
     expect(result).toEqual(input);
   });
@@ -97,8 +97,7 @@ describe("checkCredentialBans", () => {
 
     expect(result).toEqual([
       {
-        error:
-          "Credential is banned. Type=hash, End=2024-12-31, Reason=Suspicious activity",
+        error: "Credential is banned. Type=hash, End=2024-12-31, Reason=Suspicious activity",
         code: 403,
       },
     ]);
@@ -135,21 +134,12 @@ describe("checkCredentialBans", () => {
     });
 
     const anotherValidCredential = JSON.parse(JSON.stringify(validCredential));
-    anotherValidCredential.credential.credentialSubject.nullifiers = [
-      "hash456",
-    ];
+    anotherValidCredential.credential.credentialSubject.nullifiers = ["hash456"];
 
     const aThirdValidCredential = JSON.parse(JSON.stringify(validCredential));
-    aThirdValidCredential.credential.credentialSubject.nullifiers = [
-      "hash789",
-      "hashABC",
-    ];
+    aThirdValidCredential.credential.credentialSubject.nullifiers = ["hash789", "hashABC"];
 
-    const input = [
-      validCredential,
-      anotherValidCredential,
-      aThirdValidCredential,
-    ];
+    const input = [validCredential, anotherValidCredential, aThirdValidCredential];
     const result = await checkCredentialBans(input);
 
     expect((result[0] as ErrorResponseBody).code).toBe(403);
@@ -212,8 +202,8 @@ describe("checkCredentialBans", () => {
 
     await expect(checkCredentialBans([validCredential])).rejects.toThrowError(
       new InternalApiError(
-        'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}',
-      ),
+        'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}'
+      )
     );
   });
 
@@ -223,10 +213,7 @@ describe("checkCredentialBans", () => {
     const input = [validCredential];
 
     await expect(checkCredentialBans(input)).rejects.toThrowError(
-      new ApiError(
-        "Ban not found for nullifier hash123. This should not happen.",
-        "500_SERVER_ERROR",
-      ),
+      new ApiError("Ban not found for nullifier hash123. This should not happen.", "500_SERVER_ERROR")
     );
   });
 });

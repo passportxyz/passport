@@ -13,9 +13,7 @@ import { app } from "../src/index.js";
 import * as identityMock from "../src/utils/identityHelper";
 
 jest.mock("../src/utils/revocations", () => ({
-  filterRevokedCredentials: jest
-    .fn()
-    .mockImplementation((input) => Promise.resolve(input)),
+  filterRevokedCredentials: jest.fn().mockImplementation((input) => Promise.resolve(input)),
 }));
 
 jest.mock("../src/utils/identityHelper", () => {
@@ -33,15 +31,11 @@ const issuerDid = identityMock.getIssuerInfo().issuer.did;
 const verifyCredential = identityMock.verifyCredential;
 const hasValidIssuer = identityMock.hasValidIssuer;
 const verifyChallengeAndGetAddress = identityMock.verifyChallengeAndGetAddress;
-const verifyProvidersAndIssueCredentialsMock =
-  identityMock.verifyProvidersAndIssueCredentials as jest.Mock;
+const verifyProvidersAndIssueCredentialsMock = identityMock.verifyProvidersAndIssueCredentials as jest.Mock;
 
 const { ApiError, InternalApiError } = identityMock.serverUtils;
 
-const getMockEIP712Credential = (
-  provider: string,
-  address: string,
-): VerifiableCredential => {
+const getMockEIP712Credential = (provider: string, address: string): VerifiableCredential => {
   return {
     "@context": ["https://www.w3.org/2018/credentials/v1"],
     type: ["VerifiableCredential", "Stamp"],
@@ -78,15 +72,12 @@ describe("POST /verify", function () {
       async (
         providersByPlatform: string[][],
         address: string,
-        payload: RequestPayload,
+        payload: RequestPayload
       ): Promise<CredentialResponseBody[]> => {
         const ret: CredentialResponseBody[] = [];
         providersByPlatform.forEach((providers) => {
           providers.forEach((provider) => {
-            const _provider =
-              provider === "ClearTextSimple"
-                ? "ClearTextSimple#Username"
-                : provider;
+            const _provider = provider === "ClearTextSimple" ? "ClearTextSimple#Username" : provider;
             ret.push({
               credential: getMockEIP712Credential(_provider, address),
               record: {
@@ -98,7 +89,7 @@ describe("POST /verify", function () {
           });
         });
         return ret;
-      },
+      }
     );
   });
 
@@ -235,10 +226,7 @@ describe("POST /verify", function () {
 
   it("handles invalid did-session signed challenge requests", async () => {
     (verifyChallengeAndGetAddress as jest.Mock).mockImplementationOnce(() => {
-      throw new ApiError(
-        "Verification failed, challenge mismatch",
-        "401_UNAUTHORIZED",
-      );
+      throw new ApiError("Verification failed, challenge mismatch", "401_UNAUTHORIZED");
     });
 
     // challenge received from the challenge endpoint
@@ -283,9 +271,7 @@ describe("POST /verify", function () {
       .expect(401)
       .expect("Content-Type", /json/);
 
-    expect((response.body as ErrorResponseBody).error).toEqual(
-      "Verification failed, challenge mismatch",
-    );
+    expect((response.body as ErrorResponseBody).error).toEqual("Verification failed, challenge mismatch");
   });
 
   it("handles valid verify requests with EIP712 signature", async () => {
@@ -385,10 +371,7 @@ describe("POST /verify", function () {
     // check that ID matches the payload (this has been mocked)
     const expectedId = "did:pkh:eip155:1:0x0";
 
-    const verifyProvidersAndIssueCredentialsFn = jest.spyOn(
-      identityMock,
-      "verifyProvidersAndIssueCredentials",
-    );
+    const verifyProvidersAndIssueCredentialsFn = jest.spyOn(identityMock, "verifyProvidersAndIssueCredentials");
 
     // create a req against the express app
     // test the call with "EIP712" signature first, an verify that this is correctly forwarded
@@ -399,11 +382,7 @@ describe("POST /verify", function () {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(verifyProvidersAndIssueCredentialsFn).toHaveBeenCalledWith(
-      [["Simple"]],
-      "0x0",
-      payload,
-    );
+    expect(verifyProvidersAndIssueCredentialsFn).toHaveBeenCalledWith([["Simple"]], "0x0", payload);
 
     // test the call with "EIP712" signature first, an verify that this is correctly forwarded
     verifyProvidersAndIssueCredentialsFn.mockClear();
@@ -428,11 +407,7 @@ describe("POST /verify", function () {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(verifyProvidersAndIssueCredentialsFn).toHaveBeenCalledWith(
-      [["Simple"]],
-      "0x0",
-      payload,
-    );
+    expect(verifyProvidersAndIssueCredentialsFn).toHaveBeenCalledWith([["Simple"]], "0x0", payload);
   });
 
   it("returns the pii record on requests", async () => {
@@ -478,14 +453,9 @@ describe("POST /verify", function () {
     const expectedProvider = `${provider}#Username`;
 
     // check that PII is returned with provider
-    expect(
-      (response.body as ValidResponseBody[])[0].credential.credentialSubject
-        .provider,
-    ).toEqual(expectedProvider);
+    expect((response.body as ValidResponseBody[])[0].credential.credentialSubject.provider).toEqual(expectedProvider);
     // check for an id match on the mocked credential
-    expect(
-      (response.body as ValidResponseBody[])[0].credential.credentialSubject.id,
-    ).toEqual(expectedId);
+    expect((response.body as ValidResponseBody[])[0].credential.credentialSubject.id).toEqual(expectedId);
     // check the returned record
     expect((response.body as ValidResponseBody[])[0].record).toEqual({
       pii: expectedProvider,
@@ -541,20 +511,10 @@ describe("POST /verify", function () {
       .expect("Content-Type", /json/);
 
     // check for an id match on the mocked credential
-    expect(
-      (response.body[0] as ValidResponseBody).credential.credentialSubject.id,
-    ).toEqual(expectedId);
-    expect(
-      (response.body[0] as ValidResponseBody).credential.credentialSubject
-        .provider,
-    ).toEqual("Simple-1");
-    expect(
-      (response.body[1] as ValidResponseBody).credential.credentialSubject.id,
-    ).toEqual(expectedId);
-    expect(
-      (response.body[1] as ValidResponseBody).credential.credentialSubject
-        .provider,
-    ).toEqual("Simple-2");
+    expect((response.body[0] as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+    expect((response.body[0] as ValidResponseBody).credential.credentialSubject.provider).toEqual("Simple-1");
+    expect((response.body[1] as ValidResponseBody).credential.credentialSubject.id).toEqual(expectedId);
+    expect((response.body[1] as ValidResponseBody).credential.credentialSubject.provider).toEqual("Simple-2");
   });
 
   it("handles invalid challenge requests where credential.issuer is unknown", async () => {
@@ -591,9 +551,7 @@ describe("POST /verify", function () {
       .expect(401)
       .expect("Content-Type", /json/);
 
-    expect((response.body as ErrorResponseBody).error).toEqual(
-      "Invalid issuer",
-    );
+    expect((response.body as ErrorResponseBody).error).toEqual("Invalid issuer");
   });
 
   it("handles invalid challenge requests where challenge credential subject signature checks fail", async () => {
@@ -634,9 +592,7 @@ describe("POST /verify", function () {
       .expect(401)
       .expect("Content-Type", /json/);
 
-    expect((response.body as ErrorResponseBody).error).toEqual(
-      "Invalid challenge 'signer' and 'provider'",
-    );
+    expect((response.body as ErrorResponseBody).error).toEqual("Invalid challenge 'signer' and 'provider'");
   });
 
   describe("for unexpected errors", () => {
@@ -651,7 +607,7 @@ describe("POST /verify", function () {
     it("handles unexpected errors", async () => {
       (identityMock.verifyCredential as jest.Mock).mockRejectedValueOnce(
         // new identityMock.serverUtils.InternalApiError("Verify Credential Error"),
-        new Error("Verify Credential Error"),
+        new Error("Verify Credential Error")
       );
 
       // challenge received from the challenge endpoint
@@ -688,17 +644,12 @@ describe("POST /verify", function () {
         code: 500,
       });
 
-      expect(logSpy).toHaveBeenCalledWith(
-        "Unexpected error:",
-        expect.stringMatching(/^Error at/),
-      );
+      expect(logSpy).toHaveBeenCalledWith("Unexpected error:", expect.stringMatching(/^Error at/));
     });
   });
 
   it("handles ApiError errors", async () => {
-    (identityMock.verifyCredential as jest.Mock).mockRejectedValueOnce(
-      new InternalApiError("Verify Credential Error"),
-    );
+    (identityMock.verifyCredential as jest.Mock).mockRejectedValueOnce(new InternalApiError("Verify Credential Error"));
 
     // challenge received from the challenge endpoint
     const challenge = {
@@ -767,9 +718,7 @@ describe("POST /verify", function () {
       .expect(401)
       .expect("Content-Type", /json/);
 
-    expect((response.body as ErrorResponseBody).error).toEqual(
-      "Invalid challenge",
-    );
+    expect((response.body as ErrorResponseBody).error).toEqual("Invalid challenge");
   });
 
   it("handles invalid challenge request passed by the additional signer", async () => {
@@ -807,10 +756,7 @@ describe("POST /verify", function () {
     };
 
     // resolve the verification
-    jest
-      .spyOn(identityMock, "verifyCredential")
-      .mockResolvedValue(true)
-      .mockResolvedValue(false);
+    jest.spyOn(identityMock, "verifyCredential").mockResolvedValue(true).mockResolvedValue(false);
 
     // create a req against the express app
     await request(app)

@@ -58,7 +58,7 @@ export const addStampsAndGetScore = async ({
         headers: {
           Authorization: apiKey,
         },
-      },
+      }
     );
 
     if (!scorerResponse.data?.score) {
@@ -71,27 +71,26 @@ export const addStampsAndGetScore = async ({
   }
 };
 
-export const autoVerificationHandler = createHandler<
-  AutoVerificationRequestBodyType,
-  AutoVerificationResponseBodyType
->(async (req, res) => {
-  const { address, scorerId, credentialIds } = req.body;
+export const autoVerificationHandler = createHandler<AutoVerificationRequestBodyType, AutoVerificationResponseBodyType>(
+  async (req, res) => {
+    const { address, scorerId, credentialIds } = req.body;
 
-  if (!isAddress(address)) {
-    throw new ApiError("Invalid address", "400_BAD_REQUEST");
+    if (!isAddress(address)) {
+      throw new ApiError("Invalid address", "400_BAD_REQUEST");
+    }
+
+    const stamps = await autoVerifyStamps({
+      address,
+      scorerId,
+      credentialIds,
+    });
+
+    const score = await addStampsAndGetScore({ address, scorerId, stamps });
+
+    // TODO should we issue a score VC?
+    return void res.json(score);
   }
-
-  const stamps = await autoVerifyStamps({
-    address,
-    scorerId,
-    credentialIds,
-  });
-
-  const score = await addStampsAndGetScore({ address, scorerId, stamps });
-
-  // TODO should we issue a score VC?
-  return void res.json(score);
-});
+);
 
 type EmbedVerifyRequestBody = VerifyRequestBody & {
   scorerId: string;
@@ -102,10 +101,7 @@ type EmbedVerifyResponseBody = {
   credentials: VerifiableCredential[];
 };
 
-export const verificationHandler = createHandler<
-  EmbedVerifyRequestBody,
-  EmbedVerifyResponseBody
->(async (req, res) => {
+export const verificationHandler = createHandler<EmbedVerifyRequestBody, EmbedVerifyResponseBody>(async (req, res) => {
   // each verify request should be received with a challenge credential detailing a signature contained in the RequestPayload.proofs
   const { challenge, payload, scorerId } = req.body;
 
@@ -115,31 +111,24 @@ export const verificationHandler = createHandler<
     const address = await verifyChallengeAndGetAddress(req.body);
 
     // Check signer and type
-    const isSigner =
-      challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
-    const isType =
-      challenge.credentialSubject.provider === `challenge-${payload.type}`;
+    const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
+    const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
 
     if (!isSigner || !isType) {
       throw new ApiError(
-        "Invalid challenge '" +
-          [!isSigner && "signer", !isType && "provider"]
-            .filter(Boolean)
-            .join("' and '") +
-          "'",
-        "401_UNAUTHORIZED",
+        "Invalid challenge '" + [!isSigner && "signer", !isType && "provider"].filter(Boolean).join("' and '") + "'",
+        "401_UNAUTHORIZED"
       );
     }
 
     const types = payload.types?.filter((type) => type) || [];
     const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
-    const credentialsVerificationResponses =
-      await verifyProvidersAndIssueCredentials(
-        providersGroupedByPlatforms,
-        address,
-        payload,
-      );
+    const credentialsVerificationResponses = await verifyProvidersAndIssueCredentials(
+      providersGroupedByPlatforms,
+      address,
+      payload
+    );
 
     const stamps = credentialsVerificationResponses.reduce((acc, response) => {
       if ("credential" in response && response.credential) {
@@ -166,18 +155,12 @@ export const verificationHandler = createHandler<
 });
 
 // TODO This is copied from the iam/, should we source it from identity/ or something?
-export const getChallengeHandler = createHandler<
-  ChallengeRequestBody,
-  CredentialResponseBody
->(async (req, res) => {
+export const getChallengeHandler = createHandler<ChallengeRequestBody, CredentialResponseBody>(async (req, res) => {
   const payload = req.body.payload;
 
   (["address", "type"] as const).forEach((key) => {
     if (!payload[key]) {
-      throw new ApiError(
-        `Missing ${key} from challenge request body`,
-        "400_BAD_REQUEST",
-      );
+      throw new ApiError(`Missing ${key} from challenge request body`, "400_BAD_REQUEST");
     }
   });
 

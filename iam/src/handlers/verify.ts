@@ -1,7 +1,4 @@
-import {
-  CredentialResponseBody,
-  VerifyRequestBody,
-} from "@gitcoin/passport-types";
+import { CredentialResponseBody, VerifyRequestBody } from "@gitcoin/passport-types";
 
 import {
   hasValidIssuer,
@@ -18,10 +15,7 @@ const { ApiError, createHandler } = serverUtils;
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
 // All provider exports from platforms
-export const verifyHandler = createHandler<
-  VerifyRequestBody,
-  CredentialResponseBody[]
->(async (req, res) => {
+export const verifyHandler = createHandler<VerifyRequestBody, CredentialResponseBody[]>(async (req, res) => {
   // each verify request should be received with a challenge credential detailing a signature contained in the RequestPayload.proofs
   const { challenge, payload } = req.body;
 
@@ -41,30 +35,20 @@ export const verifyHandler = createHandler<
   payload.address = address;
 
   // Check signer and type
-  const isSigner =
-    challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
-  const isType =
-    challenge.credentialSubject.provider === `challenge-${payload.type}`;
+  const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
+  const isType = challenge.credentialSubject.provider === `challenge-${payload.type}`;
 
   if (!isSigner || !isType) {
     throw new ApiError(
-      "Invalid challenge '" +
-        [!isSigner && "signer", !isType && "provider"]
-          .filter(Boolean)
-          .join("' and '") +
-        "'",
-      "401_UNAUTHORIZED",
+      "Invalid challenge '" + [!isSigner && "signer", !isType && "provider"].filter(Boolean).join("' and '") + "'",
+      "401_UNAUTHORIZED"
     );
   }
 
   const types = payload.types.filter((type) => type);
   const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
-  const credentials = await verifyProvidersAndIssueCredentials(
-    providersGroupedByPlatforms,
-    address,
-    payload,
-  );
+  const credentials = await verifyProvidersAndIssueCredentials(providersGroupedByPlatforms, address, payload);
 
   return void res.json(credentials);
 });

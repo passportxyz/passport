@@ -12,9 +12,7 @@ describe("getChallengeRecord", () => {
 
     expect(challengeRecord?.address).toEqual(requestPayload.address);
     expect(challengeRecord?.type).toEqual(requestPayload.type);
-    expect(challengeRecord?.challenge).toMatch(
-      /^I commit that I wish to verify all the selected EVM stamps/,
-    );
+    expect(challengeRecord?.challenge).toMatch(/^I commit that I wish to verify all the selected EVM stamps/);
   });
 
   it("returns a challenge for custom provider", () => {
@@ -27,8 +25,6 @@ describe("getChallengeRecord", () => {
 
     expect(challengeRecord?.address).toEqual(requestPayload.address);
     expect(challengeRecord?.type).toEqual(requestPayload.type);
-    expect(challengeRecord?.challenge).toMatch(
-      /^I commit that this stamp is my unique and only CustomProvider/,
-    );
+    expect(challengeRecord?.challenge).toMatch(/^I commit that this stamp is my unique and only CustomProvider/);
   });
 });

@@ -83,7 +83,7 @@ describe("GET /embed/stamps/metadata", () => {
             }),
           ]),
         },
-      ]),
+      ])
     );
   });
 
@@ -115,10 +115,7 @@ describe("GET /embed/stamps/metadata", () => {
         error: expect.stringMatching(/Unexpected server error \(ID: \S+\)/),
       });
 
-      expect(logSpy).toHaveBeenCalledWith(
-        "Unexpected error:",
-        expect.any(String),
-      );
+      expect(logSpy).toHaveBeenCalledWith("Unexpected error:", expect.any(String));
     });
   });
 

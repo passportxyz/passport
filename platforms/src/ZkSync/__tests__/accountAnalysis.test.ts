@@ -10,7 +10,7 @@ import {
 
 const mockAddress = "0x0";
 let mockContext = {};
-const mockResponse = (score: number): { status:number, data: ModelResponse } => ({
+const mockResponse = (score: number): { status: number; data: ModelResponse } => ({
   status: 200,
   data: {
     data: {

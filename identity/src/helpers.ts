@@ -1,8 +1,7 @@
 import { generateKeyPairSync } from "crypto";
 
 // Temporary helper function to determine if we should use the new format
-export const checkRotatingKeysEnabled = (): boolean =>
-  process.env.FF_ROTATING_KEYS === "on";
+export const checkRotatingKeysEnabled = (): boolean => process.env.FF_ROTATING_KEYS === "on";
 
 // Create an ordered array of the given input (of the form [[key:string, value:string], ...])
 export const objToSortedArray = (obj: { [k: string]: string }): string[][] => {

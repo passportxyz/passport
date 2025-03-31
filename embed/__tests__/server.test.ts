@@ -3,10 +3,7 @@ import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 
 import request from "supertest";
 import { Response, Request } from "express";
-import {
-  AutoVerificationResponseBodyType,
-  AutoVerificationRequestBodyType,
-} from "../src/handlers.types.js";
+import { AutoVerificationResponseBodyType, AutoVerificationRequestBodyType } from "../src/handlers.types.js";
 import { ParamsDictionary } from "express-serve-static-core";
 import { PassportScore } from "@gitcoin/passport-identity";
 
@@ -34,18 +31,14 @@ jest.mock("../src/handlers", () => {
     verificationHandler: jest.fn(),
     autoVerificationHandler: jest.fn(
       (
-        req: Request<
-          ParamsDictionary,
-          AutoVerificationResponseBodyType,
-          AutoVerificationRequestBodyType
-        >,
-        res: Response,
+        req: Request<ParamsDictionary, AutoVerificationResponseBodyType, AutoVerificationRequestBodyType>,
+        res: Response
       ): Promise<void> => {
         return new Promise((resolve, reject) => {
           res.status(200).json(mockedScore);
           resolve();
         });
-      },
+      }
     ),
   };
 });
@@ -109,10 +102,7 @@ describe("autoVerificationHandler", function () {
     };
 
     // create a req against the express app
-    const verifyRequest = await request(app)
-      .post("/embed/auto-verify")
-      .send(payload)
-      .set("Accept", "application/json");
+    const verifyRequest = await request(app).post("/embed/auto-verify").send(payload).set("Accept", "application/json");
 
     expect(apiKeyRateLimit as jest.Mock).toHaveBeenCalledTimes(0);
     expect(verifyRequest.status).toBe(401);
@@ -148,9 +138,7 @@ describe("autoVerificationHandler", function () {
 describe("POST /health", function () {
   it("handles valid health requests", async () => {
     // create a req against the express app
-    const verifyRequest = await request(app)
-      .get("/health")
-      .set("Accept", "application/json");
+    const verifyRequest = await request(app).get("/health").set("Accept", "application/json");
 
     expect(apiKeyRateLimit as jest.Mock).toHaveBeenCalledTimes(0);
     expect(verifyRequest.status).toBe(200);

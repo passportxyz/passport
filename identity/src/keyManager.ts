@@ -27,8 +27,7 @@ const LEGACY_KEY_ENV_NAME = "IAM_JWK_EIP712";
 
 const KEY_ENV_PREFIX = "IAM_JWK_EIP712_V";
 const getKeyEnvName = (version: number) => `${KEY_ENV_PREFIX}${version}`;
-const getStartTimeEnvName = (version: number) =>
-  `${getKeyEnvName(version)}_START_TIME`;
+const getStartTimeEnvName = (version: number) => `${getKeyEnvName(version)}_START_TIME`;
 
 const LEGACY_VERSION = "0.0.0";
 type LegacyVersion = typeof LEGACY_VERSION;
@@ -41,11 +40,7 @@ type KeyVersion = {
 
 const keyEnvNameRegex = new RegExp(`^${KEY_ENV_PREFIX}(?<version>\\d+)$`);
 
-const loadKeyFromEnv = ({
-  version,
-}: {
-  version: number;
-}): KeyVersion | undefined => {
+const loadKeyFromEnv = ({ version }: { version: number }): KeyVersion | undefined => {
   const key = process.env[getKeyEnvName(version)];
   const startTimeStr = process.env[getStartTimeEnvName(version)];
 
@@ -75,7 +70,7 @@ const checkKeyOrder = (keys: KeyVersion[]) => {
       throw new Error(
         `Key version ${
           key.version
-        } start time (${key.startTime.toISOString()}) must be after previous version (${previousKey.startTime.toISOString()})`,
+        } start time (${key.startTime.toISOString()}) must be after previous version (${previousKey.startTime.toISOString()})`
       );
     }
   });
@@ -85,9 +80,7 @@ const getLegacyKeyVersion = (): KeyVersion | undefined => {
   const key = process.env[LEGACY_KEY_ENV_NAME];
 
   if (!key) {
-    console.warn(
-      `Warning: No legacy key (${LEGACY_KEY_ENV_NAME}) found in ENV`,
-    );
+    console.warn(`Warning: No legacy key (${LEGACY_KEY_ENV_NAME}) found in ENV`);
   }
 
   return (
@@ -123,16 +116,11 @@ const loadInitiatedRotatingKeyVersions = (): KeyVersion[] => {
 };
 
 const loadInitiatedKeys = (): KeyVersion[] => {
-  const rotatingKeyVersions = checkRotatingKeysEnabled()
-    ? loadInitiatedRotatingKeyVersions()
-    : [];
+  const rotatingKeyVersions = checkRotatingKeysEnabled() ? loadInitiatedRotatingKeyVersions() : [];
 
   const legacyKeyVersion = getLegacyKeyVersion();
 
-  const initiatedKeyVersions = [
-    legacyKeyVersion,
-    ...rotatingKeyVersions,
-  ].filter(Boolean);
+  const initiatedKeyVersions = [legacyKeyVersion, ...rotatingKeyVersions].filter(Boolean);
 
   if (initiatedKeyVersions.length === 0) {
     throw new Error("No valid keys configured");
