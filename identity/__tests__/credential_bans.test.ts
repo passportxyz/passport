@@ -1,7 +1,7 @@
 import axios from "axios";
 import { checkCredentialBans } from "../src/bans";
 import { ErrorResponseBody } from "@gitcoin/passport-types";
-import { ApiError, UnexpectedApiError } from "../src/helpers";
+import { ApiError, InternalApiError } from "../src/serverUtils/apiError";
 
 jest.mock("axios");
 
@@ -14,14 +14,26 @@ describe("checkCredentialBans", () => {
   });
 
   const validCredential = {
-    record: { type: "test" },
+    record: { type: "test", version: "0.0.0" },
     credential: {
+      "@context": ["https://www.w3.org/2018/credentials/v1"],
       credentialSubject: {
+        "@context": {
+          nullifiers: {
+            "@container": "@list",
+            "@type": "https://schema.org/Text",
+          },
+        },
         nullifiers: ["hash123"] as string[] | undefined,
         hash: undefined as string | undefined,
         provider: "provider123",
         id: "did:0x123",
       },
+      type: ["VerifiableCredential"],
+      issuer: "did:0x123",
+      issuanceDate: "2021-01-01",
+      expirationDate: "2022-01-01",
+      proof: {} as any,
     },
     code: 200,
   };
@@ -199,7 +211,7 @@ describe("checkCredentialBans", () => {
     });
 
     await expect(checkCredentialBans([validCredential])).rejects.toThrowError(
-      new UnexpectedApiError(
+      new InternalApiError(
         'Error making Bans request, received error response with code 500: "response", headers: {"TEST":"header"}',
       ),
     );
@@ -213,7 +225,7 @@ describe("checkCredentialBans", () => {
     await expect(checkCredentialBans(input)).rejects.toThrowError(
       new ApiError(
         "Ban not found for nullifier hash123. This should not happen.",
-        500,
+        "500_SERVER_ERROR",
       ),
     );
   });

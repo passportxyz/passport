@@ -3,6 +3,9 @@ import { redis } from "./redis.js";
 import { RedisReply, RedisStore } from "rate-limit-redis";
 
 import axios from "axios";
+import { serverUtils } from "./utils/identityHelper.js";
+
+const { ApiError } = serverUtils;
 
 export function parseRateLimit(rateLimitSpec: string | null): number {
   if (rateLimitSpec === "" || rateLimitSpec === null) {
@@ -14,8 +17,9 @@ export function parseRateLimit(rateLimitSpec: string | null): number {
   const match = rateLimitSpec.match(regex);
 
   if (!match) {
-    throw new Error(
-      "Invalid rate limit spec format. Expected format: '<requests>/<time><unit> where unit is one of 'smhd'"
+    throw new ApiError(
+      "Invalid rate limit spec format. Expected format: '<requests>/<time><unit> where unit is one of 'smhd'",
+      "400_BAD_REQUEST",
     );
   }
 
@@ -39,7 +43,10 @@ export function parseRateLimit(rateLimitSpec: string | null): number {
       timeInMinutes = timeValue * 1440;
       break;
     default:
-      throw new Error("Invalid time unit. Supported units are: s, m, h, d");
+      throw new ApiError(
+        "Invalid time unit. Supported units are: s, m, h, d",
+        "400_BAD_REQUEST",
+      );
   }
 
   // Calculate rate limit per minute
@@ -48,43 +55,36 @@ export function parseRateLimit(rateLimitSpec: string | null): number {
 
 export async function apiKeyRateLimit(
   req: Request,
-  res: Response,
+  _res: Response,
 ): Promise<number> {
-  try {
-    const apiKey = req.headers["x-api-key"] as string;
-    const cacheKey = `erl:${apiKey}`;
-    const cachedRateLimit = (await redis.get(cacheKey)) || "";
-    const rateLimit = Number.parseFloat(cachedRateLimit);
+  const apiKey = req.headers["x-api-key"] as string;
+  const cacheKey = `erl:${apiKey}`;
+  const cachedRateLimit = (await redis.get(cacheKey)) || "";
+  const rateLimit = Number.parseFloat(cachedRateLimit);
 
-    // Simulate an async operation (e.g., database call)
-    if (Number.isNaN(rateLimit)) {
-      const rateLimits = await axios.get(
-        `${process.env.SCORER_ENDPOINT}/internal/embed/validate-api-key`,
-        {
-          headers: {
-            "X-API-KEY": apiKey,
-          },
+  // Simulate an async operation (e.g., database call)
+  if (Number.isNaN(rateLimit)) {
+    const rateLimits = await axios.get(
+      `${process.env.SCORER_ENDPOINT}/internal/embed/validate-api-key`,
+      {
+        headers: {
+          "X-API-KEY": apiKey,
         },
-      );
+      },
+    );
 
-      const rateLimitSpec = (rateLimits.data as { rate_limit: string })[
-        "rate_limit"
-      ];
-      const rateLimit = parseRateLimit(rateLimitSpec);
+    const rateLimitSpec = (rateLimits.data as { rate_limit: string })[
+      "rate_limit"
+    ];
+    const rateLimit = parseRateLimit(rateLimitSpec);
 
-      // Cache the limit and set to expire in 5 minutes
-      await redis.set(cacheKey, rateLimit, "EX", 5 * 60);
+    // Cache the limit and set to expire in 5 minutes
+    await redis.set(cacheKey, rateLimit, "EX", 5 * 60);
 
-      // We will return the rate limit as limit / 1 minute
-      return rateLimit;
-    } else {
-      return rateLimit;
-    }
-  } catch (err) {
-    console.error("error checking rate limit:", err);
-    res.status(500).send({ message: "Unauthorized! Unexpected error validating API key" });
-
-    throw "ERROR";
+    // We will return the rate limit as limit / 1 minute
+    return rateLimit;
+  } else {
+    return rateLimit;
   }
 }
 

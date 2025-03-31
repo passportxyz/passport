@@ -117,13 +117,21 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
 
           const chainId = parseInt(chain.id);
 
+          if (data.passport.fee === undefined) {
+            failure({
+              title: "Error",
+              message: "Failed determining fee for attestation",
+            });
+            return;
+          }
+
           const txhash = await writeContractAsync({
             abi,
             chainId,
             address: contractAddress,
             functionName: "verifyAndAttest",
             args: [data.passport, v, r, s] as unknown[],
-            value: data.passport.fee,
+            value: BigInt(data.passport.fee),
           });
 
           success({
@@ -246,7 +254,15 @@ export const ErrorDetails = ({ msg, error }: ErrorDetailsProps): JSX.Element => 
           {textLabelDisplay}
         </a>
       </b>
-      <div style={{ display: displayDetails, overflowY: "scroll", maxHeight: "200px" }}>{error.message}</div>
+      <div
+        style={{
+          display: displayDetails,
+          overflowY: "scroll",
+          maxHeight: "200px",
+        }}
+      >
+        {error.message}
+      </div>
     </div>
   );
 };

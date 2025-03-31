@@ -1,7 +1,12 @@
 import { handleAxiosError } from "@gitcoin/passport-platforms";
-import { UnexpectedApiError } from "./helpers.js";
 import axios from "axios";
-import { VerifiableCredential, VerifiableEip712Credential } from "@gitcoin/passport-types";
+import {
+  VerifiableCredential,
+  VerifiableEip712Credential,
+} from "@gitcoin/passport-types";
+import { serverUtils } from "../utils/identityHelper.js";
+
+const { InternalApiError } = serverUtils;
 
 const SCORER_ENDPOINT = process.env.SCORER_ENDPOINT;
 const SCORER_API_KEY = process.env.SCORER_API_KEY;
@@ -14,11 +19,11 @@ type Revocation = {
 // Filters revoked credentials without throwing errors or
 // returning info about filtered credentials
 export const filterRevokedCredentials = async (
-  credentials: VerifiableCredential[]
+  credentials: VerifiableCredential[],
 ): Promise<VerifiableCredential[]> => {
   const proofValues = credentials
     .filter((credential): credential is VerifiableEip712Credential =>
-      Boolean((credential as VerifiableEip712Credential).proof.proofValue)
+      Boolean((credential as VerifiableEip712Credential).proof.proofValue),
     )
     .map((credential) => credential.proof.proofValue);
 
@@ -28,11 +33,12 @@ export const filterRevokedCredentials = async (
       acc[revocation.proof_value] = revocation;
       return acc;
     },
-    {} as Record<string, Revocation>
+    {} as Record<string, Revocation>,
   );
 
   return credentials.filter((credential) => {
-    const proofValue = (credential as VerifiableEip712Credential).proof.proofValue;
+    const proofValue = (credential as VerifiableEip712Credential).proof
+      .proofValue;
     if (!proofValue) {
       return false;
     }
@@ -43,7 +49,9 @@ export const filterRevokedCredentials = async (
   });
 };
 
-const fetchRevocations = async (proofValues: string[]): Promise<Revocation[]> => {
+const fetchRevocations = async (
+  proofValues: string[],
+): Promise<Revocation[]> => {
   const payload = { proof_values: proofValues };
 
   console.log("Checking revocations", payload);
@@ -51,14 +59,18 @@ const fetchRevocations = async (proofValues: string[]): Promise<Revocation[]> =>
   try {
     const revocationResponse: {
       data?: Revocation[];
-    } = await axios.post(`${SCORER_ENDPOINT}/internal/check-revocations`, payload, {
-      headers: {
-        Authorization: SCORER_API_KEY,
+    } = await axios.post(
+      `${SCORER_ENDPOINT}/internal/check-revocations`,
+      payload,
+      {
+        headers: {
+          Authorization: SCORER_API_KEY,
+        },
       },
-    });
+    );
 
     return revocationResponse.data || [];
   } catch (e) {
-    handleAxiosError(e, "Bans", UnexpectedApiError, [SCORER_API_KEY]);
+    handleAxiosError(e, "Bans", InternalApiError, [SCORER_API_KEY]);
   }
 };

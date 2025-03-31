@@ -1,6 +1,7 @@
 import { jest, it, describe, expect, beforeEach } from "@jest/globals";
 import axios from "axios";
-import { metadataHandler } from "../src/metadata.js";
+import request from "supertest";
+import { app } from "../src/server.js";
 
 jest.mock("axios");
 
@@ -15,39 +16,42 @@ jest.unstable_mockModule("@gitcoin/passport-platforms", () => ({
   },
 }));
 
-import { Request, Response } from "express";
-
 describe("GET /embed/stamps/metadata", () => {
-  let mockReq: Partial<Request>;
-  let mockRes: Partial<Response>;
+  let originalScorerEndpoint: string | undefined;
+  const mockScorerId = "10";
+  const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/weights?community_id=${mockScorerId}`;
 
   beforeEach(() => {
+    originalScorerEndpoint = process.env.SCORER_ENDPOINT;
+    process.env.SCORER_ENDPOINT = "https://api.passport.xyz";
     jest.clearAllMocks();
 
-    mockRes = {
-      json: jest.fn() as any,
-      status: jest.fn().mockReturnThis() as any,
-    };
+    mockedAxios.get.mockResolvedValueOnce({
+      data: {
+        rate_limit: "125/15m",
+      },
+    });
+  });
+
+  afterEach(() => {
+    process.env.SCORER_ENDPOINT = originalScorerEndpoint;
   });
 
   it("should return 400 if scorerId is missing", async () => {
-    mockReq = { query: {} };
+    const response = await request(app)
+      .get("/embed/stamps/metadata")
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(400)
+      .expect("Content-Type", /json/);
 
-    await metadataHandler(mockReq as Request, mockRes as Response);
-
-    expect(mockRes.status).toHaveBeenCalledWith(400);
-    expect(mockRes.json).toHaveBeenCalledWith({
+    expect(response.body).toEqual({
+      code: 400,
       error: "Missing required query parameter: `scorerId`",
     });
   });
 
   it("should call embedWeightsUrl and return the correct metadata structure", async () => {
-    const mockScorerId = "10";
-    process.env.SCORER_ENDPOINT = "https://api.passport.xyz";
-    mockReq = { query: { scorerId: mockScorerId } };
-
-    const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/weights?community_id=${mockScorerId}`;
-
     // Mock the axios GET request
     mockedAxios.get.mockResolvedValueOnce({
       status: 200,
@@ -57,63 +61,64 @@ describe("GET /embed/stamps/metadata", () => {
       },
     });
 
-    await metadataHandler(mockReq as Request, mockRes as Response);
+    const response = await request(app)
+      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(200)
+      .expect("Content-Type", /json/);
 
-    // TODO: geri fix this
-    // // Extract returned data from mock calls
-    // // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    // const actualResponse = (mockRes.json as jest.Mock).mock.calls[0][0];
-    // // Flatten all credentials from platforms
-    // // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-    // const allCredentials = actualResponse.flatMap((section: any) =>
-    //   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-    //   section.platforms.flatMap((platform: any) => platform.credentials || [])
-    // );
-
-    // // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    // const allDisplayWeights = actualResponse.flatMap((section: unknown) => {
-    //   return section.platforms.flatMap((platform) => ({
-    //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    //     platform: platform.name,
-    //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    //     displayWeight: platform.displayWeight || [],
-    //   }));
-    // });
-    // // Verify API call
-    // // eslint-disable-next-line @typescript-eslint/unbound-method
-    // expect(mockedAxios.get).toHaveBeenCalledWith(embedWeightsUrl);
-    // // Verify that displayWeight has 1 decimal place
-    // expect(allDisplayWeights).toEqual(
-    //   expect.arrayContaining([
-    //     expect.objectContaining({ platform: "Binance", displayWeight: "16.0" }),
-    //     expect.objectContaining({ platform: "Holonym", displayWeight: "1.5" }),
-    //     expect.objectContaining({ platform: "Google", displayWeight: "0.0" }),
-    //   ])
-    // );
-    // // Verifies that credentials are returned in the wright format
-    // expect(allCredentials).toEqual(
-    //   expect.arrayContaining([
-    //     expect.objectContaining({ id: "BinanceBABT", weight: "16.021" }),
-    //     expect.objectContaining({ id: "HolonymPhone", weight: "1.521" }),
-    //     expect.objectContaining({ id: "Google", weight: "0" }), // If Google is missing from the weights response, but it's present in the STAMP_PAGES.
-    //   ])
-    // );
+    expect(response.body.length).toBeGreaterThan(1);
+    expect(response.body).toMatchObject(
+      expect.arrayContaining([
+        {
+          header: expect.any(String),
+          platforms: expect.arrayContaining([
+            expect.objectContaining({
+              description: expect.any(String),
+              name: expect.any(String),
+              credentials: expect.any(Array),
+              displayWeight: expect.any(String),
+              documentationLink: expect.any(String),
+            }),
+          ]),
+        },
+      ]),
+    );
   });
 
-  it("should handle errors from the embedWeightsUrl API correctly", async () => {
-    const mockScorerId = "10";
-    mockReq = { query: { scorerId: mockScorerId } };
+  describe("unexpected errors", () => {
+    let logSpy: any;
 
-    mockedAxios.get.mockImplementationOnce(() => {
-      throw new Error("Failed to fetch embed weights");
+    beforeEach(() => {
+      logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
     });
 
-    await metadataHandler(mockReq as Request, mockRes as Response);
+    afterEach(() => {
+      logSpy.mockRestore();
+    });
 
-    expect(mockRes.status).toHaveBeenCalledWith(500);
-    expect(mockRes.json).toHaveBeenCalledWith({
-      error:
-        "Unexpected error when processing request, Error: Failed to fetch embed weights",
+    it("should handle errors from the embedWeightsUrl API correctly", async () => {
+      mockedAxios.get.mockImplementationOnce(() => {
+        throw new Error("Failed to fetch embed weights");
+      });
+
+      const response = await request(app)
+        .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+        .set("Accept", "application/json")
+        .set("x-api-key", "test")
+        .expect(500)
+        .expect("Content-Type", /json/);
+
+      expect(response.body).toEqual({
+        code: 500,
+        error: expect.stringMatching(/Unexpected server error \(ID: \S+\)/),
+      });
+
+      expect(logSpy).toHaveBeenCalledWith(
+        "Unexpected error:",
+        expect.any(String),
+      );
     });
   });
 
