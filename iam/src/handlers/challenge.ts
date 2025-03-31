@@ -26,7 +26,7 @@ export const challengeHandler = createHandler<
     if (!payload[key]) {
       throw new ApiError(
         `Missing ${key} from challenge request body`,
-        "BAD_REQUEST",
+        "400_BAD_REQUEST",
       );
     }
   });

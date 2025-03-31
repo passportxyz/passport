@@ -225,7 +225,7 @@ describe("checkCredentialBans", () => {
     await expect(checkCredentialBans(input)).rejects.toThrowError(
       new ApiError(
         "Ban not found for nullifier hash123. This should not happen.",
-        "SERVER_ERROR",
+        "500_SERVER_ERROR",
       ),
     );
   });

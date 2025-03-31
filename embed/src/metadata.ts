@@ -31,7 +31,7 @@ export const metadataHandler = createHandler<
   if (!scorerId) {
     throw new ApiError(
       "Missing required query parameter: `scorerId`",
-      "BAD_REQUEST",
+      "400_BAD_REQUEST",
     );
   }
   // TODO: in the future return specific stamp metadata based on the scorerId

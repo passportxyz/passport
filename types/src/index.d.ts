@@ -209,11 +209,6 @@ export type ValidResponseBody = {
 export type ErrorResponseBody = {
   error: string;
   code: number;
-  details?: {
-    id: string;
-    name: string;
-    message: string;
-  }
 };
 
 export type CredentialResponseBody = ValidResponseBody | ErrorResponseBody;

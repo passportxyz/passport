@@ -78,7 +78,7 @@ export const autoVerificationHandler = createHandler<
   const { address, scorerId, credentialIds } = req.body;
 
   if (!isAddress(address)) {
-    throw new ApiError("Invalid address", "BAD_REQUEST");
+    throw new ApiError("Invalid address", "400_BAD_REQUEST");
   }
 
   const stamps = await autoVerifyStamps({
@@ -127,7 +127,7 @@ export const verificationHandler = createHandler<
             .filter(Boolean)
             .join("' and '") +
           "'",
-        "UNAUTHORIZED",
+        "401_UNAUTHORIZED",
       );
     }
 
@@ -162,7 +162,7 @@ export const verificationHandler = createHandler<
     });
   }
 
-  throw new ApiError("Unable to verify payload", "UNAUTHORIZED");
+  throw new ApiError("Unable to verify payload", "401_UNAUTHORIZED");
 });
 
 // TODO This is copied from the iam/, should we source it from identity/ or something?
@@ -176,7 +176,7 @@ export const getChallengeHandler = createHandler<
     if (!payload[key]) {
       throw new ApiError(
         `Missing ${key} from challenge request body`,
-        "BAD_REQUEST",
+        "400_BAD_REQUEST",
       );
     }
   });

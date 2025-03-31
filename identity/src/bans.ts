@@ -53,7 +53,7 @@ export const checkCredentialBans = async (
       if (!ban) {
         throw new ApiError(
           `Ban not found for nullifier ${nullifier}. This should not happen.`,
-          "SERVER_ERROR",
+          "500_SERVER_ERROR",
         );
       }
 

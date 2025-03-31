@@ -29,11 +29,11 @@ export const verifyHandler = createHandler<
   const verified = await verifyCredential(DIDKit, challenge);
 
   if (!hasValidIssuer(challenge.issuer)) {
-    throw new ApiError("Invalid issuer", "UNAUTHORIZED");
+    throw new ApiError("Invalid issuer", "401_UNAUTHORIZED");
   }
 
   if (!verified) {
-    throw new ApiError("Invalid challenge", "UNAUTHORIZED");
+    throw new ApiError("Invalid challenge", "401_UNAUTHORIZED");
   }
 
   const address = await verifyChallengeAndGetAddress(req.body);
@@ -53,7 +53,7 @@ export const verifyHandler = createHandler<
           .filter(Boolean)
           .join("' and '") +
         "'",
-      "UNAUTHORIZED",
+      "401_UNAUTHORIZED",
     );
   }
 

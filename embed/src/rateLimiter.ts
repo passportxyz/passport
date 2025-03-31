@@ -19,7 +19,7 @@ export function parseRateLimit(rateLimitSpec: string | null): number {
   if (!match) {
     throw new ApiError(
       "Invalid rate limit spec format. Expected format: '<requests>/<time><unit> where unit is one of 'smhd'",
-      "BAD_REQUEST",
+      "400_BAD_REQUEST",
     );
   }
 
@@ -45,7 +45,7 @@ export function parseRateLimit(rateLimitSpec: string | null): number {
     default:
       throw new ApiError(
         "Invalid time unit. Supported units are: s, m, h, d",
-        "BAD_REQUEST",
+        "400_BAD_REQUEST",
       );
   }
 

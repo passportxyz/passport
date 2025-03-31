@@ -56,7 +56,7 @@ export const verifyChallengeAndGetAddress = async ({
     } catch {
       throw new ApiError(
         "Unable to verify challenge signature",
-        "UNAUTHORIZED",
+        "401_UNAUTHORIZED",
       );
     }
   }

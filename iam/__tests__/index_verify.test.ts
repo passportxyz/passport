@@ -237,7 +237,7 @@ describe("POST /verify", function () {
     (verifyChallengeAndGetAddress as jest.Mock).mockImplementationOnce(() => {
       throw new ApiError(
         "Verification failed, challenge mismatch",
-        "UNAUTHORIZED",
+        "401_UNAUTHORIZED",
       );
     });
 

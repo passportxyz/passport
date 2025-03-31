@@ -24,7 +24,7 @@ export const errorHandlerMiddleware = (
   //   user reaches out with issues
   const randomID = Math.random().toString(36).substring(2, 8);
 
-  console.log("Unexpected error:", formatSystemMessage(err, randomID));
+  console.log("Unexpected error:", formatSystemMessage(err, randomID)); // eslint-disable-line no-console
 
   return res.status(500).json(formatUserResponse(err, randomID));
 };
@@ -34,13 +34,6 @@ const formatSystemMessage = (exception: Error, randomID: string): string =>
   `${exception.name} ${exception.stack.replace(/^.*\n *(?=at)/m, "")} (ID: ${randomID})`;
 
 const formatUserResponse = (exception: Error, randomID: string) => ({
-  error: "Unexpected server error",
+  error: `Unexpected server error (ID: ${randomID})`,
   code: 500,
-  details: {
-    id: randomID,
-    // Do we want to include this info at all?
-    // Do we want to include it here, or in `error` above?
-    name: exception.name,
-    message: exception.message,
-  },
 });

@@ -10,21 +10,21 @@ import { ApiError } from "./serverUtils/apiError.js";
 
 class ChallengeMismatchError extends ApiError {
   constructor() {
-    super("Verification failed, challenge mismatch", "UNAUTHORIZED");
+    super("Verification failed, challenge mismatch", "401_UNAUTHORIZED");
     this.name = "ChallengeMismatchError";
   }
 }
 
 class InvalidSignatureError extends ApiError {
   constructor() {
-    super("Verification failed, invalid signature", "UNAUTHORIZED");
+    super("Verification failed, invalid signature", "401_UNAUTHORIZED");
     this.name = "InvalidSignatureError";
   }
 }
 
 class CredentialTooOldError extends ApiError {
   constructor() {
-    super("Credential is too old", "UNAUTHORIZED");
+    super("Credential is too old", "401_UNAUTHORIZED");
     this.name = "CredentialTooOldError";
   }
 }

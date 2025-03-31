@@ -64,7 +64,7 @@ export const autoVerifyStamps = async ({
   });
 
   if (!isAddress(address)) {
-    throw new ApiError("Invalid address", "BAD_REQUEST");
+    throw new ApiError("Invalid address", "400_BAD_REQUEST");
   }
 
   const credentialsInfo = {

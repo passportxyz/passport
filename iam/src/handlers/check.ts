@@ -15,7 +15,7 @@ export const checkHandler = createHandler<
   const { payload } = req.body;
 
   if (!payload || !(payload.type || payload.types)) {
-    throw new ApiError("Incorrect payload", "BAD_REQUEST");
+    throw new ApiError("Incorrect payload", "400_BAD_REQUEST");
   }
 
   const types = (payload.types?.length ? payload.types : [payload.type]).filter(

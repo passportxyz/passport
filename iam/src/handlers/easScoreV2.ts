@@ -32,12 +32,12 @@ export const easScoreV2Handler = createHandler<EasRequestBody, EasResponseBody>(
     if (!isChainIdHexValid(chainIdHex)) {
       throw new ApiError(
         `No onchainInfo found for chainId ${chainIdHex}`,
-        "BAD_REQUEST",
+        "400_BAD_REQUEST",
       );
     }
 
     if (!(recipient && recipient.length === 42 && recipient.startsWith("0x")))
-      throw new ApiError("Invalid recipient", "BAD_REQUEST");
+      throw new ApiError("Invalid recipient", "400_BAD_REQUEST");
 
     const scoreAttestationRequest = await generateScoreAttestationRequest({
       recipient,
