@@ -684,13 +684,8 @@ describe("POST /verify", function () {
         .expect("Content-Type", /json/);
 
       expect(response.body as ErrorResponseBody).toMatchObject({
-        error: "Unexpected server error",
+        error: expect.stringMatching(/Unexpected server error \(ID: \S+?\)/),
         code: 500,
-        details: {
-          id: expect.any(String),
-          name: "Error",
-          message: "Verify Credential Error",
-        },
       });
 
       expect(logSpy).toHaveBeenCalledWith(

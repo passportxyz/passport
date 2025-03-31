@@ -112,12 +112,7 @@ describe("GET /embed/stamps/metadata", () => {
 
       expect(response.body).toEqual({
         code: 500,
-        error: "Unexpected server error",
-        details: {
-          id: expect.any(String),
-          name: "Error",
-          message: "Failed to fetch embed weights",
-        },
+        error: expect.stringMatching(/Unexpected server error \(ID: \S+\)/),
       });
 
       expect(logSpy).toHaveBeenCalledWith(
