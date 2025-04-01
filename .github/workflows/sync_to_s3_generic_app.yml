@@ -92,7 +92,10 @@ jobs:
 
       - name: Build Application
         working-directory: .
-        run: yarn build
+        run: |
+          rm -rf node_modules/@tendermint
+          rm -rf node_modules/uint8arrays
+          yarn build
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
