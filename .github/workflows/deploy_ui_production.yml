@@ -97,4 +97,4 @@ jobs:
     secrets: inherit
     with:
       refspec: ${{ needs.ref.outputs.refspec }}
-      environment: review
+      environment: production
