@@ -13,6 +13,7 @@ import { apiKeyRateLimit, getRateLimiterStore } from "./rateLimiter.js";
 import { keyGenerator } from "./rateLimiterKeyGenerator.js";
 import { autoVerificationHandler, verificationHandler, getChallengeHandler } from "./handlers.js";
 import { metadataHandler } from "./metadata.js";
+import { serverUtils } from "./utils/identityHelper.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -61,7 +62,7 @@ app.use(
     // Redis store configuration
     keyGenerator: keyGenerator,
     store: getRateLimiterStore(),
-    skip: (req, res): boolean => {
+    skip: (req, _res): boolean => {
       // TODO: geri review this, /verify should be removed ...
       return req.path === "/health" || req.path === "/embed/challenge" || req.path === "/embed/verify";
     },
@@ -85,3 +86,6 @@ app.get("/embed/stamps/metadata", metadataHandler);
 
 // expose challenge entry point
 app.post("/embed/challenge", getChallengeHandler);
+
+// This custom error handler needs to be last
+app.use(serverUtils.errorHandlerMiddleware);

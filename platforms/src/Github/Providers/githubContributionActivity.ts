@@ -1,10 +1,6 @@
 import { type Provider } from "../../types.js";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import {
-  fetchAndCheckContributions,
-  GithubContext,
-  requestAccessToken,
-} from "../../utils/githubClient.js";
+import { fetchAndCheckContributions, GithubContext, requestAccessToken } from "../../utils/githubClient.js";
 
 export type GithubContributionActivityOptions = {
   threshold: string;

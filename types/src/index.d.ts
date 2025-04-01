@@ -20,45 +20,6 @@ export type DIDKitLib = {
   prepareIssueCredential(credential: string, linked_data_proof_options: string, public_key: string): Promise<any>;
 } & { [key: string]: any }; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-// rough outline of a VerifiableCredential
-export type VerifiableEd25519Credential = {
-  "@context": string[];
-  type: string[];
-  credentialSubject: {
-    id: string;
-    "@context": { [key: string]: string }[];
-
-    // Deprecated, should be removed once existing
-    // credentials are expired
-    hash?: string;
-
-    nullifiers?: string[];
-    provider?: string;
-    address?: string;
-    challenge?: string;
-    metaPointer?: string;
-  };
-  issuer: string;
-  issuanceDate: string;
-  expirationDate: string;
-  proof?: {
-    type: string;
-    proofPurpose: string;
-    verificationMethod: string;
-    created: string;
-    jws: string;
-    eip712Domain?: {
-      primaryType: string;
-      types: {
-        [key: string]: {
-          name: string;
-          type: string;
-        }[];
-      };
-    };
-  };
-};
-
 export type VerifiableEip712Credential = {
   "@context": string[];
   type: string[];
@@ -152,7 +113,7 @@ export type VerifiableEip712CredentialComposeEncoded = {
     };
   };
 };
-export type VerifiableCredential = VerifiableEd25519Credential | VerifiableEip712Credential;
+export type VerifiableCredential = VerifiableEip712Credential;
 
 // A ProviderContext is used as a temporary storage so that providers can can share data
 // between them, in case multiple VCs are requests in one http request
@@ -164,7 +125,7 @@ export type SignatureType = "EIP712" | "Ed25519";
 
 export type SignedDidChallenge = {
   signatures: JWSSignature[];
-  payload: any;
+  payload: string;
   cid: number[];
   cacao: number[];
   issuer: string;
@@ -184,14 +145,19 @@ export type RequestPayload = {
   signatureType?: SignatureType;
 };
 
+export type ChallengeRecord = {
+  challenge: string;
+  address: string;
+  type: string;
+  [k: string]: string;
+};
+
 // response Object return by verify procedure
 export type ChallengePayload = {
   valid: boolean;
   error?: string[];
   // This will overwrite the record presented in the Payload
-  record?: {
-    challenge: string;
-  } & { [k: string]: string };
+  record?: ChallengeRecord;
 };
 
 // response Object return by verify procedure
@@ -239,10 +205,12 @@ export type ValidResponseBody = {
   credential: VerifiableCredential;
   record?: ProofRecord;
 };
+
 export type ErrorResponseBody = {
-  error?: string;
-  code?: number;
+  error: string;
+  code: number;
 };
+
 export type CredentialResponseBody = ValidResponseBody | ErrorResponseBody;
 
 // Issued Credential response
@@ -266,7 +234,7 @@ export type VerifiableCredentialRecord = {
 export type Stamp = {
   id?: number;
   provider: PROVIDER_ID;
-  credential: VerifiableEd25519Credential | VerifiableEip712Credential;
+  credential: VerifiableEip712Credential;
 };
 
 // StampPatch should have "provider" mandatory and "credential" optional
@@ -322,7 +290,15 @@ export type PassportLoadResponse = {
 export type PassportAttestation = {
   multiAttestationRequest: MultiAttestationRequest[];
   nonce: number;
-  fee: any;
+  fee: string;
+};
+
+export type EasRequestBody = {
+  nonce: number;
+  recipient: string;
+  credentials?: VerifiableCredential[];
+  chainIdHex: string;
+  customScorerId?: number;
 };
 
 export type EasPayload = {
@@ -336,13 +312,16 @@ export type EasPayload = {
   error?: string;
 };
 
-export type EasRequestBody = {
-  nonce: number;
-  recipient: string;
-  credentials?: VerifiableCredential[];
-  chainIdHex: string;
-  customScorerId?: number;
-};
+// In a complex type, replace all instances of bigint with string
+export type ReplaceBigIntWithString<T> = T extends bigint
+  ? string
+  : T extends Array<infer U>
+    ? Array<ReplaceBigIntWithString<U>>
+    : T extends object
+      ? { [K in keyof T]: ReplaceBigIntWithString<T[K]> }
+      : T;
+
+export type EasResponseBody = ReplaceBigIntWithString<EasPayload>;
 
 // Passport DID
 export type DID = string;

@@ -33,16 +33,32 @@ type GuildAdminStats = {
 const MINIMUM_GUILD_MEMBER_COUNT = 250;
 
 export async function getGuildMemberships(address: string): Promise<GuildMembership[]> {
-  // Get current memberships of a user
-  return await getGuildClient().user.getMemberships(address);
+  try {
+    return await getGuildClient().user.getMemberships(address);
+  } catch (error: unknown) {
+    let message = "Error fetching Guild memberships";
+    if (error instanceof Error) {
+      message += ": " + error.name + " - " + error.message;
+    }
+    throw new ProviderExternalVerificationError(message);
+  }
 }
 
 async function getUserGuilds(memberships: GuildMembership[]): Promise<Guild[]> {
-  if (memberships.length === 0) {
-    return [];
+  try {
+    if (memberships.length === 0) {
+      return [];
+    }
+    const userGuildIds = memberships.map((membership) => membership.guildId);
+
+    return await getGuildClient().guild.getMany(userGuildIds);
+  } catch (error: unknown) {
+    let message = "Error fetching Guilds";
+    if (error instanceof Error) {
+      message += ": " + error.name + " - " + error.message;
+    }
+    throw new ProviderExternalVerificationError(message);
   }
-  const userGuildIds = memberships.map((membership) => membership.guildId);
-  return getGuildClient().guild.getMany(userGuildIds);
 }
 
 export async function checkGuildAdminStats(memberships: GuildMembership[]): Promise<GuildAdminStats> {

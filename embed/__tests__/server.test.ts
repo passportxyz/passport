@@ -59,7 +59,13 @@ const mockedScore: PassportScore = {
   expiration_timestamp: new Date().toISOString(),
   threshold: "20.000",
   error: "",
-  stamps: { "provider-1": { score: "12", dedup: true, expiration_date: new Date().toISOString() } },
+  stamps: {
+    "provider-1": {
+      score: "12",
+      dedup: true,
+      expiration_date: new Date().toISOString(),
+    },
+  },
 };
 
 beforeEach(() => {
@@ -100,7 +106,10 @@ describe("autoVerificationHandler", function () {
 
     expect(apiKeyRateLimit as jest.Mock).toHaveBeenCalledTimes(0);
     expect(verifyRequest.status).toBe(401);
-    expect(verifyRequest.body).toStrictEqual({ message: "Unauthorized! No 'X-API-KEY' present in the header!" });
+    expect(verifyRequest.body).toStrictEqual({
+      error: "Unauthorized! No 'X-API-KEY' present in the header!",
+      code: 401,
+    });
   });
 
   it("handles invalid verify requests - api key validation fails", async () => {

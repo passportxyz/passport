@@ -5,7 +5,6 @@ import {
   RequestPayload,
   VerifiableCredential,
   IssuedCredential,
-  SignatureType,
 } from "@gitcoin/passport-types";
 
 const ONE_DAY_IN_MS = 1000 * 60 * 60 * 24;
@@ -18,10 +17,7 @@ import {
   DocumentType,
   stampCredentialDocument,
 } from "./signingDocuments.js";
-import {
-  IgnorableNullifierGeneratorError,
-  NullifierGenerator,
-} from "./nullifierGenerators.js";
+import { IgnorableNullifierGeneratorError, NullifierGenerator } from "./nullifierGenerators.js";
 import { checkRotatingKeysEnabled } from "./helpers.js";
 
 // Control expiry times of issued credentials
@@ -34,45 +30,6 @@ const addSeconds = (date: Date, seconds: number): Date => {
   result.setSeconds(result.getSeconds() + seconds);
 
   return result;
-};
-
-// Internal method to issue a verifiable credential
-const _issueEd25519Credential = async (
-  DIDKit: DIDKitLib,
-  key: string,
-  expiresInSeconds: number,
-  fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
-  issuanceDate?: string,
-  expirationDate?: string,
-): Promise<VerifiableCredential> => {
-  // get DID from key
-  const issuer = DIDKit.keyToDID("key", key);
-  // read method from key
-  const verificationMethod = await DIDKit.keyToVerificationMethod("key", key);
-  // stringify assertionMethod we feed to didkit-wasm-node
-  const verifyWithMethod = JSON.stringify({
-    proofPurpose: "assertionMethod",
-    verificationMethod,
-  });
-
-  // generate a verifiableCredential
-  const credential = await DIDKit.issueCredential(
-    JSON.stringify({
-      "@context": ["https://www.w3.org/2018/credentials/v1"],
-      type: ["VerifiableCredential"],
-      issuer,
-      issuanceDate: issuanceDate ? issuanceDate : new Date().toISOString(),
-      expirationDate: expirationDate
-        ? expirationDate
-        : addSeconds(new Date(), expiresInSeconds).toISOString(),
-      ...fields,
-    }),
-    verifyWithMethod,
-    key,
-  );
-
-  // parse the response of the DIDKit wasm
-  return JSON.parse(credential) as VerifiableCredential;
 };
 
 type CredentialExpiresInSeconds = {
@@ -99,23 +56,19 @@ export const issueEip712Credential = async (
   // fields: { [k: string]: any }, // eslint-disable-line @typescript-eslint/no-explicit-any
   fields: Eip712CredentialFields,
   signingDocument: DocumentSignatureTypes<DocumentType>,
-  additionalContexts: string[] = [],
+  additionalContexts: string[] = []
 ): Promise<VerifiableCredential> => {
   // get DID from key
 
   const issuer = DIDKit.keyToDID("ethr", key);
 
-  const expiresInSeconds = (expiration as CredentialExpiresInSeconds)
-    .expiresInSeconds;
+  const expiresInSeconds = (expiration as CredentialExpiresInSeconds).expiresInSeconds;
   const expirationDate =
     expiresInSeconds !== undefined
       ? addSeconds(new Date(), expiresInSeconds).toISOString()
       : (expiration as CredentialExpiresAt).expiresAt.toISOString();
   const credentialInput = {
-    "@context": [
-      "https://www.w3.org/2018/credentials/v1",
-      ...additionalContexts,
-    ],
+    "@context": ["https://www.w3.org/2018/credentials/v1", ...additionalContexts],
     type: ["VerifiableCredential"],
     issuer,
     issuanceDate: new Date().toISOString(),
@@ -124,11 +77,7 @@ export const issueEip712Credential = async (
   };
 
   const options = signingDocument;
-  const credential = await DIDKit.issueCredential(
-    JSON.stringify(credentialInput),
-    JSON.stringify(options),
-    key,
-  );
+  const credential = await DIDKit.issueCredential(JSON.stringify(credentialInput), JSON.stringify(options), key);
 
   // parse the response of the DIDKit wasm
   return JSON.parse(credential) as VerifiableCredential;
@@ -138,60 +87,32 @@ export const issueEip712Credential = async (
 export const issueChallengeCredential = async (
   DIDKit: DIDKitLib,
   key: string,
-  record: RequestPayload,
-  signatureType?: SignatureType,
+  record: RequestPayload
 ): Promise<IssuedCredential> => {
   // generate a verifiableCredential (60s ttl)
-  let credential: VerifiableCredential;
-  if (signatureType === "EIP712") {
-    const verificationMethod = await DIDKit.keyToVerificationMethod(
-      "ethr",
-      key,
-    );
+  const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", key);
 
-    credential = await issueEip712Credential(
-      DIDKit,
-      key,
-      { expiresInSeconds: CHALLENGE_EXPIRES_AFTER_SECONDS },
-      {
-        credentialSubject: {
-          "@context": {
-            provider: "https://schema.org/Text",
-            challenge: "https://schema.org/Text",
-            address: "https://schema.org/Text",
-          },
-
-          id: `did:pkh:eip155:1:${record.address}`,
-          provider: `challenge-${record.type}`,
-          // extra fields to convey challenge data
-          challenge: record.challenge,
-          address: record.address,
+  const credential = await issueEip712Credential(
+    DIDKit,
+    key,
+    { expiresInSeconds: CHALLENGE_EXPIRES_AFTER_SECONDS },
+    {
+      credentialSubject: {
+        "@context": {
+          provider: "https://schema.org/Text",
+          challenge: "https://schema.org/Text",
+          address: "https://schema.org/Text",
         },
-      },
-      challengeSignatureDocument(verificationMethod),
-    );
-  } else {
-    credential = await _issueEd25519Credential(
-      DIDKit,
-      key,
-      CHALLENGE_EXPIRES_AFTER_SECONDS,
-      {
-        credentialSubject: {
-          "@context": {
-            provider: "https://schema.org/Text",
-            challenge: "https://schema.org/Text",
-            address: "https://schema.org/Text",
-          },
 
-          id: `did:pkh:eip155:1:${record.address}`,
-          provider: `challenge-${record.type}`,
-          // extra fields to convey challenge data
-          challenge: record.challenge,
-          address: record.address,
-        },
+        id: `did:pkh:eip155:1:${record.address}`,
+        provider: `challenge-${record.type}`,
+        // extra fields to convey challenge data
+        challenge: record.challenge,
+        address: record.address,
       },
-    );
-  }
+    },
+    challengeSignatureDocument(verificationMethod)
+  );
 
   // didkit-wasm-node returns credential as a string - parse for JSON
   return {
@@ -209,28 +130,19 @@ const getNullifiers = async ({
   record: ProofRecord;
   nullifierGenerators: NullifierGenerators;
 }): Promise<string[]> => {
-  const nullifierPromiseResults = await Promise.allSettled(
-    nullifierGenerators.map((g) => g({ record })),
-  );
+  const nullifierPromiseResults = await Promise.allSettled(nullifierGenerators.map((g) => g({ record })));
 
   const unexpectedErrors = nullifierPromiseResults
-    .filter(
-      (result): result is PromiseRejectedResult => result.status === "rejected",
-    )
-    .filter(
-      (result) => !(result.reason instanceof IgnorableNullifierGeneratorError),
-    );
+    .filter((result): result is PromiseRejectedResult => result.status === "rejected")
+    .filter((result) => !(result.reason instanceof IgnorableNullifierGeneratorError));
 
   if (unexpectedErrors.length > 0) {
-    console.error("Unexpected errors generating nullifiers", unexpectedErrors);
+    console.error("Unexpected errors generating nullifiers", unexpectedErrors); // eslint-disable-line no-console
     throw new Error("Unable to generate nullifiers");
   }
 
   const nullifiers = nullifierPromiseResults
-    .filter(
-      (result): result is PromiseFulfilledResult<string> =>
-        result.status === "fulfilled",
-    )
+    .filter((result): result is PromiseFulfilledResult<string> => result.status === "fulfilled")
     .map((result) => result.value);
 
   if (nullifiers.length === 0) {
@@ -260,10 +172,7 @@ export const issueNullifiableCredential = async ({
   const nullifiers = await getNullifiers({ record, nullifierGenerators });
   const legacy = !checkRotatingKeysEnabled();
 
-  const verificationMethod = await DIDKit.keyToVerificationMethod(
-    "ethr",
-    issuerKey,
-  );
+  const verificationMethod = await DIDKit.keyToVerificationMethod("ethr", issuerKey);
   // generate a verifiableCredential
   const credential = await issueEip712Credential(
     DIDKit,
@@ -307,7 +216,7 @@ export const issueNullifiableCredential = async ({
       // },
     },
     stampCredentialDocument(verificationMethod, legacy),
-    ["https://w3id.org/vc/status-list/2021/v1"],
+    ["https://w3id.org/vc/status-list/2021/v1"]
   );
 
   // didkit-wasm-node returns credential as a string - parse for JSON
@@ -317,10 +226,7 @@ export const issueNullifiableCredential = async ({
 };
 
 // Verify that the provided credential is valid
-export const verifyCredential = async (
-  DIDKit: DIDKitLib,
-  credential: VerifiableCredential,
-): Promise<boolean> => {
+export const verifyCredential = async (DIDKit: DIDKitLib, credential: VerifiableCredential): Promise<boolean> => {
   // extract expirationDate
   const { expirationDate, proof } = credential;
   // check that the credential is still valid
@@ -328,16 +234,12 @@ export const verifyCredential = async (
     try {
       // parse the result of attempting to verify
       const verify = JSON.parse(
-        await DIDKit.verifyCredential(
-          JSON.stringify(credential),
-          `{"proofPurpose":"${proof?.proofPurpose}"}`,
-        ),
+        await DIDKit.verifyCredential(JSON.stringify(credential), `{"proofPurpose":"${proof?.proofPurpose}"}`)
       ) as { checks: string[]; warnings: string[]; errors: string[] };
 
       // did we get any errors when we attempted to verify?
       return verify.errors.length === 0;
     } catch (e) {
-      console.error("Failed to verify credential", e);
       // if didkit throws, etc.
       return false;
     }

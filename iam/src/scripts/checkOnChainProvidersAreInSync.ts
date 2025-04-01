@@ -1,3 +1,4 @@
+/* eslint no-console: 0 */
 import dotenv from "dotenv";
 import { JsonRpcProvider, Contract, version } from "ethers";
 import passportDecoderAbi from "../../../deployments/abi/GitcoinPassportDecoder.json" with { type: "json" };

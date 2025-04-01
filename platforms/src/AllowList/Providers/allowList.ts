@@ -1,8 +1,5 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import {
-  ProviderExternalVerificationError,
-  type Provider,
-} from "../../types.js";
+import { ProviderExternalVerificationError, type Provider } from "../../types.js";
 import axios from "axios";
 
 export const allowListEndpoint = `${process.env.SCORER_ENDPOINT}/internal/allow-list`;
@@ -21,12 +18,9 @@ export class AllowListProvider implements Provider {
     try {
       const { address } = payload;
       const { allowList } = payload.proofs;
-      const response: AllowListResponse = await axios.get(
-        `${allowListEndpoint}/${allowList}/${address}`,
-        {
-          headers: { Authorization: process.env.SCORER_API_KEY },
-        },
-      );
+      const response: AllowListResponse = await axios.get(`${allowListEndpoint}/${allowList}/${address}`, {
+        headers: { Authorization: process.env.SCORER_API_KEY },
+      });
       const valid = response.data.is_member;
 
       return {

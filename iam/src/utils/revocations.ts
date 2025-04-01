@@ -1,7 +1,9 @@
 import { handleAxiosError } from "@gitcoin/passport-platforms";
-import { UnexpectedApiError } from "./helpers.js";
 import axios from "axios";
 import { VerifiableCredential, VerifiableEip712Credential } from "@gitcoin/passport-types";
+import { serverUtils } from "../utils/identityHelper.js";
+
+const { InternalApiError } = serverUtils;
 
 const SCORER_ENDPOINT = process.env.SCORER_ENDPOINT;
 const SCORER_API_KEY = process.env.SCORER_API_KEY;
@@ -59,6 +61,6 @@ const fetchRevocations = async (proofValues: string[]): Promise<Revocation[]> =>
 
     return revocationResponse.data || [];
   } catch (e) {
-    handleAxiosError(e, "Bans", UnexpectedApiError, [SCORER_API_KEY]);
+    handleAxiosError(e, "Bans", InternalApiError, [SCORER_API_KEY]);
   }
 };

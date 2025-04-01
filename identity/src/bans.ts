@@ -1,7 +1,7 @@
 import { CredentialResponseBody, ValidResponseBody, VerifiableCredential } from "@gitcoin/passport-types";
 import { handleAxiosError } from "@gitcoin/passport-platforms";
-import { UnexpectedApiError } from "./helpers.js";
 import axios from "axios";
+import { ApiError, InternalApiError } from "./serverUtils/apiError.js";
 
 const SCORER_ENDPOINT = process.env.SCORER_ENDPOINT;
 const SCORER_API_KEY = process.env.SCORER_API_KEY;
@@ -47,7 +47,7 @@ export const checkCredentialBans = async (
       const ban = bansByHash[nullifier];
 
       if (!ban) {
-        throw new UnexpectedApiError(`Ban not found for nullifier ${nullifier}. This should not happen.`);
+        throw new ApiError(`Ban not found for nullifier ${nullifier}. This should not happen.`, "500_SERVER_ERROR");
       }
 
       if (ban.is_banned) {
@@ -103,6 +103,6 @@ const fetchBans = async (credentials: VerifiableCredential[]): Promise<Ban[]> =>
 
     return banResponse.data || [];
   } catch (e) {
-    handleAxiosError(e, "Bans", UnexpectedApiError, [SCORER_API_KEY]);
+    handleAxiosError(e, "Bans", InternalApiError, [SCORER_API_KEY]);
   }
 };

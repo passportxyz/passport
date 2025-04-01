@@ -1,14 +1,6 @@
 // ----- Types
-import type {
-  ProviderContext,
-  RequestPayload,
-  VerifiedPayload,
-} from "@gitcoin/passport-types";
-import {
-  ProviderExternalVerificationError,
-  type Provider,
-  type ProviderOptions,
-} from "../../types.js";
+import type { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import { ProviderExternalVerificationError, type Provider, type ProviderOptions } from "../../types.js";
 import { ProviderError } from "../../utils/errors.js";
 import axios from "axios";
 
@@ -46,10 +38,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
   }
 
   // verify that the proof object contains valid === "true"
-  async verify(
-    payload: RequestPayload,
-    context: ProviderContext,
-  ): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, context: ProviderContext): Promise<VerifiedPayload> {
     let valid = false,
       record = undefined,
       gitcoinGrantsStatistic;
@@ -57,17 +46,12 @@ export class GitcoinGrantStatisticsProvider implements Provider {
     try {
       const dataUrl = CGRANTS_API_URL + this.urlPath;
       const address = payload.address.toLowerCase();
-      gitcoinGrantsStatistic = await getGitcoinStatistics(
-        dataUrl,
-        address,
-        context,
-      );
+      gitcoinGrantsStatistic = await getGitcoinStatistics(dataUrl, address, context);
 
       valid =
         !gitcoinGrantsStatistic.error &&
         (gitcoinGrantsStatistic.record
-          ? gitcoinGrantsStatistic.record[this._options.receivingAttribute] >=
-            this._options.threshold
+          ? gitcoinGrantsStatistic.record[this._options.receivingAttribute] >= this._options.threshold
           : false);
 
       if (valid === true) {
@@ -82,7 +66,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
         errors.push(
           `You do not qualify for this stamp. Your Grantee stats are less than the required thresholds: ${
             gitcoinGrantsStatistic.record[this._options.receivingAttribute]
-          } out of ${this._options.threshold}.`,
+          } out of ${this._options.threshold}.`
         );
       }
 
@@ -95,9 +79,7 @@ export class GitcoinGrantStatisticsProvider implements Provider {
         record,
       };
     } catch (e: unknown) {
-      throw new ProviderExternalVerificationError(
-        `Gitcoin Grants Statistic verification error: ${String(e)}.`,
-      );
+      throw new ProviderExternalVerificationError(`Gitcoin Grants Statistic verification error: ${String(e)}.`);
     }
   }
 }
@@ -109,18 +91,15 @@ type GitcoinStatisticsContext = {
 const getGitcoinStatistics = async (
   dataUrl: string,
   address: string,
-  context: GitcoinStatisticsContext,
+  context: GitcoinStatisticsContext
 ): Promise<GitcoinGrantStatistics> => {
   if (!context.gitcoinGrantStatistics?.[dataUrl]) {
     try {
       if (!context.gitcoinGrantStatistics) context.gitcoinGrantStatistics = {};
 
-      const grantStatisticsRequest = await axios.get(
-        `${dataUrl}?address=${address}`,
-        {
-          headers: { Authorization: process.env.SCORER_API_KEY },
-        },
-      );
+      const grantStatisticsRequest = await axios.get(`${dataUrl}?address=${address}`, {
+        headers: { Authorization: process.env.SCORER_API_KEY },
+      });
 
       context.gitcoinGrantStatistics[dataUrl] = {
         record: grantStatisticsRequest.data,
@@ -135,7 +114,7 @@ const getGitcoinStatistics = async (
       throw new ProviderExternalVerificationError(
         `Error getting user info: ${error?.message} - Status ${error.response?.status}: ${
           error.response?.statusText
-        } - Details: ${JSON.stringify(error?.response?.data)}`,
+        } - Details: ${JSON.stringify(error?.response?.data)}`
       );
     }
   }
