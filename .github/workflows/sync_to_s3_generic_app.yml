@@ -91,10 +91,10 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build Application
-        working-directory: .
+        working-directory: app
         run: |
-          rm -rf node_modules/@tendermint
-          rm -rf node_modules/uint8arrays
+          rm -rf ../node_modules/@tendermint
+          rm -rf ../node_modules/did-jwt/node_modules/uint8arrays
           yarn build
 
       - name: Configure AWS Credentials
