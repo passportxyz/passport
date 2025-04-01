@@ -59,7 +59,7 @@ jobs:
         run: |
           echo "ONE_PASS_ENV=$ONE_PASS_ENV"
           op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
-          jq -r '.fields[] | select(.section.label=="App") | "\(.label)=\(.value)"' >> $GITHUB_ENV
+          jq -r '.fields[] | select(.section.label=="app") | "\(.label)=\(.value)"' >> $GITHUB_ENV
       
       - name: Install Pulumi CLI
         uses: pulumi/actions@v4
