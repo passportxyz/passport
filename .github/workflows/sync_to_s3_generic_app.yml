@@ -54,7 +54,7 @@ jobs:
           service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
 
       - name: Get envs from 1Pass
-        working-directory: embed-popup
+        working-directory: .
         run: |
           echo "ONE_PASS_ENV=$ONE_PASS_ENV"
           op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
