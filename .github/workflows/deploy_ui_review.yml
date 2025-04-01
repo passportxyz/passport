@@ -84,9 +84,21 @@ jobs:
         with:
           ref: ${{ needs.ref.outputs.refspec }}
           fetch-depth: 0
+
+
       - name: Push code to branch
+        # TODO - this action shall be removed once the next one is properly set up
         uses: passportxyz/gh-workflows/.github/actions/push_to_branch@v1
         with:
           commit: ${{ needs.ref.outputs.refspec }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           branch: review-app
+
+  deploy-ui-s3:
+    name: Deploy UI to Review - Push to S3
+    needs: [ref, run-tests]
+    uses: ./.github/workflows/sync_to_s3_generic_app.yml
+    secrets: inherit
+    with:
+      refspec: ${{ needs.ref.outputs.refspec }}
+      environment: review
