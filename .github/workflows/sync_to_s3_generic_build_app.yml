@@ -90,12 +90,6 @@ jobs:
         working-directory: .
         run: yarn install --frozen-lockfile
 
-      - name: Run Tests
-        run: yarn test
-
-      - name: Run Linter
-        run: yarn lint
-
       - name: Build Application
         working-directory: app
         run: |
@@ -103,62 +97,7 @@ jobs:
           rm -rf ../node_modules/did-jwt/node_modules/uint8arrays
           yarn build
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - uses: actions/upload-artifact@v4
         with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-2
-
-      - name: Sync Files to S3
-        working-directory: app
-        run: |
-          if [ -d "out" ]; then
-              aws s3 sync ./out s3://${{ env.BUCKET_NAME }} --delete
-          else
-              echo "out folder not found!"
-              exit 1
-          fi
-
-      - name: Create CloudFront Invalidation
-        id: create_invalidation
-        run: |
-          INVALIDATION_ID=$(aws cloudfront create-invalidation \
-          --distribution-id ${{ env.CLOUDFRONT_ID }} \
-          --paths "/*" \
-          --query 'Invalidation.Id' \
-          --output text)
-
-          if [[ -z "$INVALIDATION_ID" ]]; then
-            echo "CloudFront invalidation failed!"
-            exit 1
-          fi
-
-          echo "INVALIDATION_ID=$INVALIDATION_ID" >> $GITHUB_ENV
-
-      - name: Wait for Invalidation Completion
-        id: check_invalidation
-        run: |
-          echo "Waiting for invalidation ID: ${{ env.INVALIDATION_ID }}"
-          for i in {1..20}; do
-              STATUS=$(aws cloudfront get-invalidation \
-              --distribution-id ${{ env.CLOUDFRONT_ID }} \
-              --id ${{ env.INVALIDATION_ID }} \
-              --query 'Invalidation.Status' \
-              --output text)
-              echo "Invalidation Status: $STATUS"
-              if [ "$STATUS" == "Completed" ]; then
-                  echo "CloudFront invalidation completed successfully."
-                  exit 0
-              fi
-              if [ "$STATUS" == "Failed" ]; then
-                  echo "CloudFront invalidation failed!"
-                  exit 1
-              fi
-              sleep 15
-          done
-          echo "CloudFront invalidation check timed out!"
-          exit 1
-
-      - name: Deployment Completed
-        run: echo "Deployment and CloudFront invalidation successful!"
+          name: passport-app
+          path: app/out
