@@ -61,7 +61,6 @@ export class NftCollectorBaseProvider extends NftBaseProvider {
       return {
         valid: true,
         record: {
-          human_probability: human_probability.toString(),
           address,
         },
       };

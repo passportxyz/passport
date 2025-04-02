@@ -42,7 +42,6 @@ describe("Valid stamp verification Collector's Journey", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        human_probability: "50",
       },
     });
   });
@@ -67,7 +66,6 @@ describe("Valid stamp verification Collector's Journey", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        human_probability: "60",
       },
     });
   });
@@ -92,7 +90,6 @@ describe("Valid stamp verification Collector's Journey", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        human_probability: "75",
       },
     });
   });
@@ -117,7 +114,6 @@ describe("Valid stamp verification Collector's Journey", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        human_probability: "80",
       },
     });
   });
@@ -142,7 +138,6 @@ describe("Valid stamp verification Collector's Journey", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        human_probability: "90",
       },
     });
   });
@@ -167,7 +162,6 @@ describe("Valid stamp verification Collector's Journey", function () {
       valid: true,
       record: {
         address: MOCK_ADDRESS_LOWER,
-        human_probability: "100",
       },
     });
   });
