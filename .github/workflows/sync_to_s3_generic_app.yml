@@ -76,7 +76,7 @@ jobs:
         id: get_pulumi_outputs
         run: |
           BUCKET_NAME=$(pulumi stack output passportAppBucketName --stack ${{ env.CORE_INFRA_PULUMI_STACK }})
-          CLOUDFRONT_ID=$(pulumi stack output passportAppistributionId --stack ${{ env.CORE_INFRA_PULUMI_STACK }})
+          CLOUDFRONT_ID=$(pulumi stack output passportAppDistributionId --stack ${{ env.CORE_INFRA_PULUMI_STACK }})
 
           if [[ -z "$BUCKET_NAME" || -z "$CLOUDFRONT_ID" ]]; then
             echo "Error: Failed to retrieve Pulumi stack outputs!"
