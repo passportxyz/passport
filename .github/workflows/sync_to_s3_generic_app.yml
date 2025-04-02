@@ -20,7 +20,7 @@ jobs:
     env:
       AWS_REGION: us-west-2
       CORE_INFRA_PULUMI_STACK: passportxyz/core-infra/${{ inputs.environment }}
-      ONE_PASS_ENV: passport-embed-${{ inputs.environment }}-env
+      ONE_PASS_ENV: passport-xyz-${{ inputs.environment }}-env
 
     steps:
       - name: Checkout Repository
@@ -28,10 +28,10 @@ jobs:
         with:
           ref: ${{ inputs.refspec }}
 
-      - name: Set up Node.js, version 20.9.0
+      - name: Set up Node.js, version 22.14.0
         uses: actions/setup-node@v4
         with:
-          node-version: 20.9.0
+          node-version: 22.14.0
           cache: "yarn"
 
       - name: Load secret
@@ -41,9 +41,9 @@ jobs:
           export-env: true
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          AWS_ACCESS_KEY_ID: op://DevOps/passport-embed-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-embed-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
-          PULUMI_ACCESS_TOKEN: op://DevOps/passport-embed-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
+          AWS_ACCESS_KEY_ID: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
+          PULUMI_ACCESS_TOKEN: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
 
       - name: Install 1Password CLI
         uses: 1password/install-cli-action@v1
@@ -54,7 +54,7 @@ jobs:
           service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
 
       - name: Get envs from 1Pass
-        working-directory: embed-popup
+        working-directory: .
         run: |
           echo "ONE_PASS_ENV=$ONE_PASS_ENV"
           op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
@@ -75,8 +75,8 @@ jobs:
       - name: Get Pulumi Stack Outputs From Core Infra
         id: get_pulumi_outputs
         run: |
-          BUCKET_NAME=$(pulumi stack output embedPopupBucketName --stack ${{ env.CORE_INFRA_PULUMI_STACK }})
-          CLOUDFRONT_ID=$(pulumi stack output embedPopupDistributionId --stack ${{ env.CORE_INFRA_PULUMI_STACK }})
+          BUCKET_NAME=$(pulumi stack output passportAppBucketName --stack ${{ env.CORE_INFRA_PULUMI_STACK }})
+          CLOUDFRONT_ID=$(pulumi stack output passportAppDistributionId --stack ${{ env.CORE_INFRA_PULUMI_STACK }})
 
           if [[ -z "$BUCKET_NAME" || -z "$CLOUDFRONT_ID" ]]; then
             echo "Error: Failed to retrieve Pulumi stack outputs!"
@@ -90,43 +90,18 @@ jobs:
         working-directory: .
         run: yarn install --frozen-lockfile
 
+      - name: Run Tests
+        run: yarn test
+
+      - name: Run Linter
+        run: yarn lint
+
       - name: Build Application
-        working-directory: .
-        run: yarn build
-
-      #       - name: Upload Build Artifacts
-      #         uses: actions/upload-artifact@v3
-      #         with:
-      #           name: embed-popup-build
-      #           path: embed-popup/dist
-      #         if: success() && hashFiles('embed-popup/dist/**') != ''
-
-      #   deploy_confirm:
-      #     name: Review Approval Pending
-      #     needs: [build]
-      #     runs-on: ubuntu-latest
-      #     environment: ${{ inputs.environment }}
-      #     steps:
-      #       - name: Approve Release to S3
-      #         run: |
-      #           echo "Ref" ${{ inputs.refspec }}
-
-      #   deploy:
-      #     name: Deploy App to S3
-      #     runs-on: ubuntu-latest
-      #     needs: [build, deploy_confirm]
-      #     steps:
-
-      #       - name: Checkout Repository
-      #         uses: actions/checkout@v4
-      #         with:
-      #           ref: ${{ inputs.refspec }}
-
-      #       - name: Download Build Artifacts
-      #         uses: actions/download-artifact@v3
-      #         with:
-      #           name: embed-popup-build
-      #           path: embed-popup/dist
+        working-directory: app
+        run: |
+          rm -rf ../node_modules/@tendermint
+          rm -rf ../node_modules/did-jwt/node_modules/uint8arrays
+          yarn build
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -136,12 +111,12 @@ jobs:
           aws-region: us-west-2
 
       - name: Sync Files to S3
-        working-directory: embed-popup
+        working-directory: app
         run: |
-          if [ -d "dist" ]; then
-              aws s3 sync ./dist s3://${{ env.BUCKET_NAME }} --delete
+          if [ -d "out" ]; then
+              aws s3 sync ./out s3://${{ env.BUCKET_NAME }} --delete
           else
-              echo "dist folder not found!"
+              echo "out folder not found!"
               exit 1
           fi
 
