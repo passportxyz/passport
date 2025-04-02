@@ -45,7 +45,7 @@ jobs:
         run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
 
       - id: build_and_push_docker_iam_image
-        uses: passportxyz/gh-workflows/.github/actions/build_and_push@v1
+        uses: passportxyz/gh-workflows/.github/actions/build_and_push@v2
         with:
           refspec: ${{ inputs.refspec }}
           docker_tag: ${{ inputs.docker_tag }}
@@ -53,6 +53,7 @@ jobs:
           aws_region: us-west-2
           aws_access_key_id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws_session_token: ${{ env.AWS_SESSION_TOKEN }}
           dockerfile_name: iam/Dockerfile
           build_dir: ./
 
@@ -84,7 +85,7 @@ jobs:
         run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
         
       - id: build_and_push_docker_embed_image
-        uses: passportxyz/gh-workflows/.github/actions/build_and_push@v1
+        uses: passportxyz/gh-workflows/.github/actions/build_and_push@v2
         with:
           refspec: ${{ inputs.refspec }}
           docker_tag: ${{ inputs.docker_tag }}
@@ -92,6 +93,7 @@ jobs:
           aws_region: us-west-2
           aws_access_key_id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws_session_token: ${{ env.AWS_SESSION_TOKEN }}
           dockerfile_name: embed/Dockerfile
           build_dir: ./
 
