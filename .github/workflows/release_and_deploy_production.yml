@@ -183,6 +183,7 @@ jobs:
         create-draft-release,
         deploy-api-staging,
         deploy-ui-staging,
+        deploy-ui-s3-staging,
       ]
     uses: ./.github/workflows/build_and_deploy_generic.yml
     with:
@@ -255,6 +256,7 @@ jobs:
         deploy-ui-staging,
         deploy-api-production,
         deploy-ui-production,
+        deploy-ui-s3-production,
       ]
     permissions: write-all
     runs-on: ubuntu-latest
