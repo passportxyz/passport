@@ -1,0 +1,70 @@
+name: Deploy Embed Generic
+run-name: Deploy Embed to  - ${{ github.event.inputs.environment || 'review' }}
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Leave blank to use current HEAD, or provide an override commit SHA"
+        type: string
+        required: false
+      environment:
+        description: "Environment to deploy to"
+        required: false
+        default: "review"
+        type: choice
+        options:
+          - review
+          - staging
+          - production
+jobs:
+  ref:
+    name: Load Commit Ref
+    runs-on: ubuntu-latest
+    steps:
+      - id: ref
+        uses: passportxyz/gh-workflows/.github/actions/load_commit_ref@v1
+        with:
+          commit: ${{ inputs.commit }}
+
+    outputs:
+      version_tag: ${{ steps.ref.outputs.version_tag }}
+      docker_tag: ${{ steps.ref.outputs.docker_tag }}
+      refspec: ${{ steps.ref.outputs.refspec }}
+
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 22
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.14.0
+          cache: "yarn"
+      - name: Install Packages
+        run: yarn install --frozen-lockfile
+      - name: Run Tests
+        run: yarn test
+      - name: Run Linter
+        run: yarn lint
+
+  build-ui:
+    name: Build UI
+    needs: [ref, run-tests]
+    uses: ./.github/workflows/sync_to_s3_generic_build_embed.yml
+    secrets: inherit
+    with:
+      refspec: ${{ needs.ref.outputs.refspec }}
+      environment: ${{ github.event.inputs.environment }}
+
+  push-ui:
+    name: Push UI to S3
+    needs: [build-ui]
+    uses: ./.github/workflows/sync_to_s3_generic_push_embed.yml
+    secrets: inherit
+    with:
+      refspec: ${{ needs.ref.outputs.refspec }}
+      environment: ${{ github.event.inputs.environment }}
