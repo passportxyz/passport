@@ -78,14 +78,6 @@ jobs:
           echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
           echo "CLOUDFRONT_ID=$CLOUDFRONT_ID" >> $GITHUB_ENV
 
-      - name: Install Dependencies
-        working-directory: .
-        run: yarn install --frozen-lockfile
-
-      - name: Build Application
-        working-directory: .
-        run: yarn build
-
       - name: Sync Files to S3
         working-directory: embed-popup
         run: |
