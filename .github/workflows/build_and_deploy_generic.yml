@@ -152,9 +152,17 @@ jobs:
       refspec: ${{ inputs.refspec }}
       environment: ${{ inputs.environment }}
 
+  build_embed:
+    name: Build Embed
+    uses: ./.github/workflows/sync_to_s3_generic_build_embed.yml
+    secrets: inherit
+    with:
+      refspec: ${{ inputs.refspec }}
+      environment: ${{ inputs.environment }}
+
   deploy_confirm:
     name: Review Approval Pending
-    needs: [docker_iam, docker_embed, deploy_preview, build_app]
+    needs: [docker_iam, docker_embed, deploy_preview, build_app, build_embed]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
@@ -216,3 +224,13 @@ jobs:
     with:
       refspec: ${{ inputs.refspec }}
       environment: ${{ inputs.environment }}
+
+  push_embed:
+    name: Push Embed to S3
+    needs: [deploy_confirm]
+    uses: ./.github/workflows/sync_to_s3_generic_push_embed.yml
+    secrets: inherit
+    with:
+      refspec: ${{ inputs.refspec }}
+      environment: ${{ inputs.environment }}
+    
