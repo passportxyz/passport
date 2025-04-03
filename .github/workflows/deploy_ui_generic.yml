@@ -12,7 +12,7 @@ on:
         required: false
       environment:
         description: "Environment to deploy to"
-        required: true
+        required: false
         default: "review"
         type: choice
         options:
