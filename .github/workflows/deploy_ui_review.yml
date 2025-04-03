@@ -27,12 +27,6 @@ jobs:
 
   run-tests:
     runs-on: ubuntu-latest
-    # Run a local ceramic nod to test against
-    # services:
-    #   ceramic:
-    #     image: gitcoinpassport/js-ceramic:3.2.0
-    #     ports:
-    #       - 7007:7007
 
     steps:
       - uses: actions/checkout@v3
@@ -86,7 +80,6 @@ jobs:
           ref: ${{ needs.ref.outputs.refspec }}
           fetch-depth: 0
 
-
       - name: Push code to branch
         uses: passportxyz/gh-workflows/.github/actions/push_to_branch@v1
         with:
@@ -94,10 +87,19 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           branch: review-app
 
-  deploy-ui-s3:
-    name: Deploy UI to Review - Push to S3
+  build-ui:
+    name: Build UI for Review
     needs: [ref, run-tests]
-    uses: ./.github/workflows/sync_to_s3_generic_app.yml
+    uses: ./.github/workflows/sync_to_s3_generic_build_app.yml
+    secrets: inherit
+    with:
+      refspec: ${{ needs.ref.outputs.refspec }}
+      environment: review
+
+  push-ui:
+    name: Push UI to Review (S3)
+    needs: [build-ui]
+    uses: ./.github/workflows/sync_to_s3_generic_push_app.yml
     secrets: inherit
     with:
       refspec: ${{ needs.ref.outputs.refspec }}
