@@ -1,4 +1,4 @@
-name: Embed - Build and Deploy S3 - Generic
+name: Push App to S3
 
 on:
   workflow_call:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: Setup & Build App
+    name: Push App to S3
     runs-on: ubuntu-latest
 
     env:

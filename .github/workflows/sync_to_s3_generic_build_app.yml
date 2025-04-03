@@ -1,4 +1,4 @@
-name: Embed - Build and Deploy S3 - Generic
+name: Build App
 
 on:
   workflow_call:
