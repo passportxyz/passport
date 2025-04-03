@@ -34,17 +34,6 @@ jobs:
           node-version: 22.14.0
           cache: "yarn"
 
-      - name: Load secret
-        id: op-load-secret
-        uses: 1password/load-secrets-action@v1
-        with:
-          export-env: true
-        env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          AWS_ACCESS_KEY_ID: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
-          PULUMI_ACCESS_TOKEN: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
-
       - name: Install 1Password CLI
         uses: 1password/install-cli-action@v1
 
@@ -59,11 +48,6 @@ jobs:
           echo "ONE_PASS_ENV=$ONE_PASS_ENV"
           op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
           jq -r '.fields[] | select(.section.label=="app") | "\(.label)=\(.value)"' >> $GITHUB_ENV
-
-      - name: Install Pulumi CLI
-        uses: pulumi/actions@v4
-        with:
-          pulumi-version: latest
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
