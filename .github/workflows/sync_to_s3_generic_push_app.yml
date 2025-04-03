@@ -1,4 +1,4 @@
-name: Embed - Build and Deploy S3 - Generic
+name: Push App to S3
 
 on:
   workflow_call:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: Setup & Build App
+    name: Push App to S3
     runs-on: ubuntu-latest
 
     env:
@@ -23,16 +23,10 @@ jobs:
       ONE_PASS_ENV: passport-xyz-${{ inputs.environment }}-env
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
-          ref: ${{ inputs.refspec }}
-
-      - name: Set up Node.js, version 22.14.0
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.14.0
-          cache: "yarn"
+          name: passport-app
+          path: app/out
 
       - name: Load secret
         id: op-load-secret
@@ -41,29 +35,23 @@ jobs:
           export-env: true
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          AWS_ACCESS_KEY_ID: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/AWS_SECRET_ACCESS_KEY
-          PULUMI_ACCESS_TOKEN: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
-
-      - name: Install 1Password CLI
-        uses: 1password/install-cli-action@v1
+          AWS_ACCESS_KEY_ID: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SECRET_ACCESS_KEY
+          PULUMI_ACCESS_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/PULUMI_ACCESS_TOKEN
 
       - name: Configure 1Password Service Account
         uses: 1password/load-secrets-action/configure@v1
         with:
           service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
 
-      - name: Get envs from 1Pass
-        working-directory: .
-        run: |
-          echo "ONE_PASS_ENV=$ONE_PASS_ENV"
-          op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
-          jq -r '.fields[] | select(.section.label=="app") | "\(.label)=\(.value)"' >> $GITHUB_ENV
-
       - name: Install Pulumi CLI
         uses: pulumi/actions@v4
         with:
           pulumi-version: latest
+
+      - name: Set AWS_SESSION_TOKEN if needed
+        if: inputs.environment == 'production'
+        run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -71,6 +59,7 @@ jobs:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
 
       - name: Get Pulumi Stack Outputs From Core Infra
         id: get_pulumi_outputs
@@ -85,30 +74,6 @@ jobs:
 
           echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
           echo "CLOUDFRONT_ID=$CLOUDFRONT_ID" >> $GITHUB_ENV
-
-      - name: Install Dependencies
-        working-directory: .
-        run: yarn install --frozen-lockfile
-
-      - name: Run Tests
-        run: yarn test
-
-      - name: Run Linter
-        run: yarn lint
-
-      - name: Build Application
-        working-directory: app
-        run: |
-          rm -rf ../node_modules/@tendermint
-          rm -rf ../node_modules/did-jwt/node_modules/uint8arrays
-          yarn build
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-2
 
       - name: Sync Files to S3
         working-directory: app

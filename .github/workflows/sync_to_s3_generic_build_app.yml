@@ -1,0 +1,70 @@
+name: Setup & Build App
+
+on:
+  workflow_call:
+    inputs:
+      refspec:
+        description: "The commit SHA"
+        type: string
+        required: true
+      environment:
+        description: "Environment to deploy to"
+        type: string
+        required: true
+
+jobs:
+  build:
+    name: Setup & Build App
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-west-2
+      CORE_INFRA_PULUMI_STACK: passportxyz/core-infra/${{ inputs.environment }}
+      ONE_PASS_ENV: passport-xyz-${{ inputs.environment }}-env
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.refspec }}
+
+      - name: Set up Node.js, version 22.14.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+          cache: "yarn"
+
+      - name: Install 1Password CLI
+        uses: 1password/install-cli-action@v1
+
+      - name: Configure 1Password Service Account
+        uses: 1password/load-secrets-action/configure@v1
+        with:
+          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+
+      - name: Get envs from 1Pass
+        working-directory: .
+        run: |
+          echo "ONE_PASS_ENV=$ONE_PASS_ENV"
+          op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
+          jq -r '.fields[] | select(.section.label=="app") | "\(.label)=\(.value)"' >> $GITHUB_ENV
+
+      - name: Install Dependencies
+        working-directory: .
+        run: yarn install --frozen-lockfile --ignore-scripts
+
+      - name: Build Application
+        working-directory: .
+        run: |
+          rm -rf ../node_modules/@tendermint
+          rm -rf ../node_modules/did-jwt/node_modules/uint8arrays
+          yarn build:platforms
+          yarn build:identity
+          yarn build:schemas
+          yarn build:database-client
+          yarn build:app
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: passport-app
+          path: app/out
