@@ -72,30 +72,20 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Get Pulumi Stack Outputs From Core Infra
-        id: get_pulumi_outputs
-        run: |
-          BUCKET_NAME=$(pulumi stack output passportAppBucketName --stack ${{ env.CORE_INFRA_PULUMI_STACK }})
-          CLOUDFRONT_ID=$(pulumi stack output passportAppDistributionId --stack ${{ env.CORE_INFRA_PULUMI_STACK }})
-
-          if [[ -z "$BUCKET_NAME" || -z "$CLOUDFRONT_ID" ]]; then
-            echo "Error: Failed to retrieve Pulumi stack outputs!"
-            exit 1
-          fi
-
-          echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
-          echo "CLOUDFRONT_ID=$CLOUDFRONT_ID" >> $GITHUB_ENV
-
       - name: Install Dependencies
         working-directory: .
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --ignore-scripts
 
       - name: Build Application
-        working-directory: app
+        working-directory: .
         run: |
           rm -rf ../node_modules/@tendermint
           rm -rf ../node_modules/did-jwt/node_modules/uint8arrays
-          yarn build
+          yarn build:platforms
+          yarn build:identity
+          yarn build:schemas
+          yarn build:database-client
+          yarn build:app
 
       - uses: actions/upload-artifact@v4
         with:
