@@ -1,4 +1,4 @@
-name: Embed push to S3
+name: Push Embed to S3
 
 on:
   workflow_call:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: Setup & Build App
+    name: Push Embed to S3
     runs-on: ubuntu-latest
 
     env:
