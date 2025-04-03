@@ -79,7 +79,7 @@ jobs:
     secrets: inherit
     with:
       refspec: ${{ needs.ref.outputs.refspec }}
-      environment: ${{ inputs.environment }}
+      environment: ${{ github.event.inputs.environment }}
 
   push-ui:
     name: Push UI to S3
@@ -88,4 +88,4 @@ jobs:
     secrets: inherit
     with:
       refspec: ${{ needs.ref.outputs.refspec }}
-      environment: ${{ inputs.environment }}
+      environment: ${{ github.event.inputs.environment }}
