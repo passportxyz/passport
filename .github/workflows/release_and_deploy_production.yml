@@ -120,21 +120,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           branch: staging-app
 
-  deploy-ui-s3-staging:
-    name: Deploy UI to Review - Push to S3
-    needs: [
-        ref,
-        run-tests,
-        # check-provider-bitmap,
-        create-draft-release,
-        deploy-api-staging,
-      ]
-    uses: ./.github/workflows/sync_to_s3_generic_app.yml
-    secrets: inherit
-    with:
-      refspec: ${{ needs.ref.outputs.refspec }}
-      environment: staging
-
   deploy-embed-s3-staging:
     name: Build Embed Popup and Deploy to Staging S3
     needs: ref
@@ -153,7 +138,6 @@ jobs:
         create-draft-release,
         deploy-api-staging,
         deploy-ui-staging,
-        deploy-ui-s3-staging,
       ]
     uses: ./.github/workflows/build_and_deploy_generic.yml
     with:
@@ -190,23 +174,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           branch: production-app
 
-  deploy-ui-s3-production:
-    name: Deploy UI to Production - Push to S3
-    needs: [
-        ref,
-        run-tests,
-        # check-provider-bitmap,
-        create-draft-release,
-        deploy-api-staging,
-        deploy-ui-staging,
-        deploy-api-production,
-      ]
-    uses: ./.github/workflows/sync_to_s3_generic_app.yml
-    secrets: inherit
-    with:
-      refspec: ${{ needs.ref.outputs.refspec }}
-      environment: production
-
   deploy-embed-s3-production:
     name: Build Embed Popup and Deploy to Production S3
     needs: ref
@@ -226,7 +193,6 @@ jobs:
         deploy-ui-staging,
         deploy-api-production,
         deploy-ui-production,
-        deploy-ui-s3-production,
       ]
     permissions: write-all
     runs-on: ubuntu-latest
