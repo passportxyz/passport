@@ -1,4 +1,4 @@
-name: Build App
+name: Setup & Build App
 
 on:
   workflow_call:
@@ -48,13 +48,6 @@ jobs:
           echo "ONE_PASS_ENV=$ONE_PASS_ENV"
           op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
           jq -r '.fields[] | select(.section.label=="app") | "\(.label)=\(.value)"' >> $GITHUB_ENV
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
 
       - name: Install Dependencies
         working-directory: .
