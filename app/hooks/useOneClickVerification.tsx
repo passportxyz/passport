@@ -14,7 +14,7 @@ import { useMessage } from "./useMessage";
 export const useOneClickVerification = () => {
   const [verificationState, setUserVerificationState] = useAtom(mutableUserVerificationAtom);
 
-  const { passport, allPlatforms, handlePatchStamps, handleComposeRetry } = useContext(CeramicContext);
+  const { passport, allPlatforms, handlePatchStamps } = useContext(CeramicContext);
   const { success } = useMessage();
 
   const initiateVerification = async function (did: DID, address: string) {
@@ -75,16 +75,6 @@ export const useOneClickVerification = () => {
 
       await handlePatchStamps(stampPatches);
 
-      try {
-        datadogLogs.logger.info(`Attempting to retry writing stamps to compose db ${address}`);
-        // Attempt to retry writing stamps to compose db that have failed to write at some point in the past
-        handleComposeRetry();
-      } catch (error) {
-        console.error("Error when attempting to retry writing stamps to compose db", error);
-        datadogLogs.logger.error("Error when attempting to retry writing stamps to compose db", {
-          error: String(error),
-        });
-      }
       setUserVerificationState({
         ...verificationState,
         loading: false,

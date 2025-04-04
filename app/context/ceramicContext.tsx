@@ -11,7 +11,7 @@ import {
   Stamp,
   StampPatch,
 } from "@gitcoin/passport-types";
-import { DataStorageBase, ComposeDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
+import { DataStorageBase, PassportDatabase } from "@gitcoin/passport-database-client";
 import { datadogLogs } from "@datadog/browser-logs";
 import { datadogRum } from "@datadog/browser-rum";
 import { ScorerContext } from "./scorerContext";
@@ -39,7 +39,6 @@ export interface CeramicContextState {
   handlePatchStamps: (stamps: StampPatch[]) => Promise<void>;
   handleDeleteStamps: (providerIds: PROVIDER_ID[]) => Promise<void>;
   cancelCeramicConnection: () => void;
-  handleComposeRetry: () => Promise<SecondaryStorageBulkPatchResponse | void>;
   userDid: string | undefined;
   expiredProviders: PROVIDER_ID[];
   expiredPlatforms: Partial<Record<PLATFORM_ID, PlatformProps>>;
@@ -102,7 +101,6 @@ const startingState: CeramicContextState = {
   handleAddStamps: async () => {},
   handlePatchStamps: async () => {},
   handleDeleteStamps: async () => {},
-  handleComposeRetry: async () => {},
   passportHasCacaoError: false,
   cancelCeramicConnection: () => {},
   userDid: undefined,
@@ -156,22 +154,11 @@ export const cleanPassport = (
   return { passport, expiredProviders: tempExpiredProviders, expirationDateProviders };
 };
 
-export const getStampsToRetry = (initialPassportStamps: Stamp[], initialCeramicStamps: Stamp[]): Stamp[] =>
-  initialPassportStamps.filter((stamp: Stamp) => {
-    const existingStamp = initialCeramicStamps.find((composeStamp: Stamp) => stamp.provider === composeStamp.provider);
-    if (!existingStamp || stamp.credential.issuanceDate !== existingStamp.credential.issuanceDate) {
-      return true;
-    }
-  });
-
 export const CeramicContextProvider = ({ children }: { children: any }) => {
   const [allProvidersState, setAllProviderState] = useState(startingAllProvidersState);
   const resolveCancel = useRef<() => void>();
-  const [ceramicClient, setCeramicClient] = useState<ComposeDatabase | undefined>(undefined);
   const [isLoadingPassport, setIsLoadingPassport] = useState<IsLoadingPassportState>(IsLoadingPassportState.Loading);
   const [passport, setPassport] = useState<Passport | undefined>(undefined);
-  const [initialPassport, setInitialPassport] = useState<Passport | undefined>(undefined);
-  const [initialCeramicStamps, setInitialCeramicStamps] = useState<Stamp[] | undefined>(undefined);
   const [userDid, setUserDid] = useState<string | undefined>();
   const [expiredProviders, setExpiredProviders] = useState<PROVIDER_ID[]>([]);
   const [expirationDateProviders, setExpirationDateProviders] = useState<Partial<Record<PROVIDER_ID, Date>>>({}); // <provider> : <expiration_date>
@@ -204,7 +191,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   useEffect(() => {
     return () => {
       clearAllProvidersState();
-      setCeramicClient(undefined);
       setDatabase(undefined);
       setPassport(undefined);
       setUserDid(undefined);
@@ -215,16 +201,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   useEffect((): void => {
     try {
       if (dbAccessToken && address && !database && did) {
-        // Ceramic Network Connection
-        const ceramicClientInstance = new ComposeDatabase(
-          did,
-          process.env.NEXT_PUBLIC_CERAMIC_CLIENT_URL,
-          datadogLogs.logger
-        );
-        if (process.env.NEXT_PUBLIC_FF_CERAMIC_CLIENT && process.env.NEXT_PUBLIC_FF_CERAMIC_CLIENT === "on") {
-          setCeramicClient(ceramicClientInstance);
-        }
-        setUserDid(ceramicClientInstance.did);
+        setUserDid((did.hasParent ? did.parent : did.id).toLowerCase());
         // Ceramic cache db
         const databaseInstance = new PassportDatabase(
           CERAMIC_CACHE_ENDPOINT || "",
@@ -236,74 +213,24 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
         setDatabase(databaseInstance);
       } else {
-        setCeramicClient(undefined);
         setDatabase(undefined);
         setIsLoadingPassport(IsLoadingPassportState.Loading);
       }
     } catch (e) {
       console.log("failed to connect self id :(");
-      setCeramicClient(undefined);
       setDatabase(undefined);
     }
   }, [address, dbAccessToken]);
 
   useEffect(() => {
     if (database && address) {
-      fetchPassport(database, false, true).then((passport) => {
-        if (passport) {
-          setInitialPassport(passport);
-        }
-      });
+      fetchPassport(database, false, true).then((passport) => {});
     }
   }, [database, address]);
 
   useEffect(() => {
     fetchStampWeights();
   }, [customization.key]);
-
-  useEffect(() => {
-    if (ceramicClient) {
-      ceramicClient
-        .getPassport()
-        .then((passportResponse) => {
-          if (passportResponse !== undefined) {
-            const { passport } = passportResponse;
-            if (passport) {
-              setInitialCeramicStamps(passport.stamps);
-            }
-            console.log("loaded passport from compose-db", passportResponse);
-            datadogLogs.logger.info("loaded passport from compose-db", { passportResponse });
-          }
-        })
-        .catch((e) => {
-          console.log("failed to load passport from compose-db", e);
-          datadogLogs.logger.error("failed to load passport from compose-db", { error: e });
-        });
-    }
-  }, [ceramicClient]);
-
-  const handleComposeRetry = async (): Promise<SecondaryStorageBulkPatchResponse | void> => {
-    if (initialPassport && ceramicClient && initialCeramicStamps) {
-      try {
-        datadogLogs.logger.info("[ComposeDB] calling handleComposeRetry");
-        // using stamps as the source of truth, filter stamps for where the issuanceDate does not match the composeStamp if there is a composeStamp with the same provider
-        const stampsToRetry = getStampsToRetry(initialPassport.stamps, initialCeramicStamps);
-        // then add the stamps to ComposeDB
-        if (stampsToRetry.length > 0) {
-          // perform an update using the stamps that need to be retried
-          const composeDBPatchResponse = await ceramicClient.patchStamps(stampsToRetry);
-          return composeDBPatchResponse;
-        } else {
-          console.log("No stamps to retry");
-        }
-      } catch (e) {
-        console.log("error adding ceramic stamps", e);
-        datadogLogs.logger.error("Error adding ceramic stamps", { stamps: initialCeramicStamps, error: e });
-      }
-    } else {
-      datadogLogs.logger.info("Did not attempt handleComposeRetry");
-    }
-  };
 
   const checkAndAlertInvalidCeramicSession = useCallback(() => {
     if (!checkSessionIsValid()) {
@@ -417,22 +344,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
         handlePassportUpdate(addResponse, database);
 
-        if (ceramicClient && addResponse.passport) {
-          (async () => {
-            try {
-              checkAndAlertInvalidCeramicSession();
-              const composeDBAddResponse = await ceramicClient.addStamps(stamps);
-              const composeDBMetadata = processComposeDBMetadata(addResponse.passport, {
-                adds: composeDBAddResponse,
-                deletes: [],
-              });
-              await database.patchStampComposeDBMetadata(composeDBMetadata);
-            } catch (e) {
-              console.log("error adding ceramic stamps", e);
-              datadogLogs.logger.error("Error adding ceramic stamps", { stamps, error: e });
-            }
-          })();
-        }
         loadScore();
       }
     } catch (e) {
@@ -441,70 +352,12 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     }
   };
 
-  const processComposeDBMetadata = (
-    updatedPassport: Passport | undefined,
-    composeDBPatchResponse: SecondaryStorageBulkPatchResponse
-  ): ComposeDBMetadataRequest[] => {
-    composeDBPatchResponse.deletes.forEach(({ secondaryStorageId, secondaryStorageError }) => {
-      if (secondaryStorageError) {
-        console.log(`Failed to delete stamp ${secondaryStorageId} from secondary storage: ${secondaryStorageError}`);
-        datadogLogs.logger.error(
-          `Failed to delete stamp ${secondaryStorageId} from secondary storage: ${secondaryStorageError}`
-        );
-      }
-    });
-
-    return composeDBPatchResponse.adds
-      .map((addResponse) => {
-        const { provider, secondaryStorageId, secondaryStorageError } = addResponse;
-
-        if (secondaryStorageError) {
-          console.log(
-            `Failed to add stamp ${secondaryStorageId} to secondary storage, error: ${secondaryStorageError}`
-          );
-          datadogLogs.logger.error("Error adding stamp to secondary storage", {
-            stamp: addResponse,
-            error: secondaryStorageError,
-          });
-        }
-
-        const primaryStorageId = updatedPassport?.stamps.find((stamp) => stamp.provider === provider)?.id;
-
-        if (!primaryStorageId) {
-          console.log(`Stamp ID not found for provider ${provider} when adding to secondary storage`);
-          datadogLogs.logger.error(`Stamp ID not found for provider ${provider} when adding to secondary storage`);
-        } else {
-          const compose_db_save_status: ComposeDBSaveStatus =
-            !secondaryStorageError && secondaryStorageId ? "saved" : "failed";
-          return {
-            id: primaryStorageId,
-            compose_db_stream_id: secondaryStorageId,
-            compose_db_save_status,
-          };
-        }
-      })
-      .filter((v?: ComposeDBMetadataRequest): v is ComposeDBMetadataRequest => Boolean(v));
-  };
-
   const handlePatchStamps = async (stampPatches: StampPatch[]): Promise<void> => {
     try {
       if (database) {
         const patchResponse = await database.patchStamps(stampPatches);
         handlePassportUpdate(patchResponse, database);
 
-        if (ceramicClient && patchResponse.passport) {
-          (async () => {
-            try {
-              checkAndAlertInvalidCeramicSession();
-              const composeDBPatchResponse = await ceramicClient.patchStamps(stampPatches);
-              const composeDBMetadata = processComposeDBMetadata(patchResponse.passport, composeDBPatchResponse);
-              await database.patchStampComposeDBMetadata(composeDBMetadata);
-            } catch (e) {
-              console.log("error patching ceramic stamps", e);
-              datadogLogs.logger.error("Error patching ceramic stamps", { stampPatches, error: e });
-            }
-          })();
-        }
         loadScore();
       }
     } catch (e) {
@@ -518,18 +371,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       if (database) {
         const deleteResponse = await database.deleteStamps(providerIds);
         handlePassportUpdate(deleteResponse, database);
-        if (ceramicClient && deleteResponse.status === "Success" && deleteResponse.passport?.stamps) {
-          (async () => {
-            try {
-              checkAndAlertInvalidCeramicSession();
-              const responses = await ceramicClient.deleteStamps(providerIds);
-              processComposeDBMetadata(deleteResponse.passport, { adds: [], deletes: responses });
-            } catch (e) {
-              console.log("error deleting ceramic stamps", e);
-              datadogLogs.logger.error("Error deleting ceramic stamps", { providerIds, error: e });
-            }
-          })();
-        }
+
         loadScore();
       }
     } catch (e) {
@@ -686,7 +528,6 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
     handlePatchStamps,
     handleDeleteStamps,
     cancelCeramicConnection,
-    handleComposeRetry,
     userDid,
     expiredProviders,
     expiredPlatforms,
