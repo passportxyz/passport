@@ -27,7 +27,7 @@ export type DatastoreConnectionContextState = {
 
 export const DatastoreConnectionContext = createContext<DatastoreConnectionContextState>({
   dbAccessTokenStatus: "idle",
-  disconnect: async (_address: string) => {},
+     disconnect: async (_address: string) => {},
   connect: async () => {},
   checkSessionIsValid: () => false,
 });
@@ -38,7 +38,7 @@ export const useDatastoreConnection = () => {
   const { isConnected, address: web3ModalAddress, chain } = useAccount();
 
   const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");
-  const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();
+    const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();
   const [connectedAddress, setConnectedAddress] = useState<string | undefined>();
 
   const [did, setDid] = useState<DID>();
