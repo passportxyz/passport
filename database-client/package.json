@@ -21,8 +21,6 @@
     "v": "tsc --version",
     "clean": "rimraf dist node_modules",
     "debug": "tsc --watch",
-    "ceramic": "CERAMIC_ENABLE_EXPERIMENTAL_COMPOSE_DB='true' ceramic daemon --config composedb.config.json",
-    "test:integration": "yarn build && npx jest --testMatch '**/integration-tests/**/*.ts'",
     "test": "jest"
   },
   "dependencies": {

@@ -73,8 +73,7 @@
     "types": "yarn workspace @gitcoin/passport-types",
     "prestart": "yarn build:platforms && yarn build:identity && yarn build:schemas && yarn build:database-client && yarn build:iam && yarn build:embed && yarn build:app",
     "pretest": "yarn build:schemas && yarn build:identity && yarn build:database-client",
-    "postinstall": "yarn build:platforms && yarn build:identity && yarn build:schemas && yarn build:database-client && yarn build:iam && yarn build:embed && yarn build:app",
-    "test:ceramic-integration": "yarn workspace @gitcoin/passport-database-client test:integration"
+    "postinstall": "yarn build:platforms && yarn build:identity && yarn build:schemas && yarn build:database-client && yarn build:iam && yarn build:embed && yarn build:app"
   },
   "engines": {
     "yarn": ">=1.22.10",

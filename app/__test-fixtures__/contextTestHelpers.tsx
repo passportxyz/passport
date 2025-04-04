@@ -102,7 +102,6 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
     handlePatchStamps: vi.fn(),
     handleCreatePassport: vi.fn(),
     handleDeleteStamps: vi.fn(),
-    handleComposeRetry: vi.fn(),
     expiredProviders: [],
     expiredPlatforms: {},
     passportHasCacaoError: false,
