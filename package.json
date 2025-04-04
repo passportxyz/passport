@@ -89,7 +89,7 @@
     "@didtools/**/uint8arrays": "^5.1.0"
   },
   "lint-staged": {
-    "*.{ts,js}": [
+    "*.{ts,tsx,js,jsx}": [
       "eslint --fix",
       "prettier --write"
     ]
