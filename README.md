@@ -1,3 +1,4 @@
+[![Github release](https://img.shields.io/github/v/tag/passportxyz/passport.svg?sort=semver)](https://github.com/passportxyz/passport/releases)
 # Passport XYZ
 
 ## What is Passport?
