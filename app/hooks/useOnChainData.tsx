@@ -145,9 +145,14 @@ const useOnChainDataQuery = (address?: string) => {
   });
 };
 
+const decimalToHexChainId = (chainId: number): ChainId => {
+  const hex = chainId.toString(16);
+  return `0x${hex}`;
+};
+
 export const useOnChainData = (): OnChainData => {
   const { address, chain } = useAccount();
-  const chainId = chain?.id.toString(16) as ChainId;
+  const chainId = decimalToHexChainId(chain?.id || 0);
   const queryClient = useQueryClient();
 
   const { data, isError, error, isPending } = useOnChainDataQuery(address);
