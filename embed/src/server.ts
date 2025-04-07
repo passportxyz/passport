@@ -63,8 +63,7 @@ app.use(
     keyGenerator: keyGenerator,
     store: getRateLimiterStore(),
     skip: (req, _res): boolean => {
-      // TODO: geri review this, /verify should be removed ...
-      return req.path === "/health" || req.path === "/embed/challenge" || req.path === "/embed/verify";
+      return req.path === "/health" || req.path === "/embed/challenge";
     },
   })
 );
