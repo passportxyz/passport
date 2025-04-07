@@ -67,5 +67,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: passport-embed-popup
+          name: passport-embed-popup-${{ inputs.environment }}
           path: embed-popup/dist

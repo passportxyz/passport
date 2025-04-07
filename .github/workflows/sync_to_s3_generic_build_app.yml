@@ -66,5 +66,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: passport-app
+          name: passport-app-${{ inputs.environment }}
           path: app/out
