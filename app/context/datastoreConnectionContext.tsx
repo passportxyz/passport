@@ -59,7 +59,6 @@ export const useDatastoreConnection = () => {
 
   const getPassportDatabaseAccessToken = async (did: DID, address: string): Promise<string> => {
     let nonce = null;
-    console.error("Getting nonce for did:", did);
     try {
       // Get nonce from server
       const nonceResponse = await axios.get(`${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/account/nonce`);
