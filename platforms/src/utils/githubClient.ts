@@ -9,7 +9,11 @@ const githubGraphEndpoint = "https://api.github.com/graphql";
 export const MAX_YEARS_TO_CHECK = 3;
 export const MAX_CONTRIBUTION_DAYS = 120;
 
-export type GithubUserData = { userId: string; contributionDays: number; hadBadCommits: boolean };
+export type GithubUserData = {
+  userId: string;
+  contributionDays: number;
+  hadBadCommits: boolean;
+};
 export type GithubAccountData = { node_id: string; login: string };
 export type GithubContext = ProviderContext & {
   github?: {
@@ -55,6 +59,7 @@ interface ContributionNode {
   occurredAt: string;
   repository: {
     createdAt: string;
+    isPrivate: boolean;
   };
 }
 
@@ -102,6 +107,7 @@ const parseContributions = ({
       endCursor = pageInfo.endCursor;
     }
     nodes.forEach((node) => {
+      if (node.repository.isPrivate) return;
       const commitDate = new Date(node.occurredAt);
       const repoCreatedAt = new Date(node.repository.createdAt);
       if (commitDate >= repoCreatedAt && commitDate >= userCreatedAt) {
@@ -165,6 +171,7 @@ export const queryFunc = async (
                   occurredAt
                   repository {
                     createdAt
+                    isPrivate
                   }
                 }
               }
@@ -395,7 +402,11 @@ export const fetchAndCheckContributionsToRepository = async (
   numberOfDays: number,
   iterations = 3,
   repoURL: string
-): Promise<{ contributionValid: boolean; numberOfDays?: number; errors?: string[] }> => {
+): Promise<{
+  contributionValid: boolean;
+  numberOfDays?: number;
+  errors?: string[];
+}> => {
   const segments = removeTrailingSlash(repoURL).split("/");
   const repo = segments.pop();
   const owner = segments.pop();
@@ -459,7 +470,11 @@ export const fetchAndCheckCommitCountToRepository = async (
   iterations = 3,
   repoNameOrURL: string,
   cutOffDate?: Date
-): Promise<{ contributionValid: boolean; commitCount?: number; errors?: string[] }> => {
+): Promise<{
+  contributionValid: boolean;
+  commitCount?: number;
+  errors?: string[];
+}> => {
   const segments = removeTrailingSlash(repoNameOrURL).split("/");
   const repo = segments.pop();
   const owner = segments.pop();
