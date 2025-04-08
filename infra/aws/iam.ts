@@ -105,21 +105,6 @@ const passportXyzIamEnvironment = pulumi
     ].sort(secretsManager.sortByName)
   );
 
-const passportXyzAppEnvironment = secretsManager
-  .getEnvironmentVars({
-    vault: "DevOps",
-    repo: "passport-xyz",
-    env: stack,
-    section: "app",
-  })
-  .reduce(
-    (acc, { name, value }) => {
-      acc[name] = value;
-      return acc;
-    },
-    {} as Record<string, string | pulumi.Output<any>>
-  );
-
 const logsRetention = Object({
   review: 1,
   staging: 7,
