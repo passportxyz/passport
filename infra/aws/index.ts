@@ -8,7 +8,6 @@ export const passportClusterArn = cluster.arn;
 export const passportClusterName = cluster.name;
 
 // IAM
-export const amplifyAppHookUrl = pulumi.secret(iam.amplifyAppInfo.webHook.url);
 export const passportIamServiceName = iam.passportXyzService.name;
 
 // Embed
