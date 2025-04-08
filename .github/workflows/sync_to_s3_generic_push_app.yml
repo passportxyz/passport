@@ -1,4 +1,4 @@
-name: Push App to S3
+name: Library - Push App to S3
 
 on:
   workflow_call:
@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: passport-app
+          name: passport-app-${{ inputs.environment }}
           path: app/out
 
       - name: Load secret

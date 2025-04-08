@@ -1,4 +1,4 @@
-name: Library - Build App
+name: Library - Build Embed
 
 on:
   workflow_call:
@@ -14,13 +14,13 @@ on:
 
 jobs:
   build:
-    name: Build App
+    name: Build Embed
     runs-on: ubuntu-latest
 
     env:
       AWS_REGION: us-west-2
       CORE_INFRA_PULUMI_STACK: passportxyz/core-infra/${{ inputs.environment }}
-      ONE_PASS_ENV: passport-xyz-${{ inputs.environment }}-env
+      ONE_PASS_ENV: passport-embed-${{ inputs.environment }}-env
 
     steps:
       - name: Checkout Repository
@@ -28,11 +28,19 @@ jobs:
         with:
           ref: ${{ inputs.refspec }}
 
-      - name: Set up Node.js, version 22.14.0
+      - name: Set up Node.js, version 20.9.0
         uses: actions/setup-node@v4
         with:
-          node-version: 22.14.0
+          node-version: 20.9.0
           cache: "yarn"
+
+      - name: Load secret
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
 
       - name: Install 1Password CLI
         uses: 1password/install-cli-action@v1
@@ -43,7 +51,7 @@ jobs:
           service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
 
       - name: Get envs from 1Pass
-        working-directory: .
+        working-directory: embed-popup
         run: |
           echo "ONE_PASS_ENV=$ONE_PASS_ENV"
           op item get "$ONE_PASS_ENV" --vault "DevOps" --format json | \
@@ -51,20 +59,13 @@ jobs:
 
       - name: Install Dependencies
         working-directory: .
-        run: yarn install --frozen-lockfile --ignore-scripts
+        run: yarn install --frozen-lockfile
 
       - name: Build Application
         working-directory: .
-        run: |
-          rm -rf ../node_modules/@tendermint
-          rm -rf ../node_modules/did-jwt/node_modules/uint8arrays
-          yarn build:platforms
-          yarn build:identity
-          yarn build:schemas
-          yarn build:database-client
-          yarn build:app
+        run: yarn build
 
       - uses: actions/upload-artifact@v4
         with:
-          name: passport-app-${{ inputs.environment }}
-          path: app/out
+          name: passport-embed-popup-${{ inputs.environment }}
+          path: embed-popup/dist

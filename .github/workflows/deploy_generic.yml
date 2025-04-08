@@ -92,10 +92,10 @@ jobs:
         with:
           export-env: true
         env:
-          PULUMI_ACCESS_TOKEN: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
-          CLOUDFLARE_API_TOKEN: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
+          CLOUDFLARE_API_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/CLOUDFLARE_API_TOKEN
           AWS_ACCESS_KEY_ID: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_ACCESS_KEY_ID
           AWS_SECRET_ACCESS_KEY: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SECRET_ACCESS_KEY
+          PULUMI_ACCESS_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/PULUMI_ACCESS_TOKEN
       
       - name: Set AWS_SESSION_TOKEN if needed
         if: inputs.environment == 'production'
@@ -149,10 +149,10 @@ jobs:
         with:
           export-env: true
         env:
-          PULUMI_ACCESS_TOKEN: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/PULUMI_ACCESS_TOKEN
-          CLOUDFLARE_API_TOKEN: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
+          CLOUDFLARE_API_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/CLOUDFLARE_API_TOKEN
           AWS_ACCESS_KEY_ID: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_ACCESS_KEY_ID
           AWS_SECRET_ACCESS_KEY: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SECRET_ACCESS_KEY
+          PULUMI_ACCESS_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/PULUMI_ACCESS_TOKEN
       
       - name: Set AWS_SESSION_TOKEN if needed
         if: inputs.environment == 'production'
