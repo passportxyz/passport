@@ -26,18 +26,7 @@ const SyncIcon = () => (
   </svg>
 );
 
-const chainsForFooter = (
-  [
-    {
-      icon: "/assets/ceramic-icon.svg",
-      chainLink: "https://support.passport.xyz/passport-knowledge-base/faq/common-questions/what-is-ceramic",
-      id: "0x",
-      token: "-",
-      label: "Ceramic",
-      explorerUrl: "https://cerscan.com/",
-    },
-  ] as Chain[]
-).concat(chains.filter((chain) => !!chain.attestationProvider));
+const chainsForFooter = ([] as Chain[]).concat(chains.filter((chain) => !!chain.attestationProvider));
 
 const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean }) => {
   return (
