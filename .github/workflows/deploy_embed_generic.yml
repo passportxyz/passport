@@ -53,7 +53,7 @@ jobs:
 
   build-ui:
     name: Build UI
-    needs: [ref, run-tests]
+    needs: [ref]
     uses: ./.github/workflows/sync_to_s3_generic_build_embed.yml
     secrets: inherit
     with:
@@ -62,7 +62,7 @@ jobs:
 
   push-ui:
     name: Push UI to S3
-    needs: [build-ui]
+    needs: [run-tests, build-ui]
     uses: ./.github/workflows/sync_to_s3_generic_push_embed.yml
     secrets: inherit
     with:
