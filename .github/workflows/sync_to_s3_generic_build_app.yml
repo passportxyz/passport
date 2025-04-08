@@ -51,7 +51,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: .
-        run: yarn install --frozen-lockfile --ignore-scripts
+        run: yarn install --frozen-lockfile
 
       - name: Build Application
         working-directory: .
