@@ -23,7 +23,7 @@ jobs:
     uses: ./.github/workflows/sync_to_s3_generic_build_embed.yml
     secrets: inherit
     with:
-      refspec: ${{ inputs.refspec }}
+      refspec: ${{ inputs.commit }}
       environment: ${{ inputs.environment }}
 
   push_embed:
@@ -32,5 +32,5 @@ jobs:
     uses: ./.github/workflows/sync_to_s3_generic_push_embed.yml
     secrets: inherit
     with:
-      refspec: ${{ inputs.refspec }}
+      refspec: ${{ inputs.commit }}
       environment: ${{ inputs.environment }}
