@@ -14,7 +14,7 @@ import { UseQueryResult, useQueries, useQueryClient } from "@tanstack/react-quer
 import { parseValidChains } from "./useOnChainStatus";
 import { useCustomization } from "./useCustomization";
 import { useAccount, useChains } from "wagmi";
-import { createPublicClient, http, PublicClient } from "viem";
+import { createPublicClient, PublicClient } from "viem";
 
 export interface OnChainProviderMap {
   [chainId: string]: OnChainProviderType[];
@@ -147,7 +147,7 @@ const useOnChainDataQuery = (address?: string) => {
 
 const decimalToHexChainId = (chainId: number): ChainId => {
   const hex = chainId.toString(16);
-  return `0x${hex}`;
+  return `${hex}`;
 };
 
 export const useOnChainData = (): OnChainData => {
