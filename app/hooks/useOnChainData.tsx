@@ -14,7 +14,7 @@ import { UseQueryResult, useQueries, useQueryClient } from "@tanstack/react-quer
 import { parseValidChains } from "./useOnChainStatus";
 import { useCustomization } from "./useCustomization";
 import { useAccount, useChains } from "wagmi";
-import { createPublicClient, http, PublicClient } from "viem";
+import { createPublicClient, PublicClient } from "viem";
 
 export interface OnChainProviderMap {
   [chainId: string]: OnChainProviderType[];
