@@ -45,7 +45,7 @@ jobs:
         run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
 
       - id: build_and_push_docker_iam_image
-        uses: passportxyz/gh-workflows/.github/actions/build_and_push@v2
+        uses: passportxyz/gh-workflows/.github/actions/build_and_push@v3
         with:
           refspec: ${{ inputs.refspec }}
           docker_tag: ${{ inputs.docker_tag }}
@@ -85,7 +85,7 @@ jobs:
         run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
 
       - id: build_and_push_docker_embed_image
-        uses: passportxyz/gh-workflows/.github/actions/build_and_push@v2
+        uses: passportxyz/gh-workflows/.github/actions/build_and_push@v3
         with:
           refspec: ${{ inputs.refspec }}
           docker_tag: ${{ inputs.docker_tag }}
@@ -128,10 +128,10 @@ jobs:
         run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
 
       - name: Prepare to Deploy to AWS
-        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v1
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v3
       - name: Deploy Preview
         # uses: ./.github/actions/deploy_to_aws
-        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v3
         with:
           docker_tag: ${{ inputs.docker_tag }}
           stack_name: passportxyz/passport/${{ inputs.environment }}
@@ -202,9 +202,9 @@ jobs:
         run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
 
       - name: Prepare to Deploy to AWS
-        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v1
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v3
       - name: Deploy to AWS
-        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v1
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v3
         with:
           docker_tag: ${{ inputs.docker_tag }}
           stack_name: passportxyz/passport/${{ inputs.environment }}
