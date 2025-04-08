@@ -1,4 +1,4 @@
-name: Build Embed
+name: Library - Build Embed
 
 on:
   workflow_call:

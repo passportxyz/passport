@@ -1,4 +1,4 @@
-name: Push Embed to S3
+name: Library - Push Embed to S3
 
 on:
   workflow_call:
