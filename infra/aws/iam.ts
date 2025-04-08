@@ -17,7 +17,6 @@ import {
   snsAlertsTopicArn,
   passportXyzDomainName,
   passportXyzHostedZoneId,
-  newPassportDomain,
 } from "./stacks";
 
 const current = aws.getCallerIdentity({});
