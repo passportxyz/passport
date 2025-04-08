@@ -3,7 +3,7 @@ import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
 import * as cloudflare from "@pulumi/cloudflare";
 import { cluster } from "./cluster";
-import { secretsManager, amplify } from "infra-libs";
+import { secretsManager } from "infra-libs";
 import { stack, defaultTags } from "../lib/tags";
 import {
   vpcId,
@@ -23,37 +23,23 @@ const regionData = aws.getRegion({});
 const DOCKER_IMAGE_TAG = `${process.env.DOCKER_IMAGE_TAG || ""}`;
 export const dockerGtcPassportEmbedImage = pulumi
   .all([current, regionData])
-  .apply(
-    ([acc, region]) =>
-      `${acc.accountId}.dkr.ecr.${region.id}.amazonaws.com/passport-embed:${DOCKER_IMAGE_TAG}`,
-  );
+  .apply(([acc, region]) => `${acc.accountId}.dkr.ecr.${region.id}.amazonaws.com/passport-embed:${DOCKER_IMAGE_TAG}`);
 
 const PROVISION_STAGING_FOR_LOADTEST =
-  op.read
-    .parse(
-      `op://DevOps/passport-xyz-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`,
-    )
-    .toLowerCase() === "true";
+  op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`).toLowerCase() === "true";
 
-const PASSPORT_VC_SECRETS_ARN = op.read.parse(
-  `op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`,
-);
+const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
 
-const cloudflareZoneId = op.read.parse(
-  `op://DevOps/passport-xyz-${stack}-env/ci/CLOUDFLARE_ZONE_ID`,
-);
+const cloudflareZoneId = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
 
 // Manage secrets & envs for Passport XYZ
-const passportEmbedSecretObject = new aws.secretsmanager.Secret(
-  "passport-embed",
-  {
-    description: "Secrets for Passport Embed on Passport XYZ",
-    tags: {
-      ...defaultTags,
-      Name: "passport-embed",
-    },
+const passportEmbedSecretObject = new aws.secretsmanager.Secret("passport-embed", {
+  description: "Secrets for Passport Embed on Passport XYZ",
+  tags: {
+    ...defaultTags,
+    Name: "passport-embed",
   },
-);
+});
 
 const passportEmbedSecrets = secretsManager
   .syncSecretsAndGetRefs({
@@ -87,7 +73,7 @@ const passportEmbedSecrets = secretsManager
         name: "HUMAN_NETWORK_CLIENT_PRIVATE_KEY",
         valueFrom: `${PASSPORT_VC_SECRETS_ARN}:HUMAN_NETWORK_CLIENT_PRIVATE_KEY::`,
       },
-    ].sort(secretsManager.sortByName),
+    ].sort(secretsManager.sortByName)
   );
 
 const passportEmbedEnvironment = pulumi
@@ -112,7 +98,7 @@ const passportEmbedEnvironment = pulumi
         name: "DATA_SCIENCE_API_URL",
         value: passportDataScienceEndpoint,
       },
-    ].sort(secretsManager.sortByName),
+    ].sort(secretsManager.sortByName)
   );
 
 // const passportEmbedAppEnvironment = secretsManager
@@ -199,13 +185,11 @@ const serviceRole = new aws.iam.Role("passport-embed-ecs-role", {
               Resource: [iamSecretArn, PASSPORT_VC_SECRETS_ARN],
             },
           ],
-        }),
+        })
       ),
     },
   ],
-  managedPolicyArns: [
-    "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
-  ],
+  managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
   tags: {
     ...defaultTags,
     Name: "passport-embed-ecs-role",
@@ -243,65 +227,56 @@ const albPassportEmbedTargetGroup = new aws.lb.TargetGroup(`passport-embed`, {
  * Alarm for monitoring target 5XX errors
  */
 const coreAlbArnSuffix = coreAlbArn.apply((arn) => arn.split(":").pop());
-const http5xxTargetAlarm = new aws.cloudwatch.MetricAlarm(
-  `passport-embed-HTTP-Target-5XX`,
-  {
-    tags: { ...defaultTags, Name: `passport-embed-HTTP-Target-5XX` },
-    name: `passport-embed-HTTP-Target-5XX`,
-    alarmActions: [snsAlertsTopicArn],
-    okActions: [snsAlertsTopicArn],
+const http5xxTargetAlarm = new aws.cloudwatch.MetricAlarm(`passport-embed-HTTP-Target-5XX`, {
+  tags: { ...defaultTags, Name: `passport-embed-HTTP-Target-5XX` },
+  name: `passport-embed-HTTP-Target-5XX`,
+  alarmActions: [snsAlertsTopicArn],
+  okActions: [snsAlertsTopicArn],
 
-    period: 60,
-    statistic: "Sum",
+  period: 60,
+  statistic: "Sum",
 
-    datapointsToAlarm: 3,
-    evaluationPeriods: 5,
+  datapointsToAlarm: 3,
+  evaluationPeriods: 5,
 
-    metricName: "HTTPCode_Target_5XX_Count",
-    namespace: "AWS/ApplicationELB",
+  metricName: "HTTPCode_Target_5XX_Count",
+  namespace: "AWS/ApplicationELB",
 
-    dimensions: {
-      LoadBalancer: coreAlbArnSuffix,
-      TargetGroup: albPassportEmbedTargetGroup.arnSuffix,
-    },
-
-    comparisonOperator: "GreaterThanThreshold",
-    threshold: 0,
-    treatMissingData: "notBreaching",
+  dimensions: {
+    LoadBalancer: coreAlbArnSuffix,
+    TargetGroup: albPassportEmbedTargetGroup.arnSuffix,
   },
-);
 
-const albPassportEmbedListenerRule = new aws.lb.ListenerRule(
-  `passport-embed-https`,
-  {
-    listenerArn: albHttpsListenerArn,
-    priority: 200, // This needs to be grater than the priority number for passport-scroll-badge-service
-    actions: [
-      {
-        type: "forward",
-        targetGroupArn: albPassportEmbedTargetGroup.arn,
-      },
-    ],
-    conditions: [
-      {
-        hostHeader: {
-          values:
-            stack === "production"
-              ? [
-                  passportXyzDomainName.apply((domain) => `embed.${domain}`),
-                  `embed.passport.xyz`,
-                ]
-              : [passportXyzDomainName.apply((domain) => `embed.${domain}`)], // if it is on production, it should be also embed.passport.xyz
-        },
-        // pathPattern: {[]}
-      },
-    ],
-    tags: {
-      ...defaultTags,
-      Name: `passport-embed-https`,
+  comparisonOperator: "GreaterThanThreshold",
+  threshold: 0,
+  treatMissingData: "notBreaching",
+});
+
+const albPassportEmbedListenerRule = new aws.lb.ListenerRule(`passport-embed-https`, {
+  listenerArn: albHttpsListenerArn,
+  priority: 200, // This needs to be grater than the priority number for passport-scroll-badge-service
+  actions: [
+    {
+      type: "forward",
+      targetGroupArn: albPassportEmbedTargetGroup.arn,
     },
+  ],
+  conditions: [
+    {
+      hostHeader: {
+        values:
+          stack === "production"
+            ? [passportXyzDomainName.apply((domain) => `embed.${domain}`), `embed.passport.xyz`]
+            : [passportXyzDomainName.apply((domain) => `embed.${domain}`)], // if it is on production, it should be also embed.passport.xyz
+      },
+      // pathPattern: {[]}
+    },
+  ],
+  tags: {
+    ...defaultTags,
+    Name: `passport-embed-https`,
   },
-);
+});
 
 //////////////////////////////////////////////////////////////
 // Service SG
@@ -331,7 +306,7 @@ const sgIngressRule80 = new aws.ec2.SecurityGroupRule(
   },
   {
     dependsOn: [serviceSG],
-  },
+  }
 );
 
 // Allow all outbound traffic
@@ -347,7 +322,7 @@ const sgEgressRule = new aws.ec2.SecurityGroupRule(
   },
   {
     dependsOn: [serviceSG],
-  },
+  }
 );
 
 const serviceLogGroup = new aws.cloudwatch.LogGroup("passport-embed", {
@@ -363,94 +338,78 @@ const serviceLogGroup = new aws.cloudwatch.LogGroup("passport-embed", {
 // CloudWatch Alerts
 //////////////////////////////////////////////////////////////
 
-const unhandledErrorsMetric = new aws.cloudwatch.LogMetricFilter(
-  "passport-embed-unhandledErrorsMetric",
-  {
-    logGroupName: serviceLogGroup.name,
-    metricTransformation: {
-      defaultValue: "0",
-      name: "providerError",
-      namespace: "/embed/errors/unhandled",
-      unit: "Count",
-      value: "1",
-    },
-    name: "Passport Embed Unhandled Provider Errors",
-    pattern: '"UNHANDLED ERROR:" type address',
-  },
-);
-
-const unhandledErrorsAlarm = new aws.cloudwatch.MetricAlarm(
-  "passport-embed-unhandledErrorsAlarm",
-  {
-    alarmActions: [snsAlertsTopicArn],
-    okActions: [snsAlertsTopicArn],
-    comparisonOperator: "GreaterThanOrEqualToThreshold",
-    datapointsToAlarm: 1,
-    evaluationPeriods: 1,
-    insufficientDataActions: [],
-    metricName: "providerError",
-    name: "Unhandled Provider Errors",
+const unhandledErrorsMetric = new aws.cloudwatch.LogMetricFilter("passport-embed-unhandledErrorsMetric", {
+  logGroupName: serviceLogGroup.name,
+  metricTransformation: {
+    defaultValue: "0",
+    name: "providerError",
     namespace: "/embed/errors/unhandled",
-    period: 21600,
-    statistic: "Sum",
-    threshold: 1,
-    treatMissingData: "notBreaching",
-    tags: {
-      ...defaultTags,
-      Name: "passport-embed-unhandledErrorsAlarm",
-    },
+    unit: "Count",
+    value: "1",
   },
-);
+  name: "Passport Embed Unhandled Provider Errors",
+  pattern: '"UNHANDLED ERROR:" type address',
+});
 
-const redisFilter = new aws.cloudwatch.LogMetricFilter(
-  "passport-embed-redisConnectionErrors",
-  {
-    logGroupName: serviceLogGroup.name,
-    metricTransformation: {
-      defaultValue: "0",
-      name: "redisConnectionError",
-      namespace: "/embed/errors/redis",
-      unit: "Count",
-      value: "1",
-    },
-    name: "Passport Embed Redis Connection Error",
-    pattern: '"REDIS CONNECTION ERROR:"',
+const unhandledErrorsAlarm = new aws.cloudwatch.MetricAlarm("passport-embed-unhandledErrorsAlarm", {
+  alarmActions: [snsAlertsTopicArn],
+  okActions: [snsAlertsTopicArn],
+  comparisonOperator: "GreaterThanOrEqualToThreshold",
+  datapointsToAlarm: 1,
+  evaluationPeriods: 1,
+  insufficientDataActions: [],
+  metricName: "providerError",
+  name: "Unhandled Provider Errors",
+  namespace: "/embed/errors/unhandled",
+  period: 21600,
+  statistic: "Sum",
+  threshold: 1,
+  treatMissingData: "notBreaching",
+  tags: {
+    ...defaultTags,
+    Name: "passport-embed-unhandledErrorsAlarm",
   },
-);
+});
 
-const redisErrorAlarm = new aws.cloudwatch.MetricAlarm(
-  "passport-embed-redisConnectionErrorsAlarm",
-  {
-    alarmActions: [snsAlertsTopicArn],
-    okActions: [snsAlertsTopicArn],
-    comparisonOperator: "GreaterThanOrEqualToThreshold",
-    datapointsToAlarm: 1,
-    evaluationPeriods: 1,
-    insufficientDataActions: [],
-    metricName: "redisConnectionError",
-    name: "Redis Connection Error",
+const redisFilter = new aws.cloudwatch.LogMetricFilter("passport-embed-redisConnectionErrors", {
+  logGroupName: serviceLogGroup.name,
+  metricTransformation: {
+    defaultValue: "0",
+    name: "redisConnectionError",
     namespace: "/embed/errors/redis",
-    period: alarmConfigurations.redisErrorPeriod,
-    statistic: "Sum",
-    threshold: alarmConfigurations.redisErrorThreshold,
-    treatMissingData: "notBreaching",
-    tags: {
-      ...defaultTags,
-      Name: "passport-embed-redisConnectionErrorsAlarm",
-    },
+    unit: "Count",
+    value: "1",
   },
-);
+  name: "Passport Embed Redis Connection Error",
+  pattern: '"REDIS CONNECTION ERROR:"',
+});
+
+const redisErrorAlarm = new aws.cloudwatch.MetricAlarm("passport-embed-redisConnectionErrorsAlarm", {
+  alarmActions: [snsAlertsTopicArn],
+  okActions: [snsAlertsTopicArn],
+  comparisonOperator: "GreaterThanOrEqualToThreshold",
+  datapointsToAlarm: 1,
+  evaluationPeriods: 1,
+  insufficientDataActions: [],
+  metricName: "redisConnectionError",
+  name: "Redis Connection Error",
+  namespace: "/embed/errors/redis",
+  period: alarmConfigurations.redisErrorPeriod,
+  statistic: "Sum",
+  threshold: alarmConfigurations.redisErrorThreshold,
+  treatMissingData: "notBreaching",
+  tags: {
+    ...defaultTags,
+    Name: "passport-embed-redisConnectionErrorsAlarm",
+  },
+});
 
 //////////////////////////////////////////////////////////////
 // ECS Task & Service
 //////////////////////////////////////////////////////////////
 // Passport XYZ
 const passportEmbedContainerDefinitions = pulumi
-  .all([
-    dockerGtcPassportEmbedImage,
-    passportEmbedSecrets,
-    passportEmbedEnvironment,
-  ])
+  .all([dockerGtcPassportEmbedImage, passportEmbedSecrets, passportEmbedEnvironment])
   .apply(([_dockerGtcPassportEmbedImage, secrets, environment]) => {
     return JSON.stringify([
       {
@@ -484,23 +443,20 @@ const passportEmbedContainerDefinitions = pulumi
     ]);
   });
 
-const passportEmbedTaskDefinition = new aws.ecs.TaskDefinition(
-  `passport-embed`,
-  {
-    family: `passport-embed`,
-    containerDefinitions: passportEmbedContainerDefinitions,
-    executionRoleArn: serviceRole.arn,
-    cpu: serviceResources[stack]["cpu"],
-    memory: serviceResources[stack]["memory"],
-    networkMode: "awsvpc",
-    requiresCompatibilities: ["FARGATE"],
-    tags: {
-      ...defaultTags,
-      EcsService: `passport-embed`,
-      Name: `passport-embed`,
-    },
+const passportEmbedTaskDefinition = new aws.ecs.TaskDefinition(`passport-embed`, {
+  family: `passport-embed`,
+  containerDefinitions: passportEmbedContainerDefinitions,
+  executionRoleArn: serviceRole.arn,
+  cpu: serviceResources[stack]["cpu"],
+  memory: serviceResources[stack]["memory"],
+  networkMode: "awsvpc",
+  requiresCompatibilities: ["FARGATE"],
+  tags: {
+    ...defaultTags,
+    EcsService: `passport-embed`,
+    Name: `passport-embed`,
   },
-);
+});
 
 export const passportEmbedService = new aws.ecs.Service(
   `passport-embed`,
@@ -532,41 +488,35 @@ export const passportEmbedService = new aws.ecs.Service(
   {
     dependsOn: [albPassportEmbedTargetGroup, passportEmbedTaskDefinition],
     ignoreChanges: ["desiredCount"],
-  },
+  }
 );
 
-const ecsAutoScalingTargetXyz = new aws.appautoscaling.Target(
-  "passport-embed-autoscaling-target",
-  {
-    maxCapacity: 10,
-    minCapacity: 1,
-    resourceId: pulumi.interpolate`service/${cluster.name}/${passportEmbedService.name}`,
-    scalableDimension: "ecs:service:DesiredCount",
-    serviceNamespace: "ecs",
-    tags: {
-      ...defaultTags,
-      Name: "passport-embed-autoscaling-target",
-    },
+const ecsAutoScalingTargetXyz = new aws.appautoscaling.Target("passport-embed-autoscaling-target", {
+  maxCapacity: 10,
+  minCapacity: 1,
+  resourceId: pulumi.interpolate`service/${cluster.name}/${passportEmbedService.name}`,
+  scalableDimension: "ecs:service:DesiredCount",
+  serviceNamespace: "ecs",
+  tags: {
+    ...defaultTags,
+    Name: "passport-embed-autoscaling-target",
   },
-);
+});
 
-const ecsAutoScalingPolicyXyz = new aws.appautoscaling.Policy(
-  "passport-embed-autoscaling-policy",
-  {
-    policyType: "TargetTrackingScaling",
-    resourceId: ecsAutoScalingTargetXyz.resourceId,
-    scalableDimension: ecsAutoScalingTargetXyz.scalableDimension,
-    serviceNamespace: ecsAutoScalingTargetXyz.serviceNamespace,
-    targetTrackingScalingPolicyConfiguration: {
-      predefinedMetricSpecification: {
-        predefinedMetricType: "ECSServiceAverageCPUUtilization",
-      },
-      targetValue: 50,
-      scaleInCooldown: 300,
-      scaleOutCooldown: 300,
+const ecsAutoScalingPolicyXyz = new aws.appautoscaling.Policy("passport-embed-autoscaling-policy", {
+  policyType: "TargetTrackingScaling",
+  resourceId: ecsAutoScalingTargetXyz.resourceId,
+  scalableDimension: ecsAutoScalingTargetXyz.scalableDimension,
+  serviceNamespace: ecsAutoScalingTargetXyz.serviceNamespace,
+  targetTrackingScalingPolicyConfiguration: {
+    predefinedMetricSpecification: {
+      predefinedMetricType: "ECSServiceAverageCPUUtilization",
     },
+    targetValue: 50,
+    scaleInCooldown: 300,
+    scaleOutCooldown: 300,
   },
-);
+});
 
 const serviceRecordXyz = new aws.route53.Record("passport-embed-record", {
   name: "embed",

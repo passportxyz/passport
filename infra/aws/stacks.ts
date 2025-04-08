@@ -20,5 +20,3 @@ export const snsAlertsTopicArn = coreInfraStack.getOutput("snsAlertsTopicArn");
 
 export const passportXyzDomainName = coreInfraStack.getOutput("passportXyzDomainName");
 export const passportXyzHostedZoneId = coreInfraStack.getOutput("passportXyzHostedZoneId");
-
-export const newPassportDomain = coreInfraStack.getOutput("newPassportDomain");

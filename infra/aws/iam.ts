@@ -3,7 +3,7 @@ import * as aws from "@pulumi/aws";
 import * as op from "@1password/op-js";
 import * as cloudflare from "@pulumi/cloudflare";
 import { cluster } from "./cluster";
-import { secretsManager, amplify } from "infra-libs";
+import { secretsManager } from "infra-libs";
 import { stack, defaultTags } from "../lib/tags";
 import {
   vpcId,
@@ -17,7 +17,6 @@ import {
   snsAlertsTopicArn,
   passportXyzDomainName,
   passportXyzHostedZoneId,
-  newPassportDomain,
 } from "./stacks";
 
 const current = aws.getCallerIdentity({});
@@ -25,44 +24,26 @@ const regionData = aws.getRegion({});
 const DOCKER_IMAGE_TAG = `${process.env.DOCKER_IMAGE_TAG || ""}`;
 export const dockerGtcPassportIamImage = pulumi
   .all([current, regionData])
-  .apply(
-    ([acc, region]) =>
-      `${acc.accountId}.dkr.ecr.${region.id}.amazonaws.com/passport:${DOCKER_IMAGE_TAG}`,
-  );
+  .apply(([acc, region]) => `${acc.accountId}.dkr.ecr.${region.id}.amazonaws.com/passport:${DOCKER_IMAGE_TAG}`);
 
 const PROVISION_STAGING_FOR_LOADTEST =
-  op.read
-    .parse(
-      `op://DevOps/passport-xyz-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`,
-    )
-    .toLowerCase() === "true";
+  op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PROVISION_STAGING_FOR_LOADTEST`).toLowerCase() === "true";
 
-const PASSPORT_VC_SECRETS_ARN = op.read.parse(
-  `op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`,
-);
+const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
 
-const route53Domain = op.read.parse(
-  `op://DevOps/passport-xyz-${stack}-env/ci/ROUTE_53_DOMAIN`,
-);
-const route53Zone = op.read.parse(
-  `op://DevOps/passport-xyz-${stack}-env/ci/ROUTE_53_ZONE`,
-);
-const cloudflareZoneId = op.read.parse(
-  `op://DevOps/passport-xyz-${stack}-env/ci/CLOUDFLARE_ZONE_ID`,
-);
+const route53Domain = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/ROUTE_53_DOMAIN`);
+const route53Zone = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/ROUTE_53_ZONE`);
+const cloudflareZoneId = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/CLOUDFLARE_ZONE_ID`);
 
 // Manage secrets & envs for Passport XYZ
-const passportXyzIamSecretObject = new aws.secretsmanager.Secret(
-  "iam-secret-passport-xyz",
-  {
-    // name: "iam-secret-passport-xyz",
-    description: "Secrets for Passport IAM on Passport XYZ",
-    tags: {
-      ...defaultTags,
-      Name: "iam-secret-passport-xyz",
-    },
+const passportXyzIamSecretObject = new aws.secretsmanager.Secret("iam-secret-passport-xyz", {
+  // name: "iam-secret-passport-xyz",
+  description: "Secrets for Passport IAM on Passport XYZ",
+  tags: {
+    ...defaultTags,
+    Name: "iam-secret-passport-xyz",
   },
-);
+});
 
 const passportXyzIamSecrets = secretsManager
   .syncSecretsAndGetRefs({
@@ -96,7 +77,7 @@ const passportXyzIamSecrets = secretsManager
         name: "HUMAN_NETWORK_CLIENT_PRIVATE_KEY",
         valueFrom: `${PASSPORT_VC_SECRETS_ARN}:HUMAN_NETWORK_CLIENT_PRIVATE_KEY::`,
       },
-    ].sort(secretsManager.sortByName),
+    ].sort(secretsManager.sortByName)
   );
 
 const passportXyzIamEnvironment = pulumi
@@ -121,7 +102,7 @@ const passportXyzIamEnvironment = pulumi
         name: "DATA_SCIENCE_API_URL",
         value: passportDataScienceEndpoint,
       },
-    ].sort(secretsManager.sortByName),
+    ].sort(secretsManager.sortByName)
   );
 
 const passportXyzAppEnvironment = secretsManager
@@ -136,7 +117,7 @@ const passportXyzAppEnvironment = secretsManager
       acc[name] = value;
       return acc;
     },
-    {} as Record<string, string | pulumi.Output<any>>,
+    {} as Record<string, string | pulumi.Output<any>>
   );
 
 const logsRetention = Object({
@@ -211,13 +192,11 @@ const serviceRole = new aws.iam.Role("passport-ecs-role", {
               Resource: [iamSecretArn, PASSPORT_VC_SECRETS_ARN],
             },
           ],
-        }),
+        })
       ),
     },
   ],
-  managedPolicyArns: [
-    "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
-  ],
+  managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
   tags: {
     ...defaultTags,
     Name: "passport-ecs-role",
@@ -260,64 +239,55 @@ const coreAlbArnSuffix = coreAlbArn.apply((arn) => {
   ret = firstSlashIndex !== -1 ? ret.substring(firstSlashIndex + 1) : "";
   return ret;
 });
-const http5xxTargetAlarm = new aws.cloudwatch.MetricAlarm(
-  `HTTP-Target-5XX-core-alb`,
-  {
-    tags: { ...defaultTags, Name: `HTTP-Target-5XX-core-alb` },
-    name: `HTTP-Target-5XX-core-alb`,
-    alarmActions: [snsAlertsTopicArn],
-    okActions: [snsAlertsTopicArn],
+const http5xxTargetAlarm = new aws.cloudwatch.MetricAlarm(`HTTP-Target-5XX-core-alb`, {
+  tags: { ...defaultTags, Name: `HTTP-Target-5XX-core-alb` },
+  name: `HTTP-Target-5XX-core-alb`,
+  alarmActions: [snsAlertsTopicArn],
+  okActions: [snsAlertsTopicArn],
 
-    period: 60,
-    statistic: "Sum",
+  period: 60,
+  statistic: "Sum",
 
-    datapointsToAlarm: 3,
-    evaluationPeriods: 5,
+  datapointsToAlarm: 3,
+  evaluationPeriods: 5,
 
-    metricName: "HTTPCode_Target_5XX_Count",
-    namespace: "AWS/ApplicationELB",
+  metricName: "HTTPCode_Target_5XX_Count",
+  namespace: "AWS/ApplicationELB",
 
-    dimensions: {
-      LoadBalancer: coreAlbArnSuffix,
-    },
-
-    comparisonOperator: "GreaterThanThreshold",
-    threshold: 0,
-    treatMissingData: "notBreaching",
+  dimensions: {
+    LoadBalancer: coreAlbArnSuffix,
   },
-);
 
-const albPassportXyzListenerRule = new aws.lb.ListenerRule(
-  `passport-xyz-iam-https`,
-  {
-    listenerArn: albHttpsListenerArn,
-    priority: 102, // This needs to be grater than the priority number for passport-scroll-badge-service
-    actions: [
-      {
-        type: "forward",
-        targetGroupArn: albPassportXyzTargetGroup.arn,
-      },
-    ],
-    conditions: [
-      {
-        hostHeader: {
-          values:
-            stack === "production"
-              ? [
-                  passportXyzDomainName.apply((domain) => `iam.${domain}`),
-                  `iam.passport.xyz`,
-                ]
-              : [passportXyzDomainName.apply((domain) => `iam.${domain}`)], // if it is on production, it should be also iam.passport.xyz
-        },
-        // pathPattern: {[]}
-      },
-    ],
-    tags: {
-      ...defaultTags,
-      Name: `passport-xyz-iam-https`,
+  comparisonOperator: "GreaterThanThreshold",
+  threshold: 0,
+  treatMissingData: "notBreaching",
+});
+
+const albPassportXyzListenerRule = new aws.lb.ListenerRule(`passport-xyz-iam-https`, {
+  listenerArn: albHttpsListenerArn,
+  priority: 102, // This needs to be grater than the priority number for passport-scroll-badge-service
+  actions: [
+    {
+      type: "forward",
+      targetGroupArn: albPassportXyzTargetGroup.arn,
     },
+  ],
+  conditions: [
+    {
+      hostHeader: {
+        values:
+          stack === "production"
+            ? [passportXyzDomainName.apply((domain) => `iam.${domain}`), `iam.passport.xyz`]
+            : [passportXyzDomainName.apply((domain) => `iam.${domain}`)], // if it is on production, it should be also iam.passport.xyz
+      },
+      // pathPattern: {[]}
+    },
+  ],
+  tags: {
+    ...defaultTags,
+    Name: `passport-xyz-iam-https`,
   },
-);
+});
 
 //////////////////////////////////////////////////////////////
 // Service SG
@@ -347,7 +317,7 @@ const sgIngressRule80 = new aws.ec2.SecurityGroupRule(
   },
   {
     dependsOn: [serviceSG],
-  },
+  }
 );
 
 // Allow all outbound traffic
@@ -363,7 +333,7 @@ const sgEgressRule = new aws.ec2.SecurityGroupRule(
   },
   {
     dependsOn: [serviceSG],
-  },
+  }
 );
 
 const serviceLogGroup = new aws.cloudwatch.LogGroup("passport-iam", {
@@ -379,83 +349,71 @@ const serviceLogGroup = new aws.cloudwatch.LogGroup("passport-iam", {
 // CloudWatch Alerts
 //////////////////////////////////////////////////////////////
 
-const unhandledErrorsMetric = new aws.cloudwatch.LogMetricFilter(
-  "unhandledErrorsMetric",
-  {
-    logGroupName: serviceLogGroup.name,
-    metricTransformation: {
-      defaultValue: "0",
-      name: "providerError",
-      namespace: "/iam/errors/unhandled",
-      unit: "Count",
-      value: "1",
-    },
-    name: "Unhandled Provider Errors",
-    pattern: '"UNHANDLED ERROR:" type address',
-  },
-);
-
-const unhandledErrorsAlarm = new aws.cloudwatch.MetricAlarm(
-  "unhandledErrorsAlarm",
-  {
-    alarmActions: [snsAlertsTopicArn],
-    okActions: [snsAlertsTopicArn],
-    comparisonOperator: "GreaterThanOrEqualToThreshold",
-    datapointsToAlarm: 1,
-    evaluationPeriods: 1,
-    insufficientDataActions: [],
-    metricName: "providerError",
-    name: "Unhandled Provider Errors",
+const unhandledErrorsMetric = new aws.cloudwatch.LogMetricFilter("unhandledErrorsMetric", {
+  logGroupName: serviceLogGroup.name,
+  metricTransformation: {
+    defaultValue: "0",
+    name: "providerError",
     namespace: "/iam/errors/unhandled",
-    period: 21600,
-    statistic: "Sum",
-    threshold: 1,
-    treatMissingData: "notBreaching",
-    tags: {
-      ...defaultTags,
-      Name: "unhandledErrorsAlarm",
-    },
+    unit: "Count",
+    value: "1",
   },
-);
+  name: "Unhandled Provider Errors",
+  pattern: '"UNHANDLED ERROR:" type address',
+});
 
-const redisFilter = new aws.cloudwatch.LogMetricFilter(
-  "redisConnectionErrors",
-  {
-    logGroupName: serviceLogGroup.name,
-    metricTransformation: {
-      defaultValue: "0",
-      name: "redisConnectionError",
-      namespace: "/iam/errors/redis",
-      unit: "Count",
-      value: "1",
-    },
-    name: "Redis Connection Error",
-    pattern: '"REDIS CONNECTION ERROR:"',
+const unhandledErrorsAlarm = new aws.cloudwatch.MetricAlarm("unhandledErrorsAlarm", {
+  alarmActions: [snsAlertsTopicArn],
+  okActions: [snsAlertsTopicArn],
+  comparisonOperator: "GreaterThanOrEqualToThreshold",
+  datapointsToAlarm: 1,
+  evaluationPeriods: 1,
+  insufficientDataActions: [],
+  metricName: "providerError",
+  name: "Unhandled Provider Errors",
+  namespace: "/iam/errors/unhandled",
+  period: 21600,
+  statistic: "Sum",
+  threshold: 1,
+  treatMissingData: "notBreaching",
+  tags: {
+    ...defaultTags,
+    Name: "unhandledErrorsAlarm",
   },
-);
+});
 
-const redisErrorAlarm = new aws.cloudwatch.MetricAlarm(
-  "redisConnectionErrorsAlarm",
-  {
-    alarmActions: [snsAlertsTopicArn],
-    okActions: [snsAlertsTopicArn],
-    comparisonOperator: "GreaterThanOrEqualToThreshold",
-    datapointsToAlarm: 1,
-    evaluationPeriods: 1,
-    insufficientDataActions: [],
-    metricName: "redisConnectionError",
-    name: "Redis Connection Error",
+const redisFilter = new aws.cloudwatch.LogMetricFilter("redisConnectionErrors", {
+  logGroupName: serviceLogGroup.name,
+  metricTransformation: {
+    defaultValue: "0",
+    name: "redisConnectionError",
     namespace: "/iam/errors/redis",
-    period: alarmConfigurations.redisErrorPeriod,
-    statistic: "Sum",
-    threshold: alarmConfigurations.redisErrorThreshold,
-    treatMissingData: "notBreaching",
-    tags: {
-      ...defaultTags,
-      Name: "redisConnectionErrorsAlarm",
-    },
+    unit: "Count",
+    value: "1",
   },
-);
+  name: "Redis Connection Error",
+  pattern: '"REDIS CONNECTION ERROR:"',
+});
+
+const redisErrorAlarm = new aws.cloudwatch.MetricAlarm("redisConnectionErrorsAlarm", {
+  alarmActions: [snsAlertsTopicArn],
+  okActions: [snsAlertsTopicArn],
+  comparisonOperator: "GreaterThanOrEqualToThreshold",
+  datapointsToAlarm: 1,
+  evaluationPeriods: 1,
+  insufficientDataActions: [],
+  metricName: "redisConnectionError",
+  name: "Redis Connection Error",
+  namespace: "/iam/errors/redis",
+  period: alarmConfigurations.redisErrorPeriod,
+  statistic: "Sum",
+  threshold: alarmConfigurations.redisErrorThreshold,
+  treatMissingData: "notBreaching",
+  tags: {
+    ...defaultTags,
+    Name: "redisConnectionErrorsAlarm",
+  },
+});
 
 const moralisFilter = new aws.cloudwatch.LogMetricFilter("moralisErrors", {
   logGroupName: serviceLogGroup.name,
@@ -495,11 +453,7 @@ const moralisErrorAlarm = new aws.cloudwatch.MetricAlarm("moralisErrorsAlarm", {
 //////////////////////////////////////////////////////////////
 // Passport XYZ
 const passportXyzContainerDefinitions = pulumi
-  .all([
-    dockerGtcPassportIamImage,
-    passportXyzIamSecrets,
-    passportXyzIamEnvironment,
-  ])
+  .all([dockerGtcPassportIamImage, passportXyzIamSecrets, passportXyzIamEnvironment])
   .apply(([_dockerGtcPassportIamImage, secrets, environment]) => {
     return JSON.stringify([
       {
@@ -533,23 +487,20 @@ const passportXyzContainerDefinitions = pulumi
     ]);
   });
 
-const passportXyzTaskDefinition = new aws.ecs.TaskDefinition(
-  `passport-xyz-iam`,
-  {
-    family: `passport-xyz-iam`,
-    containerDefinitions: passportXyzContainerDefinitions,
-    executionRoleArn: serviceRole.arn,
-    cpu: serviceResources[stack]["cpu"],
-    memory: serviceResources[stack]["memory"],
-    networkMode: "awsvpc",
-    requiresCompatibilities: ["FARGATE"],
-    tags: {
-      ...defaultTags,
-      EcsService: `passport-xyz-iam`,
-      Name: `passport-xyz-iam`,
-    },
+const passportXyzTaskDefinition = new aws.ecs.TaskDefinition(`passport-xyz-iam`, {
+  family: `passport-xyz-iam`,
+  containerDefinitions: passportXyzContainerDefinitions,
+  executionRoleArn: serviceRole.arn,
+  cpu: serviceResources[stack]["cpu"],
+  memory: serviceResources[stack]["memory"],
+  networkMode: "awsvpc",
+  requiresCompatibilities: ["FARGATE"],
+  tags: {
+    ...defaultTags,
+    EcsService: `passport-xyz-iam`,
+    Name: `passport-xyz-iam`,
   },
-);
+});
 
 export const passportXyzService = new aws.ecs.Service(
   `passport-xyz-iam`,
@@ -581,41 +532,35 @@ export const passportXyzService = new aws.ecs.Service(
   {
     dependsOn: [albPassportXyzTargetGroup, passportXyzTaskDefinition],
     ignoreChanges: ["desiredCount"],
-  },
+  }
 );
 
-const ecsAutoScalingTargetXyz = new aws.appautoscaling.Target(
-  "autoscaling-target-iam",
-  {
-    maxCapacity: 10,
-    minCapacity: 1,
-    resourceId: pulumi.interpolate`service/${cluster.name}/${passportXyzService.name}`,
-    scalableDimension: "ecs:service:DesiredCount",
-    serviceNamespace: "ecs",
-    tags: {
-      ...defaultTags,
-      Name: "autoscaling-target-iam",
-    },
+const ecsAutoScalingTargetXyz = new aws.appautoscaling.Target("autoscaling-target-iam", {
+  maxCapacity: 10,
+  minCapacity: 1,
+  resourceId: pulumi.interpolate`service/${cluster.name}/${passportXyzService.name}`,
+  scalableDimension: "ecs:service:DesiredCount",
+  serviceNamespace: "ecs",
+  tags: {
+    ...defaultTags,
+    Name: "autoscaling-target-iam",
   },
-);
+});
 
-const ecsAutoScalingPolicyXyz = new aws.appautoscaling.Policy(
-  "passport-autoscaling-policy-iam",
-  {
-    policyType: "TargetTrackingScaling",
-    resourceId: ecsAutoScalingTargetXyz.resourceId,
-    scalableDimension: ecsAutoScalingTargetXyz.scalableDimension,
-    serviceNamespace: ecsAutoScalingTargetXyz.serviceNamespace,
-    targetTrackingScalingPolicyConfiguration: {
-      predefinedMetricSpecification: {
-        predefinedMetricType: "ECSServiceAverageCPUUtilization",
-      },
-      targetValue: 50,
-      scaleInCooldown: 300,
-      scaleOutCooldown: 300,
+const ecsAutoScalingPolicyXyz = new aws.appautoscaling.Policy("passport-autoscaling-policy-iam", {
+  policyType: "TargetTrackingScaling",
+  resourceId: ecsAutoScalingTargetXyz.resourceId,
+  scalableDimension: ecsAutoScalingTargetXyz.scalableDimension,
+  serviceNamespace: ecsAutoScalingTargetXyz.serviceNamespace,
+  targetTrackingScalingPolicyConfiguration: {
+    predefinedMetricSpecification: {
+      predefinedMetricType: "ECSServiceAverageCPUUtilization",
     },
+    targetValue: 50,
+    scaleInCooldown: 300,
+    scaleOutCooldown: 300,
   },
-);
+});
 
 const serviceRecordXyz = new aws.route53.Record("passport-xyz-record", {
   name: "iam",
@@ -650,53 +595,4 @@ const gitcoinServiceRecord = new aws.route53.Record("passport-record", {
       evaluateTargetHealth: true,
     },
   ],
-});
-
-const PASSPORT_APP_GITHUB_URL = op.read.parse(
-  `op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_APP_GITHUB_URL`,
-);
-const PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY = op.read.parse(
-  `op://DevOps/passport-xyz-${stack}-secrets/ci/PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY`,
-);
-
-const CLOUDFLARE_DOMAIN = stack === "production" ? `passport.xyz` : "";
-const CLOUDFLARE_ZONE_ID = op.read.parse(
-  `op://DevOps/passport-xyz-${stack}-env/ci/CLOUDFLARE_ZONE_ID`,
-);
-
-// Passport XYZ
-const passportBranches = Object({
-  review: "review-app",
-  staging: "staging-app",
-  production: "production-app",
-});
-
-export const amplifyAppInfo = newPassportDomain.apply((domainName) => {
-  const prefix = "app";
-  const amplifyAppConfig: amplify.AmplifyAppConfig = {
-    name: `${prefix}.${domainName}`,
-    githubUrl: PASSPORT_APP_GITHUB_URL,
-    githubAccessToken: PASSPORT_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY,
-    domainName: domainName,
-    cloudflareDomain: CLOUDFLARE_DOMAIN,
-    cloudflareZoneId: CLOUDFLARE_ZONE_ID,
-    prefix: prefix,
-    branchName: passportBranches[stack],
-    environmentVariables: passportXyzAppEnvironment,
-    tags: { ...defaultTags, Name: `${prefix}.${domainName}` },
-    buildCommand:
-      "npm install --g lerna@6.6.2 && lerna bootstrap && rm -rf ../node_modules/@tendermint && rm -rf ../node_modules/did-jwt/node_modules/uint8arrays && npm run build",
-    preBuildCommand: "nvm use 20.9.0",
-    artifactsBaseDirectory: "out",
-    customRules: [
-      {
-        source: "/",
-        status: "200",
-        target: "/index.html",
-      },
-    ],
-    platform: "WEB",
-  };
-
-  return amplify.createAmplifyApp(amplifyAppConfig);
 });
