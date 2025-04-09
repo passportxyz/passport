@@ -61,7 +61,9 @@ describe("GithubContributionActivityProvider", function () {
       });
     });
 
-    const provider = new GithubContributionActivityProvider({ threshold: "31" });
+    const provider = new GithubContributionActivityProvider({
+      threshold: "31",
+    });
     const result: VerifiedPayload = await provider.verify(mockPayload, mockContext);
 
     expect(fetchAndCheckContributions).toHaveBeenCalledTimes(1);
@@ -88,7 +90,7 @@ describe("GithubContributionActivityProvider", function () {
     expect(result).toEqual({
       valid: false,
       errors: [
-        "You have contributed on 0 days, the minimum for this stamp is 1 days. Some commits were ignored because they ocurred before the Github repo or user creation.",
+        "You have contributed on 0 days, the minimum for this stamp is 1 days. Some unique commits days were ignored because they occurred before the Github repo or user creation.",
       ],
       record: { id: "123" },
     });

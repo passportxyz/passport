@@ -34,7 +34,7 @@ export class GithubContributionActivityProvider implements Provider {
       : [
           `You have contributed on ${contributionDays} days, the minimum for this stamp is ${thresholdDays} days.${
             hadBadCommits
-              ? " Some commits were ignored because they ocurred before the Github repo or user creation."
+              ? " Some unique commits days were ignored because they occurred before the Github repo or user creation."
               : ""
           }`,
         ];
