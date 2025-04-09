@@ -5,9 +5,8 @@ import {
   CeramicContextProvider,
   CeramicContextState,
   cleanPassport,
-  getStampsToRetry,
 } from "../../context/ceramicContext";
-import { ComposeDatabase, PassportDatabase } from "@gitcoin/passport-database-client";
+import { PassportDatabase } from "@gitcoin/passport-database-client";
 import { useEffect } from "react";
 import {
   googleStampFixture,
@@ -696,20 +695,8 @@ const passportDbMocks = {
   did: "test-user-did",
 };
 
-const ceramicDbMocks = {
-  createPassport: dbCreatePassportMock,
-  getPassport: dbGetPassportMock,
-  addStamp: dbAddStampMock,
-  addStamps: dbAddStampsMock,
-  deleteStamp: dbDeleteStampMock,
-  deleteStamps: dbDeleteStampsMock,
-  patchStamps: vi.fn(),
-  did: "test-user-did",
-};
-
 vi.mock("@gitcoin/passport-database-client", () => {
   return {
-    ComposeDatabase: vi.fn().mockImplementation(() => ceramicDbMocks),
     PassportDatabase: vi.fn().mockImplementation(() => passportDbMocks),
   };
 });
@@ -765,20 +752,6 @@ describe("CeramicContextProvider", () => {
         }),
       } as any;
     });
-    vi.mocked(ComposeDatabase).mockImplementation(() => {
-      return {
-        ...ceramicDbMocks,
-        getPassport: vi.fn().mockImplementation(async () => {
-          return {
-            passport: {
-              stamps: composeStamps,
-            },
-            errorDetails: {},
-            status: "Success",
-          };
-        }),
-      } as any;
-    });
 
     const Component = () => {
       useEffect(() => {
@@ -813,9 +786,7 @@ describe("CeramicContextProvider", () => {
 });
 
 describe("CeramicContextProvider syncs stamp state with ceramic", () => {
-  beforeEach(() => {
-    vi.mocked(ComposeDatabase).mockImplementation(() => ceramicDbMocks as any);
-  });
+  beforeEach(() => {});
 
   it("should return passport and stamps after successful fetch", async () => {
     vi.mocked(PassportDatabase).mockImplementation(() => {
@@ -902,83 +873,13 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
           }),
       } as any;
     });
-    vi.mocked(ComposeDatabase).mockImplementationOnce(() => {
-      return {
-        ...ceramicDbMocks,
-        getPassport: vi.fn().mockImplementation(async () => {
-          return {
-            passport: {
-              stamps,
-            },
-            errorDetails: {},
-            status: "Success",
-          };
-        }),
-      } as any;
-    });
+
     render(mockComponent());
 
     await waitFor(() => expect(screen.getAllByText("# Stamps = 3")).toHaveLength(1));
   });
 
-  it("should attempt to add stamps to database and ceramic", async () => {
-    const oldConsoleLog = console.log;
-    try {
-      console.log = vi.fn();
-
-      const addStampsMock = vi.fn();
-      const addStampMock = vi.fn().mockRejectedValue(new Error("Error"));
-      vi.mocked(PassportDatabase).mockImplementationOnce(() => {
-        return {
-          ...passportDbMocks,
-          addStamps: addStampsMock.mockImplementationOnce(async () => {
-            return {
-              passport: {
-                stamps,
-              },
-              errorDetails: {},
-              status: "Success",
-            };
-          }),
-          getPassport: vi.fn().mockImplementationOnce(async () => {
-            return {
-              passport: {
-                stamps: [],
-              },
-              errorDetails: {},
-              status: "Success",
-            };
-          }),
-        } as any;
-      });
-      vi.mocked(ComposeDatabase).mockImplementationOnce(() => {
-        return {
-          ...ceramicDbMocks,
-          getPassport: vi.fn().mockImplementation(async () => {
-            return {
-              passport: {
-                stamps,
-              },
-              errorDetails: {},
-              status: "Success",
-            };
-          }),
-          addStamps: addStampMock,
-        } as any;
-      });
-      render(mockComponent());
-
-      await waitFor(() => fireEvent.click(screen.getByText("handleAddStamps")));
-      await waitFor(() => {
-        expect(addStampsMock).toHaveBeenCalled();
-        expect(addStampMock).toHaveBeenCalledWith(stamps);
-        expect(console.log).toHaveBeenCalledWith("error adding ceramic stamps", new Error("Error"));
-      });
-    } finally {
-      console.log = oldConsoleLog;
-    }
-  });
-  it("should attempt to delete stamps from database and ceramic", async () => {
+  it("should attempt to delete stamps from database", async () => {
     const oldConsoleLog = console.log;
     try {
       console.log = vi.fn();
@@ -1006,12 +907,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
           }),
         } as any;
       });
-      vi.mocked(ComposeDatabase).mockImplementationOnce(() => {
-        return {
-          ...ceramicDbMocks,
-          deleteStamps: deleteStampsMock,
-        } as any;
-      });
+
       render(mockComponent());
 
       await waitFor(() => fireEvent.click(screen.getByText("handleDeleteStamps")));
@@ -1024,7 +920,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     }
   });
 
-  it("should patch stamps in database and delete + add stamps in ceramic", async () => {
+  it("should patch stamps in database", async () => {
     const added = stampPatches.filter(({ credential }) => credential);
 
     const patchStampsMock = vi.fn();
@@ -1055,13 +951,6 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     const setStampMock = vi.fn();
     const deleteStampsMock = vi.fn();
 
-    vi.mocked(ComposeDatabase).mockImplementationOnce(() => {
-      return {
-        ...ceramicDbMocks,
-        deleteStampIDs: deleteStampsMock,
-      } as any;
-    });
-
     render(mockComponent());
 
     await waitFor(() => fireEvent.click(screen.getByText("handlePatchStamps")));
@@ -1070,61 +959,8 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     });
   });
 
-  it("should log an error but continue if ceramic patch fails", async () => {
-    const oldConsoleLog = console.log;
-    try {
-      console.log = vi.fn();
-
-      const patchStampsMock = vi.fn().mockRejectedValue(new Error("Error"));
-      vi.mocked(PassportDatabase).mockImplementationOnce(() => {
-        return {
-          ...passportDbMocks,
-          patchStamps: patchStampsMock.mockImplementationOnce(async () => {
-            return {
-              passport: {
-                stamps,
-              },
-              errorDetails: {},
-              status: "Success",
-            };
-          }),
-          getPassport: vi.fn().mockImplementationOnce(async () => {
-            return {
-              passport: {
-                stamps,
-              },
-              errorDetails: {},
-              status: "Success",
-            };
-          }),
-        } as any;
-      });
-
-      const setStampMock = vi.fn().mockRejectedValue(new Error("Error"));
-      const deleteStampsMock = vi.fn();
-
-      vi.mocked(ComposeDatabase).mockImplementationOnce(() => {
-        return {
-          ...ceramicDbMocks,
-          setStamps: setStampMock,
-          deleteStampIDs: deleteStampsMock,
-          patchStamps: patchStampsMock,
-        } as any;
-      });
-
-      render(mockComponent());
-
-      await waitFor(() => fireEvent.click(screen.getByText("handlePatchStamps")));
-      await waitFor(() => {
-        expect(patchStampsMock).toHaveBeenCalledWith(stampPatches);
-        expect(console.log).toHaveBeenCalledWith("error patching ceramic stamps", new Error("Error"));
-      });
-    } finally {
-      console.log = oldConsoleLog;
-    }
-  });
-
-  it("should show an error toast but continue if ceramic patch fails due to invalid session", async () => {
+  it("should patch stamps with PasportDatabase", async () => {
+    const patchStampsMock = vi.fn().mockRejectedValue(new Error("Error"));
     vi.mocked(PassportDatabase).mockImplementationOnce(() => {
       return {
         ...passportDbMocks,
@@ -1149,22 +985,14 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
       } as any;
     });
 
-    const patchStampsMock = vi.fn();
+    vi.fn().mockRejectedValue(new Error("Error"));
 
-    vi.mocked(ComposeDatabase).mockImplementationOnce(() => {
-      return {
-        ...ceramicDbMocks,
-        patchStamps: patchStampsMock,
-      } as any;
-    });
-
-    render(mockComponent({ invalidSession: true }));
+    render(mockComponent());
 
     await waitFor(() => fireEvent.click(screen.getByText("handlePatchStamps")));
-    await waitFor(() => expect(patchStampsMock).toHaveBeenCalledWith(stampPatches));
-    await screen.findByText(
-      "Your update was not logged to Ceramic. Please refresh the page to reset your Ceramic session."
-    );
+    await waitFor(() => {
+      expect(patchStampsMock).toHaveBeenCalledWith(stampPatches);
+    });
   });
 });
 
@@ -1218,16 +1046,5 @@ describe("cleanPassport function", () => {
     const result = cleanPassport(passport, mockDatabase, mockValidProviders);
     expect(result.passport.stamps.length).toBe(0);
     expect(result.expiredProviders.length).toBe(0);
-  });
-});
-
-describe("handleComposeRetry function", () => {
-  it("should detect a difference between the stamps in the database and the stamps in ceramic", async () => {
-    const result = getStampsToRetry(composeStamps, databasePassport.stamps);
-    expect(result).toHaveLength(2);
-  });
-  it("should not return anything if the stamps in the database and the stamps in ceramic are the same", async () => {
-    const result = getStampsToRetry(databasePassport.stamps, databasePassport.stamps);
-    expect(result).toHaveLength(0);
   });
 });
