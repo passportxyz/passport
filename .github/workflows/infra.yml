@@ -1,0 +1,89 @@
+name: Pulumi Only - Deploy Infra 
+run-name: Run pulumi - ${{github.event.inputs.command || 'review'}}  - ${{ github.event.inputs.environment || 'review' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Leave blank to use current HEAD, or provide an override commit SHA"
+        type: string
+        required: false
+      environment:
+        description: "Environment to deploy to"
+        required: false
+        default: "review"
+        type: choice
+        options:
+          - review
+          - staging
+          - production
+      command:
+        description: "Pulumi command to run"
+        required: false
+        default: "preview"
+        type: choice
+        options:
+          - preview
+          - up
+          - refresh
+jobs:
+  ref:
+    name: Load Commit Ref
+    runs-on: ubuntu-latest
+    steps:
+      - id: ref
+        uses: passportxyz/gh-workflows/.github/actions/load_commit_ref@v3
+        with:
+          commit: ${{ inputs.commit }}
+
+    outputs:
+      version_tag: ${{ steps.ref.outputs.version_tag }}
+      docker_tag: ${{ steps.ref.outputs.docker_tag }}
+      refspec: ${{ steps.ref.outputs.refspec }}
+
+  run_pulumi:
+    name: Run Pulumi
+    needs: [ref]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.refspec }}
+          fetch-depth: 0
+      - name: Install 1Password CLI
+        uses: 1password/install-cli-action@v1
+      - name: Configure 1Password Service Account
+        uses: 1password/load-secrets-action/configure@v1
+        with:
+          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+      - name: Load secret
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          CLOUDFLARE_API_TOKEN: op://DevOps/passport-xyz-${{ inputs.environment }}-secrets/ci/CLOUDFLARE_API_TOKEN
+          AWS_ACCESS_KEY_ID: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SECRET_ACCESS_KEY
+          PULUMI_ACCESS_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/PULUMI_ACCESS_TOKEN
+
+      - name: Set AWS_SESSION_TOKEN if needed
+        if: inputs.environment == 'production'
+        run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
+
+      - name: Yarn install
+        uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v3
+      - name: Run pulumi
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v3
+        with:
+          docker_tag: ${{ inputs.docker_tag }}
+          stack_name: passportxyz/passport/${{ inputs.environment }}
+          aws_region: us-west-2
+          pulumi_command: ${{ github.event.inputs.command || 'preview' }}
+          pulumi_diff: true
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          PULUMI_ACCESS_TOKEN: ${{ env.PULUMI_ACCESS_TOKEN }}
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
