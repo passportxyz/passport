@@ -56,11 +56,8 @@ jobs:
       - name: Build Application
         working-directory: .
         run: |
-          rm -rf ./node_modules/@tendermint
-          rm -rf ./node_modules/did-jwt/node_modules/uint8arrays
           yarn build:platforms
           yarn build:identity
-          yarn build:schemas
           yarn build:database-client
           yarn build:app
 
