@@ -101,7 +101,7 @@ const OnchainPushCustomDashboardPanel = ({ className }: { className: string }) =
   return (
     <>
       <StandardCustomDashboardPanel
-        className={className + anyChainExpired ? " shadow-even-lg shadow-customization-background-1" : "shadow-none"}
+        className={className + (anyChainExpired ? " shadow-even-lg shadow-customization-background-1" : " shadow-none")}
         actionClassName={anyChainExpired ? "bg-focus text-color-1 hover:bg-focus/75 hover:text-color-1/75" : ""}
         mainText={customization.dashboardPanel.body.mainText}
         subText={customization.dashboardPanel.body.subText}
@@ -109,7 +109,7 @@ const OnchainPushCustomDashboardPanel = ({ className }: { className: string }) =
           isPending
             ? "Loading..."
             : anyChainExpired
-              ? "Refresh Expired Attestation"
+              ? "Refresh Onchain Passport"
               : customization.dashboardPanel.body.action.text
         }
         onActionClick={() => setShowSidebar(true)}
