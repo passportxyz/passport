@@ -43,7 +43,7 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
   const { useCustomDashboardPanel } = customization;
   const explanationPanel = customization.key !== "none" ? customization?.showExplanationPanel : true;
   return (
-    <div className="col-span-full flex flex-col xl:flex-row gap-8">
+    <div className="col-span-full mt-2 flex flex-col xl:flex-row gap-8">
       <div className="col-span-full order-2 flex flex-col grow lg:flex-row gap-8 mt-0.5">
         <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
         {explanationPanel && <DashboardScoreExplanationPanel />}
@@ -71,7 +71,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (did && address && databaseReady) {
-      const paramsHash = hash.sha1({ did, address, allPlatforms, databaseReady });
+      const paramsHash = hash.sha1({
+        did,
+        address,
+        allPlatforms,
+        databaseReady,
+      });
       if (paramsHash !== verifiedParamsHash.current) {
         initiateVerification(did, address);
         verifiedParamsHash.current = paramsHash;
