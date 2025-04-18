@@ -40,7 +40,10 @@ export const useOnChainStatus = ({ chain }: { chain?: Chain }): { status: OnChai
     const checkStatus = async () => {
       if (!chain || isPending) return;
 
-      const { score, providers, expirationDate } = data[chain.id] || { score: 0, providers: [] };
+      const { score, providers, expirationDate } = data[chain.id] || {
+        score: 0,
+        providers: [],
+      };
 
       // Get the current active chain attestation provider
       const attestationProvider: AttestationProvider | undefined = chains.find(
@@ -71,17 +74,21 @@ export const useAllOnChainStatus = () => {
   const { rawScore, scoreState } = useContext(ScorerContext);
   const customization = useCustomization();
 
-  const allChainsUpToDate = useMemo(() => {
-    if (isPending) return false;
-    return chains
+  const { allChainsUpToDate, anyChainExpired } = useMemo(() => {
+    if (isPending) return { allChainsUpToDate: false, anyChainExpired: false };
+
+    const statuses = chains
       .filter((chain) => parseValidChains(customization, chain))
-      .every((activeChain) => {
-        const { score, providers, expirationDate } = data[activeChain.id] || { score: 0, providers: [] };
+      .map((activeChain) => {
+        const { score, providers, expirationDate } = data[activeChain.id] || {
+          score: 0,
+          providers: [],
+        };
         const attestationProvider = activeChain.attestationProvider;
 
         if (!attestationProvider) return false;
 
-        const status = attestationProvider.checkOnChainStatus(
+        return attestationProvider.checkOnChainStatus(
           allProvidersState,
           providers,
           rawScore,
@@ -89,10 +96,13 @@ export const useAllOnChainStatus = () => {
           parseFloatOneDecimal(String(score)),
           expirationDate
         );
-
-        return status === OnChainStatus.MOVED_UP_TO_DATE;
       });
+
+    return {
+      allChainsUpToDate: statuses.every((status) => status === OnChainStatus.MOVED_UP_TO_DATE),
+      anyChainExpired: statuses.find((status) => status === OnChainStatus.MOVED_EXPIRED),
+    };
   }, [allProvidersState, customization, data, isPending, rawScore, scoreState]);
 
-  return { allChainsUpToDate };
+  return { allChainsUpToDate, anyChainExpired, isPending };
 };
