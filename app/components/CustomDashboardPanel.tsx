@@ -1,12 +1,13 @@
-import React, { ReactElement, ReactNode, useMemo, useState } from "react";
+import React, { ReactNode, useMemo, useState } from "react";
 import { VeraxPanel } from "../components/VeraxPanel";
 import { TestingPanel } from "../components/TestingPanel";
 import { Button } from "../components/Button";
 import { CustomizationLogoBackground } from "../utils/customizationUtils";
 import { useCustomization } from "../hooks/useCustomization";
 import { OnchainSidebar } from "./OnchainSidebar";
-import { renderToString } from "react-dom/server";
 import Tooltip from "./Tooltip";
+import { useAllOnChainStatus } from "../hooks/useOnChainStatus";
+import { twMerge } from "tailwind-merge";
 
 type CustomDashboardPanelProps = {
   logo: {
@@ -66,7 +67,6 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
 
 export const DynamicCustomDashboardPanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
-  const [showSidebar, setShowSidebar] = useState<boolean>(false);
 
   if (customization.key === "verax") {
     return <VeraxPanel className={className} />;
@@ -75,15 +75,67 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
   if (customization.key === "testing") {
     return <TestingPanel className={className} />;
   }
-  const { logo, body } = customization.dashboardPanel;
 
-  const onButtonClick = () => {
-    if (body.action?.type === "Onchain Push") {
-      setShowSidebar(true);
-    } else {
-      window.open(body.action.url, "_blank");
-    }
-  };
+  const { dashboardPanel } = customization;
+
+  if (dashboardPanel.body.action.type === "Onchain Push") {
+    return <OnchainPushCustomDashboardPanel className={className} />;
+  }
+
+  return (
+    <StandardCustomDashboardPanel
+      className={className}
+      {...dashboardPanel.body}
+      actionText={dashboardPanel.body.action.text}
+      onActionClick={() => window.open(dashboardPanel.body.action.url, "_blank")}
+    />
+  );
+};
+
+const OnchainPushCustomDashboardPanel = ({ className }: { className: string }) => {
+  const customization = useCustomization();
+  const { isPending, anyChainExpired } = useAllOnChainStatus();
+
+  const [showSidebar, setShowSidebar] = useState<boolean>(false);
+
+  return (
+    <>
+      <StandardCustomDashboardPanel
+        className={className + (anyChainExpired ? " shadow-even-lg shadow-customization-background-1" : " shadow-none")}
+        actionClassName={anyChainExpired ? "bg-focus text-color-1 hover:bg-focus/75 hover:text-color-1/75" : ""}
+        mainText={customization.dashboardPanel.body.mainText}
+        subText={customization.dashboardPanel.body.subText}
+        actionText={
+          isPending
+            ? "Loading..."
+            : anyChainExpired
+              ? "Refresh Onchain Passport"
+              : customization.dashboardPanel.body.action.text
+        }
+        onActionClick={() => setShowSidebar(true)}
+      />
+      <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
+    </>
+  );
+};
+
+const StandardCustomDashboardPanel = ({
+  className,
+  actionClassName,
+  mainText,
+  subText,
+  actionText,
+  onActionClick,
+}: {
+  className: string;
+  actionClassName?: string;
+  mainText: ReactNode;
+  subText: ReactNode;
+  actionText: ReactNode;
+  onActionClick: () => void;
+}) => {
+  const customization = useCustomization();
+  const { logo, body } = customization.dashboardPanel;
 
   return (
     <CustomDashboardPanel className={className} logo={logo}>
@@ -96,16 +148,18 @@ export const DynamicCustomDashboardPanel = ({ className }: { className: string }
           {body.displayInfoTooltip.text}
         </Tooltip>
       ) : null}
-      {body.mainText}
-      <div className="text-sm grow">{body.subText}</div>
+      {mainText}
+      <div className="text-sm grow">{subText}</div>
       <Button
         variant="custom"
-        className={`rounded-s mr-2 mt-2 w-fit self-end bg-customization-background-3 text-customization-foreground-2 hover:bg-customization-background-3/75 disabled:bg-customization-background-1 disabled:brightness-100`}
-        onClick={onButtonClick}
+        className={twMerge(
+          "rounded-s mr-2 mt-2 w-fit self-end bg-customization-background-3 text-customization-foreground-2 hover:bg-customization-background-3/75 disabled:bg-customization-background-1 disabled:brightness-100",
+          actionClassName
+        )}
+        onClick={onActionClick}
       >
-        {body.action.text}
+        {actionText}
       </Button>
-      <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
     </CustomDashboardPanel>
   );
 };

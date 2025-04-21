@@ -51,7 +51,7 @@ const useShouldDisplayPlatform = () => {
 
       if (
         customization.scorer?.weights &&
-        !providers.some((provider) => parseFloat(customization.scorer?.weights?.[provider] || "") > 0)
+        !providers?.some((provider) => parseFloat(customization.scorer?.weights?.[provider] || "") > 0)
       ) {
         return false;
       }
