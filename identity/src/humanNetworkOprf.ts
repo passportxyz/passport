@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
 
-import { initSync as humanNetworkInitSync, generate_oprf } from "@holonym-foundation/mishtiwasm";
+import { initSync as humanNetworkInitSync, generate_oprf, enable_errors } from "@holonym-foundation/mishtiwasm";
 
 // TODO: ideally this would be handled in the wasm module
 process.on("uncaughtException", (err): void => {
@@ -31,6 +31,7 @@ const initializeHumanNetwork = () => {
   const wasmModuleBuffer = readFileSync(wasmPath);
 
   humanNetworkInitSync({ module: wasmModuleBuffer });
+  enable_errors();
 
   humanNetworkInitialized = true;
 };
