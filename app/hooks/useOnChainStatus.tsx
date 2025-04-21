@@ -104,5 +104,8 @@ export const useAllOnChainStatus = () => {
     };
   }, [allProvidersState, customization, data, isPending, rawScore, scoreState]);
 
-  return { allChainsUpToDate, anyChainExpired, isPending };
+  return useMemo(
+    () => ({ allChainsUpToDate, anyChainExpired, isPending }),
+    [allChainsUpToDate, anyChainExpired, isPending]
+  );
 };
