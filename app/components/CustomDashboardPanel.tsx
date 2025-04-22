@@ -106,10 +106,10 @@ const OnchainPushCustomDashboardPanel = ({ className }: { className: string }) =
         mainText={customization.dashboardPanel.body.mainText}
         subText={customization.dashboardPanel.body.subText}
         actionText={
-          isPending
-            ? "Loading..."
-            : anyChainExpired
-              ? "Refresh Onchain Passport"
+          anyChainExpired
+            ? "Refresh Onchain Passport"
+            : isPending
+              ? "Loading..."
               : customization.dashboardPanel.body.action.text
         }
         onActionClick={() => setShowSidebar(true)}
