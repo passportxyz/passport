@@ -1,6 +1,7 @@
 import { parseEther } from "ethers";
 import Moralis from "moralis";
 import { PassportCache } from "@gitcoin/passport-platforms";
+import { logger } from "./logger.js";
 
 const FIVE_MINUTES = 1000 * 60 * 5;
 const WETH_CONTRACT = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
@@ -43,12 +44,12 @@ class EthPriceLoader {
       } catch (e) {
         let message = "Failed to cache ETH price";
         if (e instanceof Error) message += `, ${e.name}: ${e.message}`;
-        console.error(`REDIS CONNECTION ERROR: ${message}`);
+        logger.error(`REDIS CONNECTION ERROR: ${message}`);
       }
     } catch (e) {
       let message = "Failed to get ETH price";
       if (e instanceof Error) message += `, ${e.name}: ${e.message}`;
-      console.error(`MORALIS ERROR: ${message}`);
+      logger.error(`MORALIS ERROR: ${message}`);
     }
   }
 }

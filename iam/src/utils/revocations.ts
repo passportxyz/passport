@@ -2,7 +2,7 @@ import { handleAxiosError } from "@gitcoin/passport-platforms";
 import axios from "axios";
 import { VerifiableCredential, VerifiableEip712Credential } from "@gitcoin/passport-types";
 import { serverUtils } from "../utils/identityHelper.js";
-
+import { logger } from "./logger.js";
 const { InternalApiError } = serverUtils;
 
 const SCORER_ENDPOINT = process.env.SCORER_ENDPOINT;
@@ -48,7 +48,7 @@ export const filterRevokedCredentials = async (
 const fetchRevocations = async (proofValues: string[]): Promise<Revocation[]> => {
   const payload = { proof_values: proofValues };
 
-  console.log("Checking revocations", payload);
+  logger.info("Checking revocations", payload);
 
   try {
     const revocationResponse: {

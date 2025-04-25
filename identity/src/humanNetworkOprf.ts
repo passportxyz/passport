@@ -2,10 +2,11 @@ import { readFileSync } from "fs";
 import { join, dirname } from "path";
 
 import { initSync as humanNetworkInitSync, generate_oprf, enable_errors } from "@holonym-foundation/mishtiwasm";
+import { logger } from "./logger.js";
 
 // TODO: ideally this would be handled in the wasm module
 process.on("uncaughtException", (err): void => {
-  console.error("Uncaught exception:", err); // eslint-disable-line no-console
+  logger.error("Uncaught exception:", err); // eslint-disable-line no-console
   if (!err.toString().includes("RuntimeError: unreachable")) {
     throw err;
   }
@@ -26,7 +27,7 @@ const initializeHumanNetwork = () => {
   // TODO leaving in in case there are any weird
   // issues in other environments, but can be removed
   // next time we're in this file
-  console.log("Loading wasm module", wasmPath);
+  logger.info("Loading wasm module", wasmPath);
 
   const wasmModuleBuffer = readFileSync(wasmPath);
 

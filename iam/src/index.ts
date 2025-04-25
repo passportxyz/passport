@@ -10,13 +10,6 @@ import { challengeHandler, checkHandler, easScoreV2Handler, verifyHandler } from
 import { serverUtils } from "./utils/identityHelper.js";
 import { logger } from "./utils/logger.js";
 
-logger.info("Hello initial log ");
-logger.info("Hello multi line log");
-logger.info(`This is a multi-line log message:
-Line 1: Application is starting.
-Line 2: Environment variables are being checked.
-Line 3: Initialization is in progress.`);
-
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
 const configErrors = [
@@ -40,7 +33,7 @@ const configErrors = [
   .filter(Boolean);
 
 if (configErrors.length > 0) {
-  configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
+  configErrors.forEach((error) => logger.error(error));
   throw new Error("Missing required configuration");
 }
 
