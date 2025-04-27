@@ -625,6 +625,13 @@
   dependencies:
     "@pulumi/pulumi" "^3.0.0"
 
+"@pulumi/std@^1.7.3":
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/@pulumi/std/-/std-1.7.3.tgz#a3edee28e2dfea704bbe3c96202b3d9462c274bd"
+  integrity sha512-rQnwBjlSQtem7gvfIlAgFwpvC9HXxDuYeu99WifcN+QY+uTRyyq3IMHak7dVgPQmVr/GEHqkugZeAV6cBwL/lQ==
+  dependencies:
+    "@pulumi/pulumi" "^3.0.0"
+
 "@sigstore/bundle@^2.2.0":
   version "2.2.0"
   resolved "https://registry.npmjs.org/@sigstore/bundle/-/bundle-2.2.0.tgz"
