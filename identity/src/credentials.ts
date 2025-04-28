@@ -138,7 +138,7 @@ const getNullifiers = async ({
     .filter((result) => !(result.reason instanceof IgnorableNullifierGeneratorError));
 
   if (unexpectedErrors.length > 0) {
-    logger.error("Unexpected errors generating nullifiers", unexpectedErrors); // eslint-disable-line no-console
+    logger.error("Unexpected errors generating nullifiers", unexpectedErrors);
     throw new Error("Unable to generate nullifiers");
   }
 

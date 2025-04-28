@@ -12,6 +12,7 @@ import {
   NullifierGenerator,
 } from "../src/nullifierGenerators";
 import { humanNetworkOprf } from "../src/humanNetworkOprf";
+import { logger } from "../src/logger";
 
 // ---- original DIDKit lib
 import * as OriginalDIDKit from "@spruceid/didkit-wasm-node";
@@ -37,6 +38,15 @@ const key = "SAMPLE_KEY";
 jest.mock("../src/humanNetworkOprf", () => ({
   humanNetworkOprf: jest.fn(),
   initMishti: jest.fn(),
+}));
+
+jest.mock("../src/logger", () => ({
+  logger: {
+    error: jest.fn(),
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  },
 }));
 
 const mockIssuerKey = generateEIP712PairJWK();
@@ -466,7 +476,7 @@ describe("issueNullifiableCredential with ignorable errors", () => {
         })
       ).rejects.toThrow("Unable to generate nullifiers");
 
-      expect(console.error).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalled();
     });
 
     it("handles mix of successful, ignorable, and unexpected errors", async () => {
@@ -499,7 +509,7 @@ describe("issueNullifiableCredential with ignorable errors", () => {
         })
       ).rejects.toThrow("Unable to generate nullifiers");
 
-      expect(console.error).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalled();
     });
   });
 });
