@@ -8,3 +8,4 @@ export * from "./challenge.js";
 export * from "./verifyDidChallenge.js";
 export * as helpers from "./helpers.js";
 export * as serverUtils from "./serverUtils/index.js";
+export * as logger from "./logger.js";

@@ -19,7 +19,7 @@ export const errorHandlerMiddleware = (err: Error, _req: Request, res: Response,
   //   user reaches out with issues
   const randomID = Math.random().toString(36).substring(2, 8);
 
-  logger.debug("Unexpected error:", formatSystemMessage(err, randomID));
+  logger.error("Unexpected error:", formatSystemMessage(err, randomID));
 
   return res.status(500).json(formatUserResponse(err, randomID));
 };
