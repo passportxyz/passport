@@ -10,6 +10,8 @@ import {
 } from "@gitcoin/passport-types";
 
 import { app } from "../src/index.js";
+import { logger } from "../src/utils/logger.js";
+
 import * as identityMock from "../src/utils/identityHelper";
 
 jest.mock("../src/utils/revocations", () => ({
@@ -598,7 +600,7 @@ describe("POST /verify", function () {
   describe("for unexpected errors", () => {
     let logSpy: jest.SpyInstance;
     beforeEach(() => {
-      logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+      logSpy = jest.spyOn(logger, "debug").mockImplementation(() => {});
     });
     afterEach(() => {
       logSpy.mockRestore();

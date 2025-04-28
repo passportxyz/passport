@@ -2,6 +2,7 @@ import { parseEther } from "ethers";
 import { getEASFeeAmount } from "../src/utils/easFees.js";
 import Moralis from "moralis";
 import { PassportCache } from "@gitcoin/passport-platforms";
+import { logger } from "../src/utils/logger.js";
 
 jest.mock("moralis", () => ({
   EvmApi: {
@@ -44,7 +45,7 @@ describe("EthPriceLoader", () => {
     });
 
     it("should handle Moralis errors gracefully", async () => {
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const loggerSpy = jest.spyOn(logger, "error").mockImplementation(() => {});
       let count = 0;
       jest.spyOn(PassportCache.prototype, "get").mockImplementation((key) => {
         count += 1;
@@ -63,11 +64,11 @@ describe("EthPriceLoader", () => {
 
       (Moralis.EvmApi.token.getTokenPrice as jest.Mock<any>).mockRejectedValueOnce(new Error("Failed fetching price"));
       await getEASFeeAmount(2);
-      expect(consoleSpy).toHaveBeenCalledWith("MORALIS ERROR: Failed to get ETH price, Error: Failed fetching price");
+      expect(loggerSpy).toHaveBeenCalledWith("MORALIS ERROR: Failed to get ETH price, Error: Failed fetching price");
     });
 
     it("should handle Redis errors gracefully", async () => {
-      const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+      const loggerSpy = jest.spyOn(logger, "error").mockImplementation(() => {});
       let count = 0;
       jest.spyOn(PassportCache.prototype, "get").mockImplementation((key) => {
         count += 1;
@@ -85,7 +86,7 @@ describe("EthPriceLoader", () => {
       jest.spyOn(PassportCache.prototype, "set").mockRejectedValueOnce(new Error("Failed to store in cache"));
 
       await getEASFeeAmount(2);
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(loggerSpy).toHaveBeenCalledWith(
         "REDIS CONNECTION ERROR: Failed to cache ETH price, Error: Failed to store in cache"
       );
     });
