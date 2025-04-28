@@ -41,8 +41,13 @@ jobs:
           service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
 
       - name: Set AWS_SESSION_TOKEN if needed
+        id: set-aws-session-token
         if: inputs.environment == 'production'
-        run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          AWS_SESSION_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SESSION_TOKEN
 
       - id: build_and_push_docker_iam_image
         uses: passportxyz/gh-workflows/.github/actions/build_and_push@v3
@@ -81,8 +86,13 @@ jobs:
           service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
 
       - name: Set AWS_SESSION_TOKEN if needed
+        id: set-aws-session-token
         if: inputs.environment == 'production'
-        run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          AWS_SESSION_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SESSION_TOKEN
 
       - id: build_and_push_docker_embed_image
         uses: passportxyz/gh-workflows/.github/actions/build_and_push@v3
@@ -124,8 +134,13 @@ jobs:
           PULUMI_ACCESS_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/PULUMI_ACCESS_TOKEN
 
       - name: Set AWS_SESSION_TOKEN if needed
+        id: set-aws-session-token
         if: inputs.environment == 'production'
-        run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          AWS_SESSION_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SESSION_TOKEN
 
       - name: Prepare to Deploy to AWS
         uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v3
@@ -198,8 +213,13 @@ jobs:
           PULUMI_ACCESS_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/PULUMI_ACCESS_TOKEN
 
       - name: Set AWS_SESSION_TOKEN if needed
+        id: set-aws-session-token
         if: inputs.environment == 'production'
-        run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          AWS_SESSION_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SESSION_TOKEN
 
       - name: Prepare to Deploy to AWS
         uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v3
