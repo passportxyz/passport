@@ -9,7 +9,7 @@ type Attestation = {
   isReceiver: boolean;
   revoked: boolean;
   validUntil: number;
-  attestationId: string;
+  indexingValue: string;
 };
 
 type CleanHandsResponseData = {
@@ -35,11 +35,6 @@ export class ClanHandsProvider implements Provider {
   constructor() {}
 
   async verify(payload: RequestPayload, context: any): Promise<VerifiedPayload> {
-    // // Calling requestAccessToken will store the token in the ocntext
-    // await requestAccessToken(payload.proofs.code, context);
-
-    // const { contributionDays, userId, hadBadCommits } = await fetchAndCheckContributions(context);
-    console.log("geri - ClanHandsProvider - verify - payload", payload);
     let valid = false;
     let errors: string[] | undefined = undefined;
     let record:
@@ -65,11 +60,10 @@ export class ClanHandsProvider implements Provider {
           !att.revoked &&
           att.validUntil > new Date().getTime() / 1000
       );
-      valid = cleanHandsAttestations !== undefined;
+      // Make sure cleanHandsAttestations and cleanHandsAttestations.indexingValue are not undefined or null
+      valid = !!cleanHandsAttestations?.indexingValue;
       errors = valid ? undefined : [`Unable to find any valid attestation for ${address}`];
-      record = {
-        id: cleanHandsAttestations?.attestationId,
-      };
+      record = !valid ? undefined : { id: cleanHandsAttestations?.indexingValue };
     } catch (error) {
       handleProviderAxiosError(error, "CleanHands");
     }
