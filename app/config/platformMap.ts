@@ -28,6 +28,7 @@ const {
   Outdid,
   Binance,
   CustomGithub,
+  CleanHands,
 } = platforms;
 
 type CustomPlatformTypeInfo = {
@@ -208,3 +209,10 @@ export const CUSTOM_PLATFORM_TYPE_INFO: { [id: string]: CustomPlatformTypeInfo }
     },
   },
 };
+
+if (process.env.NEXT_PUBLIC_FF_CLEAN_HANDS_STAMP === "on") {
+  defaultPlatformMap.set("CleanHands", {
+    platform: new CleanHands.CleanHandsPlatform(),
+    platFormGroupSpec: CleanHands.ProviderConfig,
+  });
+}
