@@ -25,7 +25,7 @@ describe("ClanHandsProvider", function () {
   };
   const mockIndexingValue = "0xnullifier";
   it("handles valid verification attempt", async () => {
-    mockedAxios.get.mockImplementation(async (url, data, config) => {
+    mockedAxios.get.mockImplementation(async () => {
       return {
         data: {
           data: {
@@ -79,7 +79,7 @@ describe("ClanHandsProvider", function () {
     [{ indexingValue: undefined }],
     [{ indexingValue: null }],
   ])("handles invalid verification attempt with: `%s`", async (attestationAttributes) => {
-    mockedAxios.get.mockImplementation(async (url, data, config) => {
+    mockedAxios.get.mockImplementation(async () => {
       return {
         data: {
           data: {
