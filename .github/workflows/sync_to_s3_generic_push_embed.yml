@@ -56,8 +56,13 @@ jobs:
           pulumi-version: latest
 
       - name: Set AWS_SESSION_TOKEN if needed
+        id: set-aws-session-token
         if: inputs.environment == 'production'
-        run: echo "AWS_SESSION_TOKEN=$(op read op://DeployerVault/github-aws-production/ci/AWS_SESSION_TOKEN)" >> $GITHUB_ENV
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          AWS_SESSION_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SESSION_TOKEN
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
