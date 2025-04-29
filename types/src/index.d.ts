@@ -359,7 +359,8 @@ export type PLATFORM_ID =
   | "AllowList"
   | "Binance"
   | "DeveloperList"
-  | `Custom#${string}`;
+  | `Custom#${string}`
+  | "CleanHands";
 
 export type PLATFORM_CATEGORY = {
   name: string;
@@ -447,7 +448,8 @@ export type PROVIDER_ID =
   | `AllowList#${string}`
   | "BinanceBABT"
   | "BinanceBABT2"
-  | `DeveloperList#${string}#${string}`;
+  | `DeveloperList#${string}#${string}`
+  | "CleanHands";
 
 export type StampBit = {
   bit: number;
