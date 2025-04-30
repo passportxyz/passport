@@ -18,3 +18,5 @@ export function warn(...args: any[]) {
 export function debug(...args: any[]) {
   logger.debug(...args);
 }
+
+info("Identity module. Logger initialized");

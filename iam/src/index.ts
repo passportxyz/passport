@@ -9,7 +9,7 @@ import { challengeHandler, checkHandler, easScoreV2Handler, verifyHandler } from
 
 import { serverUtils } from "./utils/identityHelper.js";
 import { logger } from "./utils/logger.js";
-import { logger as idenityLogger } from "@gitcoin/passport-identity/";
+import { logger as idenityLogger } from "@gitcoin/passport-identity";
 idenityLogger.setLogger(logger);
 
 // ---- Config - check for all required env variables
