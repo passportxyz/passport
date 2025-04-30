@@ -20,7 +20,7 @@
 // key in the list, with version "0.0.0"
 
 import { checkRotatingKeysEnabled } from "./helpers.js";
-import { logger } from "./logger.js";
+import * as logger from "./logger.js";
 const MAX_CONCURRENT_KEYS = 2;
 
 const LEGACY_KEY_ENV_NAME = "IAM_JWK_EIP712";

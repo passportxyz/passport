@@ -12,7 +12,7 @@ import {
   NullifierGenerator,
 } from "../src/nullifierGenerators";
 import { humanNetworkOprf } from "../src/humanNetworkOprf";
-import { logger } from "../src/logger";
+import * as logger from "../src/logger";
 
 // ---- original DIDKit lib
 import * as OriginalDIDKit from "@spruceid/didkit-wasm-node";
@@ -41,12 +41,10 @@ jest.mock("../src/humanNetworkOprf", () => ({
 }));
 
 jest.mock("../src/logger", () => ({
-  logger: {
-    error: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-  },
+  error: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
 }));
 
 const mockIssuerKey = generateEIP712PairJWK();

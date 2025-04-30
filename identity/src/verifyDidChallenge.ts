@@ -7,7 +7,7 @@ import { encode } from "multiformats/block";
 import { sha256 } from "multiformats/hashes/sha2";
 import { Cacao } from "@didtools/cacao";
 import { ApiError } from "./serverUtils/apiError.js";
-import { logger } from "./logger.js";
+import * as logger from "./logger.js";
 
 class ChallengeMismatchError extends ApiError {
   constructor() {

@@ -1,12 +1,11 @@
 // ---- Types
-import { Response } from "express";
 import { RequestPayload, CredentialResponseBody, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
 
 import { platforms, providers } from "@gitcoin/passport-platforms";
 import { issueNullifiableCredential } from "./credentials.js";
 import { checkCredentialBans } from "./bans.js";
 import { getIssuerInfo } from "./issuers.js";
-import { logger } from "./logger.js";
+import * as logger from "./logger.js";
 
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ApiError } from "./apiError.js";
-import { logger } from "../logger.js";
+import * as logger from "../logger.js";
 // Middleware to handle errors
 // Must define 4 params for express to recognize this as an error handler
 export const errorHandlerMiddleware = (err: Error, _req: Request, res: Response, _next: unknown) => {

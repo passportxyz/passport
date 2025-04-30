@@ -19,7 +19,7 @@ import {
 } from "./signingDocuments.js";
 import { IgnorableNullifierGeneratorError, NullifierGenerator } from "./nullifierGenerators.js";
 import { checkRotatingKeysEnabled } from "./helpers.js";
-import { logger } from "./logger.js";
+import * as logger from "./logger.js";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min

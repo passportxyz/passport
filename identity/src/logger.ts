@@ -1,7 +1,20 @@
-import pinoImport from "pino";
-const pino = pinoImport.default;
-// https://github.com/pinojs/pino
+let logger = console;
 
-export const logger = pino();
+export function setLogger(newLogger: any) {
+  logger = newLogger;
+}
 
-logger.info("Logger initialized");
+export function error(...args: any[]) {
+  logger.error(...args);
+}
+export function info(...args: any[]) {
+  logger.info(...args);
+}
+
+export function warn(...args: any[]) {
+  logger.warn(...args);
+}
+
+export function debug(...args: any[]) {
+  logger.debug(...args);
+}

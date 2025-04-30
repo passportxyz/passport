@@ -8,7 +8,7 @@ import * as base64 from "@ethersproject/base64";
 import { createHash } from "crypto";
 import { objToSortedArray } from "./helpers.js";
 import { humanNetworkOprf } from "./humanNetworkOprf.js";
-import { logger } from "./logger.js";
+import * as logger from "./logger.js";
 
 export type NullifierGenerator = ({ record }: { record: ProofRecord }) => Promise<string>;
 

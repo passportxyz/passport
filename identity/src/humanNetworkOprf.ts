@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import { join, dirname } from "path";
 
 import { initSync as humanNetworkInitSync, generate_oprf, enable_errors } from "@holonym-foundation/mishtiwasm";
-import { logger } from "./logger.js";
+import * as logger from "./logger.js";
 
 // TODO: ideally this would be handled in the wasm module
 process.on("uncaughtException", (err): void => {
