@@ -2,7 +2,7 @@
 import type { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Verify signed message with ethers
-import { ethers, JsonRpcProvider } from "ethers";
+import { JsonRpcProvider, getAddress as toChecksummedAddress } from "ethers";
 
 export const getRPCProvider = (rpc: string): JsonRpcProvider => {
   const provider: JsonRpcProvider = new JsonRpcProvider(rpc);
@@ -16,4 +16,9 @@ export const getRPCProvider = (rpc: string): JsonRpcProvider => {
 export const getAddress = async ({ address }: RequestPayload): Promise<string> => {
   // proof was missing/invalid return controller address from the payload
   return Promise.resolve(address);
+};
+
+export const getChecksummedAddress = async ({ address }: RequestPayload): Promise<string> => {
+  // proof was missing/invalid return controller address from the payload
+  return Promise.resolve(toChecksummedAddress(address));
 };

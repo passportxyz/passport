@@ -2,9 +2,14 @@ import { type Provider } from "../../types.js";
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import axios from "axios";
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
+import { getChecksummedAddress } from "../../utils/signer.js";
+
+type AttestationSchema = {
+  id: string;
+};
 
 type Attestation = {
-  fullSchemaId: string;
+  schema: AttestationSchema;
   attester: "0xB1f50c6C34C72346b1229e5C80587D0D659556Fd";
   isReceiver: boolean;
   revoked: boolean;
@@ -45,18 +50,23 @@ export class ClanHandsProvider implements Provider {
 
     try {
       // Set user address
-      const address = payload.address.toLowerCase();
+      const address = await getChecksummedAddress(payload);
 
-      const resp: CleanHandsResponse = await axios.get(
-        `https://mainnet-rpc.sign.global/api/scan/addresses/${address}/attestations`
-      );
+      const resp: CleanHandsResponse = await axios.get("https://mainnet-rpc.sign.global/api/index/attestations", {
+        params: {
+          attester: "0xB1f50c6C34C72346b1229e5C80587D0D659556Fd",
+          recipient: address,
+          schemaId: "onchain_evm_10_0x8",
+          size: 100,
+        },
+      });
+
       const data = resp.data;
 
       const cleanHandsAttestations = data.data.rows.find(
         (att) =>
-          att.fullSchemaId == "onchain_evm_10_0x8" &&
+          att.schema.id == "onchain_evm_10_0x8" &&
           att.attester == "0xB1f50c6C34C72346b1229e5C80587D0D659556Fd" &&
-          att.isReceiver == true &&
           !att.revoked &&
           att.validUntil > new Date().getTime() / 1000
       );
