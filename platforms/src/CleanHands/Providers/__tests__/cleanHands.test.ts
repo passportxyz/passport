@@ -16,7 +16,7 @@ describe("ClanHandsProvider", function () {
     },
   };
   const mockPayload: RequestPayload = {
-    address: "0x0",
+    address: "0x0000000000000000000000000000000000000000",
     proofs: {
       code: "ABC123_ACCESSCODE",
     },
@@ -31,7 +31,7 @@ describe("ClanHandsProvider", function () {
           data: {
             rows: [
               {
-                fullSchemaId: "onchain_evm_10_0x8",
+                schema: { id: "onchain_evm_10_0x8" },
                 attester: "0xB1f50c6C34C72346b1229e5C80587D0D659556Fd",
                 isReceiver: true,
                 revoked: false,
@@ -48,9 +48,14 @@ describe("ClanHandsProvider", function () {
     const result: VerifiedPayload = await provider.verify(mockPayload, mockContext);
 
     expect(mockedAxios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toHaveBeenCalledWith(
-      `https://mainnet-rpc.sign.global/api/scan/addresses/${mockPayload.address}/attestations`
-    );
+    expect(mockedAxios.get).toHaveBeenCalledWith("https://mainnet-rpc.sign.global/api/index/attestations", {
+      params: {
+        attester: "0xB1f50c6C34C72346b1229e5C80587D0D659556Fd",
+        recipient: "0x0000000000000000000000000000000000000000",
+        schemaId: "onchain_evm_10_0x8",
+        size: 100,
+      },
+    });
     expect(result).toEqual({
       valid: true,
       errors: undefined,
@@ -61,17 +66,12 @@ describe("ClanHandsProvider", function () {
   it.each([
     [
       {
-        fullSchemaId: "bad_schema",
+        schema: { id: "bad_schema" },
       },
     ],
     [
       {
         attester: "bad_attester",
-      },
-    ],
-    [
-      {
-        isReceiver: false,
       },
     ],
     [{ revoked: true }],
@@ -85,7 +85,7 @@ describe("ClanHandsProvider", function () {
           data: {
             rows: [
               {
-                fullSchemaId: "onchain_evm_10_0x8",
+                schema: { id: "onchain_evm_10_0x8" },
                 attester: "0xB1f50c6C34C72346b1229e5C80587D0D659556Fd",
                 isReceiver: true,
                 revoked: false,
@@ -103,9 +103,14 @@ describe("ClanHandsProvider", function () {
     const result: VerifiedPayload = await provider.verify(mockPayload, mockContext);
 
     expect(mockedAxios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toHaveBeenCalledWith(
-      `https://mainnet-rpc.sign.global/api/scan/addresses/${mockPayload.address}/attestations`
-    );
+    expect(mockedAxios.get).toHaveBeenCalledWith("https://mainnet-rpc.sign.global/api/index/attestations", {
+      params: {
+        attester: "0xB1f50c6C34C72346b1229e5C80587D0D659556Fd",
+        recipient: "0x0000000000000000000000000000000000000000",
+        schemaId: "onchain_evm_10_0x8",
+        size: 100,
+      },
+    });
     expect(result).toEqual({
       valid: false,
       errors: [`Unable to find any valid attestation for ${mockPayload.address}`],
