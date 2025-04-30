@@ -13,8 +13,13 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Clean Hands",
-    providers: [{ title: "Prove clean hands ...", name: "CleanHands" }],
+    platformGroup: "Sanctions-Free Identity Verified",
+    providers: [
+      {
+        title: "Awarded after completing Holonym KYC and sanctions validation, strengthening your humanity proof",
+        name: "CleanHands",
+      },
+    ],
   },
 ];
 
