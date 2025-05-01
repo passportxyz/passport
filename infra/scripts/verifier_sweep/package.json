@@ -4,6 +4,7 @@
   "description": "Collect Verifier funds",
   "main": "dist/index.js",
   "scripts": {
+    "prebuild": "yarn install",
     "build": "tsc",
     "dev": "ts-node run.ts"
   },
