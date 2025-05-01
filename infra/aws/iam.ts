@@ -5,6 +5,7 @@ import * as cloudflare from "@pulumi/cloudflare";
 import { cluster } from "./cluster";
 import { secretsManager } from "infra-libs";
 import { stack, defaultTags } from "../lib/tags";
+import { createSweeperService } from "../lib/sweeper_service";
 import {
   vpcId,
   vpcPrivateSubnets,
@@ -603,3 +604,5 @@ const gitcoinServiceRecord = new aws.route53.Record("passport-record", {
     },
   ],
 });
+
+createSweeperService();
