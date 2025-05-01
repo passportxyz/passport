@@ -16,6 +16,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.799.0",
     "viem": "^2.28.1"
   }
 }
