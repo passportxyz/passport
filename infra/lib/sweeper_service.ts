@@ -2,6 +2,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as path from "path";
 import { secretsManager } from "infra-libs";
+import { vpcId, vpcPrivateSubnets } from "../aws/stacks";
 
 export const createSweeperService = async ({
   stack,
@@ -38,6 +39,7 @@ export const createSweeperService = async ({
     acc[name] = value;
     return acc;
   }, {});
+  variables["SECRETS_ARN"] = sweeperServiceSecret.arn;
 
   // Create IAM role for the Lambda
   const lambdaRole = new aws.iam.Role("sweeper-role", {
@@ -61,8 +63,30 @@ export const createSweeperService = async ({
     policyArn: aws.iam.ManagedPolicy.AWSLambdaBasicExecutionRole,
   });
 
+  const securityGroup = new aws.ec2.SecurityGroup("sweeper-sg", {
+    name: "sweeper-sg",
+    vpcId,
+    tags: {
+      ...defaultTags,
+      Name: `sweeper-sg`,
+    },
+  });
+
+  const sgEgressRule = new aws.ec2.SecurityGroupRule("sweeper-sg-egress", {
+    securityGroupId: securityGroup.id,
+    type: "egress",
+    fromPort: 0,
+    toPort: 0,
+    protocol: "-1",
+    cidrBlocks: ["0.0.0.0/0"],
+  });
+
   // Create Lambda function
   const ethCheckerFunction = new aws.lambda.Function("sweeper", {
+    vpcConfig: {
+      subnetIds: vpcPrivateSubnets,
+      securityGroupIds: [securityGroup.id],
+    },
     role: lambdaRole.arn,
     runtime: aws.lambda.Runtime.NodeJS18dX,
     handler: "index.handler",
