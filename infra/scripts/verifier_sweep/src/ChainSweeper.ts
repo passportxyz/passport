@@ -42,16 +42,14 @@ const getChainIdFromRpc = async (rpcUrl: string): Promise<number> => {
   }
 };
 
-const getClients = async ({
+export const getClients = async ({
   privateKey,
   alchemyApiKey,
   alchemyChainName,
-  nativeCurrency,
 }: {
   privateKey: string;
   alchemyApiKey: string;
   alchemyChainName: string;
-  nativeCurrency?: { name: string; symbol: string; decimals: number };
 }) => {
   const rpcUrl = `https://${alchemyChainName}.g.alchemy.com/v2/${alchemyApiKey}`;
   const transport = http(rpcUrl);
@@ -60,7 +58,7 @@ const getClients = async ({
   const chain: Chain = {
     id: chainId,
     name: alchemyChainName,
-    nativeCurrency: nativeCurrency || { name: "Ether", symbol: "ETH", decimals: 18 },
+    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
     rpcUrls: {
       default: { http: [rpcUrl] },
       public: { http: [rpcUrl] },
@@ -89,7 +87,6 @@ export type ChainSweeperConfig = {
   thresholdWei: bigint;
   alchemyChainName: string;
   feeDestination: string;
-  nativeCurrency?: { name: string; symbol: string; decimals: number };
 };
 
 export class ChainSweeper {
@@ -152,12 +149,11 @@ export class ChainSweeper {
   }
 
   static async create(config: ChainSweeperConfig): Promise<ChainSweeper> {
-    const { thresholdWei, privateKey, feeDestination, alchemyApiKey, alchemyChainName, nativeCurrency } = config;
+    const { thresholdWei, privateKey, feeDestination, alchemyApiKey, alchemyChainName } = config;
     const { publicClient, walletClient, account } = await getClients({
       privateKey,
       alchemyApiKey,
       alchemyChainName,
-      nativeCurrency,
     });
     const accountAddress = account.address;
     return new ChainSweeper({
