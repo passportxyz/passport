@@ -24,3 +24,4 @@ process.env.FF_ROTATING_KEYS = "on";
 process.env.HUMAN_NETWORK_CLIENT_PRIVATE_KEY = "0x4f39f049fdc7c98e1e7a995b142dac92f978b5137334ba010bf2b4abdde26e48"; // Public: 0xF952E8c44b95F44BD5f46Bc499412AeA16CACfE9
 process.env.HUMAN_NETWORK_RELAY_URL = "http://localhost:8081";
 process.env.HUMAN_NETWORK_START_VERSION = "1";
+process.env.SIGN_PROTOCOL_API_KEY = "0xsign_api_key";
