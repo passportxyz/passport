@@ -33,6 +33,7 @@ type CleanHandsResponse = {
   data: CleanHandsResponseData;
 };
 
+const signProtocolApiKey = process.env.SIGN_PROTOCOL_API_KEY;
 export class ClanHandsProvider implements Provider {
   // The type will be determined dynamically, from the options passed in to the constructor
   type = "CleanHands";
@@ -53,6 +54,9 @@ export class ClanHandsProvider implements Provider {
       const address = await getChecksummedAddress(payload);
 
       const resp: CleanHandsResponse = await axios.get("https://mainnet-rpc.sign.global/api/index/attestations", {
+        headers: {
+          "x-api-key": signProtocolApiKey,
+        },
         params: {
           attester: "0xB1f50c6C34C72346b1229e5C80587D0D659556Fd",
           recipient: address,

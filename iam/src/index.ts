@@ -27,6 +27,7 @@ const configErrors = [
   "HUMAN_NETWORK_CLIENT_PRIVATE_KEY",
   "HUMAN_NETWORK_RELAY_URL",
   "HUMAN_NETWORK_START_VERSION",
+  "SIGN_PROTOCOL_API_KEY",
 ]
   .map((env) => (process.env[env] ? null : `${env} is required`))
   .filter(Boolean);

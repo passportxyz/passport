@@ -5,6 +5,7 @@ import { ClanHandsProvider } from "../index.js";
 jest.mock("axios");
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockSignApiKey = "0xsign_api_key";
 
 describe("ClanHandsProvider", function () {
   beforeEach(() => {
@@ -49,6 +50,9 @@ describe("ClanHandsProvider", function () {
 
     expect(mockedAxios.get).toHaveBeenCalledTimes(1);
     expect(mockedAxios.get).toHaveBeenCalledWith("https://mainnet-rpc.sign.global/api/index/attestations", {
+      headers: {
+        "x-api-key": mockSignApiKey,
+      },
       params: {
         attester: "0xB1f50c6C34C72346b1229e5C80587D0D659556Fd",
         recipient: "0x0000000000000000000000000000000000000000",
@@ -104,6 +108,9 @@ describe("ClanHandsProvider", function () {
 
     expect(mockedAxios.get).toHaveBeenCalledTimes(1);
     expect(mockedAxios.get).toHaveBeenCalledWith("https://mainnet-rpc.sign.global/api/index/attestations", {
+      headers: {
+        "x-api-key": mockSignApiKey,
+      },
       params: {
         attester: "0xB1f50c6C34C72346b1229e5C80587D0D659556Fd",
         recipient: "0x0000000000000000000000000000000000000000",

@@ -45,6 +45,10 @@ if (configErrors.length > 0) {
   throw new Error("Missing required configuration: " + configErrors.join(",\n"));
 }
 
+if (!process.env.SIGN_PROTOCOL_API_KEY) {
+  configErrors.push("SIGN_PROTOCOL_API_KEY is required");
+}
+
 // create the app and run on port
 export const app = express();
 
