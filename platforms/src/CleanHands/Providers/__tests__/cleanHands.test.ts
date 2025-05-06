@@ -8,11 +8,8 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 const mockSignApiKey = "0xsign_api_key";
 
 describe("ClanHandsProvider", function () {
-  const ORIGINAL_ENV = process.env;
   beforeEach(() => {
     jest.clearAllMocks();
-
-    process.env = { ...ORIGINAL_ENV, SIGN_PROTOCOL_API_KEY: mockSignApiKey };
   });
   const mockContext: ProviderContext = {
     github: {

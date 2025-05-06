@@ -33,6 +33,7 @@ type CleanHandsResponse = {
   data: CleanHandsResponseData;
 };
 
+const signProtocolApiKey = process.env.SIGN_PROTOCOL_API_KEY;
 export class ClanHandsProvider implements Provider {
   // The type will be determined dynamically, from the options passed in to the constructor
   type = "CleanHands";
@@ -40,7 +41,6 @@ export class ClanHandsProvider implements Provider {
   constructor() {}
 
   async verify(payload: RequestPayload, context: any): Promise<VerifiedPayload> {
-    const signProtocolApiKey = process.env.SIGN_PROTOCOL_API_KEY;
     let valid = false;
     let errors: string[] | undefined = undefined;
     let record:
