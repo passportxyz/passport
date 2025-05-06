@@ -1,7 +1,14 @@
-import { createPublicClient, http, formatEther, PublicClient, WalletClient, createWalletClient } from "viem";
+import {
+  createPublicClient,
+  http,
+  formatEther,
+  PublicClient,
+  WalletClient,
+  createWalletClient,
+  Transport,
+  Chain,
+} from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import onchainInfo from "../../../../deployments/onchainInfo.json";
-import verifierAbis from "../../../../deployments/abi/GitcoinVerifier.json";
 
 export class SweeperError extends Error {
   constructor(message: string) {
@@ -10,10 +17,7 @@ export class SweeperError extends Error {
   }
 }
 
-const isValidChainId = (hexChainId: string): hexChainId is keyof typeof onchainInfo =>
-  Object.keys(onchainInfo).includes(hexChainId);
-
-const isValidAddress = (address: string): address is `0x${string}` => /^0x\w*$/.test(address);
+const isValidAddress = (address: string): address is `0x${string}` => /^0x[0-9a-fA-F]{40}$/.test(address);
 
 const validateAddress = (address: string): `0x${string}` => {
   if (!isValidAddress(address)) {
@@ -22,46 +26,61 @@ const validateAddress = (address: string): `0x${string}` => {
   return address as `0x${string}`;
 };
 
-const getClients = ({
+const getChainIdFromRpc = async (rpcUrl: string): Promise<number> => {
+  try {
+    const response = await fetch(rpcUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", method: "eth_chainId", params: [], id: 1 }),
+    });
+    if (!response.ok) throw new SweeperError(`Failed to fetch chainId from RPC: ${rpcUrl}`);
+    const data = await response.json();
+    if (!data.result) throw new SweeperError(`No chainId result from RPC: ${rpcUrl}`);
+    return Number.parseInt(data.result, 16);
+  } catch (err: any) {
+    throw new SweeperError(`Error fetching chainId: ${err.message}`);
+  }
+};
+
+const getClients = async ({
   privateKey,
   alchemyApiKey,
   alchemyChainName,
+  nativeCurrency,
 }: {
   privateKey: string;
   alchemyApiKey: string;
   alchemyChainName: string;
+  nativeCurrency?: { name: string; symbol: string; decimals: number };
 }) => {
   const rpcUrl = `https://${alchemyChainName}.g.alchemy.com/v2/${alchemyApiKey}`;
   const transport = http(rpcUrl);
-
+  const account = privateKeyToAccount(privateKey as `0x${string}`);
+  const chainId = await getChainIdFromRpc(rpcUrl);
+  const chain: Chain = {
+    id: chainId,
+    name: alchemyChainName,
+    nativeCurrency: nativeCurrency || { name: "Ether", symbol: "ETH", decimals: 18 },
+    rpcUrls: {
+      default: { http: [rpcUrl] },
+      public: { http: [rpcUrl] },
+    },
+    blockExplorers: {
+      default: { name: "", url: "" },
+    },
+    contracts: {},
+    testnet: false,
+  };
   const publicClient = createPublicClient({
     transport,
+    chain,
   });
-
-  const account = privateKeyToAccount(validateAddress(privateKey));
-
   const walletClient = createWalletClient({
     account,
     transport,
+    chain,
   });
-
-  return { publicClient, walletClient };
-};
-
-const getChainConfig = async (client: PublicClient) => {
-  const chainId = await client.getChainId();
-
-  // Convert chain ID to hex format (to match your config file format)
-  const hexChainId = `0x${chainId?.toString(16)}`;
-
-  if (!isValidChainId(hexChainId)) {
-    throw new SweeperError(`Chain ID '${hexChainId}' (from '${chainId}') not found in onchainInfo`);
-  }
-
-  const chainInfo = onchainInfo[hexChainId];
-  const abi = verifierAbis[hexChainId];
-
-  return { chainInfo, abi };
+  return { publicClient, walletClient, account };
 };
 
 export type ChainSweeperConfig = {
@@ -69,94 +88,84 @@ export type ChainSweeperConfig = {
   privateKey: string;
   thresholdWei: bigint;
   alchemyChainName: string;
+  feeDestination: string;
+  nativeCurrency?: { name: string; symbol: string; decimals: number };
 };
 
 export class ChainSweeper {
-  private walletClient: WalletClient;
-  private publicClient: PublicClient;
-  private chainDescription: string;
+  private walletClient: WalletClient<Transport, Chain>;
+  private publicClient: PublicClient<Transport, Chain>;
   private thresholdWei: bigint;
-  private contractAddress: `0x${string}`;
-  private contractAbi: unknown[];
+  private accountAddress: `0x${string}`;
+  private feeDestination: `0x${string}`;
 
   constructor({
     walletClient,
     publicClient,
-    chainDescription,
     thresholdWei,
-    contractAddress,
-    contractAbi,
+    accountAddress,
+    feeDestination,
   }: {
-    walletClient: WalletClient;
-    publicClient: PublicClient;
-    chainDescription: string;
+    walletClient: WalletClient<Transport, Chain>;
+    publicClient: PublicClient<Transport, Chain>;
     thresholdWei: bigint;
-    contractAddress: `0x${string}`;
-    contractAbi: unknown[];
+    accountAddress: `0x${string}`;
+    feeDestination: `0x${string}`;
   }) {
     this.walletClient = walletClient;
     this.publicClient = publicClient;
-    this.chainDescription = chainDescription;
     this.thresholdWei = thresholdWei;
-    this.contractAddress = contractAddress;
-    this.contractAbi = contractAbi;
+    this.accountAddress = accountAddress;
+    this.feeDestination = feeDestination;
   }
 
   async process(): Promise<void> {
-    console.log(`${this.chainDescription}: Checking GitcoinVerifier contract at ${this.contractAddress}`);
-
+    console.log(`Checking wallet ${this.accountAddress}`);
     if (await this.shouldSweep()) {
       await this.sweep();
     } else {
-      console.log(`${this.chainDescription}: Balance below threshold, no action needed`);
+      console.log(`Balance below threshold, no action needed`);
     }
   }
 
   private async shouldSweep(): Promise<boolean> {
-    const balance = await this.publicClient.getBalance({ address: this.contractAddress });
-    console.log(`${this.chainDescription}: Balance is ${formatEther(balance)} ETH`);
+    const balance = await this.publicClient.getBalance({ address: this.accountAddress });
+    console.log(`Balance is ${formatEther(balance)} ETH`);
     const thresholdMet = balance >= this.thresholdWei;
-    thresholdMet && console.log(`${this.chainDescription}: Threshold met, sending transaction`);
+    thresholdMet && console.log(`Threshold met, sending transaction`);
     return thresholdMet;
   }
 
   private async sweep(): Promise<void> {
-    const { request } = await this.publicClient.simulateContract({
-      account: this.walletClient.account,
-      address: this.contractAddress,
-      abi: this.contractAbi,
-      functionName: "withdraw",
-    });
-
+    const balance = await this.publicClient.getBalance({ address: this.accountAddress });
+    const value = balance;
+    const txRequest = {
+      account: this.walletClient.account!,
+      to: this.feeDestination,
+      value,
+    };
     console.log(
-      `${this.chainDescription}: Populated transaction: ${JSON.stringify(request, (_, value) => (typeof value === "bigint" ? value.toString() : value))}`
+      `Populated transaction: ${JSON.stringify(txRequest, (_, value) => (typeof value === "bigint" ? value.toString() : value))}`
     );
-
-    const txHash = await this.walletClient.writeContract(request);
-
-    console.log(`${this.chainDescription}: Transaction sent: ${txHash}`);
+    const txHash = await this.walletClient.sendTransaction(txRequest);
+    console.log(`Transaction sent: ${txHash}`);
   }
 
   static async create(config: ChainSweeperConfig): Promise<ChainSweeper> {
-    const { thresholdWei, alchemyApiKey, alchemyChainName, privateKey } = config;
-
-    const { publicClient, walletClient } = getClients({
+    const { thresholdWei, privateKey, feeDestination, alchemyApiKey, alchemyChainName, nativeCurrency } = config;
+    const { publicClient, walletClient, account } = await getClients({
       privateKey,
       alchemyApiKey,
       alchemyChainName,
+      nativeCurrency,
     });
-
-    const { chainInfo, abi } = await getChainConfig(publicClient);
-    const contractAddress = validateAddress(chainInfo.GitcoinVerifier.address);
-    const chainDescription = chainInfo.description;
-
+    const accountAddress = account.address;
     return new ChainSweeper({
       publicClient,
       walletClient,
       thresholdWei,
-      chainDescription,
-      contractAddress,
-      contractAbi: abi,
+      accountAddress,
+      feeDestination: validateAddress(feeDestination),
     });
   }
 }
