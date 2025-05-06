@@ -54,7 +54,7 @@ export function createPagerdutyTopic(): aws.sns.Topic {
 
 export function createIAMLogGroup({ alertTopic }: { alertTopic: aws.sns.Topic }): aws.cloudwatch.LogGroup {
   const logGroup = new aws.cloudwatch.LogGroup("dpopp-iam", {
-    retentionInDays: 1,
+    retentionInDays: 14,
   });
 
   const unhandledErrorsMetric = new aws.cloudwatch.LogMetricFilter("unhandledErrorsMetric", {
