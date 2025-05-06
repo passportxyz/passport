@@ -15,6 +15,7 @@ import { autoVerificationHandler, verificationHandler, getChallengeHandler } fro
 import { metadataHandler } from "./metadata.js";
 import { serverUtils } from "./utils/identityHelper.js";
 import { logger } from "./utils/logger.js";
+
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
 const configErrors = [];
