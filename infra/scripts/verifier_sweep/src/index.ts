@@ -5,7 +5,9 @@ import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-sec
 const COMMAS_AND_SPACES = /[\s,]+/;
 
 const loadEnvVars = () => {
-  const missingVars = ["SECRETS_ARN", "ALCHEMY_CHAIN_NAMES"].filter((key) => !process.env[key]);
+  const missingVars = ["SECRETS_ARN", "ALCHEMY_CHAIN_NAMES", "FEE_DESTINATION_ADDRESS"].filter(
+    (key) => !process.env[key]
+  );
   if (missingVars.length) {
     throw new SweeperError(
       `Missing environment variable${missingVars.length > 1 ? "s" : ""}: ${missingVars.join(", ")}`
@@ -13,6 +15,7 @@ const loadEnvVars = () => {
   }
   const thresholdEth = process.env.BALANCE_THRESHOLD_ETH || "0.25";
   const secretsArn = process.env.SECRETS_ARN!;
+  const feeDestination = process.env.FEE_DESTINATION_ADDRESS!;
   const alchemyChainNames = process.env.ALCHEMY_CHAIN_NAMES!.trim().split(COMMAS_AND_SPACES);
 
   console.log(`Number of chains: ${alchemyChainNames.length}`);
@@ -21,10 +24,13 @@ const loadEnvVars = () => {
   console.log(`Threshold in ETH: ${thresholdEth}`);
   console.log(`Threshold in Wei: ${thresholdWei.toString()}`);
 
+  console.log(`Fee destination: ${feeDestination}`);
+
   return {
     thresholdWei,
     secretsArn,
     alchemyChainNames,
+    feeDestination,
   };
 };
 
