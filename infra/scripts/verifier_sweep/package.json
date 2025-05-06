@@ -6,13 +6,17 @@
   "scripts": {
     "prebuild": "yarn install",
     "build": "tsc",
-    "dev": "ts-node run.ts"
+    "dev": "ts-node run.ts",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "dotenv": "^16.5.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.2",
     "ts-node": "*",
     "typescript": "^5.3.3"
   },
