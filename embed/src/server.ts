@@ -68,7 +68,8 @@ app.use(
     keyGenerator: keyGenerator,
     store: getRateLimiterStore(),
     skip: (req, _res): boolean => {
-      return req.path === "/health" || req.path === "/embed/challenge";
+      // TODO the /embed/verify exemption is temporary, should be safe to remove ~June 2025
+      return req.path === "/health" || req.path === "/embed/challenge" || req.path === "/embed/verify";
     },
   })
 );
