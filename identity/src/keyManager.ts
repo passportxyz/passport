@@ -20,7 +20,7 @@
 // key in the list, with version "0.0.0"
 
 import { checkRotatingKeysEnabled } from "./helpers.js";
-
+import * as logger from "./logger.js";
 const MAX_CONCURRENT_KEYS = 2;
 
 const LEGACY_KEY_ENV_NAME = "IAM_JWK_EIP712";
@@ -80,7 +80,7 @@ const getLegacyKeyVersion = (): KeyVersion | undefined => {
   const key = process.env[LEGACY_KEY_ENV_NAME];
 
   if (!key) {
-    console.warn(`Warning: No legacy key (${LEGACY_KEY_ENV_NAME}) found in ENV`);
+    logger.warn(`Warning: No legacy key (${LEGACY_KEY_ENV_NAME}) found in ENV`);
   }
 
   return (
@@ -109,7 +109,7 @@ const loadInitiatedRotatingKeyVersions = (): KeyVersion[] => {
   }
 
   if (initiatedKeyVersions.length === 0) {
-    console.warn("Warning: No valid IAM_JWK_EIP712_V* keys configured");
+    logger.warn("Warning: No valid IAM_JWK_EIP712_V* keys configured");
   }
 
   return initiatedKeyVersions;

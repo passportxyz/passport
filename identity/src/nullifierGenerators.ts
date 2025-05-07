@@ -8,6 +8,7 @@ import * as base64 from "@ethersproject/base64";
 import { createHash } from "crypto";
 import { objToSortedArray } from "./helpers.js";
 import { humanNetworkOprf } from "./humanNetworkOprf.js";
+import * as logger from "./logger.js";
 
 export type NullifierGenerator = ({ record }: { record: ProofRecord }) => Promise<string>;
 
@@ -124,7 +125,7 @@ export const HumanNetworkNullifierGenerator =
     } catch (e) {
       // For now, ignore errors with humanNetwork
       // TODO remove this once beta testing is complete
-      console.error("Error generating humanNetwork nullifier (ignoring): ", e);
+      logger.error("Error generating humanNetwork nullifier (ignoring): ", e);
       throw new IgnorableNullifierGeneratorError("Error generating humanNetwork nullifier");
     }
   };

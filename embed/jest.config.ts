@@ -1,8 +1,7 @@
-import type { JestConfigWithTsJest } from "ts-jest";
+import { type JestConfigWithTsJest } from "ts-jest";
 
 const config: JestConfigWithTsJest = {
-  extensionsToTreatAsEsm: [".ts"],
-  preset: "ts-jest",
+  preset: "ts-jest/presets/default-esm",
   testEnvironment: "node",
   moduleNameMapper: {
     "^@gitcoin/passport-identity$": "<rootDir>/../node_modules/@gitcoin/passport-identity/dist/esm/index.js",
@@ -10,16 +9,21 @@ const config: JestConfigWithTsJest = {
     "^multiformats$": "<rootDir>/../node_modules/multiformats/dist/index.min.js",
     "^@ipld/dag-cbor$": "<rootDir>/../node_modules/@ipld/dag-cbor/esm/index.js",
     "^uint8arrays(/|$)": "<rootDir>/../node_modules/uint8arrays/dist/index.min.js",
-    "^(\.\.?/.*)\\.js$": "$1",
+    "^(..?/.*)\\.js$": "$1",
   },
   transform: {
-    "^.+\\.ts$": "ts-jest",
-    // For transforming the dependencies that aren't playing nicely
-    "^.+\\.js$": [
+    "^.+\\.(j|t)s$": [
+      // Use babel-jest to transpile both local typescript files and
+      // the dependencies that only available in esm format (dids, etc)
       "babel-jest",
       {
-        presets: [["@babel/preset-env", { targets: { node: "current" } }]],
-        plugins: ["@babel/plugin-transform-modules-commonjs"],
+        presets: ["@babel/preset-typescript", ["@babel/preset-env", { targets: { node: "current" } }]],
+        plugins: [
+          "@babel/plugin-syntax-import-assertions",
+          "babel-plugin-transform-import-meta",
+          ["babel-plugin-replace-import-extension", { extMapping: { ".js": "" } }],
+          "@babel/plugin-transform-modules-commonjs",
+        ],
       },
     ],
   },

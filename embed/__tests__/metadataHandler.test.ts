@@ -88,16 +88,6 @@ describe("GET /embed/stamps/metadata", () => {
   });
 
   describe("unexpected errors", () => {
-    let logSpy: any;
-
-    beforeEach(() => {
-      logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-      logSpy.mockRestore();
-    });
-
     it("should handle errors from the embedWeightsUrl API correctly", async () => {
       mockedAxios.get.mockImplementationOnce(() => {
         throw new Error("Failed to fetch embed weights");
@@ -114,8 +104,6 @@ describe("GET /embed/stamps/metadata", () => {
         code: 500,
         error: expect.stringMatching(/Unexpected server error \(ID: \S+\)/),
       });
-
-      expect(logSpy).toHaveBeenCalledWith("Unexpected error:", expect.any(String));
     });
   });
 

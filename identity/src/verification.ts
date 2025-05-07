@@ -1,11 +1,11 @@
 // ---- Types
-import { Response } from "express";
 import { RequestPayload, CredentialResponseBody, VerifiedPayload, ProviderContext } from "@gitcoin/passport-types";
 
 import { platforms, providers } from "@gitcoin/passport-platforms";
 import { issueNullifiableCredential } from "./credentials.js";
 import { checkCredentialBans } from "./bans.js";
 import { getIssuerInfo } from "./issuers.js";
+import * as logger from "./logger.js";
 
 import * as DIDKit from "@spruceid/didkit-wasm-node";
 
@@ -114,7 +114,7 @@ export async function verifyTypes(
             const resultErrors = verifyResult.errors;
             error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
             if (error.includes(`Request timeout while verifying ${type}.`)) {
-              console.log(`Request timeout while verifying ${type}`);
+              logger.debug(`Request timeout while verifying ${type}`);
               // If a request times out exit loop and return results so additional requests are not made
               break;
             }

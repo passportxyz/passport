@@ -8,6 +8,7 @@ import { router as procedureRouter } from "@gitcoin/passport-platforms/procedure
 import { challengeHandler, checkHandler, easScoreV2Handler, verifyHandler } from "./handlers/index.js";
 
 import { serverUtils } from "./utils/identityHelper.js";
+import { logger } from "./utils/logger.js";
 
 // ---- Config - check for all required env variables
 // We want to prevent the app from starting with default values or if it is misconfigured
@@ -33,7 +34,7 @@ const configErrors = [
   .filter(Boolean);
 
 if (configErrors.length > 0) {
-  configErrors.forEach((error) => console.error(error)); // eslint-disable-line no-console
+  configErrors.forEach((error) => logger.error(error));
   throw new Error("Missing required configuration");
 }
 

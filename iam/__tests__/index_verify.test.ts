@@ -10,6 +10,7 @@ import {
 } from "@gitcoin/passport-types";
 
 import { app } from "../src/index.js";
+
 import * as identityMock from "../src/utils/identityHelper";
 
 jest.mock("../src/utils/revocations", () => ({
@@ -596,14 +597,6 @@ describe("POST /verify", function () {
   });
 
   describe("for unexpected errors", () => {
-    let logSpy: jest.SpyInstance;
-    beforeEach(() => {
-      logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
-    });
-    afterEach(() => {
-      logSpy.mockRestore();
-    });
-
     it("handles unexpected errors", async () => {
       (identityMock.verifyCredential as jest.Mock).mockRejectedValueOnce(
         // new identityMock.serverUtils.InternalApiError("Verify Credential Error"),
@@ -643,8 +636,6 @@ describe("POST /verify", function () {
         error: expect.stringMatching(/Unexpected server error \(ID: \S+?\)/),
         code: 500,
       });
-
-      expect(logSpy).toHaveBeenCalledWith("Unexpected error:", expect.stringMatching(/^Error at/));
     });
   });
 

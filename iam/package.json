@@ -42,6 +42,7 @@
     "luxon": "^2.4.0",
     "moralis": "^2.24.2",
     "multiformats": "^9.9.0",
+    "pino": "^9.6.0",
     "twitter-api-v2": "^1.15.1",
     "uuid": "^8.3.2"
   },
@@ -51,6 +52,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.23.3",
     "@babel/preset-env": "^7.23.3",
     "@babel/preset-typescript": "^7.23.3",
+    "@eslint/eslintrc": "^3.3.1",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/luxon": "^2.3.2",
@@ -65,7 +67,8 @@
     "supertest": "^6.2.2",
     "ts-node": "^10.9.1",
     "tsx": "^4.7.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.32.0"
   },
   "resolutions": {
     "leveldown": "6.1.1"

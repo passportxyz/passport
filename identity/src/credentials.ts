@@ -19,6 +19,7 @@ import {
 } from "./signingDocuments.js";
 import { IgnorableNullifierGeneratorError, NullifierGenerator } from "./nullifierGenerators.js";
 import { checkRotatingKeysEnabled } from "./helpers.js";
+import * as logger from "./logger.js";
 
 // Control expiry times of issued credentials
 export const CHALLENGE_EXPIRES_AFTER_SECONDS = 60; // 1min
@@ -137,7 +138,7 @@ const getNullifiers = async ({
     .filter((result) => !(result.reason instanceof IgnorableNullifierGeneratorError));
 
   if (unexpectedErrors.length > 0) {
-    console.error("Unexpected errors generating nullifiers", unexpectedErrors); // eslint-disable-line no-console
+    logger.error("Unexpected errors generating nullifiers", unexpectedErrors);
     throw new Error("Unable to generate nullifiers");
   }
 
