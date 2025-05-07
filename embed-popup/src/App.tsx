@@ -61,6 +61,7 @@ function App() {
   const signature = urlParams.get("signature");
   const credential = urlParams.get("credential");
   const scorerId = urlParams.get("scorerId");
+  const apiKey = urlParams.get("apiKey");
 
   if (address && signature && credential && platform && providers && scorerId) {
     // preserve the values in local storage
@@ -72,6 +73,9 @@ function App() {
     localStorage.setItem("signature", signature);
     localStorage.setItem("credential", credential);
     localStorage.setItem("scorerId", scorerId);
+    // TODO Once we remove the exemption for this endpoint, we should make this
+    // non-optional and check for it in the above `if` statement.
+    localStorage.setItem("apiKey", apiKey || "");
   }
 
   useEffect(() => {
@@ -79,6 +83,7 @@ function App() {
       const verifyEndpoint = VERIFICATION_URL;
 
       // Check if the required values are missing
+      // TODO check for apiKey here once required
       const isBadRequest = (!code || !state) && (!address || !signature || !credential || !platform);
 
       if (isBadRequest) {
@@ -112,6 +117,7 @@ function App() {
           const _platform = localStorage.getItem("platform") || "";
           const _providers = localStorage.getItem("providers") || "";
           const _scorerId = localStorage.getItem("scorerId") || "";
+          const _apiKey = localStorage.getItem("apiKey") || "";
 
           try {
             const payload = {
@@ -132,7 +138,7 @@ function App() {
             };
 
             // Make the verify call
-            const response = await fetchVerifiableCredential(verifyEndpoint, payload);
+            const response = await fetchVerifiableCredential(verifyEndpoint, payload, _apiKey);
 
             console.log("geri Verification response:", response);
             console.log("Verification response:", response);
@@ -170,7 +176,8 @@ function App() {
       };
       challenge: string;
       scorerId: string;
-    }
+    },
+    apiKey: string
   ): Promise<VerificationResponseType | null> => {
     let parsedChallenge, parsedTypes;
     try {
@@ -186,6 +193,7 @@ function App() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-api-key": apiKey,
       },
       body: JSON.stringify({
         payload: { ...data.payload, types: parsedTypes },
