@@ -1,4 +1,9 @@
 import "dotenv/config";
+
+// Initialize logger for identity package
+import { logger as identityLogger } from "@gitcoin/passport-identity";
+identityLogger.setLogger(logger);
+
 import { logger } from "./utils/logger.js";
 
 // ---- Main App from index
