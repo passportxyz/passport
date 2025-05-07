@@ -20,6 +20,7 @@ import { isServerOnMaintenance } from "../utils/helpers";
 import { CustomizationUrlLayoutRoute } from "../hooks/useCustomization";
 import Campaign from "./Campaign";
 import NotFound from "./NotFound";
+import Version from "./Version";
 
 datadogRum.init({
   applicationId: process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID || "",
@@ -46,6 +47,7 @@ datadogLogs.init({
 
 export const AppRoutes = () => (
   <Routes>
+    <Route path="version" element={<Version />} />
     <Route path="campaign/:campaignId/:step?" element={<Campaign />} />
     <Route path="/:key?" element={<CustomizationUrlLayoutRoute />}>
       <Route path="" element={<Home />} />
