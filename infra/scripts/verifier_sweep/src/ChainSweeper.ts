@@ -42,6 +42,22 @@ const getChainIdFromRpc = async (rpcUrl: string): Promise<number> => {
   }
 };
 
+export type ChainSweeperConfig = {
+  alchemyApiKey: string;
+  privateKey: string;
+  thresholdWei: bigint;
+  alchemyChainName: string;
+  feeDestination: string;
+};
+
+export type ChainSweeper = {
+  walletClient: WalletClient<Transport, Chain>;
+  publicClient: PublicClient<Transport, Chain>;
+  thresholdWei: bigint;
+  accountAddress: `0x${string}`;
+  feeDestination: `0x${string}`;
+};
+
 export const getClients = async ({
   privateKey,
   alchemyApiKey,
@@ -50,7 +66,11 @@ export const getClients = async ({
   privateKey: string;
   alchemyApiKey: string;
   alchemyChainName: string;
-}) => {
+}): Promise<{
+  publicClient: PublicClient<Transport, Chain>;
+  walletClient: WalletClient<Transport, Chain>;
+  account: { address: `0x${string}` };
+}> => {
   const rpcUrl = `https://${alchemyChainName}.g.alchemy.com/v2/${alchemyApiKey}`;
   const transport = http(rpcUrl);
   const account = privateKeyToAccount(privateKey as `0x${string}`);
@@ -81,87 +101,52 @@ export const getClients = async ({
   return { publicClient, walletClient, account };
 };
 
-export type ChainSweeperConfig = {
-  alchemyApiKey: string;
-  privateKey: string;
-  thresholdWei: bigint;
-  alchemyChainName: string;
-  feeDestination: string;
+export const createChainSweeper = async (config: ChainSweeperConfig): Promise<ChainSweeper> => {
+  const { thresholdWei, privateKey, feeDestination, alchemyApiKey, alchemyChainName } = config;
+  const { publicClient, walletClient, account } = await getClients({
+    privateKey,
+    alchemyApiKey,
+    alchemyChainName,
+  });
+  return {
+    publicClient,
+    walletClient,
+    thresholdWei,
+    accountAddress: account.address,
+    feeDestination: validateAddress(feeDestination),
+  };
 };
 
-export class ChainSweeper {
-  private walletClient: WalletClient<Transport, Chain>;
-  private publicClient: PublicClient<Transport, Chain>;
-  private thresholdWei: bigint;
-  private accountAddress: `0x${string}`;
-  private feeDestination: `0x${string}`;
-
-  constructor({
-    walletClient,
-    publicClient,
-    thresholdWei,
-    accountAddress,
-    feeDestination,
-  }: {
-    walletClient: WalletClient<Transport, Chain>;
-    publicClient: PublicClient<Transport, Chain>;
-    thresholdWei: bigint;
-    accountAddress: `0x${string}`;
-    feeDestination: `0x${string}`;
-  }) {
-    this.walletClient = walletClient;
-    this.publicClient = publicClient;
-    this.thresholdWei = thresholdWei;
-    this.accountAddress = accountAddress;
-    this.feeDestination = feeDestination;
+export const shouldSweep = async (sweeper: ChainSweeper): Promise<boolean> => {
+  const balance = await sweeper.publicClient.getBalance({ address: sweeper.accountAddress });
+  console.log(`Balance is ${formatEther(balance)} ETH`);
+  const thresholdMet = balance >= sweeper.thresholdWei;
+  if (thresholdMet) {
+    console.log(`Threshold met, sending transaction`);
   }
+  return thresholdMet;
+};
 
-  async process(): Promise<void> {
-    console.log(`Checking wallet ${this.accountAddress}`);
-    if (await this.shouldSweep()) {
-      await this.sweep();
-    } else {
-      console.log(`Balance below threshold, no action needed`);
-    }
-  }
+export const sweep = async (sweeper: ChainSweeper): Promise<void> => {
+  const balance = await sweeper.publicClient.getBalance({ address: sweeper.accountAddress });
+  const value = balance;
+  const txRequest = {
+    account: sweeper.walletClient.account!,
+    to: sweeper.feeDestination,
+    value,
+  };
+  console.log(
+    `Populated transaction: ${JSON.stringify(txRequest, (_, value) => (typeof value === "bigint" ? value.toString() : value))}`
+  );
+  const txHash = await sweeper.walletClient.sendTransaction(txRequest);
+  console.log(`Transaction sent: ${txHash}`);
+};
 
-  private async shouldSweep(): Promise<boolean> {
-    const balance = await this.publicClient.getBalance({ address: this.accountAddress });
-    console.log(`Balance is ${formatEther(balance)} ETH`);
-    const thresholdMet = balance >= this.thresholdWei;
-    thresholdMet && console.log(`Threshold met, sending transaction`);
-    return thresholdMet;
+export const processChainSweeper = async (sweeper: ChainSweeper): Promise<void> => {
+  console.log(`Checking wallet ${sweeper.accountAddress}`);
+  if (await shouldSweep(sweeper)) {
+    await sweep(sweeper);
+  } else {
+    console.log(`Balance below threshold, no action needed`);
   }
-
-  private async sweep(): Promise<void> {
-    const balance = await this.publicClient.getBalance({ address: this.accountAddress });
-    const value = balance;
-    const txRequest = {
-      account: this.walletClient.account!,
-      to: this.feeDestination,
-      value,
-    };
-    console.log(
-      `Populated transaction: ${JSON.stringify(txRequest, (_, value) => (typeof value === "bigint" ? value.toString() : value))}`
-    );
-    const txHash = await this.walletClient.sendTransaction(txRequest);
-    console.log(`Transaction sent: ${txHash}`);
-  }
-
-  static async create(config: ChainSweeperConfig): Promise<ChainSweeper> {
-    const { thresholdWei, privateKey, feeDestination, alchemyApiKey, alchemyChainName } = config;
-    const { publicClient, walletClient, account } = await getClients({
-      privateKey,
-      alchemyApiKey,
-      alchemyChainName,
-    });
-    const accountAddress = account.address;
-    return new ChainSweeper({
-      publicClient,
-      walletClient,
-      thresholdWei,
-      accountAddress,
-      feeDestination: validateAddress(feeDestination),
-    });
-  }
-}
+};
