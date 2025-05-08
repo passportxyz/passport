@@ -1,4 +1,4 @@
-import { ChainSweeper, SweeperError } from "./ChainSweeper";
+import { createChainSweeper, processChainSweeper, SweeperError, ChainSweeper } from "./ChainSweeper";
 import type { WalletClient, PublicClient, Transport, Chain } from "viem";
 
 describe("ChainSweeper", () => {
@@ -11,7 +11,7 @@ describe("ChainSweeper", () => {
   };
 
   it("throws on invalid feeDestination", async () => {
-    await expect(ChainSweeper.create({ ...validConfig, feeDestination: "invalid" })).rejects.toThrow(SweeperError);
+    await expect(createChainSweeper({ ...validConfig, feeDestination: "invalid" })).rejects.toThrow(SweeperError);
   });
 
   it("creates a ChainSweeper instance with valid config", async () => {
@@ -26,8 +26,14 @@ describe("ChainSweeper", () => {
       } as unknown as WalletClient<Transport, Chain>,
       account: { address: validConfig.privateKey as `0x${string}` },
     });
-    const sweeper = await ChainSweeper.create(validConfig);
-    expect(sweeper).toBeInstanceOf(ChainSweeper);
+    const sweeper = await createChainSweeper(validConfig);
+    expect(sweeper).toMatchObject({
+      publicClient: expect.any(Object),
+      walletClient: expect.any(Object),
+      thresholdWei: validConfig.thresholdWei,
+      accountAddress: expect.any(String),
+      feeDestination: validConfig.feeDestination,
+    });
     getClientsSpy.mockRestore();
   });
 
@@ -40,14 +46,14 @@ describe("ChainSweeper", () => {
       account: { address: validConfig.privateKey as `0x${string}` },
       sendTransaction,
     } as unknown as WalletClient<Transport, Chain>;
-    const sweeper = new ChainSweeper({
+    const sweeper: ChainSweeper = {
       publicClient,
       walletClient,
       thresholdWei: validConfig.thresholdWei,
       accountAddress: validConfig.privateKey as `0x${string}`,
       feeDestination: validConfig.feeDestination as `0x${string}`,
-    });
-    await sweeper.process();
+    };
+    await processChainSweeper(sweeper);
     expect(sendTransaction).toHaveBeenCalled();
   });
 
@@ -58,14 +64,14 @@ describe("ChainSweeper", () => {
       account: { address: validConfig.privateKey as `0x${string}` },
       sendTransaction,
     } as unknown as WalletClient<Transport, Chain>;
-    const sweeper = new ChainSweeper({
+    const sweeper: ChainSweeper = {
       publicClient,
       walletClient,
       thresholdWei: validConfig.thresholdWei,
       accountAddress: validConfig.privateKey as `0x${string}`,
       feeDestination: validConfig.feeDestination as `0x${string}`,
-    });
-    await sweeper.process();
+    };
+    await processChainSweeper(sweeper);
     expect(sendTransaction).not.toHaveBeenCalled();
   });
 });
