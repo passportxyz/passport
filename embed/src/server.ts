@@ -11,7 +11,7 @@ import { rateLimit } from "express-rate-limit";
 // --- Relative imports
 import { apiKeyRateLimit, getRateLimiterStore } from "./rateLimiter.js";
 import { keyGenerator } from "./rateLimiterKeyGenerator.js";
-import { autoVerificationHandler, verificationHandler, getChallengeHandler } from "./handlers.js";
+import { autoVerificationHandler, verificationHandler, getChallengeHandler, getScoreHandler } from "./handlers.js";
 import { metadataHandler } from "./metadata.js";
 import { serverUtils } from "./utils/identityHelper.js";
 import { logger } from "./utils/logger.js";
@@ -91,6 +91,7 @@ app.get("/embed/stamps/metadata", metadataHandler);
 
 // expose challenge entry point
 app.post("/embed/challenge", getChallengeHandler);
+app.get("/embed/score", getScoreHandler);
 
 // This custom error handler needs to be last
 app.use(serverUtils.errorHandlerMiddleware);
