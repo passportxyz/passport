@@ -71,6 +71,34 @@ export const addStampsAndGetScore = async ({
   }
 };
 
+export const getScore = async ({
+  address,
+  scorerId,
+}: {
+  address: string;
+  scorerId: string;
+}): Promise<PassportScore> => {
+  try {
+    const scorerResponse: {
+      data?: {
+        score?: PassportScore;
+      };
+    } = await axios.get(`${process.env.SCORER_ENDPOINT}/internal/embed/score/${scorerId}/${address}`, {
+      headers: {
+        Authorization: apiKey,
+      },
+    });
+
+    if (!scorerResponse.data?.score) {
+      throw new InternalApiError("No score returned from Scorer Embed API");
+    }
+
+    return scorerResponse.data.score;
+  } catch (error) {
+    handleAxiosError(error, "Scorer Embed API", InternalApiError, [apiKey]);
+  }
+};
+
 export const autoVerificationHandler = createHandler<AutoVerificationRequestBodyType, AutoVerificationResponseBodyType>(
   async (req, res) => {
     const { address, scorerId, credentialIds } = req.body;
@@ -180,4 +208,15 @@ export const getChallengeHandler = createHandler<ChallengeRequestBody, Credentia
 
   // return the verifiable credential
   return void res.json(credential);
+});
+
+type GetScoreRequestBody = {
+  scorerId: string;
+  address: string;
+};
+
+export const getScoreHandler = createHandler<GetScoreRequestBody, PassportScore>(async (req, res) => {
+  const { scorerId, address } = req.params;
+  const score = await getScore({ address, scorerId });
+  return void res.json(score);
 });

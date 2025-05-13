@@ -8,7 +8,7 @@ import { ParamsDictionary } from "express-serve-static-core";
 import { PassportScore } from "@gitcoin/passport-identity";
 
 import { apiKeyRateLimit } from "../src/rateLimiter.js";
-import { autoVerificationHandler } from "../src/handlers.js";
+import { autoVerificationHandler, getScoreHandler } from "../src/handlers.js";
 import { app } from "../src/server.js";
 
 jest.mock("../src/rateLimiter", () => {
@@ -30,6 +30,17 @@ jest.mock("../src/handlers", () => {
     getChallengeHandler: jest.fn(),
     verificationHandler: jest.fn(),
     autoVerificationHandler: jest.fn(
+      (
+        req: Request<ParamsDictionary, AutoVerificationResponseBodyType, AutoVerificationRequestBodyType>,
+        res: Response
+      ): Promise<void> => {
+        return new Promise((resolve, reject) => {
+          res.status(200).json(mockedScore);
+          resolve();
+        });
+      }
+    ),
+    getScoreHandler: jest.fn(
       (
         req: Request<ParamsDictionary, AutoVerificationResponseBodyType, AutoVerificationRequestBodyType>,
         res: Response
@@ -127,6 +138,48 @@ describe("autoVerificationHandler", function () {
     const verifyRequest = await request(app)
       .post("/embed/auto-verify")
       .send(payload)
+      .set("Accept", "application/json")
+      .set("X-API-KEY", "MY.SECRET-KEY");
+
+    expect(apiKeyRateLimit as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(verifyRequest.status).toBe(500);
+  });
+});
+
+describe("getScoreHandler", function () {
+  it("handles valid verify requests", async () => {
+    // create a req against the express app
+    const verifyRequest = await request(app)
+      .get("/embed/score/123/0x0")
+      .set("Accept", "application/json")
+      .set("X-API-KEY", "MY.SECRET-KEY");
+
+    expect(apiKeyRateLimit as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(getScoreHandler as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(verifyRequest.status).toBe(200);
+    expect(verifyRequest.body).toStrictEqual(mockedScore);
+  });
+
+  it("handles invalid verify requests - missing api key", async () => {
+    // create a req against the express app
+    const verifyRequest = await request(app).get("/embed/score/123/0x0").set("Accept", "application/json");
+
+    expect(apiKeyRateLimit as jest.Mock).toHaveBeenCalledTimes(0);
+    expect(verifyRequest.status).toBe(401);
+    expect(verifyRequest.body).toStrictEqual({
+      error: "Unauthorized! No 'X-API-KEY' present in the header!",
+      code: 401,
+    });
+  });
+
+  it("handles invalid verify requests - api key validation fails", async () => {
+    (apiKeyRateLimit as jest.Mock).mockImplementationOnce(() => {
+      throw "Invalid API-KEY";
+    });
+
+    // create a req against the express app
+    const verifyRequest = await request(app)
+      .get("/embed/score/123/0x0")
       .set("Accept", "application/json")
       .set("X-API-KEY", "MY.SECRET-KEY");
 
