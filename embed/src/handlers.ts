@@ -83,7 +83,7 @@ export const getScore = async ({
       data?: {
         score?: PassportScore;
       };
-    } = await axios.post(`${process.env.SCORER_ENDPOINT}/internal/embed/score/${scorerId}/${address}`, {
+    } = await axios.get(`${process.env.SCORER_ENDPOINT}/internal/embed/score/${scorerId}/${address}`, {
       headers: {
         Authorization: apiKey,
       },
@@ -216,7 +216,7 @@ type GetScoreRequestBody = {
 };
 
 export const getScoreHandler = createHandler<GetScoreRequestBody, PassportScore>(async (req, res) => {
-  const { scorerId, address } = req.body;
+  const { scorerId, address } = req.params;
   const score = await getScore({ address, scorerId });
   return void res.json(score);
 });

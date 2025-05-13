@@ -91,7 +91,7 @@ app.get("/embed/stamps/metadata", metadataHandler);
 
 // expose challenge entry point
 app.post("/embed/challenge", getChallengeHandler);
-app.get("/embed/score", getScoreHandler);
+app.get("/embed/score/:scorerId/:address", getScoreHandler);
 
 // This custom error handler needs to be last
 app.use(serverUtils.errorHandlerMiddleware);
