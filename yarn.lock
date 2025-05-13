@@ -7050,9 +7050,9 @@
   dependencies:
     "@noble/hashes" "^1.1.5"
 
-"@passportxyz/passport-embed@https://github.com/passportxyz/passport-embed.git#dev-build":
-  version "0.1.6-rc.2"
-  resolved "https://github.com/passportxyz/passport-embed.git#b21ab502bb9c2d5f3885d56568d061f7e4c4bf9d"
+"@passportxyz/passport-embed@https://github.com/passportxyz/passport-embed.git#v0.1.6-rc.1":
+  version "0.1.5"
+  resolved "https://github.com/passportxyz/passport-embed.git#3495687bff4b1a060772d1d4cbc093f8777c0542"
   dependencies:
     "@tanstack/react-query" "^5.62.11"
     axios "^1.7.7"
