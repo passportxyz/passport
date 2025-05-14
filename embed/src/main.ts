@@ -12,7 +12,6 @@ const port = process.env.EMBED_PORT || 80;
 
 const startServer = (): void => {
   const server = app.listen(port, () => {
-    // eslint-disable-next-line no-console
     logger.info(`server started at http://localhost:${port}`);
   });
 
@@ -24,6 +23,5 @@ try {
   // Start server
   startServer();
 } catch (error) {
-  // eslint-disable-next-line no-console
   logger.error(error);
 }
