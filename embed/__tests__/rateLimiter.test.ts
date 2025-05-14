@@ -5,13 +5,17 @@ import axios from "axios";
 
 import { parseRateLimit } from "../src/rateLimiter.js";
 
-jest.mock("../src/redis", () => ({
-  redis: {
-    get: jest.fn().mockResolvedValue(""),
-    set: jest.fn().mockResolvedValue(undefined),
-    call: async (...args: string[]): Promise<any> => Promise.resolve({}),
-  },
-}));
+jest.mock(
+  "../src/redis",
+  () =>
+    ({
+      redis: {
+        get: jest.fn(),
+        set: jest.fn(),
+        call: jest.fn(),
+      },
+    }) as any
+);
 
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
