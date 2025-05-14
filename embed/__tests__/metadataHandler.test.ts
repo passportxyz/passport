@@ -28,7 +28,7 @@ describe("GET /embed/stamps/metadata", () => {
 
     mockedAxios.get.mockResolvedValueOnce({
       data: {
-        rate_limit: "125/15m",
+        embed_rate_limit: "125/15m",
       },
     });
   });

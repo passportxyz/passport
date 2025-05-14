@@ -23,9 +23,9 @@ describe("autoVerificationHandler", function () {
     // Clear the spy stats
     jest.clearAllMocks();
 
-    (axios.get as jest.Mock<() => Promise<{ data: { rate_limit: string } }>>).mockResolvedValueOnce({
+    (axios.get as jest.Mock<() => Promise<{ data: { embed_rate_limit: string } }>>).mockResolvedValueOnce({
       data: {
-        rate_limit: "125/15m",
+        embed_rate_limit: "125/15m",
       },
     });
 

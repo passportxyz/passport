@@ -1,19 +1,26 @@
 // ---- Testing libraries
 import { jest, it, describe, expect, beforeEach } from "@jest/globals";
+import { apiKeyRateLimit } from "../src/rateLimiter.js";
+import axios from "axios";
 
 import { parseRateLimit } from "../src/rateLimiter.js";
 
-jest.mock("../src/redis", () => {
-  return {
-    redis: {
-      call: async (...args: string[]): Promise<any> => Promise.resolve({}),
-    },
-  };
-});
+jest.mock("../src/redis", () => ({
+  redis: {
+    get: jest.fn().mockResolvedValue(""),
+    set: jest.fn().mockResolvedValue(undefined),
+    call: async (...args: string[]): Promise<any> => Promise.resolve({}),
+  },
+}));
+
+jest.mock("axios");
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 beforeEach(() => {
-  // CLear the spy stats
   jest.clearAllMocks();
+  const { redis } = require("../src/redis");
+  redis.get.mockResolvedValue("");
+  redis.set.mockResolvedValue(undefined);
 });
 
 describe("parseRateLimit", function () {
@@ -33,5 +40,29 @@ describe("parseRateLimit", function () {
     expect(() => parseRateLimit("abcd")).toThrow(
       new Error("Invalid rate limit spec format. Expected format: '<requests>/<time><unit> where unit is one of 'smhd'")
     );
+  });
+});
+
+describe("apiKeyRateLimit", () => {
+  const req = { headers: { "x-api-key": "test-key" } } as any;
+  const res = {} as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("parses embed_rate_limit from API response", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { embed_rate_limit: "100/10m" },
+    });
+    const limit = await apiKeyRateLimit(req, res);
+    expect(limit).toBe(10); // 100 requests per 10 minutes = 10 per minute
+  });
+
+  it("throws if embed_rate_limit is missing", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { some_other_key: "100/10m" },
+    });
+    await expect(apiKeyRateLimit(req, res)).rejects.toThrow();
   });
 });

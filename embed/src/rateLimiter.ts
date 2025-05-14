@@ -64,7 +64,7 @@ export async function apiKeyRateLimit(req: Request, _res: Response): Promise<num
       },
     });
 
-    const rateLimitSpec = (rateLimits.data as { rate_limit: string })["rate_limit"];
+    const rateLimitSpec = (rateLimits.data as { embed_rate_limit: string })["embed_rate_limit"];
     const rateLimit = parseRateLimit(rateLimitSpec);
 
     // Cache the limit and set to expire in 5 minutes
