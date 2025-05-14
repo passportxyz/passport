@@ -56,8 +56,13 @@ export const app = express();
 // parse JSON post bodies
 app.use(express.json());
 
-// set cors to accept calls from anywhere
-app.use(cors());
+// set cors to accept calls from anywhere and expose X-RateLimit-Limit header
+app.use(
+  cors({
+    origin: "*",
+    exposedHeaders: ["X-RateLimit-Limit"],
+  })
+);
 
 // Use the rate limiting middleware
 app.use(

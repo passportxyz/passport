@@ -7,14 +7,18 @@ import { serverUtils } from "./utils/identityHelper.js";
 
 const { ApiError } = serverUtils;
 
-export function parseRateLimit(rateLimitSpec: string | null): number {
+type RateLimitResponse = {
+  embed_rate_limit?: string | null;
+};
+
+export function parseRateLimit(rateLimitSpec?: string | null): number {
   if (rateLimitSpec === "" || rateLimitSpec === null) {
     return Infinity;
   }
 
   // Regular expression to match the format "<requests>/<time>"
   const regex = /^(\d+)\/(\d+)([smhd])$/; // Supports seconds (s), minutes (m), hours (h), and days (d)
-  const match = rateLimitSpec.match(regex);
+  const match = rateLimitSpec ? rateLimitSpec.match(regex) : null;
 
   if (!match) {
     throw new ApiError(
@@ -56,16 +60,17 @@ export async function apiKeyRateLimit(req: Request, _res: Response): Promise<num
   const cachedRateLimit = (await redis.get(cacheKey)) || "";
   const rateLimit = Number.parseFloat(cachedRateLimit);
 
-  // Simulate an async operation (e.g., database call)
   if (Number.isNaN(rateLimit)) {
-    const rateLimits = await axios.get(`${process.env.SCORER_ENDPOINT}/internal/embed/validate-api-key`, {
-      headers: {
-        "X-API-KEY": apiKey,
-      },
-    });
+    const { data } = await axios.get<RateLimitResponse>(
+      `${process.env.SCORER_ENDPOINT}/internal/embed/validate-api-key`,
+      {
+        headers: {
+          "X-API-KEY": apiKey,
+        },
+      }
+    );
 
-    const rateLimitSpec = (rateLimits.data as { embed_rate_limit: string })["embed_rate_limit"];
-    const rateLimit = parseRateLimit(rateLimitSpec);
+    const rateLimit = parseRateLimit(data.embed_rate_limit);
 
     // Cache the limit and set to expire in 5 minutes
     await redis.set(cacheKey, rateLimit, "EX", 5 * 60);
