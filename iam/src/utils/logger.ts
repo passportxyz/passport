@@ -4,7 +4,13 @@ const pino = pinoImport.default;
 import type { LogFn } from "pino";
 
 const convertArgsToString = (args: unknown[]): string =>
-  args.map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : String(arg))).join(" ");
+  args
+    .map((arg) =>
+      typeof arg === "object"
+        ? JSON.stringify(arg, (_, value) => (typeof value === "bigint" ? value.toString() : value))
+        : String(arg)
+    )
+    .join(" ");
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" &&
