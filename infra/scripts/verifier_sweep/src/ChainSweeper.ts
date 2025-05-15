@@ -127,13 +127,22 @@ export const shouldSweep = async (sweeper: ChainSweeper): Promise<boolean> => {
   return thresholdMet;
 };
 
+const MIN_RETAINED_ETH = 0.05;
+const MIN_RETAINED_WEI = BigInt(Math.floor(MIN_RETAINED_ETH * 1e18));
+
 export const sweep = async (sweeper: ChainSweeper): Promise<void> => {
   const balance = await sweeper.publicClient.getBalance({ address: sweeper.accountAddress });
-  const value = balance;
+  const sweepable = balance > MIN_RETAINED_WEI ? balance - MIN_RETAINED_WEI : BigInt(0);
+  if (sweepable <= 0n) {
+    console.log(
+      `Balance is at or below minimum retained amount (${formatEther(MIN_RETAINED_WEI)} ETH), nothing to sweep.`
+    );
+    return;
+  }
   const txRequest = {
     account: sweeper.walletClient.account!,
     to: sweeper.feeDestination,
-    value,
+    value: sweepable,
   };
   console.log(
     `Populated transaction: ${JSON.stringify(txRequest, (_, value) => (typeof value === "bigint" ? value.toString() : value))}`
