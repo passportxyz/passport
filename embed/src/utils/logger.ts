@@ -19,7 +19,9 @@ const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   Object.prototype.toString.call(value) === "[object Object]";
 
 // Returns [obj, msg] or [msg] for pino compatibility
-export function formatLogArgs(args: unknown[]): [any, ...any[]] {
+export function formatLogArgs(
+  args: unknown[]
+): [string] | [Record<string, unknown>] | [Record<string, unknown>, string] {
   if (args.length === 0) return [""];
   if (isPlainObject(args[0])) {
     const [firstArg, ...restArgs] = args;
@@ -30,6 +32,7 @@ export function formatLogArgs(args: unknown[]): [any, ...any[]] {
 
 export function mergeTrailingArgs(this: unknown, args: unknown[], method: LogFn, _level: number): void {
   const formatted = formatLogArgs(args);
+  // @ts-expect-error @typescript-eslint/no-explicit-any
   method.apply(this, formatted);
 }
 
