@@ -127,7 +127,8 @@ export const shouldSweep = async (sweeper: ChainSweeper): Promise<boolean> => {
   return thresholdMet;
 };
 
-const MIN_RETAINED_ETH = 0.05;
+// Hard coding to avoid any weirdness with gas estimates
+const MIN_RETAINED_ETH = 0.01;
 const MIN_RETAINED_WEI = BigInt(Math.floor(MIN_RETAINED_ETH * 1e18));
 
 export const sweep = async (sweeper: ChainSweeper): Promise<void> => {
