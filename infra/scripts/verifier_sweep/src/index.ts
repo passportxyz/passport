@@ -20,7 +20,11 @@ export const handler = async (useEnv: boolean): Promise<{ statusCode: number; bo
     const config = await (useEnv ? loadConfigFromEnv() : loadConfigFromAWS());
     console.log(
       "=====Environment=====\n",
-      JSON.stringify({ ...config, thresholdWei: config.thresholdWei.toString() }, null, 2),
+      JSON.stringify(
+        { ...config, privateKey: "<hidden>", alchemyApiKey: "<hidden>", thresholdWei: config.thresholdWei.toString() },
+        null,
+        2
+      ),
       "\n===================="
     );
     await processAllChains(config);
