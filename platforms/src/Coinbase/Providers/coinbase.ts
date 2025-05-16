@@ -45,6 +45,7 @@ export class CoinbaseProvider implements Provider {
   }
 }
 
+// This is just for historical migration purposes. We always use 2 now
 export class CoinbaseProvider2 extends CoinbaseProvider {
   type = "CoinbaseDualVerification2";
 }
