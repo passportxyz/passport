@@ -112,6 +112,7 @@ export class BinanceProvider implements Provider {
   }
 }
 
+// This is just for historical migration purposes. We always use 2 now
 export class BinanceProvider2 extends BinanceProvider {
   type = "BinanceBABT2";
 }
