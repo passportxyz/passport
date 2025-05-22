@@ -6,14 +6,13 @@ const COMMAS_AND_SPACES = /[\s,]+/;
 
 export type SweeperConfig = {
   thresholdWei: bigint;
-  alchemyChainNames: string[];
-  feeDestination: string;
+  chainDepositAddresses: Record<string, string>;
   alchemyApiKey: string;
   privateKey: string;
 };
 
 const getCommonEnvVars = () => {
-  const requiredVars = ["ALCHEMY_CHAIN_NAMES", "FEE_DESTINATION_ADDRESS"];
+  const requiredVars = ["CHAIN_DEPOSIT_ADDRESSES"];
   const missingVars = requiredVars.filter((key) => !process.env[key]);
   if (missingVars.length) {
     throw new SweeperError(
@@ -21,10 +20,9 @@ const getCommonEnvVars = () => {
     );
   }
   const thresholdEth = process.env.BALANCE_THRESHOLD_ETH || "0.25";
-  const feeDestination = process.env.FEE_DESTINATION_ADDRESS!;
-  const alchemyChainNames = process.env.ALCHEMY_CHAIN_NAMES!.trim().split(COMMAS_AND_SPACES);
+  const chainDepositAddresses = JSON.parse(process.env.CHAIN_DEPOSIT_ADDRESSES!);
   const thresholdWei = ethers.parseEther(thresholdEth);
-  return { thresholdWei, alchemyChainNames, feeDestination };
+  return { thresholdWei, chainDepositAddresses };
 };
 
 export const loadConfigFromEnv = async (): Promise<SweeperConfig> => {
@@ -35,25 +33,24 @@ export const loadConfigFromEnv = async (): Promise<SweeperConfig> => {
       `Missing environment variable${missingVars.length > 1 ? "s" : ""}: ${missingVars.join(", ")}`
     );
   }
-  const { thresholdWei, alchemyChainNames, feeDestination } = getCommonEnvVars();
+  const { thresholdWei, chainDepositAddresses } = getCommonEnvVars();
   return {
     thresholdWei,
-    alchemyChainNames,
-    feeDestination,
+    chainDepositAddresses,
     alchemyApiKey: process.env.ALCHEMY_API_KEY!,
     privateKey: process.env.PRIVATE_KEY!,
   };
 };
 
 export const loadConfigFromAWS = async (): Promise<SweeperConfig> => {
-  const requiredVars = ["SECRETS_ARN"];
-  const missingVars = requiredVars.filter((key) => !process.env[key]);
-  if (missingVars.length) {
+  const requiredEnvVars = ["CHAIN_DEPOSIT_ADDRESSES", "SECRETS_ARN"];
+  const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
+  if (missingEnvVars.length) {
     throw new SweeperError(
-      `Missing environment variable${missingVars.length > 1 ? "s" : ""}: ${missingVars.join(", ")}`
+      `Missing environment variable${missingEnvVars.length > 1 ? "s" : ""}: ${missingEnvVars.join(", ")}`
     );
   }
-  const { thresholdWei, alchemyChainNames, feeDestination } = getCommonEnvVars();
+  const { thresholdWei, chainDepositAddresses } = getCommonEnvVars();
   const secretsArn = process.env.SECRETS_ARN!;
   const secretsClient = new SecretsManagerClient();
   const secretResponse = await secretsClient.send(new GetSecretValueCommand({ SecretId: secretsArn }));
@@ -65,8 +62,7 @@ export const loadConfigFromAWS = async (): Promise<SweeperConfig> => {
   }
   return {
     thresholdWei,
-    alchemyChainNames,
-    feeDestination,
+    chainDepositAddresses,
     alchemyApiKey: secrets.ALCHEMY_API_KEY!,
     privateKey: secrets.PRIVATE_KEY!,
   };
