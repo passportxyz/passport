@@ -47,7 +47,7 @@ export type ChainSweeperConfig = {
   privateKey: string;
   thresholdWei: bigint;
   alchemyChainName: string;
-  feeDestination: string;
+  feeDestination?: string;
 };
 
 export type ChainSweeper = {
@@ -103,6 +103,9 @@ export const getClients = async ({
 
 export const createChainSweeper = async (config: ChainSweeperConfig): Promise<ChainSweeper> => {
   const { thresholdWei, privateKey, feeDestination, alchemyApiKey, alchemyChainName } = config;
+  if (!feeDestination) {
+    throw new SweeperError("feeDestination is required for ChainSweeper");
+  }
   const { publicClient, walletClient, account } = await getClients({
     privateKey,
     alchemyApiKey,

@@ -2,13 +2,18 @@ import { createChainSweeper, processChainSweeper, ChainSweeperConfig, SweeperErr
 import { loadConfigFromEnv, loadConfigFromAWS } from "./configLoaders";
 
 const processAllChains = async (
-  config: Omit<ChainSweeperConfig, "alchemyChainName"> & { alchemyChainNames: string[] }
+  config: Omit<ChainSweeperConfig, "alchemyChainName" | "feeDestination"> & { chainDepositAddresses: Record<string, string> }
 ): Promise<void> => {
-  for (const alchemyChainName of config.alchemyChainNames) {
+  for (const [alchemyChainName, feeDestination] of Object.entries(config.chainDepositAddresses)) {
     console.log(`Processing chain: ${alchemyChainName}`);
+    if (!feeDestination) {
+      console.error(`No fee destination address found for chain: ${alchemyChainName}`);
+      continue;
+    }
     const sweeper = await createChainSweeper({
       ...config,
       alchemyChainName,
+      feeDestination,
     });
     await processChainSweeper(sweeper);
     console.log(`Finished processing chain: ${alchemyChainName}`);
