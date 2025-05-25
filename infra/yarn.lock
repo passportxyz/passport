@@ -500,10 +500,10 @@
   dependencies:
     "@pulumi/pulumi" "^3.136.0"
 
-"@pulumi/github@^6.7.0":
-  version "6.7.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/github/-/github-6.7.0.tgz#4921e0699b2909093c326fd48a9866b6f2f3b9bd"
-  integrity sha512-14LgAm6Q1CtIRoHE7E+17pr1a26ugR7IDzWoTgq1bvm8mmqUCIJs/8IbcQR+VwxY304fhN/n6YRqk/6MY9lsJw==
+"@pulumi/github@^6.7.2":
+  version "6.7.2"
+  resolved "https://registry.yarnpkg.com/@pulumi/github/-/github-6.7.2.tgz#1e1d5be3387c4ada986b9923a3aede9aebf9a633"
+  integrity sha512-dsaCLKQXqTVChE5gsowDoI7J3ZcN+WQ2zamFqHeYbSTJ2NJ06ENK+INkwbrUnEqtLA5t6lfOIu2F97Yz0+LsRQ==
   dependencies:
     "@pulumi/pulumi" "^3.142.0"
 

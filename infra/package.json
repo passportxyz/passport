@@ -7,7 +7,7 @@
     "@1password/op-js": "^0.1.13",
     "@pulumi/aws": "^5.0.0",
     "@pulumi/cloudflare": "^5.26.0",
-    "@pulumi/github": "^6.7.0",
+    "@pulumi/github": "^6.7.2",
     "@pulumi/pulumi": "^3.0.0",
     "@pulumi/std": "^1.7.3",
     "infra-libs": "passportxyz/infra-libs#v1.3.0"
