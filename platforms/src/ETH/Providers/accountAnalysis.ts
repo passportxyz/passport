@@ -51,6 +51,7 @@ const MODEL_SUBPATHS = {
   polygon: "polygon-model-predict",
   arb: "arbitrum-model-predict",
   op: "optimism-model-predict",
+  base: "base-model-predict",
 } as const;
 
 type ModelKeys = keyof typeof MODEL_SUBPATHS;
