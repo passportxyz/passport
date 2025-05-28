@@ -181,8 +181,12 @@ describe("issueNullifiableCredential", function () {
 
     const secret = "secret";
 
-    const expectedHNHash =
-      "v3:" + base64.encode(createHash("sha256").update(secret).update(mockMishtiOprfResponse).digest());
+    const expectedOwnIdentityHashHash = base64.encode(
+      createHash("sha256")
+        .update(secret)
+        .update(JSON.stringify(objToSortedArray(record)))
+        .digest()
+    );
 
     const { credential } = await issueNullifiableCredential({
       DIDKit,
@@ -207,10 +211,15 @@ describe("issueNullifiableCredential", function () {
     expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
     expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
     expect(Array.isArray(credential.credentialSubject.nullifiers)).toEqual(true);
-    expect(credential.credentialSubject.nullifiers).toEqual([expectedStandardHash, expectedHNHash]);
+    expect(credential.credentialSubject.nullifiers).toEqual([expectedStandardHash, "v3:" + mockMishtiOprfResponse]);
     expect(typeof credential.proof).toEqual("object");
     expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
     expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
+    expect(humanNetworkOprf).toHaveBeenCalledWith({
+      value: expectedOwnIdentityHashHash,
+      clientPrivateKey: "",
+      relayUrl: "",
+    });
   });
 });
 
