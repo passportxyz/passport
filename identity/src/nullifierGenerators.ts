@@ -98,16 +98,18 @@ const createHumanNetworkNullifier = async ({
   ...humanNetworkOps
 }: HumanNetworkNullifierGeneratorOptions & { record: ProofRecord }) => {
   const value = JSON.stringify(objToSortedArray(record));
+  const hashedValue = hashValueWithSecret({
+    secret: localSecret,
+    value: value,
+  });
   const humanNetworkEncrypted = await humanNetworkOprf({
-    value,
+    value: hashedValue,
     ...humanNetworkOps,
   });
-  const hashed = hashValueWithSecret({
-    secret: localSecret,
-    value: humanNetworkEncrypted,
-  });
 
-  return `v${version}:${hashed}`;
+  logger.info(`Human hashing '${hashedValue}' => '${humanNetworkEncrypted}'`);
+
+  return `v${version}:${humanNetworkEncrypted}`;
 };
 
 export const HumanNetworkNullifierGenerator =
