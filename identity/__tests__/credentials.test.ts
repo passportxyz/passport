@@ -181,7 +181,7 @@ describe("issueNullifiableCredential", function () {
 
     const secret = "secret";
 
-    const expectedOwnIdentityHashHash = base64.encode(
+    const expectedOwnIdentityHash = base64.encode(
       createHash("sha256")
         .update(secret)
         .update(JSON.stringify(objToSortedArray(record)))
@@ -216,7 +216,7 @@ describe("issueNullifiableCredential", function () {
     expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
     expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
     expect(humanNetworkOprf).toHaveBeenCalledWith({
-      value: expectedOwnIdentityHashHash,
+      value: expectedOwnIdentityHash,
       clientPrivateKey: "",
       relayUrl: "",
     });
