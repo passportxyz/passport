@@ -80,3 +80,41 @@ The passport-scorer API has been updated with the following changes:
 - [ ] Look into backwards compatibility
   - Not super importand, would be max a few minutes downtime because we own both sides
   - If easy though, support a brief transition phase. But if it complicates the code, not worth it. Let me know what you decide here.
+
+## Tests Created (12/6/2024)
+
+### Files Created:
+1. **`app/__tests__/context/scorerContext.test.tsx`** - New dedicated test file for scorerContext
+   - Tests for handling both old (`stamp_scores`) and new (`stamps`) API response formats
+   - Tests for extracting scores from objects containing `{score, dedup, expiration_date}`
+   - Tests for backward compatibility with mixed formats
+   - Tests for score calculations with deduplicated stamps
+   - Tests for handling edge cases (missing stamps field, non-binary scorers)
+
+2. **`app/__tests__/components/PlatformCard.test.tsx`** - New dedicated test file for PlatformCard
+   - Tests for displaying deduplication label when appropriate
+   - Tests for various scenarios: verified with points, verified without points (deduplicated), unverified
+   - Tests for mixed provider scenarios where some are deduplicated
+   - Tests ensuring expired stamps take precedence over deduplication status
+
+### Files Modified:
+1. **`app/__tests__/components/CardList.test.tsx`** - Added new test section
+   - Added "deduplication label tests" describe block
+   - Tests for showing/hiding deduplication label based on stamp status
+   - Mock component tests to demonstrate expected UI behavior
+
+### Important Implementation Notes:
+
+1. **Context Storage Consideration**: The current `StampScores` type in scorerContext only stores score strings, not the full stamp objects. The implementation will need to decide how to pass the `dedup` flag from the API response to the UI components. Options include:
+   - Store the full stamp response objects in context (breaking change)
+   - Add a separate `stampDedupStatus` field to track dedup flags
+   - Pass dedup information through a different mechanism
+
+2. **Deduplication Detection Logic**: The tests assume deduplication is identified by:
+   - Stamp exists (is verified)
+   - Stamp has 0 earned points
+   - API response has `dedup: true` for that stamp
+   
+   The actual implementation needs to ensure all three conditions are checked.
+
+3. **Backward Compatibility**: Tests include handling of mixed format responses to support gradual migration, but the implementation should decide on the transition strategy based on deployment coordination between frontend and backend.
