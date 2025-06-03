@@ -15,36 +15,50 @@ const scorerApiGetWeights = CERAMIC_CACHE_ENDPOINT + "/weights";
 
 export const parseFloatOneDecimal = (value: string) => parseFloat(parseFloat(value).toFixed(1));
 
-// Helper function to process stamp scores from API response
+/**
+ * Type guard to check if a value is a valid stamp score response object
+ */
+const isStampObject = (value: any): value is StampScoreResponse =>
+  typeof value === "object" && value !== null && "score" in value;
+
+/**
+ * Processes stamp scores from API response, handling both new and legacy formats.
+ *
+ * New format: { stamps: { providerId: { score, dedup, expiration_date } } }
+ * Legacy format: { stamp_scores: { providerId: "score" } }
+ *
+ * @param apiResponse - The API response data
+ * @returns Object containing extracted scores and deduplication status
+ */
 const processStampScores = (
-  responseData: any
+  apiResponse: any
 ): { scores: Partial<StampScores>; dedupStatus: Partial<StampDedupStatus> } => {
-  const scores: Partial<StampScores> = {};
-  const dedupStatus: Partial<StampDedupStatus> = {};
+  const extractedScores: Partial<StampScores> = {};
+  const extractedDedupStatus: Partial<StampDedupStatus> = {};
 
-  // Handle new API format with 'stamps' field containing objects
-  if (responseData.stamps) {
-    Object.entries(responseData.stamps).forEach(([providerId, stampData]: [string, any]) => {
-      if (typeof stampData === "object" && stampData !== null) {
-        scores[providerId as PROVIDER_ID] = stampData.score || "0";
-        dedupStatus[providerId as PROVIDER_ID] = stampData.dedup || false;
+  // Process new format (stamps with objects)
+  if (apiResponse.stamps) {
+    for (const [providerId, stampData] of Object.entries(apiResponse.stamps)) {
+      if (isStampObject(stampData)) {
+        extractedScores[providerId as PROVIDER_ID] = stampData.score || "0";
+        extractedDedupStatus[providerId as PROVIDER_ID] = stampData.dedup || false;
       } else {
-        // Fallback for mixed format
-        scores[providerId as PROVIDER_ID] = String(stampData);
-        dedupStatus[providerId as PROVIDER_ID] = false;
+        // Handle mixed format gracefully
+        extractedScores[providerId as PROVIDER_ID] = String(stampData);
+        extractedDedupStatus[providerId as PROVIDER_ID] = false;
       }
-    });
+    }
   }
 
-  // Handle old API format with 'stamp_scores' field containing strings (backward compatibility)
-  if (responseData.stamp_scores) {
-    Object.entries(responseData.stamp_scores).forEach(([providerId, score]: [string, any]) => {
-      scores[providerId as PROVIDER_ID] = String(score);
-      dedupStatus[providerId as PROVIDER_ID] = false; // No dedup info in old format
-    });
+  // Process legacy format (stamp_scores with strings)
+  if (apiResponse.stamp_scores) {
+    for (const [providerId, score] of Object.entries(apiResponse.stamp_scores)) {
+      extractedScores[providerId as PROVIDER_ID] = String(score);
+      extractedDedupStatus[providerId as PROVIDER_ID] = false;
+    }
   }
 
-  return { scores, dedupStatus };
+  return { scores: extractedScores, dedupStatus: extractedDedupStatus };
 };
 
 export type PassportSubmissionStateType =
