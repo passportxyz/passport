@@ -6,7 +6,7 @@ import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 
 // --- Components
 import { Button } from "./Button";
-import { PlatformScoreSpec } from "../context/scorerContext";
+import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 import { CeramicContext } from "../context/ceramicContext";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
@@ -32,6 +32,7 @@ type StampProps = {
   className?: string;
   onClick: () => void;
   variant?: CardVariant;
+  isDeduplicated?: boolean;
 };
 
 const variantClasses: Record<CardVariant, string> = {
@@ -107,7 +108,7 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps
   );
 };
 
-const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick }: StampProps) => {
+const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick, isDeduplicated }: StampProps) => {
   const [hovering, setHovering] = useState(false);
   const imgFilter = {
     filter: `invert(27%) sepia(97%) saturate(295%) hue-rotate(113deg) brightness(${
@@ -140,10 +141,19 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick 
                 />
               </svg>
             )}
-            <div className="bg-foreground-4 px-2 py-1 rounded text-right font-alt text-black">
-              <p className="text-xs" data-testid="verified-label">
-                Verified
-              </p>
+            <div className="flex gap-2">
+              <div className="bg-foreground-4 px-2 py-1 rounded text-right font-alt text-black">
+                <p className="text-xs" data-testid="verified-label">
+                  Verified
+                </p>
+              </div>
+              {isDeduplicated && (
+                <div className="bg-background-4 px-2 py-1 rounded text-right font-alt text-black">
+                  <p className="text-xs" data-testid="deduped-label">
+                    Claimed by another wallet
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -192,7 +202,7 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick 
   );
 };
 
-const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick }: StampProps) => {
+const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick, isDeduplicated }: StampProps) => {
   const [hovering, setHovering] = useState(false);
   const imgFilter = {
     filter: `invert(27%) sepia(97%) saturate(295%) hue-rotate(113deg) brightness(${
@@ -224,10 +234,19 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick }
                 />
               </svg>
             )}
-            <div className="bg-background-5 px-2 py-1 rounded text-right font-alt text-black">
-              <p className="text-xs" data-testid="expired-label">
-                Expired
-              </p>
+            <div className="flex gap-2">
+              <div className="bg-background-5 px-2 py-1 rounded text-right font-alt text-black">
+                <p className="text-xs" data-testid="expired-label">
+                  Expired
+                </p>
+              </div>
+              {isDeduplicated && (
+                <div className="bg-background-4 px-2 py-1 rounded text-right font-alt text-black">
+                  <p className="text-xs" data-testid="deduped-label">
+                    Claimed by another wallet
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -278,6 +297,7 @@ export const PlatformCard = ({
   variant,
 }: PlatformCardProps): JSX.Element => {
   const { platformExpirationDates, expiredPlatforms, allProvidersState } = useContext(CeramicContext);
+  const { stampDedupStatus } = useContext(ScorerContext);
   const { platformSpecs, platformProviderIds } = usePlatforms();
 
   const selectedProviders = platformSpecs.reduce((platforms, platform) => {
@@ -294,15 +314,28 @@ export const PlatformCard = ({
     expirationDate: platformExpirationDates[platform.platform as PLATFORM_ID] || "",
   });
 
-  const verified = platform.earnedPoints > 0 || selectedProviders[platform.platform].length > 0;
+  // Check if any providers for this platform are deduplicated
+  const providerIds = platformProviderIds[platform.platform] || [];
+  const isDeduplicated = providerIds.some((providerId) => {
+    const isVerified = typeof allProvidersState[providerId]?.stamp?.credential !== "undefined";
+    const isDeduped = (stampDedupStatus && stampDedupStatus[providerId]) || false;
+    const hasZeroPoints = platform.earnedPoints === 0;
+    return isVerified && isDeduped && hasZeroPoints;
+  });
+
+  const verified =
+    platform.earnedPoints > 0 ||
+    (selectedProviders[platform.platform] && selectedProviders[platform.platform].length > 0);
   // returns a single Platform card
   let stamp = null;
   if (verified && isExpired) {
+    // Expired stamps (may also be deduplicated)
     stamp = (
       <ExpiredStamp
         idx={i}
         platform={platform}
         className={className}
+        isDeduplicated={isDeduplicated}
         onClick={() => {
           setCurrentPlatform(platform);
           onOpen();
@@ -310,13 +343,14 @@ export const PlatformCard = ({
       />
     );
   } else if (verified) {
-    // The not-verified & not-expired state of the card
+    // Verified stamps (may also be deduplicated)
     stamp = (
       <VerifiedStamp
         idx={i}
         platform={platform}
         daysUntilExpiration={daysUntilExpiration}
         className={className}
+        isDeduplicated={isDeduplicated}
         onClick={() => {
           setCurrentPlatform(platform);
           onOpen();
@@ -324,6 +358,7 @@ export const PlatformCard = ({
       />
     );
   } else {
+    // Default unverified stamps
     stamp = (
       <DefaultStamp
         variant={variant}

@@ -15,6 +15,38 @@ const scorerApiGetWeights = CERAMIC_CACHE_ENDPOINT + "/weights";
 
 export const parseFloatOneDecimal = (value: string) => parseFloat(parseFloat(value).toFixed(1));
 
+// Helper function to process stamp scores from API response
+const processStampScores = (
+  responseData: any
+): { scores: Partial<StampScores>; dedupStatus: Partial<StampDedupStatus> } => {
+  const scores: Partial<StampScores> = {};
+  const dedupStatus: Partial<StampDedupStatus> = {};
+
+  // Handle new API format with 'stamps' field containing objects
+  if (responseData.stamps) {
+    Object.entries(responseData.stamps).forEach(([providerId, stampData]: [string, any]) => {
+      if (typeof stampData === "object" && stampData !== null) {
+        scores[providerId as PROVIDER_ID] = stampData.score || "0";
+        dedupStatus[providerId as PROVIDER_ID] = stampData.dedup || false;
+      } else {
+        // Fallback for mixed format
+        scores[providerId as PROVIDER_ID] = String(stampData);
+        dedupStatus[providerId as PROVIDER_ID] = false;
+      }
+    });
+  }
+
+  // Handle old API format with 'stamp_scores' field containing strings (backward compatibility)
+  if (responseData.stamp_scores) {
+    Object.entries(responseData.stamp_scores).forEach(([providerId, score]: [string, any]) => {
+      scores[providerId as PROVIDER_ID] = String(score);
+      dedupStatus[providerId as PROVIDER_ID] = false; // No dedup info in old format
+    });
+  }
+
+  return { scores, dedupStatus };
+};
+
 export type PassportSubmissionStateType =
   | "APP_INITIAL"
   | "APP_REQUEST_PENDING"
@@ -28,6 +60,16 @@ export type Weights = {
 
 export type StampScores = {
   [key in PROVIDER_ID]: string;
+};
+
+export type StampScoreResponse = {
+  score: string;
+  dedup: boolean;
+  expiration_date?: string;
+};
+
+export type StampDedupStatus = {
+  [key in PROVIDER_ID]: boolean;
 };
 
 export type PlatformScoreSpec = PlatformSpec & {
@@ -50,6 +92,7 @@ export interface ScorerContextState {
   fetchStampWeights: () => Promise<void>;
   stampWeights: Partial<Weights>;
   stampScores: Partial<StampScores>;
+  stampDedupStatus: Partial<StampDedupStatus>;
   // submitPassport: (address: string | undefined) => Promise<void>;
 }
 
@@ -69,6 +112,7 @@ const startingState: ScorerContextState = {
   fetchStampWeights: async (): Promise<void> => {},
   stampWeights: {},
   stampScores: {},
+  stampDedupStatus: {},
   // submitPassport: async (address: string | undefined): Promise<void> => {},
 };
 
@@ -83,6 +127,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [passportSubmissionState, setPassportSubmissionState] = useState<PassportSubmissionStateType>("APP_INITIAL");
   const [scoreState, setScoreState] = useState<ScoreStateType>("APP_INITIAL");
   const [stampScores, setStampScores] = useState<Partial<StampScores>>({});
+  const [stampDedupStatus, setStampDedupStatus] = useState<Partial<StampDedupStatus>>({});
   const [stampWeights, setStampWeights] = useState<Partial<Weights>>({});
   const [scoredPlatforms, setScoredPlatforms] = useState<PlatformScoreSpec[]>([]);
   const customization = useCustomization();
@@ -138,7 +183,9 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
           setRawScore(numRawScore);
           setThreshold(numThreshold);
           setScore(numScore);
-          setStampScores(response.data.stamp_scores);
+          const { scores, dedupStatus } = processStampScores(response.data);
+          setStampScores(scores);
+          setStampDedupStatus(dedupStatus);
 
           if (numRawScore > numThreshold) {
             setScoreDescription("Passing Score");
@@ -154,7 +201,9 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
           setRawScore(numRawScore);
           setThreshold(numThreshold);
           setScore(numScore);
-          setStampScores(response.data.stamp_scores);
+          const { scores, dedupStatus } = processStampScores(response.data);
+          setStampScores(scores);
+          setStampDedupStatus(dedupStatus);
 
           setScoreDescription("");
         }
@@ -236,7 +285,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       });
       setScoredPlatforms(scoredPlatforms);
     }
-  }, [stampScores, stampWeights]);
+  }, [stampScores, stampWeights, platforms, platformProviders, getPlatformSpec]);
 
   useEffect(() => {
     if (!stampScores || !stampWeights) {
@@ -246,7 +295,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       return;
     }
     calculatePlatformScore();
-  }, [stampScores, stampWeights]);
+  }, [stampScores, stampWeights, calculatePlatformScore]);
 
   // use props as a way to pass configuration values
   const providerProps = {
@@ -258,6 +307,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     scoreState,
     stampWeights,
     stampScores,
+    stampDedupStatus,
     scoredPlatforms,
     refreshScore,
     fetchStampWeights,

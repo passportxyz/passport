@@ -395,10 +395,18 @@ describe("ScorerContext", () => {
       };
 
       vi.mocked(axios).mockImplementation((config: any) => {
-        if (config.url.includes("/weights")) {
+        if (config.url && config.url.includes("/weights")) {
           return Promise.resolve({ data: mockStampWeights });
         }
         return Promise.resolve(responseWithDedupScores);
+      });
+
+      // Mock axios.get specifically for weights endpoint
+      vi.mocked(axios.get).mockImplementation((url: string) => {
+        if (url.includes("/weights")) {
+          return Promise.resolve({ data: mockStampWeights });
+        }
+        return Promise.reject(new Error("Unexpected URL"));
       });
 
       const TestComponent = () => {

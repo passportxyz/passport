@@ -35,7 +35,24 @@ describe("<PlatformCard />", () => {
   const mockScorerContext: Partial<ScorerContextState> = {
     stampScores: {},
     stampWeights: {},
+    stampDedupStatus: {},
   };
+
+  const createMockUsePlatforms = (providerIds: string[] = ["GithubContributor"]) => ({
+    ...mockUsePlatforms,
+    platformSpecs: [
+      {
+        platform: "Github" as PLATFORM_ID,
+        name: "Github",
+        description: "Github platform",
+        connectMessage: "Connect",
+        icon: "./assets/githubStampIcon.svg",
+      },
+    ],
+    platformProviderIds: {
+      Github: providerIds,
+    },
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -75,12 +92,7 @@ describe("<PlatformCard />", () => {
         earnedPoints: 0,
       };
 
-      vi.mocked(usePlatforms).mockReturnValue({
-        ...mockUsePlatforms,
-        platformProviderIds: {
-          Github: ["GithubContributor"],
-        },
-      } as any);
+      vi.mocked(usePlatforms).mockReturnValue(createMockUsePlatforms() as any);
 
       // Create a mock component that simulates the deduplication label
       const PlatformCardWithDedup = () => {
@@ -150,12 +162,7 @@ describe("<PlatformCard />", () => {
         earnedPoints: 5, // Has earned points
       };
 
-      vi.mocked(usePlatforms).mockReturnValue({
-        ...mockUsePlatforms,
-        platformProviderIds: {
-          Github: ["GithubContributor"],
-        },
-      } as any);
+      vi.mocked(usePlatforms).mockReturnValue(createMockUsePlatforms() as any);
 
       render(
         <CeramicContext.Provider value={ceramicContextWithVerifiedStamp}>
@@ -216,12 +223,7 @@ describe("<PlatformCard />", () => {
         possiblePoints: 8,
       };
 
-      vi.mocked(usePlatforms).mockReturnValue({
-        ...mockUsePlatforms,
-        platformProviderIds: {
-          Github: ["GithubContributor", "GithubFollower"],
-        },
-      } as any);
+      vi.mocked(usePlatforms).mockReturnValue(createMockUsePlatforms(["GithubContributor", "GithubFollower"]) as any);
 
       render(
         <CeramicContext.Provider value={ceramicContextWithMixedStamps}>
@@ -283,12 +285,7 @@ describe("<PlatformCard />", () => {
         possiblePoints: 8,
       };
 
-      vi.mocked(usePlatforms).mockReturnValue({
-        ...mockUsePlatforms,
-        platformProviderIds: {
-          Github: ["GithubContributor", "GithubFollower"],
-        },
-      } as any);
+      vi.mocked(usePlatforms).mockReturnValue(createMockUsePlatforms(["GithubContributor", "GithubFollower"]) as any);
 
       // Create a mock component that simulates the expected behavior
       const PlatformCardWithAllDedup = () => {
@@ -342,6 +339,15 @@ describe("<PlatformCard />", () => {
 
       vi.mocked(usePlatforms).mockReturnValue({
         ...mockUsePlatforms,
+        platformSpecs: [
+          {
+            platform: "Github" as PLATFORM_ID,
+            name: "Github",
+            description: "Github platform",
+            connectMessage: "Connect",
+            icon: "./assets/githubStampIcon.svg",
+          },
+        ],
         platformProviderIds: {
           Github: ["GithubContributor"],
         },
