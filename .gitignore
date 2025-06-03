@@ -31,5 +31,3 @@ schemas/.env.yarn
 
 # Do not ignore tehse files
 !.env.example
-
-passport-scorer
