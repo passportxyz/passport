@@ -298,7 +298,6 @@ export const PlatformCard = ({
   // returns a single Platform card
   let stamp = null;
   if (verified && isExpired) {
-    // Expired stamps (may also be deduplicated)
     stamp = (
       <ExpiredStamp
         idx={i}
@@ -312,7 +311,6 @@ export const PlatformCard = ({
       />
     );
   } else if (verified) {
-    // Verified stamps (may also be deduplicated)
     stamp = (
       <VerifiedStamp
         idx={i}
@@ -327,7 +325,6 @@ export const PlatformCard = ({
       />
     );
   } else {
-    // Default unverified stamps
     stamp = (
       <DefaultStamp
         variant={variant}
