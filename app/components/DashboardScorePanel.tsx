@@ -37,7 +37,7 @@ const borderStyle = (color: string) => {
 };
 
 export const DashboardScorePanel = ({ className }: { className?: string }) => {
-  const { rawScore, passportSubmissionState, threshold } = React.useContext(ScorerContext);
+  const { rawScore, scoreState, threshold } = React.useContext(ScorerContext);
   const [verificationState] = useAtom(mutableUserVerificationAtom);
   const [displayScore, setDisplayScore] = React.useState(0);
   const customization = useCustomization();
@@ -53,7 +53,7 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
 
   const customTitle = customization?.scorerPanel?.title;
 
-  const loading = passportSubmissionState === "APP_REQUEST_PENDING" || verificationState.loading;
+  const loading = scoreState === "LOADING" || verificationState.loading;
   const aboveThreshold = rawScore >= threshold;
   const highlightColor = aboveThreshold ? "foreground-2" : "background-5";
 
@@ -172,11 +172,11 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
 };
 
 export const DashboardScoreExplanationPanel = ({ className }: { className?: string }) => {
-  const { passportSubmissionState } = React.useContext(ScorerContext);
+  const { scoreState } = React.useContext(ScorerContext);
   const [verificationState] = useAtom(mutableUserVerificationAtom);
   const [showSidebar, setShowSidebar] = React.useState(false);
 
-  const loading = passportSubmissionState === "APP_REQUEST_PENDING" || verificationState.loading;
+  const loading = scoreState === "LOADING" || verificationState.loading;
 
   return (
     <>

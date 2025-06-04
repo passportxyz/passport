@@ -69,7 +69,7 @@ export function SyncToChainButton({ onChainStatus, chain, className, isLoading }
     showLowScoreAlert ||
     syncingToChain ||
     onChainStatus === OnChainStatus.LOADING ||
-    (scoreState !== "DONE" && scoreState !== "ERROR");
+    (scoreState !== "SUCCESS" && scoreState !== "ERROR");
   const expired = onChainStatus === OnChainStatus.MOVED_EXPIRED;
 
   return (

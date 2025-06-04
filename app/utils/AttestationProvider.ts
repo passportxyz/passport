@@ -3,7 +3,7 @@ import GitcoinVerifierAbi from "../../deployments/abi/GitcoinVerifier.json";
 import axios, { AxiosResponse } from "axios";
 import { iamUrl } from "../config/stamp_config";
 import { OnChainStatus } from "../utils/onChainStatus";
-import { ScoreStateType } from "../context/scorerContext";
+import { ScoreState } from "../context/scorerContext";
 import { AllProvidersState, ProviderState } from "../context/ceramicContext";
 import { OnChainProviderType } from "../hooks/useOnChainData";
 import { Stamp } from "@gitcoin/passport-types";
@@ -46,7 +46,7 @@ export interface AttestationProvider {
     allProvidersState: AllProvidersState,
     onChainProviders: OnChainProviderType[],
     rawScore: number,
-    scoreState: ScoreStateType,
+    scoreState: ScoreState,
     onChainScore: number,
     expirationDate?: Date
   ) => OnChainStatus;
@@ -114,13 +114,13 @@ class BaseAttestationProvider implements AttestationProvider {
     allProvidersState: AllProvidersState,
     onChainProviders: OnChainProviderType[],
     rawScore: number,
-    scoreState: ScoreStateType,
+    scoreState: ScoreState,
     onChainScore: number,
     expirationDate?: Date
   ): OnChainStatus {
     // This is default implementation that will check for differences in
     // the on-chain providers and on-chain score
-    if (scoreState !== "DONE" && scoreState !== "ERROR") return OnChainStatus.LOADING;
+    if (scoreState !== "SUCCESS" && scoreState !== "ERROR") return OnChainStatus.LOADING;
 
     if (onChainProviders.length === 0) return OnChainStatus.NOT_MOVED;
 

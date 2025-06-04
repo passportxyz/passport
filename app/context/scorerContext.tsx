@@ -22,9 +22,10 @@ const isStampObject = (value: any): value is StampScoreResponse =>
   typeof value === "object" && value !== null && "score" in value;
 
 /**
- * Processes stamp scores from API response, handling both new and legacy formats.
+ * Processes stamp scores from API response, handling both V2 and legacy formats.
+ * Both are now synchronous, so no polling complexity needed.
  *
- * New format: { stamps: { providerId: { score, dedup, expiration_date } } }
+ * V2 format: { stamps: { providerId: { score, dedup, expiration_date } } }
  * Legacy format: { stamp_scores: { providerId: "score" } }
  *
  * @param apiResponse - The API response data
@@ -36,21 +37,17 @@ const processStampScores = (
   const extractedScores: Partial<StampScores> = {};
   const extractedDedupStatus: Partial<StampDedupStatus> = {};
 
-  // Process new format (stamps with objects)
+  // Process V2 format (stamps with objects)
   if (apiResponse.stamps) {
     for (const [providerId, stampData] of Object.entries(apiResponse.stamps)) {
       if (isStampObject(stampData)) {
         extractedScores[providerId as PROVIDER_ID] = stampData.score || "0";
         extractedDedupStatus[providerId as PROVIDER_ID] = stampData.dedup || false;
-      } else {
-        // Handle mixed format gracefully
-        extractedScores[providerId as PROVIDER_ID] = String(stampData);
-        extractedDedupStatus[providerId as PROVIDER_ID] = false;
       }
     }
   }
 
-  // Process legacy format (stamp_scores with strings)
+  // Process legacy format (stamp_scores with strings) - also synchronous now
   if (apiResponse.stamp_scores) {
     for (const [providerId, score] of Object.entries(apiResponse.stamp_scores)) {
       extractedScores[providerId as PROVIDER_ID] = String(score);
@@ -61,12 +58,64 @@ const processStampScores = (
   return { scores: extractedScores, dedupStatus: extractedDedupStatus };
 };
 
-export type PassportSubmissionStateType =
-  | "APP_INITIAL"
-  | "APP_REQUEST_PENDING"
-  | "APP_REQUEST_ERROR"
-  | "APP_REQUEST_SUCCESS";
-export type ScoreStateType = "APP_INITIAL" | "BULK_PROCESSING" | "PROCESSING" | "ERROR" | "DONE";
+/**
+ * Processes score response data from both V2 and legacy API formats.
+ * Both formats are now synchronous.
+ */
+const processScoreResponse = (response: any) => {
+  const data = response.data;
+
+  // V2 format detection - has passing_score or stamps objects
+  const isV2 = "passing_score" in data || ("stamps" in data && !("stamp_scores" in data));
+
+  if (isV2) {
+    // V2 format
+    const score = parseFloatOneDecimal(data.score || "0");
+    const threshold = parseFloatOneDecimal(data.threshold || "0");
+    const passingScore = data.passing_score ?? score >= threshold;
+
+    return {
+      score,
+      rawScore: score,
+      threshold,
+      passingScore,
+      scoreDescription: passingScore ? "Passing Score" : "Low Score",
+      error: data.error || null,
+    };
+  } else {
+    // Legacy format - also synchronous now
+    const score = parseFloatOneDecimal(data.score || "0");
+    const error = data.status === "ERROR" ? "Error" : null;
+
+    if (data.evidence) {
+      // Binary scorer
+      const rawScore = parseFloatOneDecimal(data.evidence.rawScore || "0");
+      const threshold = parseFloatOneDecimal(data.evidence.threshold || "0");
+      const passingScore = rawScore >= threshold;
+
+      return {
+        score,
+        rawScore,
+        threshold,
+        passingScore,
+        error,
+        scoreDescription: passingScore ? "Passing Score" : "Low Score",
+      };
+    } else {
+      // Non-binary scorer
+      return {
+        score,
+        rawScore: score,
+        threshold: 0,
+        passingScore: true,
+        scoreDescription: "Passing Score",
+        error,
+      };
+    }
+  }
+};
+
+export type ScoreState = "LOADING" | "ERROR" | "SUCCESS";
 
 export type Weights = {
   [key in PROVIDER_ID]: string;
@@ -86,6 +135,18 @@ export type StampDedupStatus = {
   [key in PROVIDER_ID]: boolean;
 };
 
+// V2 API Response type
+export type V2ScoreResponse = {
+  address: string;
+  score: string | null;
+  passing_score: boolean;
+  last_score_timestamp: string | null;
+  expiration_timestamp: string | null;
+  threshold: string;
+  error: string | null;
+  stamps: Record<string, StampScoreResponse> | null;
+};
+
 export type PlatformScoreSpec = PlatformSpec & {
   possiblePoints: number;
   // Possible points that we want to tell the user
@@ -99,15 +160,15 @@ export interface ScorerContextState {
   rawScore: number;
   threshold: number;
   scoreDescription: string;
-  passportSubmissionState: PassportSubmissionStateType;
-  scoreState: ScoreStateType;
+  scoreState: ScoreState;
   scoredPlatforms: PlatformScoreSpec[];
   refreshScore: (address: string | undefined, dbAccessToken: string, forceRescore?: boolean) => Promise<void>;
   fetchStampWeights: () => Promise<void>;
   stampWeights: Partial<Weights>;
   stampScores: Partial<StampScores>;
   stampDedupStatus: Partial<StampDedupStatus>;
-  // submitPassport: (address: string | undefined) => Promise<void>;
+  passingScore: boolean;
+  error: string | null;
 }
 
 const startingState: ScorerContextState = {
@@ -115,8 +176,7 @@ const startingState: ScorerContextState = {
   rawScore: 0,
   threshold: 0,
   scoreDescription: "",
-  passportSubmissionState: "APP_INITIAL",
-  scoreState: "APP_INITIAL",
+  scoreState: "LOADING",
   scoredPlatforms: [],
   refreshScore: async (
     address: string | undefined,
@@ -127,7 +187,8 @@ const startingState: ScorerContextState = {
   stampWeights: {},
   stampScores: {},
   stampDedupStatus: {},
-  // submitPassport: async (address: string | undefined): Promise<void> => {},
+  passingScore: false,
+  error: null,
 };
 
 // create our app context
@@ -138,12 +199,13 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [rawScore, setRawScore] = useState(0);
   const [threshold, setThreshold] = useState(0);
   const [scoreDescription, setScoreDescription] = useState("");
-  const [passportSubmissionState, setPassportSubmissionState] = useState<PassportSubmissionStateType>("APP_INITIAL");
-  const [scoreState, setScoreState] = useState<ScoreStateType>("APP_INITIAL");
+  const [scoreState, setScoreState] = useState<ScoreState>("LOADING");
   const [stampScores, setStampScores] = useState<Partial<StampScores>>({});
   const [stampDedupStatus, setStampDedupStatus] = useState<Partial<StampDedupStatus>>({});
   const [stampWeights, setStampWeights] = useState<Partial<Weights>>({});
   const [scoredPlatforms, setScoredPlatforms] = useState<PlatformScoreSpec[]>([]);
+  const [passingScore, setPassingScore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const customization = useCustomization();
   const { platformSpecs, platformProviders, platforms, getPlatformSpec } = usePlatforms();
 
@@ -151,25 +213,17 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     address: string | undefined,
     dbAccessToken: string,
     rescore: boolean = false
-  ): Promise<string> => {
+  ): Promise<void> => {
     try {
-      setScoreState("APP_INITIAL");
       let response;
       try {
         const useAlternateScorer = customization.scorer?.id;
-
         const method = rescore ? "post" : "get";
-
         const url = `${scorerApiGetScore}/${address}${useAlternateScorer && method === "get" ? `?alternate_scorer_id=${customization.scorer?.id}` : ""}`;
-        let data: any;
-        if (method === "post") {
-          if (useAlternateScorer)
-            data = {
-              alternate_scorer_id: customization.scorer?.id,
-            };
-          else data = {};
-        } else {
-          data = {};
+
+        let data: any = {};
+        if (method === "post" && useAlternateScorer) {
+          data = { alternate_scorer_id: customization.scorer?.id };
         }
 
         response = await axios({
@@ -185,45 +239,20 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
         if (rescore) throw e;
         else return loadScore(address, dbAccessToken, true);
       }
-      setScoreState(response.data.status);
-      if (response.data.status === "DONE") {
-        // We need to handle the 2 types the scorers that the backend allows: binary as well as not-binary
-        if (response.data.evidence) {
-          // This is a binary scorer (binary scorers have the evidence data)
-          const numRawScore = parseFloatOneDecimal(response.data.evidence.rawScore);
-          const numThreshold = parseFloatOneDecimal(response.data.evidence.threshold);
-          const numScore = parseFloatOneDecimal(response.data.score);
 
-          setRawScore(numRawScore);
-          setThreshold(numThreshold);
-          setScore(numScore);
-          const { scores, dedupStatus } = processStampScores(response.data);
-          setStampScores(scores);
-          setStampDedupStatus(dedupStatus);
+      // Process response - both V2 and legacy are now synchronous
+      const processed = processScoreResponse(response);
 
-          if (numRawScore > numThreshold) {
-            setScoreDescription("Passing Score");
-          } else {
-            setScoreDescription("Low Score");
-          }
-        } else {
-          // This is not a binary scorer
-          const numRawScore = parseFloatOneDecimal(response.data.score);
-          const numThreshold = 0;
-          const numScore = parseFloatOneDecimal(response.data.score);
+      setRawScore(processed.rawScore);
+      setThreshold(processed.threshold);
+      setScore(processed.score);
+      setScoreDescription(processed.scoreDescription);
+      setPassingScore(processed.passingScore);
+      setError(processed.error);
 
-          setRawScore(numRawScore);
-          setThreshold(numThreshold);
-          setScore(numScore);
-          const { scores, dedupStatus } = processStampScores(response.data);
-          setStampScores(scores);
-          setStampDedupStatus(dedupStatus);
-
-          setScoreDescription("");
-        }
-      }
-
-      return response.data.status;
+      const { scores, dedupStatus } = processStampScores(response.data);
+      setStampScores(scores);
+      setStampDedupStatus(dedupStatus);
     } catch (error) {
       throw error;
     }
@@ -239,39 +268,20 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
         setStampWeights(response.data);
       }
     } catch (error) {
-      setPassportSubmissionState("APP_REQUEST_ERROR");
+      setScoreState("ERROR");
       console.error("Error fetching stamp weights", error);
     }
   };
 
-  const refreshScore = async (
-    address: string | undefined,
-    dbAccessToken: string,
-    forceRescore: boolean = false
-    // submitPassportOnFailure: boolean = true
-  ) => {
+  const refreshScore = async (address: string | undefined, dbAccessToken: string, forceRescore: boolean = false) => {
     if (address) {
-      const maxRequests = 30;
-      let sleepTime = 1000;
-      setPassportSubmissionState("APP_REQUEST_PENDING");
+      setScoreState("LOADING");
       try {
-        let requestCount = 1;
-        let scoreStatus = await loadScore(address, dbAccessToken, forceRescore);
-        while ((scoreStatus === "PROCESSING" || scoreStatus === "BULK_PROCESSING") && requestCount < maxRequests) {
-          requestCount++;
-          await new Promise((resolve) => setTimeout(resolve, sleepTime));
-          if (sleepTime < 10000) {
-            sleepTime += 500;
-          }
-          scoreStatus = await loadScore(address, dbAccessToken);
-        }
-        setPassportSubmissionState("APP_REQUEST_SUCCESS");
+        await loadScore(address, dbAccessToken, forceRescore);
+        setScoreState("SUCCESS");
       } catch (error: AxiosError | any) {
-        setPassportSubmissionState("APP_REQUEST_ERROR");
-        // Commenting this, as we don't want to submit passport on failure any more - this will be handled in the BE
-        // if (submitPassportOnFailure && error.response?.data?.detail === "Unable to get score for provided scorer.") {
-        //   submitPassport(address);
-        // }
+        setScoreState("ERROR");
+        setError(error.message || "Failed to load score");
       }
     }
   };
@@ -317,7 +327,6 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     rawScore,
     threshold,
     scoreDescription,
-    passportSubmissionState,
     scoreState,
     stampWeights,
     stampScores,
@@ -325,7 +334,8 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     scoredPlatforms,
     refreshScore,
     fetchStampWeights,
-    // submitPassport,
+    passingScore,
+    error,
   };
 
   return <ScorerContext.Provider value={providerProps}>{children}</ScorerContext.Provider>;

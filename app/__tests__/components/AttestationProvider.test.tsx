@@ -81,7 +81,7 @@ describe.each([easAttestationProvider, veraxAttestationProvider])("AttestationPr
           mockAllProvidersState,
           mockOnChainProviders,
           onChainScore,
-          "DONE",
+          "SUCCESS",
           onChainScore
         )
       ).toBe(OnChainStatus.MOVED_UP_TO_DATE);
@@ -93,7 +93,7 @@ describe.each([easAttestationProvider, veraxAttestationProvider])("AttestationPr
           mockAllProvidersState,
           mockOnChainProviders,
           onChainScore + 1,
-          "DONE",
+          "SUCCESS",
           onChainScore
         )
       ).toBe(OnChainStatus.MOVED_OUT_OF_DATE);
@@ -120,7 +120,7 @@ describe.each([easAttestationProvider, veraxAttestationProvider])("AttestationPr
           diffMockAllProviderState,
           mockOnChainProviders,
           onChainScore,
-          "DONE",
+          "SUCCESS",
           onChainScore
         )
       ).toBe(OnChainStatus.MOVED_OUT_OF_DATE);
@@ -128,8 +128,8 @@ describe.each([easAttestationProvider, veraxAttestationProvider])("AttestationPr
   });
 
   it("should return NOT_MOVED when onChainProviders is an empty array", () => {
-    expect(attestationProvider.checkOnChainStatus(mockAllProvidersState, [], onChainScore, "DONE", onChainScore)).toBe(
-      OnChainStatus.NOT_MOVED
-    );
+    expect(
+      attestationProvider.checkOnChainStatus(mockAllProvidersState, [], onChainScore, "SUCCESS", onChainScore)
+    ).toBe(OnChainStatus.NOT_MOVED);
   });
 });
