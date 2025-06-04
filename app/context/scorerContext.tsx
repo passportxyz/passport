@@ -41,8 +41,10 @@ const processStampScores = (
   if (apiResponse.stamps) {
     for (const [providerId, stampData] of Object.entries(apiResponse.stamps)) {
       if (isStampObject(stampData)) {
-        extractedScores[providerId as PROVIDER_ID] = stampData.score || "0";
-        extractedDedupStatus[providerId as PROVIDER_ID] = stampData.dedup || false;
+        // extractedScores[providerId as PROVIDER_ID] = stampData.score || "0";
+        extractedScores[providerId as PROVIDER_ID] = "0"; // TEMPORARY OVERRIDE: Set score to 0 for dedup effect
+        // extractedDedupStatus[providerId as PROVIDER_ID] = stampData.dedup || false;
+        extractedDedupStatus[providerId as PROVIDER_ID] = true; // TEMPORARY OVERRIDE: Force all stamps to appear as deduplicated
       }
     }
   }
@@ -50,8 +52,10 @@ const processStampScores = (
   // Process legacy format (stamp_scores with strings) - also synchronous now
   if (apiResponse.stamp_scores) {
     for (const [providerId, score] of Object.entries(apiResponse.stamp_scores)) {
-      extractedScores[providerId as PROVIDER_ID] = String(score);
-      extractedDedupStatus[providerId as PROVIDER_ID] = false;
+      // extractedScores[providerId as PROVIDER_ID] = String(score);
+      extractedScores[providerId as PROVIDER_ID] = "0"; // TEMPORARY OVERRIDE: Set score to 0 for dedup effect
+      // extractedDedupStatus[providerId as PROVIDER_ID] = false;
+      extractedDedupStatus[providerId as PROVIDER_ID] = true; // TEMPORARY OVERRIDE: Force all stamps to appear as deduplicated
     }
   }
 
@@ -115,7 +119,7 @@ const processScoreResponse = (response: any) => {
   }
 };
 
-export type ScoreState = "LOADING" | "ERROR" | "SUCCESS";
+export type ScoreState = { status: "loading" } | { status: "success" } | { status: "error"; error: string };
 
 export type Weights = {
   [key in PROVIDER_ID]: string;
@@ -168,7 +172,6 @@ export interface ScorerContextState {
   stampScores: Partial<StampScores>;
   stampDedupStatus: Partial<StampDedupStatus>;
   passingScore: boolean;
-  error: string | null;
 }
 
 const startingState: ScorerContextState = {
@@ -176,7 +179,7 @@ const startingState: ScorerContextState = {
   rawScore: 0,
   threshold: 0,
   scoreDescription: "",
-  scoreState: "LOADING",
+  scoreState: { status: "loading" },
   scoredPlatforms: [],
   refreshScore: async (
     address: string | undefined,
@@ -188,7 +191,6 @@ const startingState: ScorerContextState = {
   stampScores: {},
   stampDedupStatus: {},
   passingScore: false,
-  error: null,
 };
 
 // create our app context
@@ -199,13 +201,12 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [rawScore, setRawScore] = useState(0);
   const [threshold, setThreshold] = useState(0);
   const [scoreDescription, setScoreDescription] = useState("");
-  const [scoreState, setScoreState] = useState<ScoreState>("LOADING");
+  const [scoreState, setScoreState] = useState<ScoreState>({ status: "loading" });
   const [stampScores, setStampScores] = useState<Partial<StampScores>>({});
   const [stampDedupStatus, setStampDedupStatus] = useState<Partial<StampDedupStatus>>({});
   const [stampWeights, setStampWeights] = useState<Partial<Weights>>({});
   const [scoredPlatforms, setScoredPlatforms] = useState<PlatformScoreSpec[]>([]);
   const [passingScore, setPassingScore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const customization = useCustomization();
   const { platformSpecs, platformProviders, platforms, getPlatformSpec } = usePlatforms();
 
@@ -243,12 +244,16 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       // Process response - both V2 and legacy are now synchronous
       const processed = processScoreResponse(response);
 
+      // If API returned an error, throw it before setting any data
+      if (processed.error) {
+        throw new Error(processed.error);
+      }
+
       setRawScore(processed.rawScore);
       setThreshold(processed.threshold);
       setScore(processed.score);
       setScoreDescription(processed.scoreDescription);
       setPassingScore(processed.passingScore);
-      setError(processed.error);
 
       const { scores, dedupStatus } = processStampScores(response.data);
       setStampScores(scores);
@@ -267,21 +272,21 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
         const response = await axios.get(`${scorerApiGetWeights}`);
         setStampWeights(response.data);
       }
-    } catch (error) {
-      setScoreState("ERROR");
+    } catch (error: any) {
+      setScoreState({ status: "error", error: error.message || "Failed to fetch stamp weights" });
       console.error("Error fetching stamp weights", error);
     }
   };
 
   const refreshScore = async (address: string | undefined, dbAccessToken: string, forceRescore: boolean = false) => {
     if (address) {
-      setScoreState("LOADING");
+      setScoreState({ status: "loading" });
       try {
         await loadScore(address, dbAccessToken, forceRescore);
-        setScoreState("SUCCESS");
-      } catch (error: AxiosError | any) {
-        setScoreState("ERROR");
-        setError(error.message || "Failed to load score");
+        setScoreState({ status: "success" });
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Failed to load score";
+        setScoreState({ status: "error", error: message });
       }
     }
   };
@@ -335,7 +340,6 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     refreshScore,
     fetchStampWeights,
     passingScore,
-    error,
   };
 
   return <ScorerContext.Provider value={providerProps}>{children}</ScorerContext.Provider>;

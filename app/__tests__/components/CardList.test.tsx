@@ -718,3 +718,102 @@ describe("show/hide tests", () => {
     expect(screen.queryByText("Blockchain & Crypto Networks")).not.toBeInTheDocument();
   });
 });
+
+describe("Platform Ordering", () => {
+  it("should display platforms in order: Unverified, Verified, Expired", () => {
+    // Mock expired providers context
+    const mockCeramicContextWithExpired = {
+      ...makeTestCeramicContext(),
+      allProvidersState: {
+        Github: {
+          stamp: {
+            credential: { credentialSubject: { id: "test" } },
+            expirationDate: "2020-01-01T00:00:00Z", // Expired
+          },
+        },
+        Google: {
+          stamp: {
+            credential: { credentialSubject: { id: "test" } },
+            expirationDate: "2030-01-01T00:00:00Z", // Not expired
+          },
+        },
+      },
+      expiredProviders: ["Github"],
+    };
+
+    vi.mocked(useCustomization).mockReturnValue({} as any);
+
+    const mockPlatforms = new Map();
+    mockPlatforms.set("Github", {
+      platFormGroupSpec: [{ providers: [{ name: "Github", isDeprecated: false }] }],
+    });
+    mockPlatforms.set("Google", {
+      platFormGroupSpec: [{ providers: [{ name: "Google", isDeprecated: false }] }],
+    });
+    mockPlatforms.set("Discord", {
+      platFormGroupSpec: [{ providers: [{ name: "Discord", isDeprecated: false }] }],
+    });
+
+    vi.mocked(usePlatforms).mockReturnValue({
+      platformProviderIds: {
+        Github: ["Github"],
+        Google: ["Google"],
+        Discord: ["Discord"],
+      },
+      platforms: mockPlatforms,
+      platformCatagories: [
+        {
+          name: "Social & Professional Platforms",
+          description: "Test",
+          platforms: ["Github", "Google", "Discord"],
+        },
+      ],
+    } as any);
+
+    const scorerContext: Partial<ScorerContextState> = {
+      scoredPlatforms: [
+        {
+          // Unverified platform (no points, no selected providers)
+          possiblePoints: 10,
+          displayPossiblePoints: 10,
+          earnedPoints: 0,
+          platform: "Discord" as PLATFORM_ID,
+          name: "Discord",
+          description: "Discord",
+          connectMessage: "Connect",
+        },
+        {
+          // Verified platform (has points, not expired)
+          possiblePoints: 10,
+          displayPossiblePoints: 10,
+          earnedPoints: 5,
+          platform: "Google" as PLATFORM_ID,
+          name: "Google",
+          description: "Google",
+          connectMessage: "Connect",
+        },
+        {
+          // Expired platform (has points but expired)
+          possiblePoints: 10,
+          displayPossiblePoints: 10,
+          earnedPoints: 3,
+          platform: "Github" as PLATFORM_ID,
+          name: "Github",
+          description: "Github",
+          connectMessage: "Connect",
+        },
+      ],
+    };
+
+    renderWithContext(mockCeramicContextWithExpired, <CardList />, {}, scorerContext);
+
+    // Get all platform cards in order
+    const platformCards = screen.getAllByTestId("platform-card");
+    expect(platformCards).toHaveLength(3);
+
+    // Expected order: Unverified (Discord), Verified (Google), Expired (Github)
+    const platformNames = platformCards.map((card) => card.querySelector('[data-testid="platform-name"]')?.textContent);
+
+    expect(platformNames).toEqual(["Discord", "Google", "Github"]);
+  });
+});

@@ -348,6 +348,162 @@ describe("ScorerContext", () => {
     });
   });
 
+  describe("Error handling and state machine", () => {
+    it("should handle API errors before setting any data", async () => {
+      const apiErrorResponse = createV2Response({
+        error: "Invalid scorer configuration",
+        score: "15.5", // This should not be set when there's an error
+      });
+
+      vi.mocked(axios).mockResolvedValueOnce(apiErrorResponse as any);
+
+      const TestComponent = () => {
+        const context = React.useContext(ScorerContext);
+
+        React.useEffect(() => {
+          context.refreshScore(mockAddress, mockDbAccessToken);
+        }, []);
+
+        return (
+          <div>
+            <div data-testid="score-status">{context.scoreState.status}</div>
+            <div data-testid="score-error">
+              {context.scoreState.status === "error" ? context.scoreState.error : "no error"}
+            </div>
+            <div data-testid="score">{context.score}</div>
+          </div>
+        );
+      };
+
+      render(
+        <ScorerContextProvider>
+          <TestComponent />
+        </ScorerContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("score-status")).toHaveTextContent("error");
+        expect(screen.getByTestId("score-error")).toHaveTextContent("Invalid scorer configuration");
+        // Score should remain at initial value (0) since error was thrown before setting data
+        expect(screen.getByTestId("score")).toHaveTextContent("0");
+      });
+    });
+
+    it("should handle network errors", async () => {
+      vi.mocked(axios).mockRejectedValueOnce(new Error("Network timeout"));
+
+      const TestComponent = () => {
+        const context = React.useContext(ScorerContext);
+
+        React.useEffect(() => {
+          context.refreshScore(mockAddress, mockDbAccessToken);
+        }, []);
+
+        return (
+          <div>
+            <div data-testid="score-status">{context.scoreState.status}</div>
+            <div data-testid="score-error">
+              {context.scoreState.status === "error" ? context.scoreState.error : "no error"}
+            </div>
+          </div>
+        );
+      };
+
+      render(
+        <ScorerContextProvider>
+          <TestComponent />
+        </ScorerContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("score-status")).toHaveTextContent("error");
+        expect(screen.getByTestId("score-error")).toHaveTextContent("Network timeout");
+      });
+    });
+
+    it("should transition through loading -> success states", async () => {
+      const successResponse = createV2Response({
+        score: "25.5",
+        passing_score: true,
+      });
+
+      vi.mocked(axios).mockResolvedValueOnce(successResponse as any);
+
+      const states: string[] = [];
+      const TestComponent = () => {
+        const context = React.useContext(ScorerContext);
+
+        // Track state changes
+        React.useEffect(() => {
+          states.push(context.scoreState.status);
+        });
+
+        React.useEffect(() => {
+          context.refreshScore(mockAddress, mockDbAccessToken);
+        }, []);
+
+        return (
+          <div>
+            <div data-testid="score-status">{context.scoreState.status}</div>
+            <div data-testid="score">{context.score}</div>
+          </div>
+        );
+      };
+
+      render(
+        <ScorerContextProvider>
+          <TestComponent />
+        </ScorerContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("score-status")).toHaveTextContent("success");
+        expect(screen.getByTestId("score")).toHaveTextContent("25.5");
+      });
+
+      // Should have transitioned: loading -> loading (during request) -> success
+      expect(states).toContain("loading");
+      expect(states).toContain("success");
+    });
+
+    it("should handle legacy format errors", async () => {
+      const legacyErrorResponse = createLegacyResponse({
+        status: "ERROR",
+        score: "0",
+      });
+
+      vi.mocked(axios).mockResolvedValueOnce(legacyErrorResponse as any);
+
+      const TestComponent = () => {
+        const context = React.useContext(ScorerContext);
+
+        React.useEffect(() => {
+          context.refreshScore(mockAddress, mockDbAccessToken);
+        }, []);
+
+        return (
+          <div>
+            <div data-testid="score-status">{context.scoreState.status}</div>
+            <div data-testid="score-error">
+              {context.scoreState.status === "error" ? context.scoreState.error : "no error"}
+            </div>
+          </div>
+        );
+      };
+
+      render(
+        <ScorerContextProvider>
+          <TestComponent />
+        </ScorerContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId("score-status")).toHaveTextContent("error");
+        expect(screen.getByTestId("score-error")).toHaveTextContent("Error");
+      });
+    });
+  });
+
   describe("Score calculation with deduplicated stamps", () => {
     it("should calculate platform scores correctly with deduplicated stamps", async () => {
       const mockPlatformProviders = {

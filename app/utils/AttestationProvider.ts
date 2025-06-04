@@ -120,7 +120,7 @@ class BaseAttestationProvider implements AttestationProvider {
   ): OnChainStatus {
     // This is default implementation that will check for differences in
     // the on-chain providers and on-chain score
-    if (scoreState !== "SUCCESS" && scoreState !== "ERROR") return OnChainStatus.LOADING;
+    if (scoreState.status !== "success" && scoreState.status !== "error") return OnChainStatus.LOADING;
 
     if (onChainProviders.length === 0) return OnChainStatus.NOT_MOVED;
 

@@ -53,7 +53,7 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
 
   const customTitle = customization?.scorerPanel?.title;
 
-  const loading = scoreState === "LOADING" || verificationState.loading;
+  const loading = scoreState.status === "loading" || verificationState.loading;
   const aboveThreshold = rawScore >= threshold;
   const highlightColor = aboveThreshold ? "foreground-2" : "background-5";
 
@@ -176,7 +176,7 @@ export const DashboardScoreExplanationPanel = ({ className }: { className?: stri
   const [verificationState] = useAtom(mutableUserVerificationAtom);
   const [showSidebar, setShowSidebar] = React.useState(false);
 
-  const loading = scoreState === "LOADING" || verificationState.loading;
+  const loading = scoreState.status === "loading" || verificationState.loading;
 
   return (
     <>
