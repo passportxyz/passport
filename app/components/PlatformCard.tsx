@@ -311,6 +311,7 @@ export const PlatformCard = ({
       />
     );
   } else if (verified) {
+    // The not-verified & not-expired state of the card
     stamp = (
       <VerifiedStamp
         idx={i}

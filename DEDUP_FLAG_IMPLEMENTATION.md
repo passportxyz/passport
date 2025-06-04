@@ -320,3 +320,223 @@ The tests in passport-scorer show that:
 - The overall score calculation already accounts for deduplication (deduplicated stamps contribute 0)
 
 These additional changes ensure full compatibility with the new passport-scorer API format and provide a complete picture of the migration requirements.
+
+## Detailed Implementation Plan for API V2 Migration
+
+### Overview
+The passport-scorer API has been significantly simplified in V2, removing the status-based polling mechanism and flattening the response structure. This plan outlines the changes needed while maintaining backward compatibility during the transition period.
+
+### 1. **Update `scorerContext.tsx` loadScore Function**
+
+#### Current Issues:
+- Line 188: `setScoreState(response.data.status)` - `status` field no longer exists at root
+- Lines 189-209: Binary scorer logic checks `response.data.evidence` which has been removed
+- Lines 193-194: Accesses nested `response.data.evidence.rawScore` and `.threshold`
+- Line 226: Returns `response.data.status` which no longer exists
+
+#### Transition Strategy:
+Create a helper function to detect API version and process accordingly:
+
+```typescript
+// Add around line 63, after processStampScores
+const isV2Response = (response: any): boolean => {
+  // V2 responses have passing_score and no status/evidence fields
+  return 'passing_score' in response && !('status' in response);
+};
+
+const processScoreResponse = (response: any) => {
+  if (isV2Response(response.data)) {
+    // New V2 format processing
+    return {
+      score: parseFloatOneDecimal(response.data.score || "0"),
+      rawScore: parseFloatOneDecimal(response.data.score || "0"),
+      threshold: parseFloatOneDecimal(response.data.threshold || "0"),
+      passingScore: response.data.passing_score,
+      scoreDescription: response.data.passing_score ? "Passing Score" : "Low Score",
+      isComplete: true, // V2 responses are always complete
+      error: response.data.error
+    };
+  } else {
+    // Legacy format processing
+    const isDone = response.data.status === "DONE";
+    const hasEvidence = !!response.data.evidence;
+    
+    if (isDone && hasEvidence) {
+      // Binary scorer
+      const rawScore = parseFloatOneDecimal(response.data.evidence.rawScore);
+      const threshold = parseFloatOneDecimal(response.data.evidence.threshold);
+      return {
+        score: parseFloatOneDecimal(response.data.score),
+        rawScore,
+        threshold,
+        passingScore: rawScore > threshold,
+        scoreDescription: rawScore > threshold ? "Passing Score" : "Low Score",
+        isComplete: true,
+        error: null
+      };
+    } else if (isDone && !hasEvidence) {
+      // Non-binary scorer
+      const score = parseFloatOneDecimal(response.data.score);
+      return {
+        score,
+        rawScore: score,
+        threshold: 0,
+        passingScore: true,
+        scoreDescription: "",
+        isComplete: true,
+        error: null
+      };
+    } else {
+      // Still processing
+      return {
+        isComplete: false,
+        status: response.data.status
+      };
+    }
+  }
+};
+```
+
+#### Update loadScore function (lines 188-226):
+```typescript
+// Replace lines 188-224 with:
+const processed = processScoreResponse(response);
+
+if (processed.isComplete) {
+  setRawScore(processed.rawScore);
+  setThreshold(processed.threshold);
+  setScore(processed.score);
+  setScoreDescription(processed.scoreDescription);
+  
+  const { scores, dedupStatus } = processStampScores(response.data);
+  setStampScores(scores);
+  setStampDedupStatus(dedupStatus);
+  
+  // V2 API doesn't have status, so we set it to DONE
+  setScoreState("DONE");
+} else {
+  // Legacy API still processing
+  setScoreState(processed.status);
+}
+
+// Return appropriate value for polling logic
+return processed.isComplete ? "DONE" : processed.status;
+```
+
+### 2. **Add V2ScoreResponse Type Interface**
+
+Add after line 83:
+```typescript
+// V2 API Response type
+export type V2ScoreResponse = {
+  address: string;
+  score: string | null;
+  passing_score: boolean;
+  last_score_timestamp: string | null;
+  expiration_timestamp: string | null;  // Note: root level uses timestamp
+  threshold: string;
+  error: string | null;
+  stamps: Record<string, StampScoreResponse> | null;
+};
+
+// Helper type for processed response
+type ProcessedScoreResponse = {
+  score?: number;
+  rawScore?: number;
+  threshold?: number;
+  passingScore?: boolean;
+  scoreDescription?: string;
+  isComplete: boolean;
+  error?: string | null;
+  status?: ScoreStateType;
+};
+```
+
+### 3. **Update Score Status Handling in refreshScore**
+
+The polling logic in `refreshScore` (lines 260-266) needs to handle V2 responses that don't have status:
+
+```typescript
+// Update refreshScore function around lines 259-267
+let requestCount = 1;
+let scoreResult = await loadScore(address, dbAccessToken, forceRescore);
+
+// Only poll if using legacy API (when status is returned and not DONE)
+if (scoreResult !== "DONE") {
+  while ((scoreResult === "PROCESSING" || scoreResult === "BULK_PROCESSING") && requestCount < maxRequests) {
+    requestCount++;
+    await new Promise((resolve) => setTimeout(resolve, sleepTime));
+    if (sleepTime < 10000) {
+      sleepTime += 500;
+    }
+    scoreResult = await loadScore(address, dbAccessToken);
+  }
+}
+```
+
+### 4. **Test Updates**
+
+Update test mocks in `scorerContext.test.tsx` to support both formats:
+
+```typescript
+// Helper to create V2 format response
+const createV2Response = (score: string, passingScore: boolean, stamps: any) => ({
+  data: {
+    address: mockAddress,
+    score,
+    passing_score: passingScore,
+    threshold: "20.00000",
+    last_score_timestamp: "2024-01-01T00:00:00Z",
+    expiration_timestamp: null,
+    error: null,
+    stamps
+  }
+});
+
+// Helper to create legacy format response  
+const createLegacyResponse = (status: string, score: string, evidence: any, stamps: any) => ({
+  data: {
+    status,
+    score,
+    evidence,
+    stamps
+  }
+});
+```
+
+### 5. **Migration Timeline & Cleanup**
+
+1. **Phase 1 - Deploy Dual Support** (Current)
+   - Both old and new formats are supported
+   - No breaking changes for users
+
+2. **Phase 2 - Backend Migration**
+   - Once backend is fully migrated to V2
+   - Monitor for any legacy format responses
+
+3. **Phase 3 - Remove Legacy Code** (Easy cleanup)
+   - Remove `isV2Response` check
+   - Remove legacy branch in `processScoreResponse`
+   - Simplify to only handle V2 format
+   - Remove status-based polling in `refreshScore`
+   - Remove `ScoreStateType` states that are no longer used
+
+### 6. **Key Benefits of This Approach**
+
+1. **Clean Separation**: Legacy logic is isolated in the `processScoreResponse` function
+2. **Easy Removal**: Once migration is complete, simply remove the legacy branch
+3. **No Breaking Changes**: Users experience no disruption during migration
+4. **Simplified Code**: V2 format is much simpler - no polling, no status checks
+5. **Type Safety**: Clear types for both old and new formats
+
+### 7. **Implementation Checklist**
+
+- [ ] Add `isV2Response` helper function
+- [ ] Add `processScoreResponse` helper function
+- [ ] Update `loadScore` to use the new helper
+- [ ] Add V2 type definitions
+- [ ] Update `refreshScore` to handle V2 responses
+- [ ] Update tests with dual format support
+- [ ] Test with both API formats
+- [ ] Deploy and monitor
+- [ ] Schedule legacy code removal after backend migration
