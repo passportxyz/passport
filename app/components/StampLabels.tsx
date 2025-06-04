@@ -13,15 +13,15 @@ interface StampLabelsProps {
  */
 export const StampLabels = ({ primaryLabel, primaryBgColor, isDeduplicated }: StampLabelsProps) => (
   <div className="flex gap-2">
-    <div className={`${primaryBgColor} px-2 py-1 rounded text-right font-alt text-black`}>
+    <div className={`${primaryBgColor} px-2 py-1 rounded text-right font-alt text-color-4`}>
       <p className="text-xs" data-testid={`${primaryLabel.toLowerCase()}-label`}>
         {primaryLabel}
       </p>
     </div>
     {isDeduplicated && (
-      <div className="bg-background-4 px-2 py-1 rounded text-right font-alt text-black">
+      <div className="bg-foreground-7 px-2 py-1 rounded text-right font-alt text-color-4">
         <p className="text-xs" data-testid="deduped-label">
-          Claimed by another wallet
+          Deduplicated
         </p>
       </div>
     )}

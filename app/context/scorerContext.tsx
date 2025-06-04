@@ -41,10 +41,8 @@ const processStampScores = (
   if (apiResponse.stamps) {
     for (const [providerId, stampData] of Object.entries(apiResponse.stamps)) {
       if (isStampObject(stampData)) {
-        // extractedScores[providerId as PROVIDER_ID] = stampData.score || "0";
-        extractedScores[providerId as PROVIDER_ID] = "0"; // TEMPORARY OVERRIDE: Set score to 0 for dedup effect
-        // extractedDedupStatus[providerId as PROVIDER_ID] = stampData.dedup || false;
-        extractedDedupStatus[providerId as PROVIDER_ID] = true; // TEMPORARY OVERRIDE: Force all stamps to appear as deduplicated
+        extractedScores[providerId as PROVIDER_ID] = stampData.score || "0";
+        extractedDedupStatus[providerId as PROVIDER_ID] = stampData.dedup || false;
       }
     }
   }
@@ -52,10 +50,8 @@ const processStampScores = (
   // Process legacy format (stamp_scores with strings) - also synchronous now
   if (apiResponse.stamp_scores) {
     for (const [providerId, score] of Object.entries(apiResponse.stamp_scores)) {
-      // extractedScores[providerId as PROVIDER_ID] = String(score);
-      extractedScores[providerId as PROVIDER_ID] = "0"; // TEMPORARY OVERRIDE: Set score to 0 for dedup effect
-      // extractedDedupStatus[providerId as PROVIDER_ID] = false;
-      extractedDedupStatus[providerId as PROVIDER_ID] = true; // TEMPORARY OVERRIDE: Force all stamps to appear as deduplicated
+      extractedScores[providerId as PROVIDER_ID] = String(score);
+      extractedDedupStatus[providerId as PROVIDER_ID] = false;
     }
   }
 
@@ -69,8 +65,9 @@ const processStampScores = (
 const processScoreResponse = (response: any) => {
   const data = response.data;
 
-  // V2 format detection - has passing_score or stamps objects
-  const isV2 = "passing_score" in data || ("stamps" in data && !("stamp_scores" in data));
+  // V2 format detection - has passing_score field (most reliable indicator)
+  // Legacy format always has "status" field, V2 format does not
+  const isV2 = "passing_score" in data && !("status" in data);
 
   if (isV2) {
     // V2 format
@@ -215,52 +212,48 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     dbAccessToken: string,
     rescore: boolean = false
   ): Promise<void> => {
+    let response;
     try {
-      let response;
-      try {
-        const useAlternateScorer = customization.scorer?.id;
-        const method = rescore ? "post" : "get";
-        const url = `${scorerApiGetScore}/${address}${useAlternateScorer && method === "get" ? `?alternate_scorer_id=${customization.scorer?.id}` : ""}`;
+      const useAlternateScorer = customization.scorer?.id;
+      const method = rescore ? "post" : "get";
+      const url = `${scorerApiGetScore}/${address}${useAlternateScorer && method === "get" ? `?alternate_scorer_id=${customization.scorer?.id}` : ""}`;
 
-        let data: any = {};
-        if (method === "post" && useAlternateScorer) {
-          data = { alternate_scorer_id: customization.scorer?.id };
-        }
-
-        response = await axios({
-          url,
-          data,
-          method,
-          headers: {
-            Authorization: `Bearer ${dbAccessToken}`,
-          },
-        });
-      } catch (e) {
-        // Rethrow if this is already rescoring, to avoid loop
-        if (rescore) throw e;
-        else return loadScore(address, dbAccessToken, true);
+      let data: any = {};
+      if (method === "post" && useAlternateScorer) {
+        data = { alternate_scorer_id: customization.scorer?.id };
       }
 
-      // Process response - both V2 and legacy are now synchronous
-      const processed = processScoreResponse(response);
-
-      // If API returned an error, throw it before setting any data
-      if (processed.error) {
-        throw new Error(processed.error);
-      }
-
-      setRawScore(processed.rawScore);
-      setThreshold(processed.threshold);
-      setScore(processed.score);
-      setScoreDescription(processed.scoreDescription);
-      setPassingScore(processed.passingScore);
-
-      const { scores, dedupStatus } = processStampScores(response.data);
-      setStampScores(scores);
-      setStampDedupStatus(dedupStatus);
-    } catch (error) {
-      throw error;
+      response = await axios({
+        url,
+        data,
+        method,
+        headers: {
+          Authorization: `Bearer ${dbAccessToken}`,
+        },
+      });
+    } catch (e) {
+      // Rethrow if this is already rescoring, to avoid loop
+      if (rescore) throw e;
+      else return loadScore(address, dbAccessToken, true);
     }
+
+    // Process response - both V2 and legacy are now synchronous
+    const processed = processScoreResponse(response);
+
+    // If API returned an error, throw it before setting any data
+    if (processed.error) {
+      throw new Error(processed.error);
+    }
+
+    setRawScore(processed.rawScore);
+    setThreshold(processed.threshold);
+    setScore(processed.score);
+    setScoreDescription(processed.scoreDescription);
+    setPassingScore(processed.passingScore);
+
+    const { scores, dedupStatus } = processStampScores(response.data);
+    setStampScores(scores);
+    setStampDedupStatus(dedupStatus);
   };
 
   const fetchStampWeights = async () => {

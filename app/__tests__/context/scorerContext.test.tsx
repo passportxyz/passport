@@ -390,7 +390,7 @@ describe("ScorerContext", () => {
     });
 
     it("should handle network errors", async () => {
-      vi.mocked(axios).mockRejectedValueOnce(new Error("Network timeout"));
+      vi.mocked(axios).mockRejectedValue(new Error("Network timeout"));
 
       const TestComponent = () => {
         const context = React.useContext(ScorerContext);
