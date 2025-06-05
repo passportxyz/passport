@@ -84,6 +84,9 @@ describe("<PlatformCard />", () => {
         stampWeights: {
           GithubContributor: "5.0",
         },
+        stampDedupStatus: {
+          GithubContributor: true, // Mark as deduplicated
+        },
       };
 
       // Platform has providers verified but 0 earned points
@@ -94,31 +97,31 @@ describe("<PlatformCard />", () => {
 
       vi.mocked(usePlatforms).mockReturnValue(createMockUsePlatforms() as any);
 
-      // Create a mock component that simulates the deduplication label
-      const PlatformCardWithDedup = () => {
-        const selectedProviders = ["GithubContributor"]; // Has verified provider
-        const isVerified = selectedProviders.length > 0;
-        const hasEarnedPoints = dedupPlatform.earnedPoints > 0;
-        const isDeduped = isVerified && !hasEarnedPoints;
-
-        return (
-          <div data-testid="platform-card">
-            {isDeduped && <div data-testid="deduped-label">Claimed by another wallet</div>}
-            {isVerified && hasEarnedPoints && <div data-testid="verified-label">Verified</div>}
-            {!isVerified && <div data-testid="connect-button">Connect</div>}
-          </div>
-        );
-      };
+      const mockOnOpen = vi.fn();
+      const mockSetCurrentPlatform = vi.fn();
 
       render(
         <CeramicContext.Provider value={ceramicContextWithDedupStamp}>
           <ScorerContext.Provider value={scorerContextWithDedup as ScorerContextState}>
-            <PlatformCardWithDedup />
+            <PlatformCard
+              i={0}
+              platform={dedupPlatform}
+              onOpen={mockOnOpen}
+              setCurrentPlatform={mockSetCurrentPlatform}
+            />
           </ScorerContext.Provider>
         </CeramicContext.Provider>
       );
 
-      expect(screen.getByTestId("deduped-label")).toHaveTextContent("Claimed by another wallet");
+      // Test that deduplication badge is clickable link to support docs
+      const dedupLink = screen.getByTestId("deduped-label").closest("a");
+      expect(dedupLink).toHaveAttribute(
+        "href",
+        "https://support.passport.xyz/passport-knowledge-base/common-questions/why-am-i-receiving-zero-points-for-a-verified-stamp"
+      );
+      expect(dedupLink).toHaveAttribute("target", "_blank");
+      expect(dedupLink).toHaveAttribute("rel", "noopener noreferrer");
+      expect(screen.getByTestId("deduped-label")).toHaveTextContent("Deduplicated");
       expect(screen.queryByTestId("verified-label")).not.toBeInTheDocument();
       expect(screen.queryByTestId("connect-button")).not.toBeInTheDocument();
     });
@@ -277,6 +280,10 @@ describe("<PlatformCard />", () => {
           GithubContributor: "5.0",
           GithubFollower: "3.0",
         },
+        stampDedupStatus: {
+          GithubContributor: true,
+          GithubFollower: true,
+        },
       };
 
       const allDedupPlatform = {
@@ -287,28 +294,86 @@ describe("<PlatformCard />", () => {
 
       vi.mocked(usePlatforms).mockReturnValue(createMockUsePlatforms(["GithubContributor", "GithubFollower"]) as any);
 
-      // Create a mock component that simulates the expected behavior
-      const PlatformCardWithAllDedup = () => {
-        const hasVerifiedProviders = true; // Both providers are verified
-        const hasEarnedPoints = allDedupPlatform.earnedPoints > 0;
-        const isAllDeduped = hasVerifiedProviders && !hasEarnedPoints;
-
-        return (
-          <div data-testid="platform-card">
-            {isAllDeduped && <div data-testid="deduped-label">Claimed by another wallet</div>}
-          </div>
-        );
-      };
+      const mockOnOpen = vi.fn();
+      const mockSetCurrentPlatform = vi.fn();
 
       render(
         <CeramicContext.Provider value={ceramicContextWithAllDedup}>
           <ScorerContext.Provider value={scorerContextAllDedup as ScorerContextState}>
-            <PlatformCardWithAllDedup />
+            <PlatformCard
+              i={0}
+              platform={allDedupPlatform}
+              onOpen={mockOnOpen}
+              setCurrentPlatform={mockSetCurrentPlatform}
+            />
           </ScorerContext.Provider>
         </CeramicContext.Provider>
       );
 
-      expect(screen.getByTestId("deduped-label")).toHaveTextContent("Claimed by another wallet");
+      // Test that deduplication badge is clickable link to support docs
+      const dedupLink = screen.getByTestId("deduped-label").closest("a");
+      expect(dedupLink).toHaveAttribute(
+        "href",
+        "https://support.passport.xyz/passport-knowledge-base/common-questions/why-am-i-receiving-zero-points-for-a-verified-stamp"
+      );
+      expect(dedupLink).toHaveAttribute("target", "_blank");
+      expect(dedupLink).toHaveAttribute("rel", "noopener noreferrer");
+      expect(screen.getByTestId("deduped-label")).toHaveTextContent("Deduplicated");
+    });
+
+    it("should display '0' instead of '0.0' for deduplicated stamp points", () => {
+      const ceramicContextWithDedupStamp = {
+        ...mockCeramicContext,
+        allProvidersState: {
+          GithubContributor: {
+            stamp: {
+              credential: {
+                credentialSubject: {
+                  provider: "GithubContributor",
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const scorerContextWithDedup: Partial<ScorerContextState> = {
+        stampScores: {
+          GithubContributor: "0", // 0 score indicates deduplication
+        },
+        stampWeights: {
+          GithubContributor: "5.0",
+        },
+        stampDedupStatus: {
+          GithubContributor: true,
+        },
+      };
+
+      // Platform has providers verified but 0 earned points
+      const dedupPlatform = {
+        ...defaultPlatform,
+        earnedPoints: 0,
+      };
+
+      render(
+        <CeramicContext.Provider value={ceramicContextWithDedupStamp}>
+          <ScorerContext.Provider value={scorerContextWithDedup as ScorerContextState}>
+            <PlatformCard
+              i={0}
+              platform={dedupPlatform}
+              onOpen={mockOnOpen}
+              setCurrentPlatform={mockSetCurrentPlatform}
+            />
+          </ScorerContext.Provider>
+        </CeramicContext.Provider>
+      );
+
+      // Test that deduplicated points show as "0" not "0.0"
+      const earnedPointsDisplay = screen.getByText("0"); // Should be "0" not "0.0"
+      expect(earnedPointsDisplay).toBeInTheDocument();
+
+      // Ensure we're not showing "0.0" anywhere for deduplicated stamps
+      expect(screen.queryByText("0.0")).not.toBeInTheDocument();
     });
   });
 

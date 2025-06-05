@@ -5,6 +5,7 @@ import { CeramicContext } from "../context/ceramicContext";
 import { ScorerContext } from "../context/scorerContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { customSideBarGradient } from "./PlatformDetails";
+import { formatPointsDisplay } from "../utils/pointsDisplay";
 
 type StampSelectorProps = {
   currentProviders: PlatformGroupSpec[] | undefined;
@@ -46,12 +47,19 @@ const ProviderTitle = ({
       </span>
     )}
     {isDeduplicated && (
-      <span
-        className="text-xs bg-foreground-7 px-1 rounded text-right font-alt text-color-4"
-        data-testid="deduped-label"
+      <a
+        href="https://support.passport.xyz/passport-knowledge-base/common-questions/why-am-i-receiving-zero-points-for-a-verified-stamp"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="no-underline"
       >
-        Claimed by another wallet
-      </span>
+        <span
+          className="text-xs bg-foreground-7 px-1 rounded text-right font-alt text-color-4 cursor-pointer hover:bg-foreground-6 transition-colors"
+          data-testid="deduped-label"
+        >
+          Claimed by another wallet
+        </span>
+      </a>
     )}
   </div>
 );
@@ -82,7 +90,7 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
               const isDeduplicated = stampDedupStatus?.[provider.name] || false;
 
               const rawWeight = stampWeights?.[provider.name];
-              const weight = rawWeight ? +parseFloat(rawWeight).toFixed(1) : 0;
+              const weight = rawWeight ? formatPointsDisplay(parseFloat(rawWeight), isDeduplicated) : "0";
 
               if (isExpired) {
                 // Return verified stamp

@@ -16,6 +16,7 @@ import { DEFAULT_CUSTOMIZATION, useCustomization } from "../../hooks/useCustomiz
 import { platforms } from "@gitcoin/passport-platforms";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { usePlatforms } from "../../hooks/usePlatforms";
+import { formatPointsDisplay } from "../../utils/pointsDisplay";
 
 vi.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -40,6 +41,19 @@ vi.mock("../../hooks/usePlatforms", async (importActual) => {
 });
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
+
+const mockScorerContext = {
+  score: 0,
+  rawScore: 0,
+  threshold: 0,
+  scoreDescription: "",
+  scoreState: { status: "loading" as const },
+  stampScores: {},
+  stampWeights: {},
+  stampDedupStatus: {},
+  scoredPlatforms: [],
+  loadScore: vi.fn(),
+};
 
 let cardListProps: CardListProps = {};
 let categoryProps: CategoryProps = {
@@ -180,6 +194,19 @@ describe("<CardList />", () => {
     //the verified stamp no longer shows the score of availablepoints
     expect(availablePnts).toEqual(["12.9", "7.4", "0.7"]);
   });
+
+  it("should display '0' instead of '0.0' for deduplicated available points", () => {
+    // Test the formatPointsDisplay utility function directly
+
+    // Test normal case
+    expect(formatPointsDisplay(15.835, false)).toBe("15.8");
+
+    // Test deduplicated case
+    expect(formatPointsDisplay(0, true)).toBe("0");
+
+    // Test edge case - deduplicated but non-zero (should show normal formatting)
+    expect(formatPointsDisplay(5.123, true)).toBe("5.1");
+  });
   it("renders allowList if stamp is present", () => {
     const scorerContext = {
       scoredPlatforms: [
@@ -231,11 +258,17 @@ describe("deduplication label tests", () => {
           <div className="group relative flex h-full cursor-pointer flex-col rounded-lg border p-0">
             <div className="m-6 flex h-full flex-col justify-between">
               <div className="flex w-full items-center justify-between">
-                <div className="bg-yellow-500 px-2 py-1 rounded text-right font-alt text-black">
-                  <p className="text-xs" data-testid="deduped-label">
-                    Claimed by another wallet
-                  </p>
-                </div>
+                <a
+                  href="https://support.passport.xyz/passport-knowledge-base/common-questions/why-am-i-receiving-zero-points-for-a-verified-stamp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <div className="bg-yellow-500 px-2 py-1 rounded text-right font-alt text-black">
+                    <p className="text-xs" data-testid="deduped-label">
+                      Claimed by another wallet
+                    </p>
+                  </div>
+                </a>
               </div>
               <h1 data-testid="platform-name">{platform.name}</h1>
             </div>
@@ -269,6 +302,15 @@ describe("deduplication label tests", () => {
     const dedupedLabelElements = screen.getAllByTestId("deduped-label");
     expect(dedupedLabelElements).toHaveLength(1);
     expect(dedupedLabelElements[0]).toHaveTextContent("Claimed by another wallet");
+
+    // Test that deduplication badge is clickable link to support docs
+    const dedupLink = dedupedLabelElements[0].closest("a");
+    expect(dedupLink).toHaveAttribute(
+      "href",
+      "https://support.passport.xyz/passport-knowledge-base/common-questions/why-am-i-receiving-zero-points-for-a-verified-stamp"
+    );
+    expect(dedupLink).toHaveAttribute("target", "_blank");
+    expect(dedupLink).toHaveAttribute("rel", "noopener noreferrer");
   });
 
   it("should not show deduplication label for normal verified stamps", () => {

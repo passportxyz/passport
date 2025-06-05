@@ -19,11 +19,18 @@ export const StampLabels = ({ primaryLabel, primaryBgColor, isDeduplicated }: St
       </p>
     </div>
     {isDeduplicated && (
-      <div className="bg-foreground-7 px-2 py-1 rounded text-right font-alt text-color-4">
-        <p className="text-xs" data-testid="deduped-label">
-          Deduplicated
-        </p>
-      </div>
+      <a
+        href="https://support.passport.xyz/passport-knowledge-base/common-questions/why-am-i-receiving-zero-points-for-a-verified-stamp"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="no-underline"
+      >
+        <div className="bg-foreground-7 px-2 py-1 rounded text-right font-alt text-color-4 cursor-pointer hover:bg-foreground-6 transition-colors">
+          <p className="text-xs" data-testid="deduped-label">
+            Deduplicated
+          </p>
+        </div>
+      </a>
     )}
   </div>
 );
