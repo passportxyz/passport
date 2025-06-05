@@ -475,7 +475,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
         },
         {} as Record<PLATFORM_ID, PlatformProps>
       ),
-    [verifiedProviderIds, allPlatforms]
+    [expiredProviders, allPlatforms]
   );
 
   const platformExpirationDates = useMemo(() => {

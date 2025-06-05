@@ -6,11 +6,13 @@ import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 
 // --- Components
 import { Button } from "./Button";
-import { PlatformScoreSpec } from "../context/scorerContext";
+import { StampLabels } from "./StampLabels";
+import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 import { CeramicContext } from "../context/ceramicContext";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
 import { usePlatforms } from "../hooks/usePlatforms";
+import { useStampDeduplication } from "../hooks/useStampDeduplication";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -32,6 +34,7 @@ type StampProps = {
   className?: string;
   onClick: () => void;
   variant?: CardVariant;
+  isDeduplicated?: boolean;
 };
 
 const variantClasses: Record<CardVariant, string> = {
@@ -107,7 +110,7 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps
   );
 };
 
-const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick }: StampProps) => {
+const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick, isDeduplicated }: StampProps) => {
   const [hovering, setHovering] = useState(false);
   const imgFilter = {
     filter: `invert(27%) sepia(97%) saturate(295%) hue-rotate(113deg) brightness(${
@@ -140,11 +143,7 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick 
                 />
               </svg>
             )}
-            <div className="bg-foreground-4 px-2 py-1 rounded text-right font-alt text-black">
-              <p className="text-xs" data-testid="verified-label">
-                Verified
-              </p>
-            </div>
+            <StampLabels primaryLabel="Verified" primaryBgColor="bg-foreground-4" isDeduplicated={isDeduplicated} />
           </div>
 
           <div className="mt-4 flex justify-center h-full md:mt-6 md:inline-block md:justify-start">
@@ -192,7 +191,7 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick 
   );
 };
 
-const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick }: StampProps) => {
+const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick, isDeduplicated }: StampProps) => {
   const [hovering, setHovering] = useState(false);
   const imgFilter = {
     filter: `invert(27%) sepia(97%) saturate(295%) hue-rotate(113deg) brightness(${
@@ -224,11 +223,7 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick }
                 />
               </svg>
             )}
-            <div className="bg-background-5 px-2 py-1 rounded text-right font-alt text-black">
-              <p className="text-xs" data-testid="expired-label">
-                Expired
-              </p>
-            </div>
+            <StampLabels primaryLabel="Expired" primaryBgColor="bg-background-5" isDeduplicated={isDeduplicated} />
           </div>
 
           <div className="mt-4 flex justify-center h-full md:mt-6 md:inline-block md:justify-start">
@@ -294,7 +289,12 @@ export const PlatformCard = ({
     expirationDate: platformExpirationDates[platform.platform as PLATFORM_ID] || "",
   });
 
-  const verified = platform.earnedPoints > 0 || selectedProviders[platform.platform].length > 0;
+  // Use the custom hook to determine if this platform has deduplicated stamps
+  const isDeduplicated = useStampDeduplication(platform);
+
+  const verified =
+    platform.earnedPoints > 0 ||
+    (selectedProviders[platform.platform] && selectedProviders[platform.platform].length > 0);
   // returns a single Platform card
   let stamp = null;
   if (verified && isExpired) {
@@ -303,6 +303,7 @@ export const PlatformCard = ({
         idx={i}
         platform={platform}
         className={className}
+        isDeduplicated={isDeduplicated}
         onClick={() => {
           setCurrentPlatform(platform);
           onOpen();
@@ -317,6 +318,7 @@ export const PlatformCard = ({
         platform={platform}
         daysUntilExpiration={daysUntilExpiration}
         className={className}
+        isDeduplicated={isDeduplicated}
         onClick={() => {
           setCurrentPlatform(platform);
           onOpen();

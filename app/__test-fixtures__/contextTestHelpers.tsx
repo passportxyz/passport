@@ -141,6 +141,11 @@ export const makeTestClaimingContext = (
 };
 
 export const scorerContext = {
+  score: 0,
+  rawScore: 0,
+  threshold: 20,
+  scoreDescription: "",
+  scoreState: { status: "success" as const },
   scoredPlatforms: [
     {
       icon: "./assets/gtcStakingLogoIcon.svg",
@@ -195,8 +200,13 @@ export const scorerContext = {
       earnedPoints: 1,
     },
   ],
-  rawScore: 0,
-} as unknown as ScorerContextState;
+  refreshScore: vi.fn(),
+  fetchStampWeights: vi.fn(),
+  stampWeights: {},
+  stampScores: {},
+  stampDedupStatus: {},
+  passingScore: false,
+} as ScorerContextState;
 
 export const createWalletStoreMock = () => {
   const mockConnect = vi.fn();

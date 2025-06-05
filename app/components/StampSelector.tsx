@@ -23,9 +23,49 @@ const checkMark = () => (
   </svg>
 );
 
+const ProviderTitle = ({
+  title,
+  isVerified,
+  isExpired,
+  isDeduplicated,
+  className = "",
+}: {
+  title: string;
+  isVerified: boolean;
+  isExpired: boolean;
+  isDeduplicated: boolean;
+  className?: string;
+}) => (
+  <div className={`flex items-center flex-wrap gap-2 ${className}`}>
+    <span>
+      {isVerified && checkMark()} {title}
+    </span>
+    {isExpired && (
+      <span className="text-xs bg-background-5 px-1 rounded text-right font-alt text-black" data-testid="expired-label">
+        Expired
+      </span>
+    )}
+    {isDeduplicated && (
+      <a
+        href="https://support.passport.xyz/passport-knowledge-base/common-questions/why-am-i-receiving-zero-points-for-a-verified-stamp"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="no-underline"
+      >
+        <span
+          className="text-xs bg-foreground-7 px-1 rounded text-right font-alt text-color-4 cursor-pointer hover:bg-foreground-6 transition-colors"
+          data-testid="deduped-label"
+        >
+          Claimed by another wallet
+        </span>
+      </a>
+    )}
+  </div>
+);
+
 export function StampSelector({ currentProviders, verifiedProviders }: StampSelectorProps) {
   const { expiredProviders } = useContext(CeramicContext);
-  const { stampWeights } = useContext(ScorerContext);
+  const { stampWeights, stampDedupStatus } = useContext(ScorerContext);
   const includedGroupsAndProviders = useIncludedGroupsAndProviders(currentProviders || []);
 
   return (
@@ -46,6 +86,7 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
               }
               const isVerified = verifiedProviders?.indexOf(provider.name) !== -1;
               const isExpired = expiredProviders?.indexOf(provider.name) !== -1;
+              const isDeduplicated = stampDedupStatus?.[provider.name] || false;
 
               const rawWeight = stampWeights?.[provider.name];
               const weight = rawWeight ? +parseFloat(rawWeight).toFixed(1) : 0;
@@ -59,15 +100,12 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
                       className="relative rounded text-base flex justify-between items-stretch text-color-3 mt-4 border border-background-5 bg-gradient-to-b from-background to-background-5/30"
                     >
                       <div className="p-4 border-r border-background-5 w-3/4">
-                        <p className="">
-                          {provider.title}
-                          <p
-                            className="text-xs bg-background-5 px-1 ml-2 rounded text-right font-alt text-black inline-block relative -top-0.5"
-                            data-testid="expired-label"
-                          >
-                            Expired
-                          </p>
-                        </p>
+                        <ProviderTitle
+                          title={provider.title}
+                          isVerified={isVerified}
+                          isExpired={isExpired}
+                          isDeduplicated={isDeduplicated}
+                        />
                         {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
                       </div>
 
@@ -81,7 +119,6 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
                   </React.Fragment>
                 );
               } else if (isVerified) {
-                // Return expired stamp
                 return (
                   <React.Fragment key={provider.name}>
                     <div
@@ -89,15 +126,19 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
                       className={`relative rounded border-foreground-2 text-base flex justify-between items-stretch border text-color-1 mt-4 `}
                     >
                       <div className={`p-4 border-r w-3/4 ${customSideBarGradient}`}>
-                        <p className="font-bold text-color-6">
-                          {checkMark()} {provider.title}
-                        </p>
+                        <ProviderTitle
+                          title={provider.title}
+                          isVerified={isVerified}
+                          isExpired={isExpired}
+                          isDeduplicated={isDeduplicated}
+                          className="font-bold text-color-6"
+                        />
                         {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
                       </div>
 
                       <div className="bg-gradient-to-r from-foreground-2 to-foreground-4 w-1/4 flex items-center text-background-4 py-3">
                         <p className="text-2xl text-center w-full text-s leading-none">
-                          <span className="font-bold">{weight}</span> <br />
+                          <span className="font-bold">{isDeduplicated ? "0" : weight}</span> <br />
                           <span className="text-base">points</span>
                         </p>
                       </div>

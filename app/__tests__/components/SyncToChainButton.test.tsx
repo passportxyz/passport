@@ -136,7 +136,9 @@ describe("SyncToChainButton component", () => {
       { ...mockCeramicContext },
       <ChakraProvider>
         <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} isLoading={false} />
-      </ChakraProvider>
+      </ChakraProvider>,
+      {},
+      { rawScore: 25, threshold: 20, scoreState: { status: "success" } }
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     fireEvent.click(btn);
@@ -165,7 +167,7 @@ describe("SyncToChainButton component", () => {
         <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} isLoading={false} />
       </ChakraProvider>,
       {},
-      { threshold: 10, rawScore: 20 }
+      { threshold: 10, rawScore: 20, scoreState: { status: "success" } }
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     fireEvent.click(btn);
@@ -186,7 +188,7 @@ describe("SyncToChainButton component", () => {
         <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithEas} isLoading={false} />
       </ChakraProvider>,
       {},
-      { threshold: 15, rawScore: 10 }
+      { threshold: 15, rawScore: 10, scoreState: { status: "success" } }
     );
     const btn = screen.getByTestId("sync-to-chain-button");
     fireEvent.click(btn);
