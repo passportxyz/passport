@@ -16,7 +16,6 @@ import { DEFAULT_CUSTOMIZATION, useCustomization } from "../../hooks/useCustomiz
 import { platforms } from "@gitcoin/passport-platforms";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { usePlatforms } from "../../hooks/usePlatforms";
-import { formatPointsDisplay } from "../../utils/pointsDisplay";
 
 vi.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -195,18 +194,6 @@ describe("<CardList />", () => {
     expect(availablePnts).toEqual(["12.9", "7.4", "0.7"]);
   });
 
-  it("should display '0' instead of '0.0' for deduplicated available points", () => {
-    // Test the formatPointsDisplay utility function directly
-
-    // Test normal case
-    expect(formatPointsDisplay(15.835, false)).toBe("15.8");
-
-    // Test deduplicated case
-    expect(formatPointsDisplay(0, true)).toBe("0");
-
-    // Test edge case - deduplicated but non-zero (should show normal formatting)
-    expect(formatPointsDisplay(5.123, true)).toBe("5.1");
-  });
   it("renders allowList if stamp is present", () => {
     const scorerContext = {
       scoredPlatforms: [

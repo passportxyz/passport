@@ -2,7 +2,7 @@
 import React, { createContext, useCallback, useEffect, useState } from "react";
 
 // --- Axios
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { PROVIDER_ID } from "@gitcoin/passport-types";

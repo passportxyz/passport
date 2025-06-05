@@ -13,7 +13,6 @@ import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
 import { usePlatforms } from "../hooks/usePlatforms";
 import { useStampDeduplication } from "../hooks/useStampDeduplication";
-import { formatPointsDisplay } from "../utils/pointsDisplay";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -44,7 +43,7 @@ const variantClasses: Record<CardVariant, string> = {
     "bg-gradient-to-t from-background-2 to-background-3 border-background-3 shadow-[0px_0px_24px_0px] shadow-background-3",
 };
 
-const DefaultStamp = ({ idx, platform, className, onClick, variant, isDeduplicated }: StampProps) => {
+const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps) => {
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
       <div
@@ -75,10 +74,7 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant, isDeduplicat
             )}
             <div className={`text-right`}>
               <h1 data-testid="available-points" className="text-2xl text-color-2">
-                {formatPointsDisplay(
-                  Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0),
-                  isDeduplicated
-                )}
+                {+Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0).toFixed(1)}
               </h1>
               <p className="text-xs">Available Points</p>
             </div>
@@ -169,7 +165,7 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick,
           </div>
 
           <div className="text-color-6">Points gained</div>
-          <div className="text-2xl font-bold">{formatPointsDisplay(platform.earnedPoints, isDeduplicated)}</div>
+          <div className="text-2xl font-bold">{+platform.earnedPoints.toFixed(1)}</div>
           <ProgressBar
             pointsGained={platform.earnedPoints}
             pointsAvailable={Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0)}
@@ -249,7 +245,7 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick, 
           </div>
 
           <div className="text-color-6">Points gained</div>
-          <div className="text-2xl font-bold">{formatPointsDisplay(platform.earnedPoints, isDeduplicated)}</div>
+          <div className="text-2xl font-bold">{+platform.earnedPoints.toFixed(1)}</div>
           <ProgressBar
             pointsGained={platform.earnedPoints}
             pointsAvailable={Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0)}
@@ -336,7 +332,6 @@ export const PlatformCard = ({
         idx={i}
         platform={platform}
         className={className}
-        isDeduplicated={isDeduplicated}
         onClick={() => {
           setCurrentPlatform(platform);
           onOpen();

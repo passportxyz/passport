@@ -5,7 +5,6 @@ import { CeramicContext } from "../context/ceramicContext";
 import { ScorerContext } from "../context/scorerContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { customSideBarGradient } from "./PlatformDetails";
-import { formatPointsDisplay } from "../utils/pointsDisplay";
 
 type StampSelectorProps = {
   currentProviders: PlatformGroupSpec[] | undefined;
@@ -90,7 +89,7 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
               const isDeduplicated = stampDedupStatus?.[provider.name] || false;
 
               const rawWeight = stampWeights?.[provider.name];
-              const weight = rawWeight ? formatPointsDisplay(parseFloat(rawWeight), isDeduplicated) : "0";
+              const weight = rawWeight ? +parseFloat(rawWeight).toFixed(1) : 0;
 
               if (isExpired) {
                 // Return verified stamp
@@ -120,7 +119,6 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
                   </React.Fragment>
                 );
               } else if (isVerified) {
-                // Return expired stamp
                 return (
                   <React.Fragment key={provider.name}>
                     <div
@@ -140,7 +138,7 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
 
                       <div className="bg-gradient-to-r from-foreground-2 to-foreground-4 w-1/4 flex items-center text-background-4 py-3">
                         <p className="text-2xl text-center w-full text-s leading-none">
-                          <span className="font-bold">{weight}</span> <br />
+                          <span className="font-bold">{isDeduplicated ? "0" : weight}</span> <br />
                           <span className="text-base">points</span>
                         </p>
                       </div>

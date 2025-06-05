@@ -8,8 +8,6 @@ import { ScorerContext } from "../context/scorerContext";
 import { Popover, Transition } from "@headlessui/react";
 import { RemoveStampModal } from "./RemoveStampModal";
 import { ProgressBar } from "./ProgressBar";
-import { formatPointsDisplay } from "../utils/pointsDisplay";
-import { useStampDeduplication } from "../hooks/useStampDeduplication";
 import { getDaysToExpiration } from "../utils/duration";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 
@@ -132,9 +130,6 @@ export const PlatformDetails = ({
 
   const currentPlatformScoreSpec = scoredPlatforms.find((platform) => platform.name === currentPlatform.name);
 
-  // Use the deduplication hook
-  const isDeduplicated = currentPlatformScoreSpec ? useStampDeduplication(currentPlatformScoreSpec) : false;
-
   const platformPassportData = useMemo(
     () =>
       verifiedProviders && passport && passport.stamps.filter((stamp) => verifiedProviders?.includes(stamp.provider)),
@@ -146,8 +141,8 @@ export const PlatformDetails = ({
   const earnedPoints = currentPlatformScoreSpec?.earnedPoints || 0;
   const possiblePoints = currentPlatformScoreSpec?.displayPossiblePoints || 0;
 
-  const pointsGained = formatPointsDisplay(earnedPoints, isDeduplicated);
-  const pointsAvailable = formatPointsDisplay(Math.max(possiblePoints - earnedPoints, 0), isDeduplicated);
+  const pointsGained = +earnedPoints.toFixed(1);
+  const pointsAvailable = +Math.max(possiblePoints - earnedPoints, 0).toFixed(1);
 
   verifiedProviders = verifiedProviders || [];
   const hasExpiredProviders = useMemo(() => {
