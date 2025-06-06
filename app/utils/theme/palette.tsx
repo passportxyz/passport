@@ -18,6 +18,9 @@ export const colors = {
   yellowGreen: "#A0FE7F",
   yellow: "#FEF17F",
   orangeRed: "#FEA57F",
+  // Holonym pallete below
+  hmnBackground: "#F5F5F5",
+  hmnGrey: "#737373",
 };
 
 export const palette = Object.entries(colors).reduce(

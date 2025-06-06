@@ -12,8 +12,8 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   pointsGained,
   pointsAvailable,
   isSlim = false,
-  gainedBarColor = "rgb(var(--color-foreground-4))",
-  availableBarColor = "#C1F6FF",
+  gainedBarColor = "white",
+  availableBarColor = "#009973",
 }) => {
   const percentGained = (pointsGained / (pointsGained + pointsAvailable)) * 100 || 0;
 
@@ -23,6 +23,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   const gainedBarBorder = isSlim ? 3 : 3;
 
   const heightClass = `h-[${gainedBarWidth + 2 * gainedBarBorder}px]`;
+
   return (
     <div className={heightClass}>
       <svg viewBox={`0 0 ${100 + 2 * capDistance} 10`} preserveAspectRatio="none">
@@ -37,7 +38,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
           strokeLinecap="round"
         />
         {/* We draw the "border" as wider bar than the "gained" bar. */}
-        <line
+        {/* <line
           x1={capDistance}
           y1="5"
           x2={percentGained + capDistance}
@@ -45,7 +46,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
           stroke="#0E2825"
           strokeWidth={gainedBarWidth + gainedBarBorder}
           strokeLinecap="round"
-        />
+        /> */}
         {/* We draw the "gained" part of the bar, on top of the "border". What remains visible of the border bar will look like a nice border */}
         <line
           x1={capDistance}
