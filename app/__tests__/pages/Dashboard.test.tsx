@@ -242,7 +242,8 @@ describe.skip("when app fails to load ceramic stream", () => {
   });
 });
 
-it("reset passport button should open refresh modal when clicked", async () => {
+it.skip("reset passport button should open refresh modal when clicked", async () => {
+  // TODO #3502: Skipping for now because the entire "Collected Stamps" section is removed for now ...
   renderWithContext(
     {
       ...mockCeramicContext,
@@ -260,7 +261,8 @@ it("reset passport button should open refresh modal when clicked", async () => {
 });
 
 describe("when the user has a passport", () => {
-  it("shows Passport JSON button", () => {
+  it.skip("shows Passport JSON button", () => {
+    // TODO #3502: Skipping for now because the Passport JSON button has been removed for now
     renderWithContext(
       mockCeramicContext,
       <Router>
@@ -273,7 +275,8 @@ describe("when the user has a passport", () => {
 });
 
 describe("when the user clicks Passport JSON", () => {
-  it("it should display a modal", async () => {
+  it.skip("it should display a modal", async () => {
+    // TODO #3502: Skipping for now because the Passport JSON button has been removed for now
     renderWithContext(
       mockCeramicContext,
       <Router>
