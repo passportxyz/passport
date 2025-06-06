@@ -255,7 +255,7 @@ export default function Dashboard() {
           <PageWidthGrid>
             <DashboardCTAs customization={customization} />
 
-            <span id="add-stamps" className="col-span-full font-heading text-4xl">
+            <span id="add-stamps" className="col-span-full font-heading text-4xl text-gray-800">
               Add Stamps
             </span>
             <CardList

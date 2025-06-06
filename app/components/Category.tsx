@@ -10,6 +10,7 @@ import { useDisclosure } from "@chakra-ui/react";
 
 export type Category = {
   name: string;
+  icon?: React.ReactElement;
   id?: string;
   description: string;
   sortedPlatforms: PlatformScoreSpec[];
@@ -24,7 +25,8 @@ export type CategoryProps = {
 
 export const CUSTOM_CATEGORY_ID = "Custom";
 
-const cardClassName = "col-span-2 md:col-span-1 lg:col-span-1 xl:col-span-1";
+// const cardClassName = "col-span-2 md:col-span-1 lg:col-span-1 xl:col-span-1 bg-background";
+const cardClassName = "";
 
 export const Category = ({
   className,
@@ -80,22 +82,25 @@ export const Category = ({
 
   return (
     <>
-      <Disclosure as="div" className={className} defaultOpen={true} key={category.name}>
-        <Disclosure.Button
-          className="flex items-center border-b border-foreground-2 cursor-pointer"
-          onClick={handleClick}
-          as="div"
-        >
-          <div className="grow flex flex-col items-start mr-1">
-            <div className="text-xl text-color-6 font-bold lg:text-2xl leading-none lg:leading-none text-left py-2">
-              {category.name}
+      <Disclosure as="div" className="col-span-full p-8 bg-white rounded-xl" defaultOpen={true} key={category.name}>
+        <Disclosure.Button className="flex items-center cursor-pointer" onClick={handleClick} as="div">
+          <div className="flex grow">
+            <div className="pr-4 flex-none">{category.icon}</div>
+            <div className="grow flex flex-col items-start mr-1">
+              <div className="text-xl text-gray-800 lg:text-2xl leading-none lg:leading-none text-left py-2">
+                {category.name}
+              </div>
+              <div className="text-xl text-black lg:text-xl leading-none lg:leading-none text-left py-2">
+                <span className="text-gray-600 py-2 my-4">{category.description}</span>
+              </div>
+            </div>
+            <div className="flex flex-col justify-center">
+              <DropDownIcon isOpen={dropDownOpen} className="flex-none px-4" />
             </div>
           </div>
-          <DropDownIcon isOpen={dropDownOpen} className="px-4" />
         </Disclosure.Button>
         {panelMounted && (
           <Disclosure.Panel className={`transition-all transit duration-150 ease-in-out my-4`} static>
-            <span className="text-color-2 py-2 my-4">{category.description}</span>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 my-8">
               {category.sortedPlatforms.map((platform, i) => {
                 return isLoading ? (

@@ -38,8 +38,9 @@ type StampProps = {
 };
 
 const variantClasses: Record<CardVariant, string> = {
-  default: "bg-gradient-to-b from-background to-background-2/70 border-foreground-6",
+  default: "bg-background",
   partner:
+    // TODO #3513 fix the partner stamps
     "bg-gradient-to-t from-background-2 to-background-3 border-background-3 shadow-[0px_0px_24px_0px] shadow-background-3",
 };
 
@@ -47,15 +48,8 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
       <div
-        className={`group relative flex h-full cursor-pointer flex-col rounded-lg border p-0 transition-all ease-out 
-        hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-transparent hover:shadow-even-md hover:border-background-3 hover:to-background-2 hover:shadow-background-3
-        ${variantClasses[variant || "default"]}`}
+        className={`group relative flex h-full cursor-pointer flex-col rounded-2xl p-0 transition-all ease-out ${variantClasses[variant || "default"]}`}
       >
-        <img
-          src="./assets/card-background.svg"
-          alt=""
-          className="absolute bottom-0 right-0 opacity-0 group-hover:opacity-100"
-        />
         <div className="m-6 flex h-full flex-col justify-between">
           <div className="flex w-full items-center justify-between">
             {platform.icon ? (
@@ -72,8 +66,8 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps
                 />
               </svg>
             )}
-            <div className="text-right inline-block">
-              <div data-testid="available-points" className="text-l text-color-2">
+            <div className="text-right inline-block bg-white pb-0 pt-1 px-2 rounded-2xl">
+              <div data-testid="available-points" className="text-l text-color-4">
                 <div className="flex w-full items-start justify-end">
                   <svg width="17" height="21" viewBox="0 0 17 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -87,18 +81,17 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps
                       fill="#006B56"
                     />
                   </svg>
-                  <div className="pl-2">
+                  <div className="pl-1">
                     {+Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0).toFixed(1)}
                   </div>
                 </div>
               </div>
-              <p className="text-xs">Available Points</p>
             </div>
           </div>
 
-          <div className="mt-4 flex justify-center h-full md:mt-6 md:inline-block md:justify-start">
+          <div className="mt-4 flex justify-center h-full md:mt-6 md:inline-block md:justify-start text-color-4">
             <div
-              className={`flex flex-col place-items-start text-color-2 md:flex-row ${
+              className={`flex flex-col place-items-start md:flex-row ${
                 platform.name.split(" ").length > 1 ? "items-center md:items-baseline" : "items-center"
               }`}
             >
@@ -109,14 +102,14 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps
                 {platform.name}
               </h1>
             </div>
-            <p className="flex-1 pleading-relaxed mt-2 hidden text-sm text-color-1 md:inline-block visible">
+            <p className="flex-1 pleading-relaxed mt-2 hidden text-sm md:inline-block visible text-gray-600">
               {platform.description}
             </p>
           </div>
           <Button
             data-testid="connect-button"
             variant="custom"
-            className="mt-5 w-auto border bg-transparent text-foreground-2 border-foreground-2 z-10"
+            className="mt-5 w-auto bg-transparent bg-white text-color-4 border-foreground-2 z-10"
           >
             Connect
           </Button>
@@ -126,28 +119,16 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps
   );
 };
 
+
 const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick, isDeduplicated }: StampProps) => {
-  const [hovering, setHovering] = useState(false);
-  const imgFilter = {
-    filter: `invert(27%) sepia(97%) saturate(295%) hue-rotate(113deg) brightness(${
-      hovering ? "100%" : "56%"
-    }) contrast(89%)`,
-  };
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
-      <div
-        onMouseEnter={() => setHovering(true)}
-        onMouseLeave={() => setHovering(false)}
-        className="group relative flex h-full cursor-pointer flex-col rounded-lg border p-0 transition-all ease-out
-        hover:bg-opacity-100 hover:bg-gradient-to-b hover:from-transparent hover:shadow-even-md
-        border-foreground-5 hover:border-foreground-4 hover:to-foreground-5/70 hover:shadow-foreground-4
-        bg-gradient-to-b from-background to-foreground-5/40"
-      >
+      <div className="group relative flex h-full cursor-pointer flex-col rounded-2xl p-0 transition-all ease-out bg-emerald-100">
         <div className="m-6 flex h-full flex-col justify-between">
-          <div className="flex w-full items-center justify-between">
+          <div className="flex w-full items-center">
             {platform.icon ? (
-              <div style={imgFilter}>
-                <img src={platform.icon} alt={platform.name} className="h-10 w-10 grayscale" />
+              <div>
+                <img src={platform.icon} alt={platform.name} className="h-10 w-10" />
               </div>
             ) : (
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -160,11 +141,14 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick,
               </svg>
             )}
             <StampLabels primaryLabel="Verified" primaryBgColor="bg-foreground-4" isDeduplicated={isDeduplicated} />
+            <div className="px-2 py-1 text-l font-bold text-left text-emerald-600">
+              <p data-testid="verified-label">Verified</p>
+            </div>
           </div>
 
           <div className="mt-4 flex justify-center h-full md:mt-6 md:inline-block md:justify-start">
             <div
-              className={`flex flex-col place-items-start text-color-2 md:flex-row ${
+              className={`flex flex-col place-items-start text-color-4 md:flex-row ${
                 platform.name.split(" ").length > 1 ? "items-center md:items-baseline" : "items-center"
               }`}
             >
@@ -175,31 +159,36 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick,
                 {platform.name}
               </h1>
             </div>
-            <p className="flex-1 pleading-relaxed mt-2 hidden text-sm text-color-1 md:inline-block invisible">
-              {platform.description}
+            <p className="flex-1 pleading-relaxed mt-2 hidden text-sm text-color-4 md:inline-block invisible">
+              {platform.description}dewfded
             </p>
           </div>
 
-          <div className="text-color-6">Points gained</div>
-          <div className="text-2xl font-bold">{+platform.earnedPoints.toFixed(1)}</div>
+          <div className="text-sm font-bold text-color-9">
+            <span className="text-xl text-color-4">{+platform.earnedPoints.toFixed(1)} </span> /{" "}
+            {platform.displayPossiblePoints.toFixed(1)} points gained
+          </div>
           <ProgressBar
             pointsGained={platform.earnedPoints}
             pointsAvailable={Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0)}
             isSlim={true}
           />
-        </div>
-        <div className="flex items-center mt-5 px-4 py-2 border-t border-foreground-4">
-          <div className="flex-none">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M12 6C12 6.78793 11.8448 7.56815 11.5433 8.2961C11.2417 9.02405 10.7998 9.68549 10.2426 10.2426C9.68549 10.7998 9.02405 11.2417 8.2961 11.5433C7.56815 11.8448 6.78793 12 6 12L6 6H12Z"
-                fill="#C1F6FF"
-              />
-              <circle cx="6" cy="6" r="5.5" stroke="#C1F6FF" />
-            </svg>
-          </div>
-          <div className="flex-1 pl-2 text-foreground-2 override-text-color">
-            {daysUntilExpiration} {daysUntilExpiration === 1 ? "day" : "days"} until Stamps expire
+          <div className="flex flex-row justify-center px-4 pt-2">
+            <div>
+              <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M3.5 12.332C3.5 14.1121 4.02784 15.8521 5.01677 17.3322C6.00571 18.8122 7.41131 19.9658 9.05585 20.6469C10.7004 21.3281 12.51 21.5064 14.2558 21.1591C16.0016 20.8118 17.6053 19.9547 18.864 18.696C20.1226 17.4373 20.9798 15.8337 21.3271 14.0878C21.6743 12.342 21.4961 10.5324 20.8149 8.88788C20.1337 7.24335 18.9802 5.83774 17.5001 4.8488C16.0201 3.85987 14.28 3.33203 12.5 3.33203C9.98395 3.3415 7.56897 4.32325 5.76 6.07203L3.5 8.33203M3.5 8.33203V3.33203M3.5 8.33203H8.5M12.5 7.33203V12.332L16.5 14.332"
+                  stroke="black"
+                  stroke-opacity="0.5"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div className="pl-2 text-color-9 override-text-color">
+              Valid for {daysUntilExpiration} {daysUntilExpiration === 1 ? "day" : "days"}
+            </div>
           </div>
         </div>
       </div>

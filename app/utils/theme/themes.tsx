@@ -3,7 +3,7 @@ import palette from "./palette";
 
 export const LUNARPUNK_DARK_MODE: Theme = {
   colors: {
-    background: palette.black,
+    background: palette.hmnBackground, // black
     background2: palette.darkPurple,
     background3: palette.iris,
     background4: palette.nightBlue,
@@ -23,7 +23,7 @@ export const LUNARPUNK_DARK_MODE: Theme = {
     text6: palette.iceBlue,
     text7: palette.orange,
     text8: palette.yellowGreen,
-    text9: palette.yellow,
+    text9: palette.hmnGrey,
     text10: palette.orangeRed,
     focus: palette.red,
   },

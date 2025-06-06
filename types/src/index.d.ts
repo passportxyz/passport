@@ -4,6 +4,7 @@ export { BrightIdProcedureResponse, BrightIdVerificationResponse, BrightIdSponso
 
 import { MultiAttestationRequest } from "@ethereum-attestation-service/eas-sdk";
 import { JWSSignature } from "dids";
+import React from "react";
 
 // Typing for required parts of DIDKit
 export type DIDKitLib = {
@@ -366,6 +367,7 @@ export type PLATFORM_ID =
 
 export type PLATFORM_CATEGORY = {
   name: string;
+  icon?: React.ReactElement;
   id?: string;
   description: string;
   platforms: PLATFORM_ID[];
