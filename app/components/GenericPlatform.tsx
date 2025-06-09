@@ -414,7 +414,13 @@ export const GenericPlatform = ({
   ]);
 
   return (
-    <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
+    <Drawer
+      isOpen={isOpen}
+      placement="right"
+      size="sm"
+      onClose={onClose}
+      trapFocus={false} // TODO: Make this conditional (trapFocus={platform.platformId !== "HumanID"}) to preserve accessibility for other platforms
+    >
       <DrawerOverlay />
       <SideBarContent
         onClose={onClose}

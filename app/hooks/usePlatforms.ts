@@ -47,7 +47,7 @@ const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
   {
     name: "Government IDs",
     description: "Use your government-issued IDs or complete a KYC process with our partners to verify your identity.",
-    platforms: ["Coinbase", "Holonym", "Outdid", "Binance", "CleanHands"],
+    platforms: ["Coinbase", "Holonym", "Outdid", "Binance", "CleanHands", "HumanID"],
   },
   {
     name: "Social & Professional Platforms",
