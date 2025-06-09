@@ -29,6 +29,7 @@ const {
   Binance,
   CustomGithub,
   CleanHands,
+  HumanID,
 } = platforms;
 
 type CustomPlatformTypeInfo = {
@@ -214,5 +215,12 @@ if (process.env.NEXT_PUBLIC_FF_CLEAN_HANDS_STAMP === "on") {
   defaultPlatformMap.set("CleanHands", {
     platform: new CleanHands.CleanHandsPlatform(),
     platFormGroupSpec: CleanHands.ProviderConfig,
+  });
+}
+
+if (process.env.NEXT_PUBLIC_FF_HUMAN_ID_STAMP === "on") {
+  defaultPlatformMap.set("HumanID", {
+    platform: new HumanID.HumanIDPlatform(),
+    platFormGroupSpec: HumanID.ProviderConfig,
   });
 }

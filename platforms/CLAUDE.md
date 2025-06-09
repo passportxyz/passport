@@ -21,6 +21,7 @@ platforms/src/{PlatformName}/
 ## Creating a New Platform
 
 ### 1. Directory Structure
+
 Create the directory structure above in `src/{PlatformName}/`.
 
 ### 2. Backend Provider (`Providers/{providerName}.ts`)
@@ -33,7 +34,7 @@ import { Provider, ProviderOptions } from "../../types.js";
 
 export class YourProvider implements Provider {
   type = "YourProviderName";
-  
+
   constructor(options: ProviderOptions = {}) {
     // Initialize provider
   }
@@ -92,7 +93,7 @@ export const YourProviderConfig = {
     platform: "YourPlatform",
     name: "Your Platform Name",
     description: "Brief description",
-    connectMessage: "Connect your account to verify"
+    connectMessage: "Connect your account to verify",
   },
   ProviderConfig: [
     {
@@ -102,11 +103,11 @@ export const YourProviderConfig = {
         {
           title: "Provider Display Name",
           description: "What this provider verifies",
-          name: "YourProviderName"
-        }
-      ]
-    }
-  ]
+          name: "YourProviderName",
+        },
+      ],
+    },
+  ],
 };
 ```
 
@@ -129,6 +130,7 @@ export const providers = [new YourProvider()];
 ## Common Provider Patterns
 
 ### OAuth Flow
+
 1. Frontend generates OAuth URL via `getOAuthUrl()`
 2. User redirected to OAuth provider
 3. Frontend waits for redirect with authorization code
@@ -136,11 +138,13 @@ export const providers = [new YourProvider()];
 5. Backend verifies user data via provider API
 
 ### On-Chain Verification
+
 1. Frontend connects wallet (`isEVM = true`)
 2. Backend queries blockchain data
 3. Verification based on on-chain state
 
 ### Custom Flows
+
 1. Frontend implements custom authentication
 2. Can use wagmi hooks for wallet interactions
 3. Can use iframe integration or external services
@@ -165,7 +169,7 @@ describe("YourProvider", () => {
       address: "0x...",
       proofs: { code: "valid_code" },
       type: "YourProviderName",
-      version: "0.0.0"
+      version: "0.0.0",
     };
 
     const result = await provider.verify(payload);
@@ -177,8 +181,13 @@ describe("YourProvider", () => {
 ## Integration
 
 1. Add to `/platforms/src/platforms.ts`:
+
 ```typescript
-import { YourPlatform, YourProviderConfig, providers as YourProviders } from "./YourPlatform";
+import {
+  YourPlatform,
+  YourProviderConfig,
+  providers as YourProviders,
+} from "./YourPlatform";
 
 export const Platforms = new Map([
   // ... existing platforms
@@ -222,16 +231,19 @@ export const providers = [
 ## Special Considerations
 
 ### Wallet Integration
+
 - Set `isEVM = true` for providers requiring wallet connection
 - Use wagmi hooks in frontend for signature/transaction handling
 - Validate addresses and handle network switching
 
 ### Rate Limiting
+
 - Be mindful of external API rate limits
 - Implement appropriate backoff strategies
 - Cache responses when possible
 
 ### Privacy
+
 - Never log user credentials or tokens
 - Follow each platform's data usage policies
 - Implement proper data retention practices

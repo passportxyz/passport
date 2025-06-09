@@ -33,10 +33,12 @@
   "dependencies": {
     "@gitcoin/passport-types": "^1.0.0",
     "@guildxyz/sdk": "^2.5.0",
+    "@holonym-foundation/human-id-sdk": "^0.0.7",
     "@spruceid/didkit-wasm": "^0.3.0-alpha0",
     "axios": "^1.7.9",
     "bignumber.js": "^9.1.2",
     "ethers": "^6.13.4",
+    "ethers-v5": "npm:ethers@5.7.2",
     "multiformats": "^13.0.0",
     "redis": "^4.6.10"
   },

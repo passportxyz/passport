@@ -1,7 +1,8 @@
 // ---- End-to-End Integration Tests for Human ID Platform
 import { HumanIDPlatform } from "../App-Bindings.js";
 import { HumanIdPhoneProvider } from "../Providers/humanIdPhone.js";
-import { AppContext, RequestPayload } from "../../types.js";
+import { AppContext } from "../../types.js";
+import { RequestPayload, PROVIDER_ID } from "@gitcoin/passport-types";
 import * as humanIdSdk from "@holonym-foundation/human-id-sdk";
 
 // Mock the Human ID SDK
@@ -27,6 +28,10 @@ describe("Human ID End-to-End Integration", () => {
   const mockHumanID = {
     getKeygenMessage: jest.fn(),
     privateRequestSBT: jest.fn(),
+    request: jest.fn(),
+    requestSBT: jest.fn(),
+    on: jest.fn(),
+    removeListener: jest.fn(),
   };
 
   beforeEach(() => {
@@ -41,7 +46,7 @@ describe("Human ID End-to-End Integration", () => {
       state: "test-state",
       userDid: "did:test:123",
       callbackUrl: "http://localhost:3000/callback",
-      selectedProviders: ["HumanIdPhone"],
+      selectedProviders: ["HumanIdPhone" as PROVIDER_ID],
       waitForRedirect: jest.fn(),
       window: { open: jest.fn() },
       screen: { width: 1920, height: 1080 },
@@ -60,82 +65,58 @@ describe("Human ID End-to-End Integration", () => {
 
   describe("Successful Complete Flow", () => {
     it("should complete entire flow from frontend request to backend verification", async () => {
-      // Step 1: Frontend - Get provider payload
+      // Setup mocks for the complete flow
       const mockMessage = "Sign this message to generate your Human ID key";
       mockHumanID.getKeygenMessage.mockReturnValue(mockMessage);
 
+      // Mock wagmi functions
+      mockSignMessageAsync.mockResolvedValue(MOCK_SIGNATURE);
+      mockSendTransactionAsync.mockResolvedValue(MOCK_TX_HASH);
+      mockSwitchChainAsync.mockResolvedValue(undefined);
+
+      // Mock the SBT result that privateRequestSBT will return
+      const mockSBTResult = {
+        sbt: {
+          recipient: MOCK_ADDRESS,
+          txHash: MOCK_TX_HASH,
+        },
+        success: true,
+      };
+
+      // Mock privateRequestSBT to return the expected result
+      mockHumanID.privateRequestSBT.mockResolvedValue(mockSBTResult);
+
+      // Step 1: Call getProviderPayload which handles the entire flow
       const payload = await platform.getProviderPayload(mockAppContext);
 
+      // Verify the payload structure matches the implementation
       expect(payload).toEqual({
         humanId: {
-          action: "requestSignature",
-          message: mockMessage,
+          sbtRecipient: MOCK_ADDRESS,
+          transactionHash: MOCK_TX_HASH, // Now comes from the actual result
           sbtType: "phone",
         },
       });
 
-      // Step 2: Frontend - User signs message
-      mockSignMessageAsync.mockResolvedValue(MOCK_SIGNATURE);
-      const signature = await mockSignMessageAsync({ message: mockMessage });
-      expect(signature).toBe(MOCK_SIGNATURE);
-
-      // Step 3: Frontend - SBT request with payment
-      const mockTransaction = {
-        to: "0x1234567890123456789012345678901234567890",
-        value: "1000000000000000000",
-        data: "0xabcdef123456",
-        chainId: "10",
-      };
-
-      const mockSBTResult = {
-        recipient: MOCK_ADDRESS,
-        success: true,
-        txHash: MOCK_TX_HASH,
-      };
-
-      mockSwitchChainAsync.mockResolvedValue(undefined);
-      mockSendTransactionAsync.mockResolvedValue(MOCK_TX_HASH);
-
-      mockHumanID.privateRequestSBT.mockImplementation(async (sbtType, options) => {
-        const paymentResult = await options.paymentCallback(mockTransaction);
-        expect(paymentResult).toEqual({
-          txHash: MOCK_TX_HASH,
-          chainId: 10,
-        });
-        return mockSBTResult;
+      // Verify SDK functions were called
+      expect(mockedHumanIdSdk.initHumanID).toHaveBeenCalled();
+      expect(mockHumanID.getKeygenMessage).toHaveBeenCalled();
+      expect(mockSignMessageAsync).toHaveBeenCalledWith({ message: mockMessage });
+      expect(mockHumanID.privateRequestSBT).toHaveBeenCalledWith("phone", {
+        signature: MOCK_SIGNATURE,
+        address: MOCK_ADDRESS,
+        paymentCallback: expect.any(Function),
       });
 
-      const paymentCallback = async (tx: any) => {
-        await mockSwitchChainAsync({ chainId: Number(tx.chainId) });
-        const txHash = await mockSendTransactionAsync({
-          to: tx.to,
-          value: BigInt(tx.value ?? "0"),
-          data: tx.data,
-        });
-        return {
-          txHash,
-          chainId: Number(tx.chainId),
-        };
-      };
-
-      const sbtResult = await mockHumanID.privateRequestSBT("phone", {
-        signature,
-        address: MOCK_ADDRESS,
-        paymentCallback,
-      });
-
-      expect(sbtResult).toEqual(mockSBTResult);
-
-      // Step 4: Backend - Verify SBT exists
-      const mockSBTQueryResult = {
-        address: MOCK_ADDRESS,
-        timestamp: Date.now(),
-        tokenId: "123",
-        chainId: 10,
-      };
+      // Step 2: Backend - Verify SBT exists - should match [expiry, [prefix, nullifier], revoked] format
+      const mockSBTQueryResult = [
+        Date.now(), // expiry
+        ["0x0", "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"], // publicValues [0, nullifier]
+        false, // revoked
+      ];
 
       mockedHumanIdSdk.setOptimismRpcUrl.mockImplementation(() => {});
-      mockedHumanIdSdk.getPhoneSBTByAddress.mockResolvedValue(mockSBTQueryResult);
+      (mockedHumanIdSdk.getPhoneSBTByAddress as jest.Mock).mockResolvedValue(mockSBTQueryResult);
 
       const verificationPayload: RequestPayload = {
         address: MOCK_ADDRESS,
@@ -148,18 +129,11 @@ describe("Human ID End-to-End Integration", () => {
       expect(verificationResult).toEqual({
         valid: true,
         record: {
-          address: MOCK_ADDRESS,
+          nullifier: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef", // This matches the mock data
         },
       });
 
-      // Verify all SDK calls were made correctly
-      expect(mockedHumanIdSdk.initHumanID).toHaveBeenCalled();
-      expect(mockHumanID.getKeygenMessage).toHaveBeenCalled();
-      expect(mockHumanID.privateRequestSBT).toHaveBeenCalledWith("phone", {
-        signature: MOCK_SIGNATURE,
-        address: MOCK_ADDRESS,
-        paymentCallback,
-      });
+      // Verify backend SDK calls were made correctly
       expect(mockedHumanIdSdk.setOptimismRpcUrl).toHaveBeenCalledWith(process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL);
       expect(mockedHumanIdSdk.getPhoneSBTByAddress).toHaveBeenCalledWith(MOCK_ADDRESS);
     });
@@ -223,17 +197,40 @@ describe("Human ID End-to-End Integration", () => {
 
   describe("Different SBT Types", () => {
     it("should handle KYC SBT flow", async () => {
+      // Clear any previous mocks to ensure clean state
+      jest.clearAllMocks();
+
       const kycContext = {
         ...mockAppContext,
-        selectedProviders: ["HumanIdKyc"],
+        selectedProviders: ["HumanIdKyc" as PROVIDER_ID],
       };
 
+      // Setup fresh mocks for KYC flow
       const mockMessage = "Sign this message for KYC";
       mockHumanID.getKeygenMessage.mockReturnValue(mockMessage);
 
+      mockSignMessageAsync.mockResolvedValue(MOCK_SIGNATURE);
+      mockSendTransactionAsync.mockResolvedValue(MOCK_TX_HASH);
+      mockSwitchChainAsync.mockResolvedValue(undefined);
+
+      const mockSBTResult = {
+        sbt: {
+          recipient: MOCK_ADDRESS,
+          txHash: MOCK_TX_HASH,
+        },
+        success: true,
+      };
+
+      mockHumanID.privateRequestSBT.mockResolvedValue(mockSBTResult);
+
       const payload = await platform.getProviderPayload(kycContext);
 
-      expect(payload.humanId?.sbtType).toBe("kyc");
+      expect((payload as { humanId?: { sbtType?: string } }).humanId?.sbtType).toBe("kyc");
+      expect(mockHumanID.privateRequestSBT).toHaveBeenCalledWith("kyc", {
+        signature: MOCK_SIGNATURE,
+        address: MOCK_ADDRESS,
+        paymentCallback: expect.any(Function),
+      });
     });
   });
 });

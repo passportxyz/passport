@@ -6,6 +6,7 @@ import { AppContext } from "../../types.js";
 jest.mock("@holonym-foundation/human-id-sdk");
 
 import * as humanIdSdk from "@holonym-foundation/human-id-sdk";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 const mockedHumanIdSdk = humanIdSdk as jest.Mocked<typeof humanIdSdk>;
 
@@ -18,6 +19,10 @@ const mockSwitchChainAsync = jest.fn();
 const mockHumanID = {
   getKeygenMessage: jest.fn(),
   privateRequestSBT: jest.fn(),
+  request: jest.fn(),
+  requestSBT: jest.fn(),
+  on: jest.fn(),
+  removeListener: jest.fn(),
 };
 
 describe("HumanIDPlatform", () => {
@@ -42,7 +47,7 @@ describe("HumanIDPlatform", () => {
         height: 1080,
       },
       address: "0xb4b6f1c68be31841b52f4015a31d1f38b99cdb71",
-      signMessageAsync: mockSignMessageAsync,
+      signMessageAsync: mockSignMessageAsync as ({ message }: { message: string }) => Promise<string>,
       sendTransactionAsync: mockSendTransactionAsync,
       switchChainAsync: mockSwitchChainAsync,
     };
@@ -65,18 +70,31 @@ describe("HumanIDPlatform", () => {
   });
 
   describe("getProviderPayload", () => {
-    it("should return humanId payload for signature request", async () => {
+    it("should complete full Human ID verification flow", async () => {
       const mockMessage = "Sign this message to generate your Human ID key";
+      const mockSignature = "0xmocksignature";
+      const mockResult = { sbt: { recipient: "0xrecipient123", txHash: "0xmocktxhash" } };
+
       mockHumanID.getKeygenMessage.mockReturnValue(mockMessage);
+      mockSignMessageAsync.mockResolvedValue(mockSignature);
+      mockHumanID.privateRequestSBT.mockResolvedValue(mockResult);
 
       const result = await platform.getProviderPayload(mockAppContext);
 
       expect(mockedHumanIdSdk.initHumanID).toHaveBeenCalled();
       expect(mockHumanID.getKeygenMessage).toHaveBeenCalled();
+      expect(mockSignMessageAsync).toHaveBeenCalledWith({ message: mockMessage });
+      expect(mockHumanID.privateRequestSBT).toHaveBeenCalledWith(
+        "phone",
+        expect.objectContaining({
+          signature: mockSignature,
+          address: mockAppContext.address,
+        })
+      );
       expect(result).toEqual({
         humanId: {
-          action: "requestSignature",
-          message: mockMessage,
+          sbtRecipient: mockResult.sbt.recipient,
+          transactionHash: mockResult.sbt.txHash,
           sbtType: "phone",
         },
       });
@@ -84,17 +102,33 @@ describe("HumanIDPlatform", () => {
 
     it("should handle different SBT types", async () => {
       const mockMessage = "Sign this message to generate your Human ID key";
-      mockHumanID.getKeygenMessage.mockReturnValue(mockMessage);
+      const mockSignature = "0xmocksignature";
+      const mockResult = { sbt: { recipient: "0xrecipient123", txHash: "0xmocktxhash" } };
 
-      // Test with KYC provider
+      mockHumanID.getKeygenMessage.mockReturnValue(mockMessage);
+      mockSignMessageAsync.mockResolvedValue(mockSignature);
+      mockHumanID.privateRequestSBT.mockResolvedValue(mockResult);
+
       const kycContext = {
         ...mockAppContext,
-        selectedProviders: ["HumanIdKyc"],
+        selectedProviders: ["HumanIdKyc" as PROVIDER_ID],
       };
 
       const result = await platform.getProviderPayload(kycContext);
 
-      expect(result.humanId?.sbtType).toBe("kyc");
+      expect(mockHumanID.privateRequestSBT).toHaveBeenCalledWith("kyc", expect.any(Object));
+      expect((result as { humanId?: { sbtType?: string } }).humanId?.sbtType).toBe("kyc");
+    });
+
+    it("should throw error when wallet methods are missing", async () => {
+      const contextWithoutWallet: AppContext = {
+        ...mockAppContext,
+        signMessageAsync: undefined,
+      };
+
+      await expect(platform.getProviderPayload(contextWithoutWallet)).rejects.toThrow(
+        "Human ID verification requires wallet connection and signing capabilities"
+      );
     });
 
     it("should handle Human ID SDK initialization failure", async () => {
