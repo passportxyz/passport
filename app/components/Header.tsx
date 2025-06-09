@@ -17,13 +17,15 @@ const Header = (): JSX.Element => {
   }, [loadBanners]);
 
   return (
-    <div>
-      <div className={`w-full bg-background ${PAGE_PADDING}`}>
+    <div className="top-0 left-0 w-full fixed z-30">
+      <div className={`${PAGE_PADDING}`}>
         <MinimalHeader />
       </div>
+      {/* TODO: #3502
+      
       {!(userWarning || banners.length) && (
         <div className="h-1 w-full bg-gradient-to-b from-foreground-4 to-background" />
-      )}
+      )} */}
       <div className={`w-full bg-background-3 ${PAGE_PADDING}`}>
         {userWarning && <Warning userWarning={userWarning} onDismiss={() => setUserWarning(undefined)} />}
       </div>
