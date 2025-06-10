@@ -45,7 +45,7 @@ export const SideBarContent = ({
         height={42}
       />
       {currentPlatform && currentProviders ? (
-        <div className="overflow-auto p-10 text-color-1">
+        <div className="overflow-auto p-10 text-gray-800">
           <DrawerHeader
             style={{
               fontWeight: "inherit",
