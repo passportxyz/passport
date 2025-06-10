@@ -4940,23 +4940,22 @@
   resolved "https://registry.yarnpkg.com/@heroicons/react/-/react-2.2.0.tgz#0c05124af50434a800773abec8d3af6a297d904b"
   integrity sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ==
 
-"@holonym-foundation/human-id-interface-core@0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@holonym-foundation/human-id-interface-core/-/human-id-interface-core-0.0.3.tgz#38890c160235b64c927fb416418e3fff175689db"
-  integrity sha512-y5gwZCxy6rIvOj4kHwE3YPYVV8S604PAUc9IYLwdMVsRziXvfaHcC9ir1LXWUKJ7oufpdJwo8oifMIkI5+W2sw==
+"@holonym-foundation/human-id-interface-core@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@holonym-foundation/human-id-interface-core/-/human-id-interface-core-0.0.4.tgz#fff7a09a9750ee73828d56b0cdb99de14097760d"
+  integrity sha512-WNeeCNbdCs2/Xw8lTHLQ2i+QT2g3ZxJT8Z2aEMJCQKdSlDtWXpXWqlXa8ITxohU9Gy1cozCq6bidE5D+RFWYHA==
 
-"@holonym-foundation/human-id-sdk@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@holonym-foundation/human-id-sdk/-/human-id-sdk-0.0.7.tgz#eac7dd703ffbc368816461aec46d31f5499b2fd0"
-  integrity sha512-IU6n5Hvn4ozG54+ko3eJm1c/9DjTeLGD+/mlQIRYbvs2T+PvcCQPFWCpPFNUycxwNapiOcWSkMib2nPXpGkRbg==
+"@holonym-foundation/human-id-sdk@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@holonym-foundation/human-id-sdk/-/human-id-sdk-0.0.8.tgz#7774cfb559cd744e819b5b0f218f26ecd93d7cd8"
+  integrity sha512-iIi+T9yWr/hnGKU6dUZl5V4H8WZiAb5Z0aoKn+iCqg8BcNqxurvn11+9ixnUp7uQbFop3PbN6HSCxYqkGRAMQw==
   dependencies:
-    "@holonym-foundation/human-id-interface-core" "0.0.3"
+    "@holonym-foundation/human-id-interface-core" "0.0.4"
     "@metamask/rpc-errors" "^5.1.1"
     "@walletconnect/ethereum-provider" "^2.20.2"
-    ethers "5.7.2"
     events "^3.3.0"
     pino-pretty "^10.2.0"
-    viem "^2.21.44"
+    viem "^2.31.0"
     zod "^3.21.4"
     zod-validation-error "^1.3.0"
 
@@ -14622,42 +14621,6 @@ ethereumjs-util@^7.1.0:
     rlp "^2.2.4"
 
 "ethers-v5@npm:ethers@5.7.2":
-  version "5.7.2"
-  resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.7.2.tgz#3a7deeabbb8c030d4126b24f84e525466145872e"
-  integrity sha512-wswUsmWo1aOK8rR7DIKiWSw9DbLWe6x98Jrn8wcTflTVvaXhAMaB5zGAXy0GYQEQp9iO1iSHWVyARQm11zUtyg==
-  dependencies:
-    "@ethersproject/abi" "5.7.0"
-    "@ethersproject/abstract-provider" "5.7.0"
-    "@ethersproject/abstract-signer" "5.7.0"
-    "@ethersproject/address" "5.7.0"
-    "@ethersproject/base64" "5.7.0"
-    "@ethersproject/basex" "5.7.0"
-    "@ethersproject/bignumber" "5.7.0"
-    "@ethersproject/bytes" "5.7.0"
-    "@ethersproject/constants" "5.7.0"
-    "@ethersproject/contracts" "5.7.0"
-    "@ethersproject/hash" "5.7.0"
-    "@ethersproject/hdnode" "5.7.0"
-    "@ethersproject/json-wallets" "5.7.0"
-    "@ethersproject/keccak256" "5.7.0"
-    "@ethersproject/logger" "5.7.0"
-    "@ethersproject/networks" "5.7.1"
-    "@ethersproject/pbkdf2" "5.7.0"
-    "@ethersproject/properties" "5.7.0"
-    "@ethersproject/providers" "5.7.2"
-    "@ethersproject/random" "5.7.0"
-    "@ethersproject/rlp" "5.7.0"
-    "@ethersproject/sha2" "5.7.0"
-    "@ethersproject/signing-key" "5.7.0"
-    "@ethersproject/solidity" "5.7.0"
-    "@ethersproject/strings" "5.7.0"
-    "@ethersproject/transactions" "5.7.0"
-    "@ethersproject/units" "5.7.0"
-    "@ethersproject/wallet" "5.7.0"
-    "@ethersproject/web" "5.7.1"
-    "@ethersproject/wordlists" "5.7.0"
-
-ethers@5.7.2:
   version "5.7.2"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.7.2.tgz#3a7deeabbb8c030d4126b24f84e525466145872e"
   integrity sha512-wswUsmWo1aOK8rR7DIKiWSw9DbLWe6x98Jrn8wcTflTVvaXhAMaB5zGAXy0GYQEQp9iO1iSHWVyARQm11zUtyg==
@@ -24515,7 +24478,7 @@ viem@2.30.6:
     ox "0.7.1"
     ws "8.18.2"
 
-viem@2.x, viem@>=2.29.0, viem@^2.1.1, viem@^2.19.2, viem@^2.21.41, viem@^2.21.44, viem@^2.27.2:
+viem@2.x, viem@>=2.29.0, viem@^2.1.1, viem@^2.19.2, viem@^2.21.41, viem@^2.27.2, viem@^2.31.0:
   version "2.31.0"
   resolved "https://registry.yarnpkg.com/viem/-/viem-2.31.0.tgz#2263426cce091d440e283b88183dff6f1d8bae5c"
   integrity sha512-U7OMQ6yqK+bRbEIarf2vqxL7unSEQvNxvML/1zG7suAmKuJmipqdVTVJGKBCJiYsm/EremyO2FS4dHIPpGv+eA==

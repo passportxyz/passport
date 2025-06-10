@@ -1,7 +1,7 @@
 import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
 import { Platform } from "../utils/platform.js";
-import { initHumanID, CredentialType, HumanIDProviderInterface } from "@holonym-foundation/human-id-sdk";
+import { initHumanID, CredentialType } from "@holonym-foundation/human-id-sdk";
 import type { RequestSBTExtraParams, TransactionRequestWithChainId } from "@holonym-foundation/human-id-interface-core";
 
 type RequestSBTResponse = null | {
@@ -12,11 +12,19 @@ type RequestSBTResponse = null | {
   };
 };
 
+// Define the base interface locally since we can't import it directly
+interface HumanIDProviderInterface {
+  request(args: { method: string; params?: unknown[] | object }): Promise<unknown>;
+  on(event: string, listener: (...args: any[]) => void): any;
+  removeListener(event: string, listener: (...args: any[]) => void): any;
+  requestSBT(type: CredentialType, args: RequestSBTExtraParams): Promise<unknown>;
+}
+
 function isHexString(value: string): value is `0x${string}` {
   return value.startsWith("0x");
 }
 
-// Extended interface with private methods
+// Extended interface with secret methods that exist at runtime but aren't in the public interface
 export interface ExtendedHumanIDProvider extends HumanIDProviderInterface {
   getKeygenMessage(): string;
   privateRequestSBT(type: CredentialType, args: RequestSBTExtraParams): Promise<RequestSBTResponse>;
@@ -49,7 +57,9 @@ export class HumanIDPlatform extends Platform {
     }
 
     // Initialize the Human ID SDK
-    const humanID = initHumanID() as ExtendedHumanIDProvider;
+    // Note: Cast to any first then to ExtendedHumanIDProvider because the secret methods
+    // aren't part of the public interface but exist at runtime
+    const humanID = initHumanID() as any as ExtendedHumanIDProvider;
 
     // Determine SBT type based on selected providers
     const sbtType = this.getSbtTypeFromProviders(appContext.selectedProviders);

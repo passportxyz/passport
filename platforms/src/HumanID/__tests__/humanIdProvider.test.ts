@@ -4,7 +4,6 @@ import { HumanIdPhoneProvider } from "../Providers/humanIdPhone.js";
 
 // ----- Libs
 import * as humanIdSdk from "@holonym-foundation/human-id-sdk";
-import { BigNumber as EthersV5BigNumber } from "ethers-v5";
 
 // Mock the Human ID SDK
 jest.mock("@holonym-foundation/human-id-sdk");
@@ -13,11 +12,11 @@ const mockedHumanIdSdk = humanIdSdk as jest.Mocked<typeof humanIdSdk>;
 
 const MOCK_ADDRESS = "0xb4b6f1c68be31841b52f4015a31d1f38b99cdb71";
 const MOCK_NULLIFIER = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
-const MOCK_SBT_RESULT: [EthersV5BigNumber, EthersV5BigNumber[], boolean] = [
-  EthersV5BigNumber.from(Date.now()), // expiry
-  [EthersV5BigNumber.from("0x0"), EthersV5BigNumber.from(MOCK_NULLIFIER)], // publicValues [0, nullifier]
-  false, // revoked
-];
+const MOCK_SBT_RESULT = {
+  expiry: BigInt(Date.now()),
+  publicValues: [BigInt("0x0"), BigInt(MOCK_NULLIFIER)], // [0, nullifier]
+  revoked: false,
+};
 
 describe("HumanIdPhoneProvider", function () {
   let provider: HumanIdPhoneProvider;
@@ -50,7 +49,7 @@ describe("HumanIdPhoneProvider", function () {
       expect(result).toEqual({
         valid: true,
         record: {
-          nullifier: EthersV5BigNumber.from(MOCK_NULLIFIER).toString(),
+          nullifier: BigInt(MOCK_NULLIFIER).toString(),
         },
       });
     });
@@ -129,11 +128,11 @@ describe("HumanIdPhoneProvider", function () {
     });
 
     it("should throw error when nullifier cannot be determined from SBT with empty publicValues", async () => {
-      const malformedSbt: [EthersV5BigNumber, EthersV5BigNumber[], boolean] = [
-        EthersV5BigNumber.from(Date.now()), // expiry
-        [], // empty publicValues array
-        false, // revoked
-      ];
+      const malformedSbt = {
+        expiry: BigInt(Date.now()),
+        publicValues: [] as bigint[], // empty publicValues array
+        revoked: false,
+      };
 
       mockedHumanIdSdk.setOptimismRpcUrl.mockImplementation(() => {});
       mockedHumanIdSdk.getPhoneSBTByAddress.mockResolvedValueOnce(malformedSbt);
@@ -148,11 +147,11 @@ describe("HumanIdPhoneProvider", function () {
     });
 
     it("should throw error when nullifier cannot be determined from SBT with insufficient publicValues", async () => {
-      const malformedSbt: [EthersV5BigNumber, EthersV5BigNumber[], boolean] = [
-        EthersV5BigNumber.from(Date.now()), // expiry
-        [EthersV5BigNumber.from("0x0")], // publicValues with only one element (missing nullifier at index 1)
-        false, // revoked
-      ];
+      const malformedSbt = {
+        expiry: BigInt(Date.now()),
+        publicValues: [BigInt("0x0")], // publicValues with only one element (missing nullifier at index 1)
+        revoked: false,
+      };
 
       mockedHumanIdSdk.setOptimismRpcUrl.mockImplementation(() => {});
       mockedHumanIdSdk.getPhoneSBTByAddress.mockResolvedValueOnce(malformedSbt);

@@ -21,20 +21,29 @@ const mockHumanIDProvider = {
 // Default mock implementations
 mockInitHumanID.mockReturnValue(mockHumanIDProvider);
 mockGetKeygenMessage.mockReturnValue("Sign this message to generate your HumanID verification key");
-mockRequestSBT.mockResolvedValue({ recipient: "0x123456789..." });
-mockPrivateRequestSBT.mockResolvedValue({ recipient: "0x123456789..." });
+mockRequestSBT.mockResolvedValue({
+  sbt: {
+    recipient: "0x123456789...",
+    txHash: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab",
+    chain: "Optimism",
+  },
+});
+mockPrivateRequestSBT.mockResolvedValue({
+  sbt: {
+    recipient: "0x123456789...",
+    txHash: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab",
+    chain: "Optimism",
+  },
+});
 
 // Mock query functions
 mockGetPhoneSBTByAddress.mockResolvedValue({
-  address: "0x123456789...",
-  timestamp: Date.now(),
-  isValid: true,
+  expiry: BigInt(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+  publicValues: [BigInt("0x0"), BigInt("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")], // [0, nullifier]
+  revoked: false,
 });
 mockGetKycSBTByAddress.mockResolvedValue(null);
-mockUncheckedGetMinimalPhoneSBTByAddress.mockResolvedValue({
-  exists: true,
-  address: "0x123456789...",
-});
+mockUncheckedGetMinimalPhoneSBTByAddress.mockResolvedValue([BigInt(Date.now()), true]); // [expiry, hasPhone]
 mockUncheckedGetMinimalKycSBTByAddress.mockResolvedValue(null);
 
 // Export functions

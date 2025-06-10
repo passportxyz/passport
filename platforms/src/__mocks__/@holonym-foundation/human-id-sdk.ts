@@ -1,10 +1,9 @@
 // Mock implementation of @holonym-foundation/human-id-sdk
 
 export interface SBTResult {
-  address: string;
-  timestamp: number;
-  tokenId: string;
-  chainId: number;
+  expiry: bigint;
+  publicValues: bigint[];
+  revoked: boolean;
 }
 
 export interface HumanIDInstance {
@@ -22,7 +21,7 @@ export interface HumanIDInstance {
         chainId: string;
       }) => Promise<{ txHash: string; chainId: number }>;
     }
-  ): Promise<{ recipient?: string; success?: boolean; txHash?: string }>;
+  ): Promise<{ sbt: { recipient: string; txHash: string; chain: "Optimism" | "NEAR" | "Stellar" } } | null>;
 }
 
 // Mock functions
@@ -34,9 +33,11 @@ export const initHumanID = jest.fn(
       success: true,
     })),
     privateRequestSBT: jest.fn(async (sbtType: string, options: any) => ({
-      recipient: options.address,
-      success: true,
-      txHash: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab",
+      sbt: {
+        recipient: options.address,
+        txHash: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab",
+        chain: "Optimism" as const,
+      },
     })),
   })
 );
@@ -57,10 +58,9 @@ export const getPhoneSBTByAddress = jest.fn(async (address: string): Promise<SBT
   }
 
   return {
-    address,
-    timestamp: Date.now(),
-    tokenId: "123",
-    chainId: 10,
+    expiry: BigInt(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+    publicValues: [BigInt("0x0"), BigInt("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")], // [0, nullifier]
+    revoked: false,
   };
 });
 
@@ -74,10 +74,9 @@ export const getKycSBTByAddress = jest.fn(async (address: string): Promise<SBTRe
   }
 
   return {
-    address,
-    timestamp: Date.now(),
-    tokenId: "456",
-    chainId: 10,
+    expiry: BigInt(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+    publicValues: [BigInt("0x0"), BigInt("0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba")], // [0, nullifier]
+    revoked: false,
   };
 });
 

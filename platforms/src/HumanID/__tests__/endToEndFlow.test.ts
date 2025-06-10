@@ -108,12 +108,12 @@ describe("Human ID End-to-End Integration", () => {
         paymentCallback: expect.any(Function),
       });
 
-      // Step 2: Backend - Verify SBT exists - should match [expiry, [prefix, nullifier], revoked] format
-      const mockSBTQueryResult = [
-        Date.now(), // expiry
-        ["0x0", "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"], // publicValues [0, nullifier]
-        false, // revoked
-      ];
+      // Step 2: Backend - Verify SBT exists - should match { expiry, publicValues, revoked } format
+      const mockSBTQueryResult = {
+        expiry: BigInt(Date.now()),
+        publicValues: [BigInt("0x0"), BigInt("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")], // [0, nullifier]
+        revoked: false,
+      };
 
       mockedHumanIdSdk.setOptimismRpcUrl.mockImplementation(() => {});
       (mockedHumanIdSdk.getPhoneSBTByAddress as jest.Mock).mockResolvedValue(mockSBTQueryResult);
@@ -129,7 +129,7 @@ describe("Human ID End-to-End Integration", () => {
       expect(verificationResult).toEqual({
         valid: true,
         record: {
-          nullifier: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef", // This matches the mock data
+          nullifier: "8234104122482341265491137074636836252947884782870784360943022469005013929455", // BigInt converted to string
         },
       });
 
