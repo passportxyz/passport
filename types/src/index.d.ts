@@ -360,7 +360,9 @@ export type PLATFORM_ID =
   | "Binance"
   | "DeveloperList"
   | `Custom#${string}`
-  | "CleanHands";
+  | "CleanHands"
+  | "HumanIdPhone"
+  | "HumanIdKyc";
 
 export type PLATFORM_CATEGORY = {
   name: string;
@@ -421,6 +423,8 @@ export type PROVIDER_ID =
   | "Hypercerts"
   | "HolonymGovIdProvider"
   | "HolonymPhone"
+  | "HumanIdPhone"
+  | "HumanIdKyc"
   | "IdenaState#Newbie"
   | "IdenaState#Verified"
   | "IdenaState#Human"

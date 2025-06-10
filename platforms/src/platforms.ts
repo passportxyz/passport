@@ -25,6 +25,8 @@ import * as AllowList from "./AllowList/index.js";
 import * as Binance from "./Binance/index.js";
 import * as CustomGithub from "./CustomGithub/index.js";
 import * as CleanHands from "./CleanHands/index.js";
+import * as HumanIdPhone from "./HumanIdPhone/index.js";
+import * as HumanIdKyc from "./HumanIdKyc/index.js";
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types.js";
 
 export type PlatformConfig = {
@@ -62,6 +64,8 @@ const platforms: Record<string, PlatformConfig> = {
   Binance,
   CustomGithub,
   CleanHands,
+  HumanIdPhone,
+  HumanIdKyc,
 };
 
 if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {

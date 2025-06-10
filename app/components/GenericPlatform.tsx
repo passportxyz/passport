@@ -38,7 +38,7 @@ import { useDatastoreConnectionContext } from "../context/datastoreConnectionCon
 import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../context/userState";
 import { useMessage } from "../hooks/useMessage";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage, useSendTransaction, useSwitchChain } from "wagmi";
 
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
@@ -78,6 +78,9 @@ export const GenericPlatform = ({
   onClose,
 }: GenericPlatformProps): JSX.Element => {
   const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+  const { sendTransactionAsync } = useSendTransaction();
+  const { switchChainAsync } = useSwitchChain();
   const { handlePatchStamps, verifiedProviderIds, userDid, expiredProviders } = useContext(CeramicContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
@@ -145,7 +148,7 @@ export const GenericPlatform = ({
       if (!did) throw new Error("No DID found");
 
       const state = `${platform.path}-` + generateUID(10);
-      const providerPayload = (await platform.getProviderPayload({
+      const appContext = {
         state,
         window,
         screen,
@@ -153,7 +156,16 @@ export const GenericPlatform = ({
         callbackUrl: window.location.origin,
         selectedProviders,
         waitForRedirect,
-      })) as {
+        // Add wagmi functions for EVM platforms
+        ...(platform.isEVM && {
+          address,
+          signMessageAsync,
+          sendTransactionAsync,
+          switchChainAsync,
+        }),
+      };
+
+      const providerPayload = (await platform.getProviderPayload(appContext)) as {
         [k: string]: string;
       };
 
@@ -402,7 +414,13 @@ export const GenericPlatform = ({
   ]);
 
   return (
-    <Drawer isOpen={isOpen} placement="right" size="sm" onClose={onClose}>
+    <Drawer
+      isOpen={isOpen}
+      placement="right"
+      size="sm"
+      onClose={onClose}
+      trapFocus={false} // TODO: Make this conditional (trapFocus={platform.platformId !== "HumanID"}) to preserve accessibility for other platforms
+    >
       <DrawerOverlay />
       <SideBarContent
         onClose={onClose}
