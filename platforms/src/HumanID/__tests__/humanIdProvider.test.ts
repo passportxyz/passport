@@ -24,11 +24,11 @@ describe("HumanIdPhoneProvider", function () {
   beforeEach(() => {
     jest.clearAllMocks();
     provider = new HumanIdPhoneProvider();
-    process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL = "https://mainnet.optimism.io";
+    process.env.OPTIMISM_RPC_URL = "https://mainnet.optimism.io";
   });
 
   afterEach(() => {
-    delete process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL;
+    delete process.env.OPTIMISM_RPC_URL;
   });
 
   describe("verify", () => {
@@ -44,7 +44,7 @@ describe("HumanIdPhoneProvider", function () {
 
       const result = await provider.verify(payload);
 
-      expect(mockedHumanIdSdk.setOptimismRpcUrl).toHaveBeenCalledWith(process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL);
+      expect(mockedHumanIdSdk.setOptimismRpcUrl).toHaveBeenCalledWith(process.env.OPTIMISM_RPC_URL);
       expect(mockedHumanIdSdk.getPhoneSBTByAddress).toHaveBeenCalledWith(MOCK_ADDRESS);
       expect(result).toEqual({
         valid: true,
@@ -108,8 +108,8 @@ describe("HumanIdPhoneProvider", function () {
 
     it("should throw error when RPC URL is not configured", async () => {
       // Mock environment variable not being set
-      const originalEnv = process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL;
-      delete process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL;
+      const originalEnv = process.env.OPTIMISM_RPC_URL;
+      delete process.env.OPTIMISM_RPC_URL;
 
       mockedHumanIdSdk.setOptimismRpcUrl.mockImplementation(() => {});
 
@@ -123,7 +123,7 @@ describe("HumanIdPhoneProvider", function () {
 
       // Restore environment variable
       if (originalEnv) {
-        process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL = originalEnv;
+        process.env.OPTIMISM_RPC_URL = originalEnv;
       }
     });
 

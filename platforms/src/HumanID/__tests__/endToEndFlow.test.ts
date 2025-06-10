@@ -40,7 +40,7 @@ describe("Human ID End-to-End Integration", () => {
     platform = new HumanIDPlatform();
     provider = new HumanIdPhoneProvider();
 
-    process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL = "https://mainnet.optimism.io";
+    process.env.OPTIMISM_RPC_URL = "https://mainnet.optimism.io";
 
     mockAppContext = {
       state: "test-state",
@@ -60,7 +60,7 @@ describe("Human ID End-to-End Integration", () => {
   });
 
   afterEach(() => {
-    delete process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL;
+    delete process.env.OPTIMISM_RPC_URL;
   });
 
   describe("Successful Complete Flow", () => {
@@ -134,7 +134,7 @@ describe("Human ID End-to-End Integration", () => {
       });
 
       // Verify backend SDK calls were made correctly
-      expect(mockedHumanIdSdk.setOptimismRpcUrl).toHaveBeenCalledWith(process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL);
+      expect(mockedHumanIdSdk.setOptimismRpcUrl).toHaveBeenCalledWith(process.env.OPTIMISM_RPC_URL);
       expect(mockedHumanIdSdk.getPhoneSBTByAddress).toHaveBeenCalledWith(MOCK_ADDRESS);
     });
   });
@@ -183,7 +183,7 @@ describe("Human ID End-to-End Integration", () => {
 
   describe("Configuration", () => {
     it("should handle missing RPC configuration", async () => {
-      delete process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL;
+      delete process.env.OPTIMISM_RPC_URL;
 
       await expect(
         provider.verify({

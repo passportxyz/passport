@@ -13,7 +13,7 @@ export class HumanIdPhoneProvider implements Provider {
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     try {
-      const rpcUrl = process.env.NEXT_PUBLIC_OPTIMISM_RPC_URL;
+      const rpcUrl = process.env.OPTIMISM_RPC_URL;
       if (!rpcUrl) {
         throw new Error("Optimism RPC URL not configured");
       }
