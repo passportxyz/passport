@@ -26,12 +26,7 @@ export class HumanIdPhoneProvider implements Provider {
       }
       const phoneSbt = await getPhoneSBTByAddress(payload.address);
 
-      console.log("🔍 HumanID Phone SBT Query Result:", phoneSbt);
-      console.log("🔍 SBT Type:", typeof phoneSbt);
-      console.log("🔍 SBT Keys:", phoneSbt ? Object.keys(phoneSbt) : "null");
-
       if (!phoneSbt) {
-        console.log("❌ No phone SBT found for address:", payload.address);
         return {
           valid: false,
           errors: ["No phone SBT found for this address"],
@@ -44,27 +39,16 @@ export class HumanIdPhoneProvider implements Provider {
       // Handle new object structure: { expiry: bigint, publicValues: bigint[], revoked: boolean }
       if (phoneSbt && typeof phoneSbt === "object" && "publicValues" in phoneSbt) {
         const publicValues = phoneSbt.publicValues;
-        console.log("🔍 Public Values:", publicValues);
-        console.log("🔍 Public Values Length:", Array.isArray(publicValues) ? publicValues.length : "not array");
 
         if (Array.isArray(publicValues) && publicValues.length >= 2) {
           const nullifierValue = publicValues[1];
           nullifier = nullifierValue.toString();
-          console.log("✅ Extracted nullifier:", nullifier);
-        } else {
-          console.log("❌ Public values array too short or not array:", publicValues);
         }
-      } else {
-        console.log("❌ SBT object structure unexpected:", phoneSbt);
       }
 
       if (!nullifier) {
-        console.log("❌ Unable to determine nullifier from phone SBT");
         throw new ProviderExternalVerificationError("Unable to determine nullifier from phone SBT");
       }
-
-      console.log("✅ HumanID Phone verification successful for address:", payload.address);
-      console.log("✅ Final nullifier:", nullifier);
 
       return {
         valid: true,

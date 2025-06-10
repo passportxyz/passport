@@ -1,7 +1,7 @@
 import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
 import { Platform } from "../utils/platform.js";
-import { initHumanID, CredentialType } from "@holonym-foundation/human-id-sdk";
+import { initHumanID, CredentialType, setOptimismRpcUrl, getPhoneSBTByAddress } from "@holonym-foundation/human-id-sdk";
 import type { RequestSBTExtraParams, TransactionRequestWithChainId } from "@holonym-foundation/human-id-interface-core";
 
 type RequestSBTResponse = null | {
@@ -50,19 +50,55 @@ export class HumanIDPlatform extends Platform {
     },
   };
 
+  private async hasExistingSBT(address: string, sbtType: CredentialType): Promise<boolean> {
+    const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL;
+    if (!rpcUrl) {
+      console.warn("Optimism RPC URL not configured for frontend SBT check");
+      return false;
+    }
+
+    // TODO figure out how we'll do KYC
+    if (sbtType !== "phone" || !isHexString(address)) {
+      return false;
+    }
+
+    try {
+      setOptimismRpcUrl(rpcUrl);
+
+      const phoneSbt = await getPhoneSBTByAddress(address);
+
+      if (phoneSbt && typeof phoneSbt === "object" && "expiry" in phoneSbt) {
+        // Check if SBT is not expired
+        const currentTime = BigInt(Math.floor(Date.now() / 1000));
+        if (phoneSbt.expiry > currentTime && !phoneSbt.revoked) {
+          return true;
+        }
+      }
+    } catch (error) {
+      console.error("Error checking existing SBT:", error);
+    }
+
+    return false;
+  }
+
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     // Require wallet methods for Human ID verification
     if (!appContext.signMessageAsync || !appContext.sendTransactionAsync || !appContext.address) {
       throw new Error("Human ID verification requires wallet connection and signing capabilities");
     }
 
-    // Initialize the Human ID SDK
+    // Determine SBT type based on selected providers
+    const sbtType = this.getSbtTypeFromProviders(appContext.selectedProviders);
+
+    // Check if user already has a valid SBT
+    if (await this.hasExistingSBT(appContext.address, sbtType)) {
+      // Skip all this, just do the backend check
+      return {};
+    }
+
     // Note: Cast to any first then to ExtendedHumanIDProvider because the secret methods
     // aren't part of the public interface but exist at runtime
     const humanID = initHumanID() as any as ExtendedHumanIDProvider;
-
-    // Determine SBT type based on selected providers
-    const sbtType = this.getSbtTypeFromProviders(appContext.selectedProviders);
 
     // Get message to sign
     const message = humanID.getKeygenMessage();
