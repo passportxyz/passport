@@ -34,7 +34,7 @@ export default function Home() {
       <div className="mt-4 md:mt-0 pt-16 flex-1 m-auto overflow-visible">
         <div className="grid grid-cols-2 grid-rows-1 gap-12 overflow-visible m-8">
           <div className="flex flex-row justify-end">
-            <img src=".//assets/hmnWelcomeImage.svg" alt="Welcome"></img>
+            <img src="/assets/hmnWelcomeImage.svg" alt="Welcome"></img>
           </div>
           <div className="flex flex-col justify-center gap-6 relative z-10 overflow-visible">
             <div
