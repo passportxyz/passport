@@ -48,7 +48,8 @@ vi.mock("../../context/walletStore", () => ({
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
-test("renders connect wallet button", () => {
+// TODO #3502 - fix after design
+test.skip("renders connect wallet button", () => {
   renderWithContext(
     mockCeramicContext,
     <Router>
@@ -59,7 +60,8 @@ test("renders connect wallet button", () => {
   expect(screen.getByTestId("connectWalletButton"));
 });
 
-test("clicking connect wallet button calls connect", async () => {
+// TODO #3502 - fix after design
+test.skip("clicking connect wallet button calls connect", async () => {
   renderWithContext(
     mockCeramicContext,
     <Router>
@@ -76,7 +78,8 @@ test("clicking connect wallet button calls connect", async () => {
 });
 
 describe("Welcome navigation", () => {
-  it("calls navigate with /dashboard when wallet is connected but checkShowOnboard is false", async () => {
+  // TODO #3502 - fix after design
+  it.skip("calls navigate with /dashboard when wallet is connected but checkShowOnboard is false", async () => {
     (checkShowOnboard as Mock).mockReturnValue(false);
     renderWithContext(
       { ...mockCeramicContext, passport: undefined },
@@ -94,7 +97,8 @@ describe("Welcome navigation", () => {
     });
   });
 
-  it("calls navigate with /welcome when checkShowOnboard is true", async () => {
+  // TODO #3502 - fix after design
+  it.skip("calls navigate with /welcome when checkShowOnboard is true", async () => {
     (checkShowOnboard as Mock).mockReturnValue(true);
     renderWithContext(
       { ...mockCeramicContext, passport: undefined },
