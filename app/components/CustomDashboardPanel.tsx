@@ -50,17 +50,17 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
   }, [logo.background]);
 
   return (
-    <div className={`${className} flex rounded border border-customization-background-1`}>
-      <div className="grid shrink border-r border-customization-background-1 bg-gradient-to-b from-transparent to-customization-background-1/[.4]">
+    <div className={`${className} flex-col rounded border border-customization-background-1 text-color-4`}>
+      {/* <div className="grid shrink border-r border-customization-background-1 ">
         <div className="flex col-start-1 row-start-1 flex-col items-center justify-center p-6">
           {logo.image}
           {logo.caption && <span className="mt-1 text-3xl leading-none">{logo.caption}</span>}
         </div>
         {logoBackground && <div className="col-start-1 flex row-start-1 z-0">{logoBackground}</div>}
       </div>
-      <div className="relative flex flex-col justify-start gap-2 bg-gradient-to-b from-transparent to-customization-background-2/[.26] p-6 w-full">
-        {children}
-      </div>
+      <div className="relative flex flex-col justify-start gap-2 p-6 w-full"> */}
+      {children}
+      {/* </div> */}
     </div>
   );
 };
@@ -137,6 +137,7 @@ const StandardCustomDashboardPanel = ({
   const customization = useCustomization();
   const { logo, body } = customization.dashboardPanel;
 
+  console.log("geri className {}", className);
   return (
     <CustomDashboardPanel className={className} logo={logo}>
       {body.displayInfoTooltip && body.displayInfoTooltip.shouldDisplay && body.displayInfoTooltip.text ? (

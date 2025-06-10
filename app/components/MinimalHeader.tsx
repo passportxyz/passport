@@ -197,7 +197,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   return (
     <>
       <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
-      <div className={`flex gap-4 items-center h-16 bg-passport-gradient-header ${className}`}>
+      <div className={`flex gap-4 items-center h-16 ${className}`}>
         <div className="flex-1 flex items-center">
           <HumanPassportLogo />
         </div>
