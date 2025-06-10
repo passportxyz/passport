@@ -1,5 +1,10 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import { Provider, ProviderOptions, ProviderExternalVerificationError } from "../../types.js";
+import {
+  Provider,
+  ProviderOptions,
+  ProviderExternalVerificationError,
+  ProviderInternalVerificationError,
+} from "../../types.js";
 import { setOptimismRpcUrl } from "@holonym-foundation/human-id-sdk";
 
 function isHexAddress(address: string): address is `0x${string}` {
@@ -15,67 +20,77 @@ export abstract class BaseHumanIdProvider implements Provider {
 
   constructor(_options: ProviderOptions = {}) {}
 
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async getExistingSbt(address: string): Promise<{ expiry: bigint; publicValues: bigint[]; revoked: boolean } | null> {
     try {
-      const rpcUrl = process.env.OPTIMISM_RPC_URL;
-      if (!rpcUrl) {
-        throw new Error("Optimism RPC URL not configured");
-      }
-
-      setOptimismRpcUrl(rpcUrl);
-
-      // Validate address format
-      if (!isHexAddress(payload.address)) {
-        throw new Error("Invalid address format");
-      }
-
-      // Backend independently verifies the SBT exists
-      const sbt = await this.sbtFetcher(payload.address);
-
-      if (!sbt) {
-        return {
-          valid: false,
-          errors: [`No ${this.credentialType} SBT found for this address`],
-          record: undefined,
-        };
-      }
-
-      // Check expiry
-      const currentTime = BigInt(Math.floor(Date.now() / 1000));
-      if (sbt.expiry <= currentTime) {
-        return {
-          valid: false,
-          errors: [`${this.credentialType} SBT has expired`],
-          record: undefined,
-        };
-      }
-
-      // Check revocation
-      if (sbt.revoked) {
-        return {
-          valid: false,
-          errors: [`${this.credentialType} SBT has been revoked`],
-          record: undefined,
-        };
-      }
-
-      // Extract nullifier from public values (same position for both phone and KYC)
-      if (!sbt.publicValues || !Array.isArray(sbt.publicValues) || sbt.publicValues.length < 2) {
-        throw new ProviderExternalVerificationError("Invalid SBT public values");
-      }
-
-      const nullifier = sbt.publicValues[1].toString();
-
-      return {
-        valid: true,
-        record: {
-          nullifier,
-        },
-      };
-    } catch (error: any) {
-      throw new ProviderExternalVerificationError(
-        `Error verifying Human ID ${this.credentialType} SBT: ${error.message}`
-      );
+      return await this.sbtFetcher(address);
+    } catch {
+      /* Throws when SBT not found */
     }
+  }
+
+  _validateSbt(sbt: {
+    expiry: bigint;
+    publicValues: bigint[];
+    revoked: boolean;
+  }): { valid: true; errors?: undefined } | { valid: false; errors: string[] } {
+    if (!sbt) {
+      return {
+        valid: false,
+        errors: [`No ${this.credentialType} SBT found for this address`],
+      };
+    }
+
+    // Check expiry
+    const currentTime = BigInt(Math.floor(Date.now() / 1000));
+    if (sbt.expiry <= currentTime) {
+      return {
+        valid: false,
+        errors: [`${this.credentialType} SBT has expired`],
+      };
+    }
+
+    // Check revocation
+    if (sbt.revoked) {
+      return {
+        valid: false,
+        errors: [`${this.credentialType} SBT has been revoked`],
+      };
+    }
+
+    // Extract nullifier from public values
+    if (!sbt.publicValues || !Array.isArray(sbt.publicValues) || sbt.publicValues.length < 5) {
+      throw new ProviderExternalVerificationError("Invalid SBT public values");
+    }
+
+    return {
+      valid: true,
+    };
+  }
+
+  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+    const rpcUrl = process.env.OPTIMISM_RPC_URL;
+    if (!rpcUrl) {
+      throw new ProviderInternalVerificationError("Optimism RPC URL not configured");
+    }
+
+    setOptimismRpcUrl(rpcUrl);
+
+    // Validate address format
+    if (!isHexAddress(payload.address)) {
+      throw new ProviderInternalVerificationError("Invalid address format");
+    }
+
+    const sbt = await this.getExistingSbt(payload.address);
+
+    const { valid, errors } = this._validateSbt(sbt);
+
+    return {
+      valid,
+      errors,
+      record: {
+        // Public Values: [expiry, recipientAddress, actionId, nullifier, issuerAddress]
+        nullifier: sbt?.publicValues?.[3]?.toString(),
+      },
+    };
   }
 }

@@ -56,20 +56,21 @@ export abstract class BaseHumanIDPlatform extends Platform {
       return false;
     }
 
+    setOptimismRpcUrl(rpcUrl);
+
+    let sbt: { expiry: bigint; publicValues: bigint[]; revoked: boolean } | null = null;
     try {
-      setOptimismRpcUrl(rpcUrl);
+      sbt = await this.sbtChecker(address);
+    } catch {
+      /* Throws an error if the address is not found */
+    }
 
-      const sbt = await this.sbtChecker(address);
-
-      if (sbt && typeof sbt === "object" && "expiry" in sbt) {
-        // Check if SBT is not expired
-        const currentTime = BigInt(Math.floor(Date.now() / 1000));
-        if (sbt.expiry > currentTime && !sbt.revoked) {
-          return true;
-        }
+    if (sbt && typeof sbt === "object" && "expiry" in sbt) {
+      // Check if SBT is not expired
+      const currentTime = BigInt(Math.floor(Date.now() / 1000));
+      if (sbt.expiry > currentTime && !sbt.revoked) {
+        return true;
       }
-    } catch (error) {
-      console.error(`Error checking existing ${this.credentialType} SBT:`, error);
     }
 
     return false;
