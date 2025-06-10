@@ -40,7 +40,8 @@ import { useAccount } from "wagmi";
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export const DashboardCTAs = ({ customization }: { customization: Customization }) => {
-  const { useCustomDashboardPanel } = customization;
+  const { useCustomDashboardPanel, customizationTheme } = customization;
+  const backgroundColor = customizationTheme?.colors.customizationBackground1 || "#E5E5E5";
   const explanationPanel = customization.key !== "none" ? customization?.showExplanationPanel : true;
   return (
     <div className="relative col-span-full">
@@ -55,8 +56,10 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
           />
         )}
       </div>
-      <div className="w-[calc(100%+100px)] h-[calc(100%+30px)] rounded-b-[40px] relative left-[-50px] top-[calc(-100%)] shadow-2xl bg-passport-gradient-dashboard-cta"></div>
-      {/* <div className="w-screen h-[calc(100%+20px)] rounded-b-[40px] relative left-1/2 -ml-[50vw] top-[calc(-100%)] shadow-2xl bg-passport-gradient-dashboard-cta"></div> */}
+      <div
+        style={{ background: `radial-gradient(ellipse 100vw 900px at 50% -32px, #fff, ${backgroundColor})` }}
+        className="w-[calc(100%+100px)] h-[calc(100%+30px)] rounded-b-[40px] relative left-[-50px] top-[calc(-100%)] shadow-2xl"
+      ></div>
     </div>
   );
 };

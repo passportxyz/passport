@@ -7,17 +7,22 @@ import MinimalHeader from "./MinimalHeader";
 import { SupportBanner } from "../components/SupportBanner";
 import { useAtom } from "jotai";
 import { useSupportBanners } from "../hooks/useSupportBanners";
+import { useCustomization } from "../hooks/useCustomization";
 
 const Header = (): JSX.Element => {
   const [userWarning, setUserWarning] = useAtom(userWarningAtom);
   const { banners, loadBanners } = useSupportBanners();
-
+  const { customizationTheme } = useCustomization();
+  const backgroundColor = customizationTheme?.colors.customizationBackground1 || "#E5E5E5";
   useEffect(() => {
     loadBanners();
   }, [loadBanners]);
 
   return (
-    <div className="top-0 left-0 w-full fixed z-30">
+    <div
+      style={{ background: `radial-gradient(ellipse 100vw 900px at 50% 50%, white, ${backgroundColor})` }}
+      className="top-0 left-0 w-full fixed z-30"
+    >
       <div className={`${PAGE_PADDING}`}>
         <MinimalHeader />
       </div>
