@@ -14,7 +14,7 @@ import { LoadingBar } from "./LoadingBar";
 const PanelDiv = ({ className, children }: { className: string; children: React.ReactNode }) => {
   return (
     <div
-      className={`flex flex-col items-center justify-center p-4 w-full rounded-lg bg-gradient-to-t from-background to-[#082F2A] ${className}`}
+      className={`flex flex-col items-center justify-center p-4 w-full rounded-[20px] bg-white text-black ${className}`}
     >
       {children}
     </div>
@@ -58,7 +58,7 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
   const highlightColor = aboveThreshold ? "foreground-2" : "background-5";
 
   return (
-    <PanelDiv className={`${borderStyle(highlightColor)} text-color-2 font-heading ${className}`}>
+    <PanelDiv className={`${borderStyle(highlightColor)} font-heading ${className}`}>
       <div className="flex items-center w-full">
         <span className="grow">{customTitle || "Unique Humanity Score"}</span>
         <Tooltip className="px-0">
@@ -107,7 +107,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
 
   const renderContent = (title: string, description?: string, linkText?: string, linkHref?: string) => (
     <div className="flex flex-col h-full w-full pt-10">
-      <h2 className={`text-xl text-foreground-2 ${!description && "mb-4"}`}>{title}</h2>
+      <h2 className={`text-xl text-black ${!description && "mb-4"}`}>{title}</h2>
       {description && <p className="py-2">{description}</p>}
       {linkText && linkHref && <Hyperlink href={linkHref}>{linkText}</Hyperlink>}
     </div>
@@ -115,7 +115,16 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
 
   const renderButton = (text: string, onClick: () => void, className: string = "w-auto mt-4") => (
     <div className="flex w-full justify-end px-4">
-      <LoadButton className={className} onClick={onClick}>
+      <LoadButton className={`${className} gap-0`} onClick={onClick}>
+        <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M7.5 6L12.5 11L17.5 6M7.5 13L12.5 18L17.5 13"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
         {text}
       </LoadButton>
     </div>

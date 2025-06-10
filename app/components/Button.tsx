@@ -17,7 +17,7 @@ export const Button = ({ variant, className, ...props }: ButtonProps) => {
       return "text-color-1 bg-background border border-foreground-3 hover:border-foreground-4";
     } else {
       // primary, default
-      return "text-color-4 bg-gradient-to-r  from-foreground-2 to-foreground-2 hover:to-foreground-4";
+      return "text-color-4 text-white bg-black";
     }
   }, [variant]);
 

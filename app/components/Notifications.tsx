@@ -213,6 +213,20 @@ export type NotificationsProps = {
   setShowSidebar: (show: boolean) => void;
 };
 
+const NotificationIcon = () => {
+  return (
+    <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M10.8 21.4648C10.9674 21.7693 11.2134 22.0232 11.5125 22.2C11.8115 22.3769 12.1526 22.4702 12.5 22.4702C12.8474 22.4702 13.1885 22.3769 13.4875 22.2C13.7866 22.0232 14.0326 21.7693 14.2 21.4648M6.5 8.46484C6.5 6.87354 7.13214 5.34742 8.25736 4.2222C9.38258 3.09698 10.9087 2.46484 12.5 2.46484C14.0913 2.46484 15.6174 3.09698 16.7426 4.2222C17.8679 5.34742 18.5 6.87354 18.5 8.46484C18.5 15.4648 21.5 17.4648 21.5 17.4648H3.5C3.5 17.4648 6.5 15.4648 6.5 8.46484Z"
+        stroke="#737373"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+};
+
 export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) => {
   const { notifications } = useNotifications();
   const deleteMutation = useDeleteAllNotifications();
@@ -230,15 +244,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) 
                   {notifications.filter((not) => !not.is_read).length}
                 </div>
               )}
-              <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M10.8 21.4648C10.9674 21.7693 11.2134 22.0232 11.5125 22.2C11.8115 22.3769 12.1526 22.4702 12.5 22.4702C12.8474 22.4702 13.1885 22.3769 13.4875 22.2C13.7866 22.0232 14.0326 21.7693 14.2 21.4648M6.5 8.46484C6.5 6.87354 7.13214 5.34742 8.25736 4.2222C9.38258 3.09698 10.9087 2.46484 12.5 2.46484C14.0913 2.46484 15.6174 3.09698 16.7426 4.2222C17.8679 5.34742 18.5 6.87354 18.5 8.46484C18.5 15.4648 21.5 17.4648 21.5 17.4648H3.5C3.5 17.4648 6.5 15.4648 6.5 8.46484Z"
-                  stroke="#737373"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
+              <NotificationIcon />
             </div>
           </Popover.Button>
           <Transition
