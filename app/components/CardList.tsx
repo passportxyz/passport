@@ -84,7 +84,7 @@ const useShouldDisplayPlatform = () => {
 };
 
 export const CardList = ({ className, isLoading = false, initialOpen = true }: CardListProps): JSX.Element => {
-  const { allProvidersState } = useContext(CeramicContext);
+  const { allProvidersState, expiredProviders } = useContext(CeramicContext);
   const { scoredPlatforms } = useContext(ScorerContext);
   const { platformProviderIds, platforms, platformCatagories } = usePlatforms();
   const { isOpen, onClose } = useDisclosure();
@@ -102,18 +102,34 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
     [platforms, allProvidersState, platformProviderIds]
   );
 
-  const [verified, unverified] = scoredPlatforms.reduce(
-    ([verified, unverified], platform): [PlatformScoreSpec[], PlatformScoreSpec[]] => {
-      return platform.earnedPoints === 0 && (selectedProviders[platform.platform] || []).length === 0
-        ? [verified, [...unverified, platform]]
-        : [[...verified, platform], unverified];
+  const [unverified, verified, expired] = scoredPlatforms.reduce(
+    ([unverified, verified, expired], platform): [PlatformScoreSpec[], PlatformScoreSpec[], PlatformScoreSpec[]] => {
+      const hasSelectedProviders = (selectedProviders[platform.platform] || []).length > 0;
+      const hasEarnedPoints = platform.earnedPoints > 0;
+
+      // Check if platform has any expired providers using existing context
+      const platformProviders = selectedProviders[platform.platform] || [];
+      const hasExpiredProviders = platformProviders.some((providerId) => expiredProviders.includes(providerId));
+
+      if (hasEarnedPoints || hasSelectedProviders) {
+        // Platform is verified - check if it's expired
+        if (hasExpiredProviders) {
+          return [unverified, verified, [...expired, platform]];
+        } else {
+          return [unverified, [...verified, platform], expired];
+        }
+      } else {
+        // Platform is unverified
+        return [[...unverified, platform], verified, expired];
+      }
     },
-    [[], []] as [PlatformScoreSpec[], PlatformScoreSpec[]]
+    [[], [], []] as [PlatformScoreSpec[], PlatformScoreSpec[], PlatformScoreSpec[]]
   );
 
   const sortedPlatforms = [
     ...unverified.sort((a, b) => b.displayPossiblePoints - a.displayPossiblePoints),
     ...verified.sort((a, b) => b.displayPossiblePoints - b.earnedPoints - (a.displayPossiblePoints - a.earnedPoints)),
+    ...expired.sort((a, b) => b.displayPossiblePoints - a.displayPossiblePoints),
   ];
 
   const groupedPlatforms: {

@@ -192,4 +192,65 @@ describe("<StampSelector />", () => {
       expect(screen.queryByText("Self GTC Staking")).toBeInTheDocument();
     });
   });
+
+  describe("deduplication links", () => {
+    it("should make 'Claimed by another wallet' text clickable link to support docs", () => {
+      const customization = {
+        useCustomDashboard: true,
+        dashboardPanel: {},
+        scorer: {
+          weights: {
+            SelfStakingBronze: "1",
+          },
+        },
+      };
+
+      // Create a mock context with verified but deduplicated stamp
+      const mockCeramicContextWithDedup = {
+        ...testCeramicContext,
+        allProvidersState: {
+          SelfStakingBronze: {
+            stamp: {
+              credential: {
+                credentialSubject: {
+                  provider: "SelfStakingBronze",
+                },
+              },
+            },
+          },
+        },
+      };
+
+      (useCustomization as Mock).mockReturnValue(customization);
+      renderWithContext(
+        mockCeramicContextWithDedup,
+        <StampSelector
+          currentProviders={GtcStaking.ProviderConfig}
+          verifiedProviders={["SelfStakingBronze"] as PROVIDER_ID[]}
+        />,
+        undefined,
+        {
+          stampScores: {
+            SelfStakingBronze: "0", // 0 score indicates deduplication
+          },
+          stampDedupStatus: {
+            SelfStakingBronze: true, // Explicitly mark as deduplicated
+          },
+        }
+      );
+
+      // Find the "Claimed by another wallet" text
+      const claimedText = screen.getByText("Claimed by another wallet");
+      expect(claimedText).toBeInTheDocument();
+
+      // Test that it's wrapped in a clickable link
+      const dedupLink = claimedText.closest("a");
+      expect(dedupLink).toHaveAttribute(
+        "href",
+        "https://support.passport.xyz/passport-knowledge-base/common-questions/why-am-i-receiving-zero-points-for-a-verified-stamp"
+      );
+      expect(dedupLink).toHaveAttribute("target", "_blank");
+      expect(dedupLink).toHaveAttribute("rel", "noopener noreferrer");
+    });
+  });
 });
