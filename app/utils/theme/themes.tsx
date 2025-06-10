@@ -28,8 +28,8 @@ export const LUNARPUNK_DARK_MODE: Theme = {
     focus: palette.red,
   },
   fonts: {
-    body: "Poppins",
-    heading: "Unbounded",
-    alt: "DM Mono",
+    body: "Suisse",
+    heading: "Suisse",
+    alt: "Suisse",
   },
 };
