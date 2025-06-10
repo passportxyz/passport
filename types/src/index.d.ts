@@ -361,7 +361,8 @@ export type PLATFORM_ID =
   | "DeveloperList"
   | `Custom#${string}`
   | "CleanHands"
-  | "HumanID";
+  | "HumanIdPhone"
+  | "HumanIdKyc";
 
 export type PLATFORM_CATEGORY = {
   name: string;

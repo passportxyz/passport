@@ -1,7 +1,7 @@
 import React from "react";
-import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
-import { Platform } from "../utils/platform.js";
-import { initHumanID, CredentialType, setOptimismRpcUrl, getPhoneSBTByAddress } from "@holonym-foundation/human-id-sdk";
+import { AppContext, PlatformOptions, ProviderPayload } from "../../types.js";
+import { Platform } from "../../utils/platform.js";
+import { initHumanID, CredentialType, setOptimismRpcUrl } from "@holonym-foundation/human-id-sdk";
 import type { RequestSBTExtraParams, TransactionRequestWithChainId } from "@holonym-foundation/human-id-interface-core";
 
 type RequestSBTResponse = null | {
@@ -30,9 +30,13 @@ export interface ExtendedHumanIDProvider extends HumanIDProviderInterface {
   privateRequestSBT(type: CredentialType, args: RequestSBTExtraParams): Promise<RequestSBTResponse>;
 }
 
-export class HumanIDPlatform extends Platform {
-  platformId = "HumanID";
-  path = "HumanID";
+export abstract class BaseHumanIDPlatform extends Platform {
+  abstract platformName: string;
+  abstract credentialType: CredentialType;
+  abstract sbtChecker: (
+    address: string
+  ) => Promise<{ expiry: bigint; publicValues: bigint[]; revoked: boolean } | null>;
+
   isEVM = true;
 
   constructor(options: PlatformOptions = {}) {
@@ -41,41 +45,31 @@ export class HumanIDPlatform extends Platform {
     this.redirectUri = options.redirectUri as string;
   }
 
-  banner = {
-    heading: "To add the Human ID Phone Verification Stamp to your Passport...",
-    content: React.createElement("div", {}, "Connect your wallet and verify your phone number through Human ID"),
-    cta: {
-      label: "Learn more",
-      url: "https://human-id.org",
-    },
-  };
-
-  private async hasExistingSBT(address: string, sbtType: CredentialType): Promise<boolean> {
+  private async hasExistingSBT(address: string): Promise<boolean> {
     const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL;
     if (!rpcUrl) {
       console.warn("Optimism RPC URL not configured for frontend SBT check");
       return false;
     }
 
-    // TODO figure out how we'll do KYC
-    if (sbtType !== "phone" || !isHexString(address)) {
+    if (!isHexString(address)) {
       return false;
     }
 
     try {
       setOptimismRpcUrl(rpcUrl);
 
-      const phoneSbt = await getPhoneSBTByAddress(address);
+      const sbt = await this.sbtChecker(address);
 
-      if (phoneSbt && typeof phoneSbt === "object" && "expiry" in phoneSbt) {
+      if (sbt && typeof sbt === "object" && "expiry" in sbt) {
         // Check if SBT is not expired
         const currentTime = BigInt(Math.floor(Date.now() / 1000));
-        if (phoneSbt.expiry > currentTime && !phoneSbt.revoked) {
+        if (sbt.expiry > currentTime && !sbt.revoked) {
           return true;
         }
       }
     } catch (error) {
-      console.error("Error checking existing SBT:", error);
+      console.error(`Error checking existing ${this.credentialType} SBT:`, error);
     }
 
     return false;
@@ -87,11 +81,8 @@ export class HumanIDPlatform extends Platform {
       throw new Error("Human ID verification requires wallet connection and signing capabilities");
     }
 
-    // Determine SBT type based on selected providers
-    const sbtType = this.getSbtTypeFromProviders(appContext.selectedProviders);
-
     // Check if user already has a valid SBT
-    if (await this.hasExistingSBT(appContext.address, sbtType)) {
+    if (await this.hasExistingSBT(appContext.address)) {
       // Skip all this, just do the backend check
       return {};
     }
@@ -135,7 +126,7 @@ export class HumanIDPlatform extends Platform {
     };
 
     // Request SBT
-    const result = await humanID.privateRequestSBT(sbtType, requestParams);
+    const result = await humanID.privateRequestSBT(this.credentialType, requestParams);
 
     // Extract result data
     const sbtData = result && typeof result === "object" && "sbt" in result ? result.sbt : null;
@@ -147,21 +138,8 @@ export class HumanIDPlatform extends Platform {
       humanId: {
         sbtRecipient: recipient,
         transactionHash: txHash,
-        sbtType,
+        sbtType: this.credentialType,
       },
     };
-  }
-
-  // TODO probably handle this differently, like checking for both automatically in two separate calls
-  private getSbtTypeFromProviders(selectedProviders: string[]): CredentialType {
-    // Map provider names to SBT types
-    if (selectedProviders.includes("HumanIdKyc")) {
-      return "kyc";
-    }
-    if (selectedProviders.includes("HumanIdPhone")) {
-      return "phone";
-    }
-    // Default to phone for backward compatibility
-    return "phone";
   }
 }

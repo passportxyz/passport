@@ -3,10 +3,10 @@ import { HumanIdPhoneProvider } from "./Providers/humanIdPhone.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/humanIdStampIcon.svg",
-  platform: "HumanID",
-  name: "Human ID",
+  platform: "HumanIdPhone",
+  name: "Human ID Phone",
   description: "Verify your phone number privately with Human ID",
-  connectMessage: "Connect your wallet to verify with Human ID",
+  connectMessage: "Connect your wallet to verify your phone number",
   website: "https://human-id.org",
 };
 
@@ -17,7 +17,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
       {
         title: "Phone SBT",
         name: "HumanIdPhone",
-        description: "Proves you have verified your phone number",
+        description: "Proves you have verified your phone number through Human ID",
       },
     ],
   },
