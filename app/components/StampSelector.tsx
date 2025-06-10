@@ -4,7 +4,6 @@ import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
 import { CeramicContext } from "../context/ceramicContext";
 import { ScorerContext } from "../context/scorerContext";
 import { useCustomization } from "../hooks/useCustomization";
-import { customSideBarGradient } from "./PlatformDetails";
 
 type StampSelectorProps = {
   currentProviders: PlatformGroupSpec[] | undefined;
@@ -123,9 +122,9 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
                   <React.Fragment key={provider.name}>
                     <div
                       data-testid={`indicator-${provider.name}`}
-                      className={`relative rounded border-foreground-2 text-base flex justify-between items-stretch border text-color-1 mt-4 `}
+                      className={`relative rounded text-base flex justify-between items-stretch border mt-4 text-gray-800`}
                     >
-                      <div className={`p-4 border-r w-3/4 ${customSideBarGradient}`}>
+                      <div className={`p-4 border-r w-3/4`}>
                         <ProviderTitle
                           title={provider.title}
                           isVerified={isVerified}
@@ -136,7 +135,7 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
                         {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
                       </div>
 
-                      <div className="bg-gradient-to-r from-foreground-2 to-foreground-4 w-1/4 flex items-center text-background-4 py-3">
+                      <div className="w-1/4 flex items-center py-3">
                         <p className="text-2xl text-center w-full text-s leading-none">
                           <span className="font-bold">{isDeduplicated ? "0" : weight}</span> <br />
                           <span className="text-base">points</span>
@@ -151,7 +150,7 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
                   <React.Fragment key={provider.name}>
                     <div
                       data-testid={`indicator-${provider.name}`}
-                      className={`relative rounded border-color-3 text-base text-color-3 flex justify-between items-stretch border mt-4 `}
+                      className={`relative rounded border-color-3 text-base flex justify-between items-stretch border mt-4 `}
                     >
                       <div className="p-4 border-r w-3/4">
                         <p>{provider.title}</p>

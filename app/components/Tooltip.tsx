@@ -3,12 +3,14 @@ import { autoUpdate, flip, offset, shift, useFloating } from "@floating-ui/react
 import { twMerge } from "tailwind-merge";
 
 const TextAlignedInfoIcon = ({ className }: { className?: string }): JSX.Element => (
-  <div className={`relative top-[.125em] h-[1em] w-[1em] text-color-2 ${className}`}>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="2 2 16 16" fill="currentColor">
+  <div className={`relative ${className}`}>
+    <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
-        fillRule="evenodd"
-        d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z"
-        clipRule="evenodd"
+        d="M12.5 16V12M12.5 8H12.51M22.5 12C22.5 17.5228 18.0228 22 12.5 22C6.97715 22 2.5 17.5228 2.5 12C2.5 6.47715 6.97715 2 12.5 2C18.0228 2 22.5 6.47715 22.5 12Z"
+        stroke="#737373"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       />
     </svg>
   </div>

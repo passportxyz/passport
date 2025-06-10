@@ -133,18 +133,14 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   ];
 
   const groupedPlatforms: {
-    [key: string]: {
-      name: string;
-      id?: string;
-      description: string;
-      sortedPlatforms: PlatformScoreSpec[];
-    };
+    [key: string]: Category;
   } = {};
 
   // Generate grouped stamps
   platformCatagories.forEach((category) => {
     groupedPlatforms[category.name] = {
       name: category.name,
+      icon: category.icon,
       id: category.id,
       description: category.description,
       sortedPlatforms: [],

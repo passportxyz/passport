@@ -40,19 +40,26 @@ import { useAccount } from "wagmi";
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export const DashboardCTAs = ({ customization }: { customization: Customization }) => {
-  const { useCustomDashboardPanel } = customization;
+  const { useCustomDashboardPanel, customizationTheme } = customization;
+  const backgroundColor = customizationTheme?.colors.customizationBackground1 || "#E5E5E5";
   const explanationPanel = customization.key !== "none" ? customization?.showExplanationPanel : true;
   return (
-    <div className="col-span-full mt-2 flex flex-col xl:flex-row gap-8">
-      <div className="col-span-full order-2 flex flex-col grow lg:flex-row gap-8 mt-0.5">
-        <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
-        {explanationPanel && <DashboardScoreExplanationPanel />}
+    <div className="relative col-span-full">
+      <div className="col-span-full mt-2 flex flex-col xl:flex-row gap-8 relative left-0 top-0 z-20">
+        <div className="col-span-full order-2 flex flex-col grow lg:flex-row gap-8 mt-0.5">
+          <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
+          {explanationPanel && <DashboardScoreExplanationPanel />}
+        </div>
+        {useCustomDashboardPanel && (
+          <DynamicCustomDashboardPanel
+            className={`order-1 lg:order-2 max-w-full ${explanationPanel ? "xl:max-w-md" : "xl:w-2/3"}`}
+          />
+        )}
       </div>
-      {useCustomDashboardPanel && (
-        <DynamicCustomDashboardPanel
-          className={`order-1 lg:order-2 max-w-full ${explanationPanel ? "xl:max-w-md" : "xl:w-2/3"}`}
-        />
-      )}
+      <div
+        style={{ background: `radial-gradient(ellipse 100vw 900px at 50% -32px, #fff, ${backgroundColor})` }}
+        className="w-[calc(100%+100px)] h-[calc(100%+30px)] rounded-b-[40px] relative left-[-50px] top-[calc(-100%)] shadow-2xl"
+      ></div>
     </div>
   );
 };
@@ -251,11 +258,11 @@ export default function Dashboard() {
       <HeaderContentFooterGrid>
         <Confetti />
         <Header />
-        <BodyWrapper className="mt-4 md:mt-6">
+        <BodyWrapper className="mt-4 md:mt-0 pt-16">
           <PageWidthGrid>
             <DashboardCTAs customization={customization} />
 
-            <span id="add-stamps" className="col-span-full font-heading text-4xl">
+            <span id="add-stamps" className="col-span-full font-heading text-4xl text-gray-800 mt-12">
               Add Stamps
             </span>
             <CardList
@@ -266,10 +273,10 @@ export default function Dashboard() {
                 isLoadingPassport == IsLoadingPassportState.FailedToConnect
               }
             />
-            <span className="col-start-1 col-end-5 font-heading text-3xl">Collected Stamps</span>
-            <PassportDetailsButton className="col-end-[-1] col-start-1 md:col-start-[-3] justify-self-end self-center" />
-            <DashboardValidStampsPanel className="col-span-full" />
-            <ExpiredStampsPanel className="col-span-full" />
+            {/* <span className="col-start-1 col-end-5 font-heading text-3xl">Collected Stamps</span> */}
+            {/* <PassportDetailsButton className="col-end-[-1] col-start-1 md:col-start-[-3] justify-self-end self-center" /> */}
+            {/* <DashboardValidStampsPanel className="col-span-full" /> */}
+            {/* <ExpiredStampsPanel className="col-span-full" /> */}
           </PageWidthGrid>
         </BodyWrapper>
         {/* This footer contains dark colored text and dark images */}
