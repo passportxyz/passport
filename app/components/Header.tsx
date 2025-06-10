@@ -21,7 +21,7 @@ const Header = (): JSX.Element => {
       <div className={`${PAGE_PADDING}`}>
         <MinimalHeader />
       </div>
-      {/* TODO: #3502
+      {/* TODO: #3502 : wait for clarification on how to display banners ....
       
       {!(userWarning || banners.length) && (
         <div className="h-1 w-full bg-gradient-to-b from-foreground-4 to-background" />

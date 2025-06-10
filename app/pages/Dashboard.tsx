@@ -55,7 +55,8 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
           />
         )}
       </div>
-      <div className="w-[calc(100%+100px)] h-[calc(100%+20px)] rounded-b-[40px] relative left-[-50px] top-[calc(-100%)] shadow-2xl bg-passport-gradient-dashboard-cta"></div>
+      <div className="w-[calc(100%+100px)] h-[calc(100%+30px)] rounded-b-[40px] relative left-[-50px] top-[calc(-100%)] shadow-2xl bg-passport-gradient-dashboard-cta"></div>
+      {/* <div className="w-screen h-[calc(100%+20px)] rounded-b-[40px] relative left-1/2 -ml-[50vw] top-[calc(-100%)] shadow-2xl bg-passport-gradient-dashboard-cta"></div> */}
     </div>
   );
 };
@@ -258,7 +259,7 @@ export default function Dashboard() {
           <PageWidthGrid>
             <DashboardCTAs customization={customization} />
 
-            <span id="add-stamps" className="col-span-full font-heading text-4xl text-gray-800">
+            <span id="add-stamps" className="col-span-full font-heading text-4xl text-gray-800 mt-12">
               Add Stamps
             </span>
             <CardList

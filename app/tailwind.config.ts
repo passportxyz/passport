@@ -19,8 +19,8 @@ export default {
     },
     extend: {
       backgroundImage: {
-        "passport-gradient-header": "radial-gradient(ellipse 100% 900px at 50% 50%, #fff, #E5E5E5)",
-        "passport-gradient-dashboard-cta": "radial-gradient(ellipse 100% 900px at 50% 50%, #fff, #E1E1E1)",
+        "passport-gradient-header": "radial-gradient(ellipse 100vw 900px at 50% 50%, #fff, #E5E5E5)",
+        "passport-gradient-dashboard-cta": "radial-gradient(ellipse 100vw 900px at 50% -32px, #fff, #E5E5E5)",
       },
       colors: {
         background: "rgb(var(--color-background) / <alpha-value>)",
