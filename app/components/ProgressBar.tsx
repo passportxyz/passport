@@ -12,8 +12,8 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   pointsGained,
   pointsAvailable,
   isSlim = false,
-  gainedBarColor = "white",
-  availableBarColor = "#009973",
+  gainedBarColor = "#009973",
+  availableBarColor = "white",
 }) => {
   const percentGained = (pointsGained / (pointsGained + pointsAvailable)) * 100 || 0;
 
@@ -33,7 +33,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
           y1="5"
           x2={100 + capDistance}
           y2="5"
-          stroke={gainedBarColor}
+          stroke={availableBarColor}
           strokeWidth={remainingBarWidth}
           strokeLinecap="round"
         />
@@ -53,7 +53,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
           y1="5"
           x2={percentGained + capDistance}
           y2="5"
-          stroke={availableBarColor}
+          stroke={gainedBarColor}
           strokeWidth={gainedBarWidth}
           strokeLinecap="round"
         />

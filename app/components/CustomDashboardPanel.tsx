@@ -137,7 +137,6 @@ const StandardCustomDashboardPanel = ({
   const customization = useCustomization();
   const { logo, body } = customization.dashboardPanel;
 
-  console.log("geri className {}", className);
   return (
     <CustomDashboardPanel className={className} logo={logo}>
       {body.displayInfoTooltip && body.displayInfoTooltip.shouldDisplay && body.displayInfoTooltip.text ? (

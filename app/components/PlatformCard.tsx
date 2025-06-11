@@ -119,7 +119,6 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps
   );
 };
 
-
 const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick, isDeduplicated }: StampProps) => {
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
@@ -160,7 +159,7 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick,
               </h1>
             </div>
             <p className="flex-1 pleading-relaxed mt-2 hidden text-sm text-color-4 md:inline-block invisible">
-              {platform.description}dewfded
+              {platform.description}
             </p>
           </div>
 
@@ -198,26 +197,17 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick,
 
 const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick, isDeduplicated }: StampProps) => {
   const [hovering, setHovering] = useState(false);
-  const imgFilter = {
-    filter: `invert(27%) sepia(97%) saturate(295%) hue-rotate(113deg) brightness(${
-      hovering ? "100%" : "56%"
-    }) contrast(89%)`,
-  };
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
       <div
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
-        className="group relative flex h-full cursor-pointer flex-col rounded-lg border border-background-5 p-0 transition-all ease-out
-        bg-gradient-to-b from-background to-background-5/30
-        hover:bg-opacity-100 hover:from-transparent hover:shadow-even-md hover:border-background-5 hover:to-background-5/60 hover:shadow-background-5"
+        className="group relative flex h-full cursor-pointer flex-col rounded-2xl p-0 bg-[#e5e5e5]"
       >
         <div className="m-6 flex h-full flex-col justify-between">
           <div className="flex w-full items-center justify-between">
             {platform.icon ? (
-              <div style={imgFilter}>
-                <img src={platform.icon} alt={platform.name} className="h-10 w-10 grayscale" />
-              </div>
+              <img src={platform.icon} alt={platform.name} className="h-10 w-10" />
             ) : (
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -230,10 +220,9 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick, 
             )}
             <StampLabels primaryLabel="Expired" primaryBgColor="bg-background-5" isDeduplicated={isDeduplicated} />
           </div>
-
           <div className="mt-4 flex justify-center h-full md:mt-6 md:inline-block md:justify-start">
             <div
-              className={`flex flex-col place-items-start text-color-2 md:flex-row ${
+              className={`flex flex-col place-items-start text-color-4 md:flex-row ${
                 platform.name.split(" ").length > 1 ? "items-center md:items-baseline" : "items-center"
               }`}
             >
@@ -244,26 +233,28 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick, 
                 {platform.name}
               </h1>
             </div>
-            <p className="flex-1 pleading-relaxed mt-2 hidden text-sm text-color-1 md:inline-block invisible">
+            <p className="flex-1 pleading-relaxed mt-2 hidden text-sm text-color-4 md:inline-block invisible">
               {platform.description}
             </p>
           </div>
-
-          <div className="text-color-6">Points gained</div>
-          <div className="text-2xl font-bold">{+platform.earnedPoints.toFixed(1)}</div>
+          <div className="text-sm font-bold text-color-9">
+            <span className="text-xl text-color-4">{+platform.earnedPoints.toFixed(1)} </span> /{" "}
+            {platform.displayPossiblePoints.toFixed(1)} points gained
+          </div>{" "}
           <ProgressBar
             pointsGained={platform.earnedPoints}
             pointsAvailable={Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0)}
             isSlim={true}
+            gainedBarColor={"#737373"}
           />
+          <Button
+            data-testid="update-button"
+            variant="custom"
+            className="mt-5 w-auto bg-transparent bg-white text-color-4 border-foreground-2 z-10"
+          >
+            Update
+          </Button>
         </div>
-        <Button
-          data-testid="update-button"
-          variant="custom"
-          className="mb-5 mx-5 w-auto border bg-transparent border-background-5 text-color-7 z-10"
-        >
-          Update
-        </Button>
       </div>
     </div>
   );
