@@ -2,13 +2,15 @@ import { ethers } from "ethers";
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 import { SweeperError } from "./ChainSweeper";
 
-const COMMAS_AND_SPACES = /[\s,]+/;
-
 export type SweeperConfig = {
   thresholdWei: bigint;
   chainDepositAddresses: Record<string, string>;
   alchemyApiKey: string;
   privateKey: string;
+};
+
+const validateEthereumAddress = (address: unknown): boolean => {
+  return typeof address === "string" && ethers.isAddress(address);
 };
 
 const getCommonEnvVars = () => {
@@ -21,6 +23,14 @@ const getCommonEnvVars = () => {
   }
   const thresholdEth = process.env.BALANCE_THRESHOLD_ETH || "0.25";
   const chainDepositAddresses = JSON.parse(process.env.CHAIN_DEPOSIT_ADDRESSES!);
+
+  // Validate all destination addresses
+  for (const [chain, address] of Object.entries(chainDepositAddresses)) {
+    if (!validateEthereumAddress(address)) {
+      throw new SweeperError(`Invalid Ethereum address for chain ${chain}: ${address}`);
+    }
+  }
+
   const thresholdWei = ethers.parseEther(thresholdEth);
   return { thresholdWei, chainDepositAddresses };
 };
