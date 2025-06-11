@@ -32,32 +32,28 @@ import TagManager from "react-gtm-module";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import Script from "next/script";
 import { Confetti } from "../components/Confetti";
-import { PassportDetailsButton } from "../components/PassportDetailsButton";
 import { useMessage } from "../hooks/useMessage";
 import { Customization } from "../utils/customizationUtils";
 import { useAccount } from "wagmi";
+import { useRadialBackgroundColorForHeader } from "../components/Header";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export const DashboardCTAs = ({ customization }: { customization: Customization }) => {
-  const { useCustomDashboardPanel, customizationTheme } = customization;
-  const backgroundColor = customizationTheme?.colors.customizationBackground1 || "#E5E5E5";
-  const explanationPanel = customization.key !== "none" ? customization?.showExplanationPanel : true;
+  const { useCustomDashboardPanel } = customization;
+
+  const backgroundColor = useRadialBackgroundColorForHeader();
+
   return (
     <div className="relative col-span-full">
       <div className="col-span-full mt-2 flex flex-col xl:flex-row gap-8 relative left-0 top-0 z-20">
         <div className="col-span-full order-2 flex flex-col grow lg:flex-row gap-8 mt-0.5">
           <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
-          {explanationPanel && <DashboardScoreExplanationPanel />}
         </div>
-        {useCustomDashboardPanel && (
-          <DynamicCustomDashboardPanel
-            className={`order-1 lg:order-2 max-w-full ${explanationPanel ? "xl:max-w-md" : "xl:w-2/3"}`}
-          />
-        )}
+        {useCustomDashboardPanel && <DynamicCustomDashboardPanel className="order-1 lg:order-2 max-w-full xl:w-2/3" />}
       </div>
       <div
-        style={{ background: `radial-gradient(ellipse 100vw 900px at 50% -32px, #fff, ${backgroundColor})` }}
+        style={{ background: `radial-gradient(ellipse 100vw 200px at 50% -32px, white, ${backgroundColor})` }}
         className="w-[calc(100%+100px)] h-[calc(100%+30px)] rounded-b-[40px] relative left-[-50px] top-[calc(-100%)] shadow-2xl"
       ></div>
     </div>

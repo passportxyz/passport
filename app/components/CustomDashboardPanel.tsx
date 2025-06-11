@@ -35,35 +35,26 @@ const DotsBackground = ({ viewBox, className }: { viewBox: string; className: st
   </svg>
 );
 
-// Used as base for both API-defined and static panels
-export const CustomDashboardPanel = ({ logo, className, children }: CustomDashboardPanelProps) => {
-  const logoBackground = useMemo(() => {
-    if (logo.background === "dots") {
-      return (
-        <>
-          <DotsBackground viewBox="0 0 50 100" className="block md:hidden lg:block" />
-          {/* 1:1 aspect ratio works better on medium screen */}
-          <DotsBackground viewBox="0 15 50 65" className="hidden md:block lg:hidden" />
-        </>
-      );
-    }
-  }, [logo.background]);
+// // Used as base for both API-defined and static panels
+// export const CustomDashboardPanel = ({ logo, className, children }: CustomDashboardPanelProps) => {
+//   const logoBackground = useMemo(() => {
+//     if (logo.background === "dots") {
+//       return (
+//         <>
+//           <DotsBackground viewBox="0 0 50 100" className="block md:hidden lg:block" />
+//           {/* 1:1 aspect ratio works better on medium screen */}
+//           <DotsBackground viewBox="0 15 50 65" className="hidden md:block lg:hidden" />
+//         </>
+//       );
+//     }
+//   }, [logo.background]);
 
-  return (
-    <div className={`${className} flex-col rounded border border-customization-background-1 text-color-4`}>
-      {/* <div className="grid shrink border-r border-customization-background-1 ">
-        <div className="flex col-start-1 row-start-1 flex-col items-center justify-center p-6">
-          {logo.image}
-          {logo.caption && <span className="mt-1 text-3xl leading-none">{logo.caption}</span>}
-        </div>
-        {logoBackground && <div className="col-start-1 flex row-start-1 z-0">{logoBackground}</div>}
-      </div>
-      <div className="relative flex flex-col justify-start gap-2 p-6 w-full"> */}
-      {children}
-      {/* </div> */}
-    </div>
-  );
-};
+//   return (
+//     <div className={`${className} flex flex-row rounded border border-customization-background-1 text-color-4`}>
+//       {children}
+//     </div>
+//   );
+// };
 
 export const DynamicCustomDashboardPanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
@@ -136,9 +127,10 @@ const StandardCustomDashboardPanel = ({
 }) => {
   const customization = useCustomization();
   const { logo, body } = customization.dashboardPanel;
+  const title = "TODO: Add some title here ???";
 
   return (
-    <CustomDashboardPanel className={className} logo={logo}>
+    <div className={`${className} flex flex-col rounded-3xl text-color-4 bg-[#ffffff99] p-4 justify-between`}>
       {body.displayInfoTooltip && body.displayInfoTooltip.shouldDisplay && body.displayInfoTooltip.text ? (
         <Tooltip
           iconClassName="text-customization-background-1"
@@ -148,18 +140,38 @@ const StandardCustomDashboardPanel = ({
           {body.displayInfoTooltip.text}
         </Tooltip>
       ) : null}
+
+      <div className="flex flex-row items-center justify-end h-16">
+        <div className="grow font-medium text-lg">{title}</div>
+        <div className="flex bg-white p-2 rounded-md">
+          <div className="h-10 [&_svg]:h-full">{logo.image}</div>
+          {logo.caption && <span className="mt-1 text-3xl leading-none">{logo.caption}</span>}
+        </div>
+      </div>
+
       {mainText}
-      <div className="text-sm grow">{subText}</div>
-      <Button
-        variant="custom"
-        className={twMerge(
-          "rounded-s mr-2 mt-2 w-fit self-end bg-customization-background-3 text-customization-foreground-2 hover:bg-customization-background-3/75 disabled:bg-customization-background-1 disabled:brightness-100",
-          actionClassName
-        )}
-        onClick={onActionClick}
-      >
-        {actionText}
-      </Button>
-    </CustomDashboardPanel>
+      <div className="flex items-center">
+        <Button
+          variant="custom"
+          className={twMerge(
+            "rounded-md mr-2 w-fit self-end bg-customization-background-3 text-customization-foreground-2 hover:bg-customization-background-3/75 disabled:bg-customization-background-1 disabled:brightness-100",
+            actionClassName
+          )}
+          onClick={onActionClick}
+        >
+          {actionText}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M5 12H19M19 12L12 5M19 12L12 19"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </Button>
+        <div className="text-sm grow">{subText}</div>
+      </div>
+    </div>
   );
 };
