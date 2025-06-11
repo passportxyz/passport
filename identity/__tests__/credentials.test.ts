@@ -170,6 +170,8 @@ describe("issueNullifiableCredential", function () {
       address: "0x0",
     };
 
+    const secret = "secret";
+
     const expectedStandardHash: string =
       "v0.0.0:" +
       base64.encode(
@@ -179,14 +181,11 @@ describe("issueNullifiableCredential", function () {
           .digest()
       );
 
-    const secret = "secret";
+    const expectedHumanNetworkHash: string =
+      "v3:" +
+      base64.encode(createHash("sha256").update(secret, "utf-8").update(mockMishtiOprfResponse, "utf-8").digest());
 
-    const expectedOwnIdentityHash = base64.encode(
-      createHash("sha256")
-        .update(secret)
-        .update(JSON.stringify(objToSortedArray(record)))
-        .digest()
-    );
+    const expectedOprfInput = JSON.stringify(objToSortedArray(record));
 
     const { credential } = await issueNullifiableCredential({
       DIDKit,
@@ -211,12 +210,12 @@ describe("issueNullifiableCredential", function () {
     expect(credential.credentialSubject.id).toEqual(`did:pkh:eip155:1:${record.address}`);
     expect(credential.credentialSubject.provider).toEqual(`${record.type}`);
     expect(Array.isArray(credential.credentialSubject.nullifiers)).toEqual(true);
-    expect(credential.credentialSubject.nullifiers).toEqual([expectedStandardHash, "v3:" + mockMishtiOprfResponse]);
+    expect(credential.credentialSubject.nullifiers).toEqual([expectedStandardHash, expectedHumanNetworkHash]);
     expect(typeof credential.proof).toEqual("object");
     expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
     expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
     expect(humanNetworkOprf).toHaveBeenCalledWith({
-      value: expectedOwnIdentityHash,
+      value: expectedOprfInput,
       clientPrivateKey: "",
       relayUrl: "",
     });
