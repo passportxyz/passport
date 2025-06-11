@@ -35,26 +35,26 @@ const DotsBackground = ({ viewBox, className }: { viewBox: string; className: st
   </svg>
 );
 
-// // Used as base for both API-defined and static panels
-// export const CustomDashboardPanel = ({ logo, className, children }: CustomDashboardPanelProps) => {
-//   const logoBackground = useMemo(() => {
-//     if (logo.background === "dots") {
-//       return (
-//         <>
-//           <DotsBackground viewBox="0 0 50 100" className="block md:hidden lg:block" />
-//           {/* 1:1 aspect ratio works better on medium screen */}
-//           <DotsBackground viewBox="0 15 50 65" className="hidden md:block lg:hidden" />
-//         </>
-//       );
-//     }
-//   }, [logo.background]);
+// Used as base for both API-defined and static panels
+export const CustomDashboardPanel = ({ logo, className, children }: CustomDashboardPanelProps) => {
+  const logoBackground = useMemo(() => {
+    if (logo.background === "dots") {
+      return (
+        <>
+          <DotsBackground viewBox="0 0 50 100" className="block md:hidden lg:block" />
+          {/* 1:1 aspect ratio works better on medium screen */}
+          <DotsBackground viewBox="0 15 50 65" className="hidden md:block lg:hidden" />
+        </>
+      );
+    }
+  }, [logo.background]);
 
-//   return (
-//     <div className={`${className} flex flex-row rounded border border-customization-background-1 text-color-4`}>
-//       {children}
-//     </div>
-//   );
-// };
+  return (
+    <div className={`${className} flex flex-row rounded border border-customization-background-1 text-color-4`}>
+      {children}
+    </div>
+  );
+};
 
 export const DynamicCustomDashboardPanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
