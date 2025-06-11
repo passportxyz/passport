@@ -14,7 +14,7 @@ import { LoadingBar } from "./LoadingBar";
 const PanelDiv = ({ className, children }: { className: string; children: React.ReactNode }) => {
   return (
     <div
-      className={`flex flex-col items-center justify-center p-4 w-full rounded-[20px] bg-white text-black ${className}`}
+      className={`flex flex-col items-center justify-center p-4 w-full rounded-3xl bg-white text-black ${className}`}
     >
       {children}
     </div>
@@ -30,10 +30,6 @@ const Ellipsis = () => {
       <div className="animate-[visible-at-two-thirds_1.5s_steps(1)_infinite]">.</div>
     </div>
   );
-};
-
-const borderStyle = (color: string) => {
-  return `shadow-${color} shadow-even-md border-${color} shadow-${color} border`;
 };
 
 export const DashboardScorePanel = ({ className }: { className?: string }) => {
@@ -54,13 +50,13 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
   const customTitle = customization?.scorerPanel?.title;
 
   const loading = scoreState.status === "loading" || verificationState.loading;
-  const aboveThreshold = rawScore >= threshold;
-  const highlightColor = aboveThreshold ? "foreground-2" : "background-5";
+  // const aboveThreshold = rawScore >= threshold;
+  // const highlightColor = aboveThreshold ? "foreground-2" : "background-5";
 
   return (
-    <PanelDiv className={`${borderStyle(highlightColor)} font-heading ${className}`}>
+    <PanelDiv className={`font-heading ${className}`}>
       <div className="flex items-center w-full">
-        <span className="grow">{customTitle || "Unique Humanity Score"}</span>
+        <span className="grow font-medium">{customTitle || "Unique Humanity Score"}</span>
         <Tooltip className="px-0">
           Your Unique Humanity Score is based out of 100 and measures your uniqueness. The current passing threshold is{" "}
           {threshold}. Scores may vary across different apps, especially due to abuse or attacks on the service.
@@ -71,10 +67,7 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
           {loading ? (
             <LoadingScoreImage />
           ) : (
-            <img
-              src={aboveThreshold ? "/assets/scoreLogoSuccess.svg" : "/assets/scoreLogoBelow.svg"}
-              alt={aboveThreshold ? "Above threshold Passport Logo" : "Below threshold Passport logo"}
-            />
+            <img src="/assets/scoreLogoSuccess.svg" alt="Above threshold Passport Logo" />
           )}
         </div>
         {loading ? (
@@ -86,7 +79,7 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
             </div>
           </div>
         ) : (
-          <span className={`text-${highlightColor} text-5xl`}>{+displayScore.toFixed(2)}</span>
+          <span className={`text-5xl`}>{+displayScore.toFixed(2)}</span>
         )}
       </div>
     </PanelDiv>

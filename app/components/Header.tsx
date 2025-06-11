@@ -8,19 +8,30 @@ import { SupportBanner } from "../components/SupportBanner";
 import { useAtom } from "jotai";
 import { useSupportBanners } from "../hooks/useSupportBanners";
 import { useCustomization } from "../hooks/useCustomization";
+import { ScorerContext } from "../context/scorerContext";
+
+export const useRadialBackgroundColorForHeader = (): string => {
+  const { customizationTheme } = useCustomization();
+
+  const { rawScore, threshold } = React.useContext(ScorerContext);
+  const aboveThreshold = threshold && rawScore >= threshold;
+
+  const fallbackBackgroundColor = aboveThreshold ? "#BEFEE2" : "#E5E5E5";
+  return customizationTheme?.colors.customizationBackground1 || fallbackBackgroundColor;
+};
 
 const Header = (): JSX.Element => {
   const [userWarning, setUserWarning] = useAtom(userWarningAtom);
   const { banners, loadBanners } = useSupportBanners();
-  const { customizationTheme } = useCustomization();
-  const backgroundColor = customizationTheme?.colors.customizationBackground1 || "#E5E5E5";
+  const backgroundColor = useRadialBackgroundColorForHeader();
+
   useEffect(() => {
     loadBanners();
   }, [loadBanners]);
 
   return (
     <div
-      style={{ background: `radial-gradient(ellipse 100vw 900px at 50% 50%, white, ${backgroundColor})` }}
+      style={{ background: `radial-gradient(ellipse 100vw 200px at 50% 50%, white, ${backgroundColor})` }}
       className="top-0 left-0 w-full fixed z-30"
     >
       <div className={`${PAGE_PADDING}`}>

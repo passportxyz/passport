@@ -52,7 +52,7 @@ const Tooltip = ({
         <div
           ref={refs.setFloating}
           className={twMerge(
-            "z-10 w-4/5 px-4 py-2 max-w-screen-md rounded-md border border-foreground-6 bg-background text-sm text-color-1",
+            "z-10 w-4/5 px-4 py-2 max-w-screen-md rounded-md border border-foreground-6 bg-background text-sm",
             panelClassName
           )}
           style={floatingStyles}
