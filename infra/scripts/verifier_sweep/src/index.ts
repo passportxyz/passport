@@ -2,7 +2,9 @@ import { createChainSweeper, processChainSweeper, ChainSweeperConfig, SweeperErr
 import { loadConfigFromEnv, loadConfigFromAWS } from "./configLoaders";
 
 const processAllChains = async (
-  config: Omit<ChainSweeperConfig, "alchemyChainName" | "feeDestination"> & { chainDepositAddresses: Record<string, string> }
+  config: Omit<ChainSweeperConfig, "alchemyChainName" | "feeDestination"> & {
+    chainDepositAddresses: Record<string, string>;
+  }
 ): Promise<void> => {
   for (const [alchemyChainName, feeDestination] of Object.entries(config.chainDepositAddresses)) {
     console.log(`Processing chain: ${alchemyChainName}`);
@@ -20,7 +22,8 @@ const processAllChains = async (
   }
 };
 
-export const handler = async (useEnv: boolean): Promise<{ statusCode: number; body: string }> => {
+// Local/CLI handler that takes a boolean parameter
+export const runSweeper = async (useEnv: boolean = false): Promise<{ statusCode: number; body: string }> => {
   try {
     const config = await (useEnv ? loadConfigFromEnv() : loadConfigFromAWS());
     console.log(
@@ -38,4 +41,9 @@ export const handler = async (useEnv: boolean): Promise<{ statusCode: number; bo
     console.error("Execution failed:", error instanceof SweeperError ? error.message : error);
     return { statusCode: 500, body: "Error processing chains" };
   }
+};
+
+// AWS Lambda handler - always uses AWS Secrets Manager
+exports.handler = async (event: any, context: any) => {
+  return await runSweeper(false); // Always use AWS config in Lambda
 };

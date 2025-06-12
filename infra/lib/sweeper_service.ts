@@ -20,26 +20,27 @@ export const createSweeperService = async ({
     },
   });
 
-  const secretMeta = {
+  // Sync to AWS Secrets Manager, will fetch in lambda
+  // Note: sweeper section needs to be created in 1Password DevOps/passport-xyz-{env}-secrets
+  // Secrets: ALCHEMY_API_KEY, PRIVATE_KEY
+  secretsManager.syncSecretsAndGetRefs({
     vault: "DevOps",
     repo: "passport-xyz",
     env: stack,
     section: "sweeper",
-  };
-
-  // Sync to AWS Secrets Manager, will fetch in lambda
-  secretsManager.syncSecretsAndGetRefs({
-    ...secretMeta,
     targetSecret: sweeperServiceSecret,
     secretVersionName: "sweeper-secret-version",
   });
 
-  const environment = secretsManager.getEnvironmentVars(secretMeta);
-  const variables = environment.reduce((acc, { name, value }) => {
-    acc[name] = value;
-    return acc;
-  }, {});
-  variables["SECRETS_ARN"] = sweeperServiceSecret.arn;
+  // Only put non-secret environment variables in Lambda
+  const variables: Record<string, any> = {
+    SECRETS_ARN: sweeperServiceSecret.arn,
+    BALANCE_THRESHOLD_ETH: "0.25", // Default threshold
+    // These should be environment-specific destination addresses (multisig) for swept funds
+    CHAIN_DEPOSIT_ADDRESSES: JSON.stringify({
+      "opt-sepolia": "0x96DB2c6D93A8a12089f7a6EdA5464e967308AdEd",
+    }),
+  };
 
   // Create IAM role for the Lambda
   const lambdaRole = new aws.iam.Role("sweeper-role", {
@@ -63,6 +64,29 @@ export const createSweeperService = async ({
     policyArn: aws.iam.ManagedPolicy.AWSLambdaBasicExecutionRole,
   });
 
+  // Add VPC execution policy for Lambda in VPC
+  const vpcExecutionPolicy = new aws.iam.RolePolicyAttachment("sweeper-vpc-policy", {
+    role: lambdaRole.name,
+    policyArn: aws.iam.ManagedPolicy.AWSLambdaVPCAccessExecutionRole,
+  });
+
+  // Add policy for accessing secrets manager
+  const secretsPolicy = new aws.iam.RolePolicy("sweeper-secrets-policy", {
+    role: lambdaRole.id,
+    policy: sweeperServiceSecret.arn.apply((secretArn) =>
+      JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Effect: "Allow",
+            Action: ["secretsmanager:GetSecretValue"],
+            Resource: secretArn,
+          },
+        ],
+      })
+    ),
+  });
+
   const securityGroup = new aws.ec2.SecurityGroup("sweeper-sg", {
     name: "sweeper-sg",
     vpcId,
@@ -81,7 +105,8 @@ export const createSweeperService = async ({
     cidrBlocks: ["0.0.0.0/0"],
   });
 
-  // Create Lambda function
+  // Create Lambda function - expects the TypeScript to be built in CI
+  const sweeperDir = path.join(__dirname, "../scripts/verifier_sweep");
   const ethCheckerFunction = new aws.lambda.Function("sweeper", {
     vpcConfig: {
       subnetIds: vpcPrivateSubnets,
@@ -91,7 +116,10 @@ export const createSweeperService = async ({
     runtime: aws.lambda.Runtime.NodeJS18dX,
     handler: "index.handler",
     code: new pulumi.asset.AssetArchive({
-      ".": new pulumi.asset.FileArchive(path.join(__dirname, "dist")),
+      // Include the built JavaScript files
+      ".": new pulumi.asset.FileArchive(path.join(sweeperDir, "dist")),
+      // Include node_modules for dependencies
+      node_modules: new pulumi.asset.FileArchive(path.join(sweeperDir, "node_modules")),
     }),
     timeout: 600,
     memorySize: 256,
