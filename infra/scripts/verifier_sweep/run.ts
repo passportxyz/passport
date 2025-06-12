@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { handler } from "./src/index";
+import { runSweeper } from "./src/index";
 
 const showHelp = () => {
   console.log(`
@@ -59,7 +59,7 @@ if (args.length === 0 || helpFlags.some((flag) => args.includes(flag))) {
 
 const useEnv = process.argv.includes("--env");
 
-handler(useEnv)
+runSweeper(useEnv)
   .then(console.log)
   .catch((error: any) => {
     console.error("Error:", error);

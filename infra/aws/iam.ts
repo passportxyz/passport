@@ -598,4 +598,4 @@ const gitcoinServiceRecord = new aws.route53.Record("passport-record", {
   ],
 });
 
-createSweeperService();
+createSweeperService({ stack, defaultTags });
