@@ -1,41 +1,4 @@
-import { readFileSync } from "fs";
-import { join, dirname } from "path";
-
-import { initSync as humanNetworkInitSync, generate_oprf, enable_errors } from "@holonym-foundation/mishtiwasm";
 import * as logger from "./logger.js";
-
-// TODO: ideally this would be handled in the wasm module
-process.on("uncaughtException", (err): void => {
-  logger.error("Uncaught exception:", err); // eslint-disable-line no-console
-  if (!err.toString().includes("RuntimeError: unreachable")) {
-    throw err;
-  }
-});
-
-let humanNetworkInitialized = false;
-const initializeHumanNetwork = () => {
-  if (humanNetworkInitialized) return;
-
-  const monorepoBaseDir = dirname(process.cwd());
-
-  // TODO: this is a hack to get the wasm path.
-  // For docker builds, the wasm path is different and can be set in the Dockerfile
-  const wasmPath =
-    process.env.HUMAN_NETWORK_WASM_PATH ||
-    join(monorepoBaseDir, "node_modules/@holonym-foundation/mishtiwasm/pkg/esm", "mishtiwasm_bg.wasm");
-
-  // TODO leaving in in case there are any weird
-  // issues in other environments, but can be removed
-  // next time we're in this file
-  logger.info("Loading wasm module", wasmPath);
-
-  const wasmModuleBuffer = readFileSync(wasmPath);
-
-  humanNetworkInitSync({ module: wasmModuleBuffer });
-  enable_errors();
-
-  humanNetworkInitialized = true;
-};
 
 export const humanNetworkOprf = async ({
   value,
@@ -46,9 +9,36 @@ export const humanNetworkOprf = async ({
   clientPrivateKey: string;
   relayUrl: string;
 }): Promise<string> => {
-  initializeHumanNetwork();
+  const signerUrl = process.env.HN_SIGNER_URL;
+  
+  if (!signerUrl) {
+    throw new Error("HN_SIGNER_URL environment variable is required");
+  }
 
-  const encrypted = await generate_oprf(clientPrivateKey, value, "OPRFSecp256k1", relayUrl);
+  try {
+    const response = await fetch(`${signerUrl}/sign`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        value,
+      }),
+    });
 
-  return encrypted;
+    if (!response.ok) {
+      throw new Error(`HN Signer request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    
+    if (!result.signature) {
+      throw new Error("Invalid response from HN Signer: missing signature");
+    }
+
+    return result.signature;
+  } catch (error) {
+    logger.error("Error calling HN Signer service:", error);
+    throw error;
+  }
 };

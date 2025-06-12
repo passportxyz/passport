@@ -19,6 +19,8 @@ import {
   passportXyzHostedZoneId,
 } from "./stacks";
 
+import { hnSignerInternalUrl } from "./hn_signer";
+
 const current = aws.getCallerIdentity({});
 const regionData = aws.getRegion({});
 const DOCKER_IMAGE_TAG = `${process.env.DOCKER_IMAGE_TAG || ""}`;
@@ -90,8 +92,9 @@ const passportXyzIamEnvironment = pulumi
     }),
     redisConnectionUrl,
     passportDataScienceEndpoint,
+    hnSignerInternalUrl,
   ])
-  .apply(([managedEnvVars, _redisConnectionUrl, passportDataScienceEndpoint]) =>
+  .apply(([managedEnvVars, _redisConnectionUrl, passportDataScienceEndpoint, hnSignerInternalUrl]) =>
     [
       ...managedEnvVars,
       {
@@ -101,6 +104,10 @@ const passportXyzIamEnvironment = pulumi
       {
         name: "DATA_SCIENCE_API_URL",
         value: passportDataScienceEndpoint,
+      },
+      {
+        name: "HN_SIGNER_URL",
+        value: hnSignerInternalUrl,
       },
     ].sort(secretsManager.sortByName)
   );
