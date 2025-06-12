@@ -296,6 +296,124 @@ The codebase uses a clean separation between platforms (frontend) and providers 
 - `/platforms/src/{Platform}/Providers-config.ts` - UI metadata and grouping
 - `/types/src/index.d.ts` - Type definitions for provider IDs
 
+## Infrastructure Architecture
+
+The monorepo uses a dual ALB architecture with external and internal services:
+
+### External vs Internal ALB Pattern
+
+#### External ALB (Public Services)
+- **Purpose**: User-facing services accessible from the internet
+- **Routing**: Host-based routing using subdomains
+- **Examples**: 
+  - `iam.passport.xyz` → IAM Service
+  - `embed.passport.xyz` → Embed Service
+- **Configuration**: Defined in `infra/aws/iam.ts`, `infra/aws/embed.ts`
+- **Security**: HTTPS termination, public DNS records
+
+#### Internal ALB (Service-to-Service)  
+- **Purpose**: Internal services for service-to-service communication
+- **Routing**: Path-based routing on internal endpoints
+- **Examples**:
+  - `internal-alb.gitcoin.co/data-science` → Data Science API
+  - `internal-alb.gitcoin.co/hn-signer` → HN Signer Service
+- **Configuration**: Uses `internalAlbBaseUrl` from separate stack references
+- **Security**: Internal VPC only, no external access
+
+### Adding New Services
+
+#### External Service Pattern
+```typescript
+// Host-based routing with public DNS
+const albListenerRule = new aws.lb.ListenerRule("service-https", {
+  listenerArn: albHttpsListenerArn,
+  priority: 150, // Unique priority
+  actions: [{ type: "forward", targetGroupArn: targetGroup.arn }],
+  conditions: [{ hostHeader: { values: ["service.domain"] }}],
+});
+```
+
+#### Internal Service Pattern  
+```typescript
+// Path-based routing for internal ALB
+// Service configured to use internal ALB target group
+// No external DNS records created
+// Security group restricts access to internal VPC only
+```
+
+### Secret Management Patterns
+
+#### Shared Secrets (High Security)
+- **Location**: `PASSPORT_VC_SECRETS_ARN` (shared across services)
+- **Examples**: Cryptographic keys, JWT signing keys
+- **Pattern**:
+  ```typescript
+  {
+    name: "HUMAN_NETWORK_CLIENT_PRIVATE_KEY",
+    valueFrom: `${PASSPORT_VC_SECRETS_ARN}:HUMAN_NETWORK_CLIENT_PRIVATE_KEY::`,
+  }
+  ```
+- **Usage**: IAM, embed, and hn-signer services
+
+#### Service-Specific Secrets
+- **Location**: Per-service secret objects via 1Password sync
+- **Examples**: API keys, database URLs
+- **Pattern**: `secretsManager.syncSecretsAndGetRefs()`
+
+#### IAM Permissions
+Services need explicit IAM permissions for both:
+1. Service-specific secret access (automatically configured)
+2. Shared secret access (manual configuration required)
+
+### Internal Service Communication
+
+#### Environment Variables for Internal Services
+```typescript
+// Set internal service URLs as environment variables
+environment: [
+  {
+    name: "DATA_SCIENCE_API_URL", 
+    value: passportDataScienceEndpoint // From internal ALB
+  },
+  {
+    name: "HN_SIGNER_URL",
+    value: "http://internal-alb.gitcoin.co/hn-signer"
+  }
+]
+```
+
+#### Usage Pattern
+```typescript
+// Services call internal endpoints via HTTP (not HTTPS)
+const dataScienceEndpoint = process.env.DATA_SCIENCE_API_URL;
+const url = `http://${dataScienceEndpoint}/${url_subpath}`;
+```
+
+### HN Signer Service Example
+
+The HN Signer demonstrates the internal service pattern:
+- **Infrastructure**: `infra/aws/hn_signer.ts`
+- **Access**: Internal ALB only, path-based routing
+- **Secrets**: Uses shared `HUMAN_NETWORK_CLIENT_PRIVATE_KEY`
+- **Communication**: IAM/embed services call via internal URL
+- **Security**: VPC-internal security group, no external access
+
+### Stack References and Dependencies
+
+#### Core Infrastructure Stack
+- **Purpose**: Provides shared ALB, VPC, Redis, DNS
+- **Exports**: `coreAlbArn`, `albHttpsListenerArn`, `vpcId`, `vpcPrivateSubnets`
+
+#### Data Science Stack  
+- **Purpose**: Provides internal ALB base URL
+- **Export**: `internalAlbBaseUrl`
+- **Usage**: Referenced as `passportDataScienceEndpoint`
+
+#### Service Communication Flow
+1. External traffic → External ALB → Public services (IAM/embed)
+2. Internal traffic → Internal ALB → Internal services (data science, HN signer)
+3. Service-to-service → Internal ALB endpoints via HTTP
+
 ## Troubleshooting
 
 - **Module not found**: Run `lerna bootstrap` from root
