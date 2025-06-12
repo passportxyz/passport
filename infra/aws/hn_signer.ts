@@ -20,9 +20,7 @@ import {
 
 import { op } from "@1password/op-js";
 
-const PASSPORT_VC_SECRETS_ARN = op.read.parse(
-  `op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`
-);
+const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
 
 // Get HN Signer environment variables from 1Password
 const hnSignerEnvironment = secretsManager.getEnvironmentVars({
@@ -48,14 +46,14 @@ const hnSignerResources: Record<string, any> = {
     maxCapacity: 2,
   },
   staging: {
-    cpu: "512", 
+    cpu: "512",
     memory: "1024",
     desiredCount: 1,
     maxCapacity: 4,
   },
   production: {
     cpu: "1024",
-    memory: "2048", 
+    memory: "2048",
     desiredCount: 2,
     maxCapacity: 8,
   },
@@ -64,9 +62,7 @@ const hnSignerResources: Record<string, any> = {
 // Docker image reference
 export const dockerHnSignerImage = pulumi
   .all([current, regionData])
-  .apply(([acc, region]) => 
-    `mishtinetwork/signer:latest`
-  );
+  .apply(([acc, region]) => `mishtinetwork/signer:latest`);
 
 // Create IAM role for ECS task
 const hnSignerRole = new aws.iam.Role("hn-signer-ecs-role", {
@@ -97,9 +93,7 @@ const hnSignerRole = new aws.iam.Role("hn-signer-ecs-role", {
       ]
     }`,
   },
-  managedPolicyArns: [
-    "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
-  ],
+  managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
   tags: defaultTags,
 });
 
@@ -144,57 +138,63 @@ const hnSignerTaskDefinition = new aws.ecs.TaskDefinition("hn-signer", {
   memory: hnSignerResources[stack]["memory"],
   executionRoleArn: hnSignerRole.arn,
   taskRoleArn: hnSignerRole.arn,
-  containerDefinitions: pulumi.all([dockerHnSignerImage, hnSignerLogGroup.name, hnSignerEnvironment]).apply(
-    ([imageUri, logGroupName, envVars]) => JSON.stringify([
-      {
-        name: "hn-signer",
-        image: imageUri,
-        essential: true,
-        portMappings: [
-          {
-            containerPort: 3000,
-            protocol: "tcp",
+  containerDefinitions: pulumi
+    .all([dockerHnSignerImage, hnSignerLogGroup.name, hnSignerEnvironment])
+    .apply(([imageUri, logGroupName, envVars]) =>
+      JSON.stringify([
+        {
+          name: "hn-signer",
+          image: imageUri,
+          essential: true,
+          portMappings: [
+            {
+              containerPort: 3000,
+              protocol: "tcp",
+            },
+          ],
+          environment: [
+            ...envVars,
+            {
+              name: "SIGNER_ENV",
+              value: stack === "review" ? "dev" : "prod",
+            },
+            {
+              name: "SIGNER_PORT",
+              value: "3000",
+            },
+            {
+              name: "RATE_LIMIT_ENABLED",
+              value: "false",
+            },
+            {
+              name: "ALLOWED_METHODS",
+              value: "OPRFSecp256k1",
+            },
+          ],
+          secrets: [
+            {
+              name: "MISHTI_SIGNER_PRIVATE_KEY",
+              valueFrom: `${PASSPORT_VC_SECRETS_ARN}:HUMAN_NETWORK_CLIENT_PRIVATE_KEY::`,
+            },
+          ],
+          logConfiguration: {
+            logDriver: "awslogs",
+            options: {
+              "awslogs-group": logGroupName,
+              "awslogs-region": regionData.name,
+              "awslogs-stream-prefix": "ecs",
+            },
           },
-        ],
-        environment: [
-          ...envVars,
-          {
-            name: "NODE_ENV",
-            value: stack === "production" ? "production" : "development",
-          },
-          {
-            name: "PORT",
-            value: "3000",
-          },
-          {
-            name: "DISABLE_RATE_LIMITING",
-            value: "true",
-          },
-        ],
-        secrets: [
-          {
-            name: "HUMAN_NETWORK_CLIENT_PRIVATE_KEY",
-            valueFrom: `${PASSPORT_VC_SECRETS_ARN}:HUMAN_NETWORK_CLIENT_PRIVATE_KEY::`,
-          },
-        ],
-        logConfiguration: {
-          logDriver: "awslogs",
-          options: {
-            "awslogs-group": logGroupName,
-            "awslogs-region": regionData.name,
-            "awslogs-stream-prefix": "ecs",
+          healthCheck: {
+            command: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"],
+            interval: 30,
+            timeout: 5,
+            retries: 3,
+            startPeriod: 60,
           },
         },
-        healthCheck: {
-          command: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"],
-          interval: 30,
-          timeout: 5,
-          retries: 3,
-          startPeriod: 60,
-        },
-      },
-    ])
-  ),
+      ])
+    ),
   tags: defaultTags,
 });
 
