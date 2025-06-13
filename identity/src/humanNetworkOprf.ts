@@ -1,12 +1,11 @@
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
-
-import { initSync as humanNetworkInitSync, generate_oprf, enable_errors } from "@holonym-foundation/mishtiwasm";
+import { initSync as humanNetworkInitSync, request_from_signer, enable_errors } from "@holonym-foundation/mishtiwasm";
 import * as logger from "./logger.js";
 
 // TODO: ideally this would be handled in the wasm module
 process.on("uncaughtException", (err): void => {
-  logger.error("Uncaught exception:", err); // eslint-disable-line no-console
+  logger.error("Uncaught exception:", err);
   if (!err.toString().includes("RuntimeError: unreachable")) {
     throw err;
   }
@@ -37,18 +36,18 @@ const initializeHumanNetwork = () => {
   humanNetworkInitialized = true;
 };
 
-export const humanNetworkOprf = async ({
-  value,
-  clientPrivateKey,
-  relayUrl,
-}: {
-  value: string;
-  clientPrivateKey: string;
-  relayUrl: string;
-}): Promise<string> => {
+export const humanNetworkOprf = async ({ value }: { value: string }): Promise<string> => {
+  const signerUrl = process.env.HN_SIGNER_URL;
+
+  if (!signerUrl) {
+    throw new Error("HN_SIGNER_URL environment variable is required");
+  }
+
   initializeHumanNetwork();
 
-  const encrypted = await generate_oprf(clientPrivateKey, value, "OPRFSecp256k1", relayUrl);
+  // Remove trailing slash from signerUrl if present
+  const baseUrl = signerUrl.endsWith("/") ? signerUrl.slice(0, -1) : signerUrl;
 
-  return encrypted;
+  // Use the mishtiwasm library to make the request
+  return await request_from_signer(value, "OPRFSecp256k1", baseUrl);
 };
