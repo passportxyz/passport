@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  hn-signer:
+    image: mishtinetwork/signer:latest
+    container_name: hn-signer-local
+    ports:
+      - "3006:3000"  # Map to 3006 to avoid conflicts with app on 3000
+    environment:
+      - MISHTI_SIGNER_PRIVATE_KEY=${MISHTI_SIGNER_PRIVATE_KEY}
+      - MISHTI_RPC_URL=${MISHTI_RPC_URL}
+      - SIGNER_ENV=dev
+      - SIGNER_PORT=3000
+      - RATE_LIMIT_ENABLED=false
+      - ALLOWED_METHODS=OPRFSecp256k1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
