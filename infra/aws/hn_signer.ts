@@ -2,23 +2,23 @@ import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 
 import { secretsManager } from "@gitcoin/passport-infra-libs";
+import { cluster } from "./cluster";
+import { stack, defaultTags } from "../lib/tags";
 
 import {
-  stack,
-  current,
-  regionData,
-  cluster,
   vpcId,
   vpcPrivateSubnets,
-  logsRetention,
-  snsTopic,
-  DOCKER_IMAGE_TAG,
-  privateAlbHttpListenerArn,
+  privateAlbArn,
   privateAlbArnSuffix,
   privateAlbRoute53Record,
+  snsAlertsTopicArn,
 } from "./stacks";
 
 import { op } from "@1password/op-js";
+
+const current = aws.getCallerIdentity({});
+const regionData = aws.getRegion({});
+const DOCKER_IMAGE_TAG = `${process.env.DOCKER_IMAGE_TAG || ""}`;
 
 const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
 
@@ -30,12 +30,11 @@ const hnSignerEnvironment = secretsManager.getEnvironmentVars({
   section: "hn-signer",
 });
 
-const defaultTags = {
-  ManagedBy: "pulumi",
-  Environment: stack,
-  Application: "passport",
-  PulumiStack: pulumi.getStack(),
-};
+const logsRetention = Object({
+  review: 1,
+  staging: 7,
+  production: 14,
+});
 
 // Define resource sizing by environment
 const hnSignerResources: Record<string, any> = {
@@ -219,21 +218,15 @@ const hnSignerTargetGroup = new aws.lb.TargetGroup("hn-signer", {
   tags: defaultTags,
 });
 
-// Private ALB Listener Rule for path-based routing
-const hnSignerListenerRule = new aws.lb.ListenerRule("hn-signer-private", {
-  listenerArn: privateAlbHttpListenerArn,
-  priority: 100, // Higher priority than data science service
-  actions: [
+// Create a new listener on port 86 for HN Signer
+const hnSignerListener = new aws.lb.Listener("hn-signer-port-86", {
+  loadBalancerArn: privateAlbArn,
+  port: 86,
+  protocol: "HTTP",
+  defaultActions: [
     {
       type: "forward",
       targetGroupArn: hnSignerTargetGroup.arn,
-    },
-  ],
-  conditions: [
-    {
-      pathPattern: {
-        values: ["/hn-signer/*"],
-      },
     },
   ],
   tags: defaultTags,
@@ -303,7 +296,7 @@ const hnSignerErrorAlarm = new aws.cloudwatch.MetricAlarm("hn-signer-errors", {
     TargetGroup: hnSignerTargetGroup.arnSuffix,
     LoadBalancer: privateAlbArnSuffix,
   },
-  alarmActions: [snsTopic],
+  alarmActions: [snsAlertsTopicArn],
   tags: defaultTags,
 });
 
@@ -311,7 +304,8 @@ const hnSignerErrorAlarm = new aws.cloudwatch.MetricAlarm("hn-signer-errors", {
 export const hnSignerServiceName = hnSignerService.name;
 export const hnSignerTargetGroupArn = hnSignerTargetGroup.arn;
 export const hnSignerSecurityGroupId = hnSignerSG.id;
-export const hnSignerListenerRuleArn = hnSignerListenerRule.arn;
+export const hnSignerListenerArn = hnSignerListener.arn;
 
 // Export internal endpoint for other services to use
-export const hnSignerInternalUrl = pulumi.interpolate`http://${privateAlbRoute53Record}/hn-signer`;
+// Using port 86 for direct routing without path prefix
+export const hnSignerInternalUrl = pulumi.interpolate`http://${privateAlbRoute53Record}:86`;
