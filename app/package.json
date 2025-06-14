@@ -37,6 +37,7 @@
     "@popperjs/core": "^2.11.8",
     "@reown/appkit": "=1.5.0",
     "@reown/appkit-adapter-wagmi": "=1.5.0",
+    "@silk-wallet/silk-wallet-sdk": "^0.7.1",
     "@tanstack/react-query": "^5.59.20",
     "broadcast-channel": "^4.11.0",
     "did-session": "^4.0.0",
