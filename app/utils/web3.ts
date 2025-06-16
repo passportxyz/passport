@@ -19,10 +19,8 @@ if (typeof window !== "undefined") {
     try {
       // Check if Silk is already initialized
       if ((window as any).silk) {
-        console.log("Silk wallet already initialized, announcing via EIP-6963");
         initSilkWithEIP6963((window as any).silk);
       } else {
-        console.log("Initializing new Silk wallet instance");
         const silk = initSilk({
           config: {
             allowedSocials: ["google", "twitter", "discord", "linkedin", "apple"],
@@ -30,16 +28,13 @@ if (typeof window !== "undefined") {
             styles: { darkMode: true },
           },
           walletConnectProjectId: projectId,
-          // TODO
-          // useStaging: process.env.NEXT_PUBLIC_HUMAN_WALLET_STAGING === "true",
-          useStaging: true,
+          useStaging: process.env.NEXT_PUBLIC_HUMAN_WALLET_PROD !== "true",
         });
 
         // Announce via EIP-6963 so WAGMI can discover it
         initSilkWithEIP6963(silk);
 
         (window as any).silk = silk;
-        console.log("Silk wallet initialized and announced via EIP-6963");
 
         if (silk.on && typeof silk.on === "function") {
           silk.on("error", (error: any) => {
@@ -49,8 +44,7 @@ if (typeof window !== "undefined") {
       }
     } catch (error) {
       console.error("Failed to initialize Silk wallet:", error);
-      // Re-throw to ensure error surfaces properly
-      throw error;
+      // Don't re-throw - let the app continue working with other wallets
     }
   }, 100);
 }
@@ -89,19 +83,5 @@ export const web3Modal = createAppKit({
     "--w3m-font-family": "var(--font-body)",
     "--w3m-accent": "rgb(var(--color-foreground-4))",
   },
-  // Add Human Wallet as custom wallet so it shows even when not installed
-  // NOTE: This will show duplicate when Human Wallet is installed via browser extension
-  // AppKit doesn't support deduplication between custom and EIP-6963 wallets
-  customWallets: [
-    {
-      id: "tech.human.wallet",
-      name: "Human Wallet",
-      homepage: "https://human.technology/wallet",
-      image_url:
-        "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiByeD0iMjAiIGZpbGw9IiMwMDAwMDAiLz4KPHBhdGggZD0iTTQ4IDI0QzM0Ljc0NTIgMjQgMjQgMzQuNzQ1MiAyNCA0OEM0NCA2MS4yNTQ4IDM0Ljc0NTIgNzIgNDggNzJDNjEuMjU0OCA3MiA3MiA2MS4yNTQ4IDcyIDQ4QzcyIDM0Ljc0NTIgNjEuMjU0OCAyNCA0OCAyNFoiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+",
-      webapp_link: "https://human.technology/wallet",
-      desktop_link: "https://human.technology/wallet",
-      mobile_link: "https://human.technology/wallet",
-    },
-  ],
+  // No customWallets - relying on EIP-6963 announcement only
 });

@@ -146,11 +146,8 @@ export function initSilkWithEIP6963(silkProvider: SilkEthereumProviderInterface)
   // Announce the provider via EIP-6963
   const cleanup = announceSilkProvider(silkProvider);
 
-  // Also make it available on window.ethereum for backward compatibility
-  // Note: This should be done carefully to avoid conflicts with other wallets
-  if (typeof window !== "undefined" && !window.ethereum) {
-    (window as any).ethereum = silkProvider;
-  }
+  // Don't assign to window.ethereum - let users connect via EIP-6963 discovery
+  // This prevents conflicts with other wallets
 
   return cleanup;
 }

@@ -103,7 +103,18 @@ To verify the integration:
 4. **No Conflicts**: Multiple wallets can coexist peacefully
 5. **Simpler Code**: Less custom logic to maintain
 
-### 7. Troubleshooting
+### 7. Important Discovery
+
+**Human Wallet works without the browser extension!** The SDK initialization combined with proper EIP-6963 announcement creates a fully functional embedded wallet that:
+- Appears in Reown AppKit's wallet selection modal
+- Allows users to connect and authenticate
+- Works seamlessly without requiring browser extension installation
+
+This means users have two options:
+1. **Browser Extension**: Traditional wallet experience
+2. **Embedded SDK**: No installation required, works directly in the web app
+
+### 8. Troubleshooting
 
 #### "Not Detected" Error
 - Ensure Silk SDK initialization completes before wallet selection
@@ -114,6 +125,7 @@ To verify the integration:
 - Check that `window.silk` exists
 - Verify no JavaScript errors during initialization
 - Ensure environment variables are set correctly
+- Run `window.silk` in console to verify SDK initialization
 
 #### Connection Issues
 - Check network compatibility
