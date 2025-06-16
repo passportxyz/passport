@@ -108,16 +108,7 @@ export const createSweeperService = async ({
   });
 
   // Create Lambda function - expects the TypeScript to be built in CI
-  // __dirname is infra/lib, so we go up one level to infra, then to scripts/verifier_sweep
   const sweeperDir = path.join(__dirname, "../scripts/verifier_sweep");
-  
-  // Debug logging to understand the path issue
-  console.log("[SWEEPER DEBUG] __dirname:", __dirname);
-  console.log("[SWEEPER DEBUG] process.cwd():", process.cwd());
-  console.log("[SWEEPER DEBUG] sweeperDir:", sweeperDir);
-  console.log("[SWEEPER DEBUG] Looking for dist at:", path.join(sweeperDir, "dist"));
-  console.log("[SWEEPER DEBUG] Looking for node_modules at:", path.join(sweeperDir, "node_modules"));
-  
   const ethCheckerFunction = new aws.lambda.Function("sweeper", {
     vpcConfig: {
       subnetIds: vpcPrivateSubnets,

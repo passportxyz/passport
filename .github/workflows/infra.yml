@@ -82,22 +82,8 @@ jobs:
           cd infra/scripts/verifier_sweep
           yarn install --frozen-lockfile
           yarn build
-          echo "=== Verifying build output ==="
-          ls -la
-          echo "=== Contents of dist directory ==="
-          ls -la dist/
-          echo "=== Current directory ==="
-          pwd
       - name: Yarn install
         uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v3
-      - name: Verify sweeper build before Pulumi
-        run: |
-          echo "=== Checking sweeper build from root ==="
-          ls -la infra/scripts/verifier_sweep/
-          echo "=== Checking dist contents ==="
-          ls -la infra/scripts/verifier_sweep/dist/ || echo "dist directory not found!"
-          echo "=== Current working directory ==="
-          pwd
       - name: Run pulumi
         uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v3
         with:

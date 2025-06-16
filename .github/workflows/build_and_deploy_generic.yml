@@ -226,6 +226,11 @@ jobs:
         env:
           AWS_SESSION_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SESSION_TOKEN
 
+      - name: Build Sweeper Service
+        run: |
+          cd infra/scripts/verifier_sweep
+          yarn install --frozen-lockfile
+          yarn build
       - name: Prepare to Deploy to AWS
         uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v3
       - name: Deploy to AWS
