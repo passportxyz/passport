@@ -56,6 +56,13 @@ const silk = initSilk({
 initSilkWithEIP6963(silk);
 ```
 
+#### Special Handling for Human Wallet
+The integration includes a wrapper that handles Human Wallet's unique authentication flow:
+- Intercepts `eth_requestAccounts` calls from WAGMI
+- Automatically triggers `login()` when needed
+- Supports auto-reconnection for returning users
+- Filters out empty addresses to prevent validation errors
+
 ### 4. EIP-6963 Provider Info
 
 Human Wallet announces itself with:
@@ -112,6 +119,12 @@ To verify the integration:
 - Check network compatibility
 - Verify WalletConnect project ID is valid
 - Review console logs for specific error messages
+- Human Wallet provider errors are automatically logged to console via error event listener
+
+#### Empty Address Error
+- This was a known issue where Human Wallet returned empty addresses
+- Fixed by adding a wrapper that properly handles the login flow
+- The wrapper intercepts `eth_requestAccounts` and triggers login when needed
 
 ### 8. Security Considerations
 

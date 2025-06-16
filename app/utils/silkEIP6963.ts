@@ -30,10 +30,65 @@ declare global {
 }
 
 /**
+ * Wraps the Silk provider to handle login automatically when eth_requestAccounts is called
+ */
+function createWrappedSilkProvider(provider: SilkEthereumProviderInterface): SilkEthereumProviderInterface {
+  // Create a wrapped version that intercepts specific methods
+  const wrapped = Object.create(provider);
+
+  // Override the request method
+  wrapped.request = async function (args: { method: string; params?: any[] }) {
+    // Intercept eth_requestAccounts to handle Human Wallet's unique flow
+    if (args.method === "eth_requestAccounts") {
+      // According to Human Wallet docs, eth_requestAccounts automatically attempts reconnection
+      // for users who have previously logged in
+      try {
+        const accounts = await provider.request({ method: "eth_requestAccounts" });
+
+        if (accounts && accounts.length > 0 && accounts[0]) {
+          return accounts;
+        } else {
+          // If no accounts returned, try login() as fallback
+          await (provider as any).login();
+          const newAccounts = await provider.request({ method: "eth_accounts" });
+          return newAccounts;
+        }
+      } catch (error: any) {
+        console.error("Human Wallet: eth_requestAccounts failed:", error);
+
+        // If eth_requestAccounts fails, fall back to login()
+        if (error.message?.includes("not been authorized") || error.code === 4001) {
+          try {
+            await (provider as any).login();
+            const accounts = await provider.request({ method: "eth_accounts" });
+            return accounts;
+          } catch (loginError) {
+            console.error("Human Wallet: Login failed", loginError);
+            throw loginError;
+          }
+        }
+
+        throw error;
+      }
+    }
+
+    // For all other methods, pass through
+    return provider.request(args);
+  };
+
+  // Make sure all other methods and properties are accessible
+  // This ensures event emitters and other functionality work correctly
+  return wrapped as SilkEthereumProviderInterface;
+}
+
+/**
  * Announces the Silk/Human Wallet provider following EIP-6963 standard
  * This allows dApps to discover the wallet through the standard event system
  */
 export function announceSilkProvider(provider: SilkEthereumProviderInterface): () => void {
+  // Wrap the provider to handle login automatically
+  const wrappedProvider = createWrappedSilkProvider(provider);
+
   const info: EIP6963ProviderInfo = {
     uuid: crypto.randomUUID(), // Generate a new UUIDv4 for each session per EIP-6963 spec
     name: "Human Wallet",
@@ -43,7 +98,7 @@ export function announceSilkProvider(provider: SilkEthereumProviderInterface): (
 
   const detail: EIP6963ProviderDetail = {
     info: Object.freeze(info),
-    provider,
+    provider: wrappedProvider,
   };
 
   // Function to announce the provider
