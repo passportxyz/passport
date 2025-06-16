@@ -35,9 +35,11 @@ export const createSweeperService = async ({
   // Only put non-secret environment variables in Lambda
   const variables: Record<string, any> = {
     SECRETS_ARN: sweeperServiceSecret.arn,
-    BALANCE_THRESHOLD_ETH: "0.25", // Default threshold
-    // These should be environment-specific destination addresses (multisig) for swept funds
-    CHAIN_DEPOSIT_ADDRESSES: JSON.stringify({
+    BALANCE_THRESHOLD_ETH: "0.25",
+    // These should be chain-specific destination addresses (multisig) for swept funds
+    CHAIN_DEPOSIT_ADDRESSES: JSON.stringify(stack === "production" ? {
+      // TODO
+    } : {
       "opt-sepolia": "0x96DB2c6D93A8a12089f7a6EdA5464e967308AdEd",
     }),
   };
@@ -106,7 +108,16 @@ export const createSweeperService = async ({
   });
 
   // Create Lambda function - expects the TypeScript to be built in CI
+  // __dirname is infra/lib, so we go up one level to infra, then to scripts/verifier_sweep
   const sweeperDir = path.join(__dirname, "../scripts/verifier_sweep");
+  
+  // Debug logging to understand the path issue
+  console.log("[SWEEPER DEBUG] __dirname:", __dirname);
+  console.log("[SWEEPER DEBUG] process.cwd():", process.cwd());
+  console.log("[SWEEPER DEBUG] sweeperDir:", sweeperDir);
+  console.log("[SWEEPER DEBUG] Looking for dist at:", path.join(sweeperDir, "dist"));
+  console.log("[SWEEPER DEBUG] Looking for node_modules at:", path.join(sweeperDir, "node_modules"));
+  
   const ethCheckerFunction = new aws.lambda.Function("sweeper", {
     vpcConfig: {
       subnetIds: vpcPrivateSubnets,
@@ -130,6 +141,7 @@ export const createSweeperService = async ({
 
   // Create CloudWatch event rule (scheduled trigger)
   const eventRule = new aws.cloudwatch.EventRule("sweeper-schedule", {
+    // TODO
     scheduleExpression: "rate(10 minutes)",
   });
 
