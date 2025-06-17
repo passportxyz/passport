@@ -32,7 +32,7 @@ export default function Home() {
     <PageRoot className="text-gray-900 flex flex-col min-h-screen overflow-auto pb-32 md:pb-0">
       <Header />
       <div className="mt-4 md:mt-0 pt-16 flex-1 m-auto overflow-visible grid grid-cols-1 grid-rows-1 content-center ">
-        <div className="grid grid-cols-2 grid-rows-1 gap-12 overflow-visible m-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 grid-rows-1 gap-12 overflow-visible m-8">
           <div className="flex flex-row justify-end">
             <img src="/assets/hmnWelcomeImage.svg" alt="Welcome"></img>
           </div>
