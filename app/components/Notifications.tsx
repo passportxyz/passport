@@ -135,7 +135,7 @@ const Content = ({ notification }: { notification: Notification }) => {
 
 const NotificationComponent: React.FC<NotificationProps> = ({ notification, setShowSidebar }) => {
   const { notification_id, is_read, type } = notification;
-  const messageClasses = `text-sm w-5/6 ${is_read ? "text-foreground-4" : "text-foreground-2"}`;
+  const messageClasses = `text-sm w-5/6 ${is_read ? "text-color-9" : "text-color-4"}`;
 
   const dismissMutation = useDismissNotification(notification_id, "read");
   const deleteMutation = useDismissNotification(notification_id, "delete");
@@ -176,7 +176,7 @@ const NotificationComponent: React.FC<NotificationProps> = ({ notification, setS
                 leaveFrom="opacity-100 translate-y-0"
                 leaveTo="opacity-0 translate-y-1"
               >
-                <Popover.Panel className="absolute w-48 right-1 bg-background flex flex-col justify-start text-left p-4 rounded">
+                <Popover.Panel className="absolute w-48 right-1 bg-background flex flex-col justify-start text-left p-4 rounded border shadow-lg">
                   {({ close }) => (
                     <>
                       <button
@@ -256,13 +256,11 @@ export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) 
             leaveFrom="opacity-100 translate-y-0"
             leaveTo="opacity-0 translate-y-1"
           >
-            <Popover.Panel className="absolute w-96 md:w-72 right-1 flex flex-col border-foreground-5 border rounded bg-gradient-to-b from-background via-background to-[#082F2A]">
+            <Popover.Panel className="absolute w-96 md:w-72 right-1 flex flex-col border-foreground-5 border rounded shadow-lg bg-background text-color-4">
               <div className="w-full relative">
                 <div className="absolute top-[-6px] w-[10px] h-[10px] right-7 border-l bg-background border-b border-foreground-5 transform rotate-[135deg]"></div>
               </div>
-              <div className="absolute w-full pl-8 py-3 text-foreground-2 bg-background z-20 rounded-t">
-                Notifications
-              </div>
+              <div className="absolute w-full pl-8 py-3 z-20 rounded-t">Notifications</div>
               <div
                 className={`overflow-y-auto min-h-[120px] max-h-[40vh] ${notifications.length > 0 ? "pt-10 pb-10" : "pt-6"}`}
               >
@@ -281,13 +279,13 @@ export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) 
                       onClick={() => {
                         deleteMutation.mutate();
                       }}
-                      className="cursor-pointer absolute bottom-0 w-full pl-8 py-3 text-foreground-2 bg-background z-20 rounded-b bg-gradient-to-b from-background via-background to-[#082F2A]"
+                      className="cursor-pointer absolute bottom-0 w-full pl-8 py-3 text-color-7 bg-background z-20"
                     >
                       Delete All
                     </div>
                   </>
                 ) : (
-                  <p className="p-8 text-foreground-2">
+                  <p className="p-8 text-color-4">
                     You have no notifications. We’ll let you know when there’s something.
                   </p>
                 )}
