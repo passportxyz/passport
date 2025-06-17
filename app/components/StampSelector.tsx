@@ -130,7 +130,7 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
                           isVerified={isVerified}
                           isExpired={isExpired}
                           isDeduplicated={isDeduplicated}
-                          className="font-bold text-color-6"
+                          className="font-bold"
                         />
                         {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
                       </div>
