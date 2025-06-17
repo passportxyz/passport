@@ -17,7 +17,14 @@ vi.mock("../../components/CardList", () => ({ CardList: () => <div>Card List</di
 
 vi.mock("../../components/SyncToChainButton", () => <div>Sync to Chain</div>);
 
-vi.mock("../../components/Header", () => ({ default: () => <div>Header</div> }));
+vi.mock("../../components/Header", async (importOriginal) => {
+  const original = (await importOriginal()) as {};
+  console.log(original);
+  return {
+    ...original,
+    default: () => <div>Header</div>,
+  };
+});
 
 vi.mock("@self.id/web", () => {
   return {
