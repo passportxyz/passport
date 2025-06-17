@@ -27,14 +27,7 @@ export const ActionOrCancelModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay width="100%" height="100%" />
-      <ModalContent
-        rounded={"8px"}
-        padding={"28px"}
-        paddingBottom={"12px"}
-        maxW={"380px"}
-        border={"rgb(var(--color-foreground-5)) 1px solid"}
-        background={"linear-gradient(180deg, rgb(var(--color-background)) 0%, rgb(var(--color-foreground-5)) 100%)"}
-      >
+      <ModalContent rounded={"8px"} padding={"28px"} paddingBottom={"12px"} maxW={"380px"}>
         <ModalHeader padding={0} fontWeight={"normal"} className="text-xl font-heading leading-tight text-focus my-4">
           {title}
         </ModalHeader>
@@ -43,7 +36,7 @@ export const ActionOrCancelModal = ({
           <LoadButton className="w-full" onClick={onButtonClick} isLoading={buttonLoading} disabled={buttonDisabled}>
             {buttonText}
           </LoadButton>
-          <Button variant="custom" className="mt-4 px-8" onClick={onClose}>
+          <Button variant="custom" className="mt-4 px-8 text-color-4" onClick={onClose}>
             Cancel
           </Button>
         </ModalFooter>

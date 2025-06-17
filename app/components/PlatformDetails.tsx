@@ -56,7 +56,7 @@ const PlatformJsonButton = ({
             leaveFrom="opacity-100 translate-y-0"
             leaveTo="opacity-0 translate-y-1"
           >
-            <Popover.Panel className="absolute w-48 right-1 bg-background flex flex-col justify-start text-left p-4 rounded">
+            <Popover.Panel className="absolute w-48 right-1 bg-background flex flex-col justify-start text-left p-4 rounded shadow-lg border">
               <button onClick={() => setStampDetailsModal(true)} className="w-full text-left">
                 Stamp Details
               </button>

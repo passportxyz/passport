@@ -56,7 +56,7 @@ export const RemoveStampModal = ({
       onClose={onClose}
       buttonLoading={isLoading}
     >
-      {body}
+      <span className="text-color-4">{body}</span>
     </ActionOrCancelModal>
   );
 };
