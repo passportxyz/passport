@@ -65,6 +65,9 @@ function createWrappedSilkProvider(provider: SilkEthereumProviderInterface): Sil
             return accounts;
           } catch (loginError) {
             console.error("Human Wallet: Login failed", loginError);
+            try {
+              await (provider as any).logout();
+            } catch {}
             throw loginError;
           }
         }

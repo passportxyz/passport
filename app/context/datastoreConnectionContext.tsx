@@ -10,9 +10,10 @@ import { AccountId } from "caip";
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { createSignedPayload } from "../utils/helpers";
 import { updateIntercomUserData } from "../hooks/useIntercom";
-import { useDisconnect } from "@reown/appkit/react";
+import { useCustomDisconnect } from "../hooks/useCustomDisconnect";
 import { useAccount } from "wagmi";
 import { WalletClient } from "viem";
+import { logoutHumanWallet } from "../utils/humanWallet";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
@@ -34,7 +35,7 @@ export const DatastoreConnectionContext = createContext<DatastoreConnectionConte
 
 // In the app, the context hook should be used. This is only exported for testing
 export const useDatastoreConnection = () => {
-  const { disconnect: disconnectWallet } = useDisconnect();
+  const { disconnect: disconnectWallet } = useCustomDisconnect();
   const { isConnected, address: web3ModalAddress, chain } = useAccount();
 
   const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");
@@ -51,6 +52,10 @@ export const useDatastoreConnection = () => {
       dbAccessTokenStatus === "connected"
     ) {
       console.log("Clearing db access token", chain, isConnected, connectedAddress, web3ModalAddress);
+
+      // Handle Human Wallet logout when disconnected from any source
+      logoutHumanWallet().catch(console.error);
+
       setConnectedAddress(undefined);
       setDbAccessTokenStatus("idle");
       setDbAccessToken(undefined);
