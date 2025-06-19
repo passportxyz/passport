@@ -95,7 +95,7 @@ export function announceSilkProvider(provider: SilkEthereumProviderInterface): (
 
   const info: EIP6963ProviderInfo = {
     uuid: crypto.randomUUID(), // Generate a new UUIDv4 for each session per EIP-6963 spec
-    name: "Human Wallet",
+    name: "Human Wallet (Beta)",
     icon: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiByeD0iMjAiIGZpbGw9IiMwMDAwMDAiLz4KPHBhdGggZD0iTTQ4IDI0QzM0Ljc0NTIgMjQgMjQgMzQuNzQ1MiAyNCA0OEM0NCA2MS4yNTQ4IDM0Ljc0NTIgNzIgNDggNzJDNjEuMjU0OCA3MiA3MiA2MS4yNTQ4IDcyIDQ4QzcyIDM0Ljc0NTIgNjEuMjU0OCAyNCA0OCAyNFoiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+", // This should be the actual Human Wallet logo as base64
     rdns: "tech.human.wallet", // Reverse DNS for Human Wallet
   };
