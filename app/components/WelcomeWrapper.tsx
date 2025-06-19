@@ -155,7 +155,7 @@ const WelcomePageButtons = ({
       </div>
 
       {showSkipNextTime ? (
-        <div className="mt-8 flex justify-center md:justify-start">
+        <div className="mt-8 flex justify-center md:justify-start text-color-9">
           <Checkbox
             id="skip-next-time"
             checked={skipNextTime}
