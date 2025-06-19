@@ -159,9 +159,7 @@ describe("DashboardCTAs", () => {
 
     expect(screen.getByTestId("dashboard-score-panel")).toHaveClass("w-full");
     expect(screen.getByTestId("dashboard-score-explanation-panel")).toBeInTheDocument();
-    expect(screen.getByTestId("dynamic-custom-dashboard-panel")).toHaveClass(
-      "order-1 lg:order-2 max-w-full xl:max-w-md"
-    );
+    expect(screen.getByTestId("dynamic-custom-dashboard-panel")).toHaveClass("order-1 lg:order-2 max-w-full xl:w-2/3");
   });
 
   it("renders without explanation panel", () => {
