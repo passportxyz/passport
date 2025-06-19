@@ -6,7 +6,6 @@ import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 
 // --- Components
 import { Button } from "./Button";
-import { StampLabels } from "./StampLabels";
 import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
 import { CeramicContext } from "../context/ceramicContext";
 import { ProgressBar } from "./ProgressBar";
@@ -140,9 +139,16 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick,
               </svg>
             )}
             {/* <StampLabels primaryLabel="Verified" primaryBgColor="bg-foreground-4" isDeduplicated={isDeduplicated} /> */}
-            <div className="px-2 py-1 text-l font-bold text-left text-emerald-600">
-              <p data-testid="verified-label">Verified</p>
-            </div>
+            {isDeduplicated || (
+              <div className="px-2 py-1 text-l font-bold text-left text-emerald-600">
+                <p data-testid="verified-label">Verified</p>
+              </div>
+            )}
+            {isDeduplicated && (
+              <div className="px-2 py-1 text-l font-bold text-left text-emerald-600">
+                <p data-testid="verified-label">Deduplicated</p>
+              </div>
+            )}
           </div>
 
           <div className="mt-4 flex justify-center h-full md:mt-6 md:inline-block md:justify-start">

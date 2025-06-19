@@ -14,7 +14,7 @@ const checkMark = () => (
   <svg className="inline-block" width="13" height="9" viewBox="0 0 13 9" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
       d="M1.74412 4.33333L4.32795 8L11.0122 1"
-      stroke="#C1F6FF"
+      stroke="#454545"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -40,7 +40,7 @@ const ProviderTitle = ({
       {isVerified && checkMark()} {title}
     </span>
     {isExpired && (
-      <span className="text-xs bg-background-5 px-1 rounded text-right font-alt text-black" data-testid="expired-label">
+      <span className="text-xs bg-background-5 px-1 rounded text-right text-black" data-testid="expired-label">
         Expired
       </span>
     )}
@@ -52,7 +52,7 @@ const ProviderTitle = ({
         className="no-underline"
       >
         <span
-          className="text-xs bg-foreground-7 px-1 rounded text-right font-alt text-color-4 cursor-pointer hover:bg-foreground-6 transition-colors"
+          className="text-xs bg-foreground-7 px-1 rounded text-right text-color-4 cursor-pointer hover:bg-foreground-6 transition-colors"
           data-testid="deduped-label"
         >
           Claimed by another wallet
