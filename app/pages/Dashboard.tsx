@@ -41,6 +41,7 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export const DashboardCTAs = ({ customization }: { customization: Customization }) => {
   const { useCustomDashboardPanel } = customization;
+  const explanationPanel = customization.key !== "none" ? customization?.showExplanationPanel : true;
 
   const backgroundColor = useRadialBackgroundColorForHeader();
 
@@ -49,6 +50,7 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
       <div className="col-span-full mt-2 flex flex-col xl:flex-row gap-8 relative left-0 top-0 z-20">
         <div className="col-span-full order-2 flex flex-col grow lg:flex-row gap-8 mt-0.5">
           <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
+          {explanationPanel && <DashboardScoreExplanationPanel />}
         </div>
         {useCustomDashboardPanel && <DynamicCustomDashboardPanel className="order-1 lg:order-2 max-w-full xl:w-2/3" />}
       </div>
