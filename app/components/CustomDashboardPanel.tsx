@@ -126,8 +126,7 @@ const StandardCustomDashboardPanel = ({
   onActionClick: () => void;
 }) => {
   const customization = useCustomization();
-  const { logo, body } = customization.dashboardPanel;
-  const title = "TODO: Add some title here ???";
+  const { logo, body, customDashboardPanelTitle } = customization.dashboardPanel;
 
   return (
     <div className={`${className} flex flex-col rounded-3xl text-color-4 bg-[#ffffff99] p-4 justify-between`}>
@@ -142,7 +141,7 @@ const StandardCustomDashboardPanel = ({
       ) : null}
 
       <div className="flex flex-row items-center justify-end h-16">
-        <div className="grow font-medium text-lg">{title}</div>
+        <div className="grow font-medium text-lg">{customDashboardPanelTitle}</div>
         <div className="flex bg-white p-2 rounded-md">
           <div className="h-10 [&_svg]:h-full">{logo.image}</div>
           {logo.caption && <span className="mt-1 text-3xl leading-none">{logo.caption}</span>}
