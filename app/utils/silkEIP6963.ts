@@ -43,16 +43,17 @@ function createWrappedSilkProvider(provider: SilkEthereumProviderInterface): Sil
       // According to Human Wallet docs, eth_requestAccounts automatically attempts reconnection
       // for users who have previously logged in
       try {
-        const accounts = await provider.request({ method: "eth_requestAccounts" });
+        console.log("Human Wallet: Attempting eth_requestAccounts...");
+        const previousAddresses = (await provider.request({ method: "eth_requestAccounts" })) as string[];
 
-        if (accounts && accounts.length > 0 && accounts[0]) {
-          return accounts;
-        } else {
-          // If no accounts returned, try login() as fallback
+        if (!previousAddresses?.length) {
+          console.log("Human Wallet: No previous accounts found, attempting login...");
           await (provider as any).login();
-          const newAccounts = await provider.request({ method: "eth_accounts" });
-          return newAccounts;
         }
+
+        const accounts = await provider.request({ method: "eth_accounts" });
+        console.log("Human Wallet: Accounts retrieved:", accounts);
+        return accounts;
       } catch (error: any) {
         console.error("Human Wallet: eth_requestAccounts failed:", error);
 

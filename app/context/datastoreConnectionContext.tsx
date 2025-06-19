@@ -13,7 +13,6 @@ import { updateIntercomUserData } from "../hooks/useIntercom";
 import { useDisconnect } from "@reown/appkit/react";
 import { useAccount } from "wagmi";
 import { WalletClient } from "viem";
-// import { getHumanWalletAuthMethod, isHumanWallet } from "../utils/humanWalletAuth";
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
@@ -122,16 +121,12 @@ export const useDatastoreConnection = () => {
     async (address: string, walletClient: WalletClient) => {
       if (address) {
         try {
-          // Normalize address to lowercase for consistency
-          address = address.toLowerCase();
-
           const accountId = new AccountId({
             // We always use chain id 1 for now for all sessions, to avoid users
             // switching networks and not see their stamps any more
             chainId: "eip155:1",
-            address: address.toLowerCase(),
+            address,
           });
-
           const authMethod = await EthereumWebAuth.getAuthMethod(walletClient, accountId);
 
           let session: DIDSession = await DIDSession.get(accountId, authMethod, { resources: ["ceramic://*"] });

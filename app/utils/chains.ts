@@ -121,6 +121,13 @@ if (usingTestEnvironment) {
     explorerUrl: "https://sepolia.etherscan.io",
     icon: "./assets/eth-network-logo.svg",
     chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
+    attestationProviderConfig: {
+      name: "Ethereum Attestation Service",
+      status: "enabled",
+      skipByDefault: false,
+      easScanUrl: "https://sepolia.easscan.org",
+      monochromeIcon: "./assets/eth-network-logo.svg",
+    },
   });
   wagmiChains.push(sepolia);
   wagmiTransports[sepolia.id] = http(process.env.NEXT_PUBLIC_PASSPORT_SEPOLIA_RPC_URL);

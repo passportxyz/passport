@@ -511,5 +511,43 @@
         "uid": "0x1f3dce6501d8aad23563c0cf4f0c32264aed9311cb050056ebf72774f89ba912"
       }
     }
+  },
+  "0xaa36a7": {
+    "description": "Ethereum Sepolia",
+    "issuer": {
+      "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
+    },
+    "EAS": {
+      "address": "0xC2679fBD37d54388Ce493F1DB75320D236e1815e"
+    },
+    "EASSchemaRegistry": {
+      "address": "0x0a7E2Ff54e76B8E6659aedc9103FB21c038050D0"
+    },
+    "GitcoinAttester": {
+      "address": "0x7246689C6e8dE8544E1e8eC5bEd2aeAD635147DC"
+    },
+    "GitcoinVerifier": {
+      "address": "0x71AAf19403227457731EA4a00ab68B58A1cc755e"
+    },
+    "GitcoinResolver": {
+      "address": "0x63060D427Aaf34994c491e22540e3629509227B9"
+    },
+    "GitcoinPassportDecoder": {
+      "address": "0x33f7Cd41e18b7581cBC74Cf958DA3f0BA5872AD9"
+    },
+    "easSchemas": {
+      "namingSchema": {
+        "uid": ""
+      },
+      "passport": {
+        "uid": ""
+      },
+      "score": {
+        "uid": ""
+      },
+      "scoreV2": {
+        "uid": "0x1c0fe999ea80ebea98f613f0fc1ca53dbe9172a9431035129322cb902c02319c"
+      }
+    }
   }
 }

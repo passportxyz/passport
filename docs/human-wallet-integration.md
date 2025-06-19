@@ -13,6 +13,8 @@ Main web3 configuration that initializes Silk wallet and announces it via EIP-69
 - Initializes Silk SDK on page load
 - Announces wallet using EIP-6963 standard
 - WAGMI automatically discovers and creates an injected connector
+- Sets up error interceptor for debugging wallet errors
+- Checks if Silk is already initialized before creating new instance
 
 #### `/app/utils/silkEIP6963.ts`
 EIP-6963 implementation for wallet discovery:
@@ -20,6 +22,14 @@ EIP-6963 implementation for wallet discovery:
 - Uses dynamic UUID generation (`crypto.randomUUID()`) per session
 - Listens for provider request events
 - Makes wallet discoverable without conflicts
+- Includes wrapped provider that handles Human Wallet's unique authentication flow
+
+#### `/app/utils/errorInterceptor.ts`
+Error handling for wallet connection issues:
+- Intercepts error tracking messages before analytics
+- Logs wallet connection errors to console
+- Helps debug CORS and address validation issues
+- Catches unhandled promise rejections related to wallet addresses
 
 ### 2. How It Works
 
@@ -36,7 +46,7 @@ EIP-6963 implementation for wallet discovery:
 #### Environment Variables
 ```
 NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_project_id
-NEXT_PUBLIC_HUMAN_WALLET_STAGING=true  # Optional: Use staging environment
+NEXT_PUBLIC_HUMAN_WALLET_PROD=true  # Optional: Use production environment (defaults to staging)
 ```
 
 #### Key Configuration
@@ -49,19 +59,28 @@ const silk = initSilk({
     styles: { darkMode: true },
   },
   walletConnectProjectId: projectId,
-  useStaging: process.env.NEXT_PUBLIC_HUMAN_WALLET_STAGING === "true",
+  useStaging: process.env.NEXT_PUBLIC_HUMAN_WALLET_PROD !== "true",
 });
 
 // Announce via EIP-6963 so WAGMI can discover it
 initSilkWithEIP6963(silk);
+
+// Store reference and add error listener
+(window as any).silk = silk;
+if (silk.on && typeof silk.on === "function") {
+  silk.on("error", (error: any) => {
+    console.error("Human Wallet provider error:", error);
+  });
+}
 ```
 
 #### Special Handling for Human Wallet
-The integration includes a wrapper that handles Human Wallet's unique authentication flow:
+The integration includes a wrapper (`createWrappedSilkProvider` in `silkEIP6963.ts`) that handles Human Wallet's unique authentication flow:
 - Intercepts `eth_requestAccounts` calls from WAGMI
 - Automatically triggers `login()` when needed
 - Supports auto-reconnection for returning users
-- Filters out empty addresses to prevent validation errors
+- Falls back to login if eth_requestAccounts fails with authorization errors
+- Logs detailed connection flow for debugging
 
 ### 4. EIP-6963 Provider Info
 
@@ -138,14 +157,15 @@ This means users have two options:
 - Fixed by adding a wrapper that properly handles the login flow
 - The wrapper intercepts `eth_requestAccounts` and triggers login when needed
 
-### 8. Security Considerations
+### 9. Security Considerations
 
 - UUID is generated fresh for each session (not hardcoded)
 - Provider info objects are frozen to prevent tampering
 - Errors are caught and logged without breaking the app
 - No sensitive data is exposed in window object
+- Error interceptor prevents sensitive wallet errors from being sent to external analytics
 
-### 9. Future Considerations
+### 10. Future Considerations
 
 - Monitor for native EIP-6963 support in Silk SDK
 - Watch for updates to WAGMI's multiInjectedProviderDiscovery

@@ -14,39 +14,35 @@ const projectId = (process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string) 
 // Initialize Silk and announce via EIP-6963
 // WAGMI will automatically discover it and create an injected connector
 if (typeof window !== "undefined") {
-  // Add a small delay to ensure DOM is ready
-  setTimeout(() => {
-    try {
-      // Check if Silk is already initialized
-      if ((window as any).silk) {
-        initSilkWithEIP6963((window as any).silk);
-      } else {
-        const silk = initSilk({
-          config: {
-            allowedSocials: ["google", "twitter", "discord", "linkedin", "apple"],
-            authenticationMethods: ["email", "phone", "social", "wallet"],
-            styles: { darkMode: true },
-          },
-          walletConnectProjectId: projectId,
-          useStaging: process.env.NEXT_PUBLIC_HUMAN_WALLET_PROD !== "true",
+  try {
+    // Check if Silk is already initialized
+    if ((window as any).silk) {
+      initSilkWithEIP6963((window as any).silk);
+    } else {
+      const silk = initSilk({
+        config: {
+          allowedSocials: ["google", "twitter", "discord", "linkedin", "apple"],
+          authenticationMethods: ["email", "phone", "social", "wallet"],
+          styles: { darkMode: true },
+        },
+        walletConnectProjectId: projectId,
+        useStaging: process.env.NEXT_PUBLIC_HUMAN_WALLET_PROD !== "true",
+      });
+
+      // Announce via EIP-6963 so WAGMI can discover it
+      initSilkWithEIP6963(silk);
+
+      (window as any).silk = silk;
+
+      if (silk.on && typeof silk.on === "function") {
+        silk.on("error", (error: any) => {
+          console.error("Human Wallet provider error:", error);
         });
-
-        // Announce via EIP-6963 so WAGMI can discover it
-        initSilkWithEIP6963(silk);
-
-        (window as any).silk = silk;
-
-        if (silk.on && typeof silk.on === "function") {
-          silk.on("error", (error: any) => {
-            console.error("Human Wallet provider error:", error);
-          });
-        }
       }
-    } catch (error) {
-      console.error("Failed to initialize Silk wallet:", error);
-      // Don't re-throw - let the app continue working with other wallets
     }
-  }, 100);
+  } catch (error) {
+    console.error("Failed to initialize Silk wallet:", error);
+  }
 }
 
 const metadata = {
@@ -60,8 +56,6 @@ export const wagmiAdapter = new WagmiAdapter({
   projectId,
   networks: wagmiChains,
   transports: wagmiTransports,
-  // No custom connectors needed - WAGMI will auto-discover EIP-6963 wallets
-  // multiInjectedProviderDiscovery is true by default
   ssr: true,
 });
 
@@ -83,5 +77,4 @@ export const web3Modal = createAppKit({
     "--w3m-font-family": "var(--font-body)",
     "--w3m-accent": "rgb(var(--color-foreground-4))",
   },
-  // No customWallets - relying on EIP-6963 announcement only
 });
