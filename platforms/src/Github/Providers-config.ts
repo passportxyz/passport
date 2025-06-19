@@ -3,7 +3,7 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { GithubContributionActivityProvider } from "./Providers/githubContributionActivity.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/githubWhiteStampIcon.svg",
+  icon: "./assets/githubStampIcon.svg",
   platform: "Github",
   name: "Github",
   description: "Connect to GitHub to verify your activity based on days with active commits.",

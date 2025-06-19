@@ -2,7 +2,7 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { ClanHandsProvider } from "./Providers/index.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/proofOfCleanHandsWhite.svg",
+  icon: "./assets/proofOfCleanHandsBlack.svg",
   platform: "CleanHands",
   name: "Clean Hands",
   description: "Privately prove you are not sanctioned using Proof of Clean Hands",
