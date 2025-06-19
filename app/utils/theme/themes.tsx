@@ -30,6 +30,6 @@ export const LUNARPUNK_DARK_MODE: Theme = {
   fonts: {
     body: "Suisse",
     heading: "Suisse",
-    alt: "Suisse",
+    alt: "PPHatton",
   },
 };

@@ -79,7 +79,7 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
             </div>
           </div>
         ) : (
-          <span className={`text-5xl`}>{+displayScore.toFixed(2)}</span>
+          <span className="text-5xl font-alt">{+displayScore.toFixed(2)}</span>
         )}
       </div>
     </PanelDiv>

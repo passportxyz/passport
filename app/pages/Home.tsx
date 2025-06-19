@@ -43,7 +43,7 @@ export default function Home() {
               }}
               className="w-[200%] h-full absolute -z-10 -left-[50%]"
             />
-            <div className="mb-4 text-2xl leading-none md:text-6xl">Unlock the best of web3</div>
+            <div className="mb-4 text-2xl leading-none md:text-6xl font-alt">Unlock the best of web3</div>
             <div className="max-w-md text-lg lg:max-w-sm">
               Access a world of Web3 opportunities securely with a single sign-in.
             </div>

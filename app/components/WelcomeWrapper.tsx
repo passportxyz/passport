@@ -170,7 +170,7 @@ const WelcomePageButtons = ({
               }
             }}
           />
-          <label htmlFor="skip-next-time" className="pl-2 font-alt text-sm">
+          <label htmlFor="skip-next-time" className="pl-2 text-sm">
             Skip this screen next time
           </label>
         </div>

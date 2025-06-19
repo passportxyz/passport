@@ -1,7 +1,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-Black.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-Black.woff2') format('woff2');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -9,7 +9,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-BlackIt.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-BlackIt.woff2') format('woff2');
   font-weight: 900;
   font-style: italic;
   font-display: swap;
@@ -17,7 +17,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-Bold.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -25,7 +25,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-BoldIt.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-BoldIt.woff2') format('woff2');
   font-weight: 700;
   font-style: italic;
   font-display: swap;
@@ -33,7 +33,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-Book.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-Book.woff2') format('woff2');
   font-weight: 350;
   font-style: normal;
   font-display: swap;
@@ -41,7 +41,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-BookIt.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-BookIt.woff2') format('woff2');
   font-weight: 350;
   font-style: italic;
   font-display: swap;
@@ -49,7 +49,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-Hairline.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-Hairline.woff2') format('woff2');
   font-weight: 100;
   font-style: normal;
   font-display: swap;
@@ -57,7 +57,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-HairlineIt.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-HairlineIt.woff2') format('woff2');
   font-weight: 100;
   font-style: italic;
   font-display: swap;
@@ -65,7 +65,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-Light.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-Light.woff2') format('woff2');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -73,7 +73,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-LightIt.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-LightIt.woff2') format('woff2');
   font-weight: 300;
   font-style: italic;
   font-display: swap;
@@ -81,7 +81,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-Medium.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -89,7 +89,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-MediumIt.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-MediumIt.woff2') format('woff2');
   font-weight: 500;
   font-style: italic;
   font-display: swap;
@@ -97,7 +97,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-Regular.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -105,7 +105,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-RegularIt.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-RegularIt.woff2') format('woff2');
   font-weight: 400;
   font-style: italic;
   font-display: swap;
@@ -113,7 +113,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-Semibold.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-Semibold.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -121,7 +121,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-SemiboldIt.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-SemiboldIt.woff2') format('woff2');
   font-weight: 600;
   font-style: italic;
   font-display: swap;
@@ -129,7 +129,7 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-Thin.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-Thin.woff2') format('woff2');
   font-weight: 200;
   font-style: normal;
   font-display: swap;
@@ -137,9 +137,34 @@
 
 @font-face { 
   font-family: 'Suisse';
-  src: url('/assets/fonts/SuisseIntl-ThinIt.woff2') format('woff2');
+  src: url('/assets/fonts/SuisseIntl/SuisseIntl-ThinIt.woff2') format('woff2');
   font-weight: 200;
   font-style: italic;
+  font-display: swap;
+}
+
+/* Hatton font */
+@font-face {
+  font-family: 'PPHatton';
+  src: url('/assets/fonts/Hatton/PPHatton-Medium.woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PPHatton';
+  src: url('/assets/fonts/Hatton/PPHatton-Regular.woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PPHatton';
+  src: url('/assets/fonts/Hatton/PPHatton-Semibold.woff2');
+  font-weight: 600;
+  font-style: normal;
   font-display: swap;
 }
 
