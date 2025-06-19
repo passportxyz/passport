@@ -18,7 +18,7 @@ const passportEmbedParams = {
 };
 
 const Heading = ({ className, children }: { className?: string; children: React.ReactNode }) => (
-  <div className={`font-heading text-4xl md:text-5xl text-foreground-2 ${className}`}>{children}</div>
+  <div className={`font-heading text-4xl md:text-5xl text-color-4 ${className}`}>{children}</div>
 );
 
 type OptionSelectProps<T extends readonly string[]> = {
@@ -91,8 +91,8 @@ const OptionSelect = <const T extends readonly string[]>({
             ref={(el: HTMLDivElement | null) => {
               optionRefs.current[index] = el;
             }}
-            className={`px-2 py-[2px] cursor-pointer rounded-md relative transition-colors duration-300 z-10
-              ${selected ? "text-color-4" : "text-color-1 hover:text-opacity-80"}`}
+            className={`px-2 py-[2px] cursor-pointer rounded-md relative transition-colors duration-300 z-10 
+              ${selected ? "text-color-4" : "text-color-4 hover:text-opacity-80"}`}
             onClick={() => setSelectedOption(option as T[number])}
           >
             {option}
@@ -246,7 +246,7 @@ export const EmbedCampaign = () => {
         <div className={`${PAGE_PADDING} bg-background`}>
           <MinimalHeader className={`border-b border-foreground-6`} />
         </div>
-        <BodyWrapper className="text-color-1 grid grid-cols-1 lg:grid-cols-2 items-center justify-items-center gap-6 pb-6 mt-0 lg:mt-6 grid-flow-dense w-full h-full">
+        <BodyWrapper className="text-color-4 grid grid-cols-1 lg:grid-cols-2 items-center justify-items-center gap-6 pb-6 mt-0 lg:mt-6 grid-flow-dense w-full h-full">
           <div className="grid grid-cols-1 w-full max-w-md lg:max-w-full h-auto place-items-center lg:col-start-2 -my-16 lg:my-0">
             <img
               className="w-full h-auto col-start-1 row-start-1"
@@ -280,8 +280,8 @@ export const EmbedCampaign = () => {
             className="col-start-1 col-end-2 row-start-4 lg:col-end-3 lg:row-start-3 w-full max-w-[330px] h-auto lg:max-w-full"
             aria-hidden="true"
           />
-          <div className="shadow-[0px_6px_34px_11px_#ACCDFC30] backdrop-blur-sm col-start-1 col-end-2 lg:row-start-3 lg:justify-self-start lg:self-start lg:mt-[20%] lg:ml-[10%] bg-gradient-to-b from-background/[.6] to-background-3/[.6] p-6 rounded-md border-foreground border gap-2 flex flex-col">
-            <div className="text-2xl font-heading text-foreground-2">Settings tryout</div>
+          <div className="shadow-[0px_6px_34px_11px_#ACCDFC30] backdrop-blur-sm col-start-1 col-end-2 lg:row-start-3 lg:justify-self-start lg:self-start lg:mt-[20%] lg:ml-[10%] p-6 rounded-md border-foreground border gap-2 flex flex-col bg-background">
+            <div className="text-2xl font-heading text-color-4">Settings tryout</div>
             <Option
               heading="Theme"
               options={["Dark", "Light"]}
@@ -323,7 +323,7 @@ export const EmbedCampaign = () => {
             src="./assets/passportBackgroundLogo.svg"
             alt="Background Icon"
           />
-          <Heading className="col-start-1 col-end-1 lg:max-w-sm lg:row-start-4 lg:self-start lg:mt-16">
+          <Heading className="col-start-1 col-end-1 lg:max-w-sm lg:row-start-4 lg:self-start lg:mt-16 backdrop-blur-md p-5">
             Frequently Asked Questions
           </Heading>
           <FAQ className="col-span-1 w-full self-start" />
@@ -391,8 +391,8 @@ const FAQ = ({ className }: { className?: string }) => {
     <div className={className}>
       {FAQ_ENTRIES.map((entry, index) => (
         <Disclosure key={index} as="div" className="py-4 border-b border-foreground-4 faq">
-          <Disclosure.Button className="group text-foreground-2 flex text-left">{entry.title}</Disclosure.Button>
-          <Disclosure.Panel className="mt-2 text-foreground-1 flex text-left">{entry.body}</Disclosure.Panel>
+          <Disclosure.Button className="group text-color-4 flex text-left">{entry.title}</Disclosure.Button>
+          <Disclosure.Panel className="mt-2 text-color-9 flex text-left">{entry.body}</Disclosure.Panel>
         </Disclosure>
       ))}
     </div>
