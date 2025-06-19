@@ -84,8 +84,8 @@ const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean
         <Link href="https://support.passport.xyz/passport-knowledge-base" className="hover:underline px-2">
           Learn More
         </Link>
-        <Link href="https://scorer.passport.xyz/" className="hover:underline px-2">
-          Passport XYZ Scorer
+        <Link href="https://docs.passport.xyz/" className="hover:underline px-2">
+          Docs
         </Link>
         <div className="flex flex-col md:flex-row gap-y-1 items-end justify-end flex-wrap">
           <div className="md:px-2">
