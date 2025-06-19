@@ -10,7 +10,7 @@ type MinimalHeaderProps = {
   className?: string;
 };
 
-const HumanPassportLogo = () => {
+const HumanPassportLogoWithText = () => {
   return (
     <svg width="132" height="27" viewBox="0 0 132 27" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
@@ -197,11 +197,11 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   return (
     <>
       <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
-      <div className={`flex gap-4 items-center h-16 ${className}`}>
+      <div className={`hidden md:flex gap-4 items-center h-16 ${className}`}>
         <div className="flex-1 flex items-center">
-          <HumanPassportLogo />
+          <HumanPassportLogoWithText />
         </div>
-        <AppSelector />
+        {/* <AppSelector /> */}
         <a href="https://wallet.human.tech/" target="_blank">
           <WalletIcon />
         </a>
@@ -213,6 +213,46 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
         </a>
         <AccountCenter />
         {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
+      </div>
+
+      <div className={`flex md:hidden gap-4 items-center justify-between h-16 ${className}`}>
+        <AccountCenter />
+        <Popover className=" text-gray-800">
+          <Popover.Button className="ml-auto" data-testid="app-bar-selector">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </Popover.Button>
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="opacity-0 translate-y-1"
+            enterTo="opacity-100 translate-y-0"
+            leave="transition ease-in duration-150"
+            leaveFrom="opacity-100 translate-y-0"
+            leaveTo="opacity-0 translate-y-1"
+          >
+            <Popover.Panel className="fixed left-0 top-16 w-full flex flex-col bg-white">
+              <ul>
+                <li>
+                  <a href="https://wallet.human.tech/" target="_blank" className="flex h-8 m-2">
+                    <WalletIcon /> <span className="ml-3">Human Wallet</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="https://human.tech/" target="_blank" className="flex h-8 m-2">
+                    <ZeronymIcon /> <span className="ml-3">Zeronym</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="https://human.tech/" target="_blank" className="flex h-8 m-2">
+                    <BridgeIcon /> <span className="ml-3">Human Tech</span>
+                  </a>
+                </li>
+              </ul>
+            </Popover.Panel>
+          </Transition>
+        </Popover>
       </div>
     </>
   );
