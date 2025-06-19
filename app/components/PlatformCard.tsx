@@ -229,7 +229,9 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick, 
                   stroke-linejoin="round"
                 />
               </svg>
-              <span className="text-emerald-900 pl-1">Expired</span>
+              <span className="text-emerald-900 pl-1" data-testid="expired-label">
+                Expired
+              </span>
             </div>
           </div>
           <div className="mt-4 flex justify-center h-full md:mt-6 md:inline-block md:justify-start">
