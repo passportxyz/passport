@@ -18,7 +18,7 @@ Gitcoin Passport is a monorepo using Lerna and Yarn workspaces. It provides iden
 
 ## Prerequisites
 
-- Node.js v16 LTS
+- Node.js v20 LTS
 - Yarn (managed by corepack)
 
 ## Global Commands

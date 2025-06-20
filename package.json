@@ -76,7 +76,7 @@
   },
   "engines": {
     "yarn": ">=1.22.10",
-    "node": ">=16.0.0"
+    "node": ">=20.0.0"
   },
   "resolutions": {
     "csstype": "3.0.10",
