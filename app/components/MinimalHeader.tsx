@@ -202,13 +202,13 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
           <HumanPassportLogoWithText />
         </div>
         {/* <AppSelector /> */}
-        <a href="https://wallet.human.tech/" target="_blank">
+        <a href="https://humansignon.com/" target="_blank">
           <WalletIcon />
         </a>
         <a href="https://human.tech/" target="_blank">
           <ZeronymIcon />
         </a>
-        <a href="https://human.tech/" target="_blank">
+        <a href="https://humansignon.com/" target="_blank">
           <BridgeIcon />
         </a>
         <AccountCenter />
