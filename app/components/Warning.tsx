@@ -17,11 +17,11 @@ export default function Warning({
   const { content, dismissible, icon, link } = userWarning;
   return (
     <div
-      className={`mx-auto flex w-full items-center justify-center py-2 text-background ${CONTENT_MAX_WIDTH} ${className}`}
+      className={`mx-auto flex w-full items-center justify-center py-2 text-color-9 ${CONTENT_MAX_WIDTH} ${className}`}
     >
       {icon || (
         <div className="mr-4 w-4">
-          <ExclamationCircleIcon height={24} color={"rgb(var(--color-background))"} />
+          <ExclamationCircleIcon height={24} color={"rgb(var(--color-9))"} />
         </div>
       )}
       {content}{" "}

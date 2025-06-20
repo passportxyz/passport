@@ -239,7 +239,7 @@ export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) 
             <div className="relative">
               {notifications.length > 0 && (
                 <div
-                  className={`${notifications.length > 10 ? "-right-5" : "-right-2"} absolute -top-3 rounded-full bg-background-5 px-1 border-4 border-background text-[10px] text-background leading-2`}
+                  className={`${notifications.length > 10 ? "-right-1" : "-right-0"} absolute -top-1 rounded-full bg-[#ff0000] px-1 text-[10px] text-background leading-2`}
                 >
                   {notifications.filter((not) => !not.is_read).length}
                 </div>
