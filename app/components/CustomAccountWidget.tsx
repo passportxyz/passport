@@ -33,7 +33,7 @@ export const CustomAccountWidget = () => {
     return (
       <button
         disabled
-        className="flex items-center gap-2.5 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200 opacity-75"
+        className="flex items-center gap-2.5 px-4 py-2 bg-white rounded-lg shadow-sm border-2 border-gray-200 opacity-75"
       >
         <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full"></div>
         <span className="text-sm font-medium text-gray-500">Connecting...</span>
@@ -46,7 +46,7 @@ export const CustomAccountWidget = () => {
     return (
       <button
         onClick={() => open()}
-        className="flex items-center gap-2.5 px-4 py-2 bg-white rounded-full shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200"
+        className="flex items-center gap-2.5 px-4 py-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer border-2 border-gray-200"
       >
         <span className="text-sm font-medium text-gray-700">Connect Wallet</span>
       </button>
@@ -56,29 +56,35 @@ export const CustomAccountWidget = () => {
   return (
     <button
       onClick={() => open()}
-      className="flex items-center gap-2.5 px-4 py-2 bg-white rounded-full shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200"
+      className="flex items-center gap-2 pl-0 pr-2.5 py-0 bg-white rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer border-2 border-gray-200 overflow-hidden"
     >
-      {/* Wallet Icon */}
-      {connector?.icon && <img src={connector.icon} alt={connector.name || "Wallet"} className="w-5 h-5 rounded" />}
+      {/* Wallet Icon with light blue background */}
+      <div className="bg-blue-100 px-3 py-2 flex items-center justify-center rounded-r-lg">
+        {connector?.icon ? (
+          <img src={connector.icon} alt={connector.name || "Wallet"} className="w-5 h-5" />
+        ) : (
+          <div className="w-5 h-5 bg-gray-300 rounded" />
+        )}
+      </div>
 
-      {/* Chain Icon */}
-      <img
-        src={getChainIcon(chainId)}
-        alt="Chain"
-        className="w-5 h-5"
-        onError={(e) => {
-          // Fallback to Ethereum icon if chain icon fails to load
-          (e.target as HTMLImageElement).src = "./assets/eth-network-logo.svg";
-        }}
-      />
+      {/* Chain Icon with gray circle background */}
+      <div className="bg-gray-200 rounded-full w-7 h-7 flex items-center justify-center flex-shrink-0">
+        <img
+          src={getChainIcon(chainId)}
+          alt="Chain"
+          className="w-3.5 h-3.5"
+          onError={(e) => {
+            // Fallback to Ethereum icon if chain icon fails to load
+            (e.target as HTMLImageElement).src = "./assets/eth-network-logo.svg";
+          }}
+        />
+      </div>
 
       {/* Address or ENS name */}
-      <span className={`text-sm font-medium text-gray-900 ${ensName ? "" : "font-mono"}`}>
-        {ensName || formatAddress(address)}
-      </span>
+      <span className="text-sm font-semibold text-gray-900">{ensName || formatAddress(address)}</span>
 
       {/* Dropdown Arrow */}
-      <ChevronDownIcon className="w-5 h-5 text-gray-500 -ml-1" />
+      <ChevronDownIcon className="w-4 h-4 text-gray-500" />
     </button>
   );
 };

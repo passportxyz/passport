@@ -40,25 +40,42 @@
         <div>
             <div class="widget-label">Loading/Connecting State:</div>
             <div class="widget-example">
-                <button disabled class="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full shadow-sm border border-gray-200 opacity-75">
+                <button disabled class="flex items-center gap-2.5 px-4 py-2 bg-white rounded-2xl shadow-sm border border-gray-100 opacity-75">
                     <div class="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full"></div>
-                    <span class="text-sm font-medium text-gray-500">Connecting...</span>
+                    <span class="text-base font-medium text-gray-500">Connecting...</span>
                 </button>
             </div>
         </div>
 
         <!-- Connected State Examples -->
         <div>
-            <div class="widget-label">Connected with MetaMask on Ethereum (matching your design):</div>
+            <div class="widget-label">New Design Implementation (Final):</div>
             <div class="widget-example">
-                <button class="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask" class="w-5 h-5 rounded">
-                    <img src="../public/assets/eth-network-logo.svg" alt="Ethereum" class="w-4 h-4">
-                    <span class="font-mono text-sm font-semibold text-gray-900">0x772B...932</span>
-                    <svg class="w-5 h-5 text-gray-700 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                <button class="flex items-center gap-2 pl-0 pr-2.5 py-0 bg-white rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer border-2 border-gray-200 overflow-hidden">
+                    <!-- Wallet icon with light blue edge-to-edge background -->
+                    <div class="bg-blue-100 px-3 py-2 flex items-center justify-center rounded-r-lg">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask" class="w-5 h-5">
+                    </div>
+                    <!-- Chain icon with gray circle background -->
+                    <div class="bg-gray-200 rounded-full w-7 h-7 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 2L16.928 14H3.072L10 2Z" fill="#1a1a1a"/>
+                        </svg>
+                    </div>
+                    <!-- Address without monospace -->
+                    <span class="text-sm font-semibold text-gray-900" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">0x772B...932</span>
+                    <!-- Dropdown arrow -->
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
+            </div>
+        </div>
+
+        <div>
+            <div class="widget-label">Target Design (from example-account-center.png):</div>
+            <div class="widget-example">
+                <img src="./example-account-center.png" alt="Target Design" style="height: auto;">
             </div>
         </div>
 
@@ -107,8 +124,8 @@
         <div>
             <div class="widget-label">Disconnected State:</div>
             <div class="widget-example">
-                <button class="flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-100">
-                    <span class="text-sm font-medium text-gray-700">Connect Wallet</span>
+                <button class="flex items-center gap-2.5 px-4 py-2 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100">
+                    <span class="text-base font-medium text-gray-700">Connect Wallet</span>
                 </button>
             </div>
         </div>
