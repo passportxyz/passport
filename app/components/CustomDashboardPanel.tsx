@@ -163,9 +163,9 @@ const StandardCustomDashboardPanel = ({
             <path
               d="M5 12H19M19 12L12 5M19 12L12 19"
               stroke="white"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
         </Button>
