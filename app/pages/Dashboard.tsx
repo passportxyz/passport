@@ -47,7 +47,7 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
 
   return (
     <div className="relative col-span-full">
-      <div className="col-span-full mt-2 flex flex-col xl:flex-row gap-8 relative left-0 top-0 z-20">
+      <div className="col-span-full mt-2 flex flex-col xl:flex-row gap-8 relative left-0 top-0 z-10">
         <div className="col-span-full order-2 flex flex-col grow lg:flex-row gap-8 mt-0.5">
           <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
           {explanationPanel && <DashboardScoreExplanationPanel />}
@@ -199,8 +199,8 @@ export default function Dashboard() {
       <ModalOverlay />
       <ModalContent>
         <ModalBody mt={4}>
-          <div className="flex flex-row">
-            <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-background-2 md:mr-10">
+          <div className="flex flex-row text-color-4">
+            <div className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-color- md:mr-4">
               <img alt="shield-exclamation-icon" src="./assets/shield-exclamation-icon.svg" />
             </div>
             <div className="flex flex-col" data-testid="retry-modal-content">
@@ -252,7 +252,6 @@ export default function Dashboard() {
           gtag('config', '${GA_ID}');
         `}
       </Script>
-      {modals}
       <HeaderContentFooterGrid>
         <Confetti />
         <Header />
@@ -280,6 +279,7 @@ export default function Dashboard() {
         {/* This footer contains dark colored text and dark images */}
         <WelcomeFooter displayPrivacyPolicy={false} />
       </HeaderContentFooterGrid>
+      {modals}
     </PageRoot>
   );
 }
