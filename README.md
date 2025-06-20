@@ -32,7 +32,7 @@ When the review finishes, your pull request will be squashed and merged into the
 
 ## Quick Start
 
-Prerequisites: [Node (v16 LTS)](https://nodejs.org/en/download/) plus [Yarn](https://classic.yarnpkg.com/en/docs/install/) and [Git](https://git-scm.com/downloads)
+Prerequisites: [Node (v20 LTS)](https://nodejs.org/en/download/) plus [Yarn](https://classic.yarnpkg.com/en/docs/install/) and [Git](https://git-scm.com/downloads)
 
 1. Install Passport (this will install all packages within the passport monorepo):
 
@@ -40,8 +40,7 @@ Prerequisites: [Node (v16 LTS)](https://nodejs.org/en/download/) plus [Yarn](htt
 git clone https://github.com/passportxyz/passport.git
 cd passport
 npm install --global lerna
-lerna init
-lerna bootstrap
+yarn install
 ```
 
 2. Create environment files, and replace environment variables with your own values
@@ -49,7 +48,6 @@ lerna bootstrap
 ```sh
 cp ./app/.env-example.env ./app/.env
 cp ./iam/.env-example.env ./iam/.env
-cp ./schemas/.env-example.env ./schemas/.env
 ```
 
 3. Start iam, app, and ceramic services concurrently:
