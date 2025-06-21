@@ -365,7 +365,9 @@ export type PLATFORM_ID =
   | "HumanIdPhone"
   | "HumanIdKyc"
   | "Biometrics";
+  | "ZKEmail";
 
+  
 export type PLATFORM_CATEGORY = {
   name: string;
   icon?: React.ReactElement;
@@ -457,7 +459,8 @@ export type PROVIDER_ID =
   | "BinanceBABT2"
   | `DeveloperList#${string}#${string}`
   | "CleanHands"
-  | "Biometrics";
+  | "Biometrics"
+  | "ZKEmail";
 
 export type StampBit = {
   bit: number;
