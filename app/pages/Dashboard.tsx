@@ -13,6 +13,7 @@ import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import { DashboardScorePanel, DashboardScoreExplanationPanel } from "../components/DashboardScorePanel";
 import { DashboardValidStampsPanel } from "../components/DashboardValidStampsPanel";
 import { ExpiredStampsPanel } from "../components/ExpiredStampsPanel";
+import { OnchainSidebar } from "../components/OnchainSidebar";
 
 // --Chakra UI Elements
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalOverlay, useDisclosure } from "@chakra-ui/react";
@@ -69,6 +70,7 @@ export default function Dashboard() {
   const { address } = useAccount();
   const { initiateVerification } = useOneClickVerification();
   const { success, failure } = useMessage();
+  const [showOnchainSidebar, setShowOnchainSidebar] = React.useState(false);
 
   // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
   // until ceramicContext is refactored and memoized
@@ -274,6 +276,14 @@ export default function Dashboard() {
             {/* <PassportDetailsButton className="col-end-[-1] col-start-1 md:col-start-[-3] justify-self-end self-center" /> */}
             {/* <DashboardValidStampsPanel className="col-span-full" /> */}
             {/* <ExpiredStampsPanel className="col-span-full" /> */}
+
+            {/* Dev button for onchain sidebar */}
+            <div className="col-span-full mt-8 mb-8">
+              <button onClick={() => setShowOnchainSidebar(true)} className="bg-blue-500 text-white px-4 py-2 rounded">
+                Open Onchain Sidebar (Dev)
+              </button>
+            </div>
+            <OnchainSidebar isOpen={showOnchainSidebar} onClose={() => setShowOnchainSidebar(false)} />
           </PageWidthGrid>
         </BodyWrapper>
         {/* This footer contains dark colored text and dark images */}

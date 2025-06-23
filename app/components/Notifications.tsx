@@ -230,70 +230,67 @@ const NotificationIcon = () => {
 export const Notifications: React.FC<NotificationsProps> = ({ setShowSidebar }) => {
   const { notifications } = useNotifications();
   const deleteMutation = useDeleteAllNotifications();
-  const hasNotifications = notifications.length > 0;
   return (
-    <div className="flex justify-end z-30">
-      <Popover className="relative">
-        <>
-          <Popover.Button className="ml-auto p-6" data-testid="notification-bell">
-            <div className="relative">
-              {notifications.length > 0 && (
-                <div
-                  className={`${notifications.length > 10 ? "-right-1" : "-right-0"} absolute -top-1 rounded-full bg-[#ff0000] px-1 text-[10px] text-background leading-2`}
-                >
-                  {notifications.filter((not) => !not.is_read).length}
-                </div>
-              )}
-              <NotificationIcon />
-            </div>
-          </Popover.Button>
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-100"
-            enterFrom="opacity-0 translate-y-1"
-            enterTo="opacity-100 translate-y-0"
-            leave="transition ease-in duration-150"
-            leaveFrom="opacity-100 translate-y-0"
-            leaveTo="opacity-0 translate-y-1"
-          >
-            <Popover.Panel className="absolute w-96 md:w-72 right-1 flex flex-col border-foreground-5 border rounded shadow-lg bg-background text-color-4">
-              <div className="w-full relative">
-                <div className="absolute top-[-6px] w-[10px] h-[10px] right-7 border-l bg-background border-b border-foreground-5 transform rotate-[135deg]"></div>
-              </div>
-              <div className="absolute w-full pl-8 py-3 z-20 rounded-t">Notifications</div>
+    <Popover className="relative z-30 top-[1px]">
+      <>
+        <Popover.Button className="flex items-center" data-testid="notification-bell">
+          <div className="relative">
+            {notifications.length > 0 && (
               <div
-                className={`overflow-y-auto min-h-[120px] max-h-[40vh] ${notifications.length > 0 ? "pt-10 pb-10" : "pt-6"}`}
+                className={`${notifications.length > 10 ? "-right-5" : "-right-2"} absolute -top-3 rounded-full bg-[#ff0000] px-1 border-4 border-background text-[10px] text-background leading-2`}
               >
-                {notifications.length > 0 ? (
-                  <>
-                    {notifications
-                      .sort((a, b) => (a.is_read === b.is_read ? 0 : a.is_read ? 1 : -1))
-                      .map((notification) => (
-                        <NotificationComponent
-                          key={notification.notification_id}
-                          notification={notification}
-                          setShowSidebar={() => setShowSidebar(true)}
-                        />
-                      ))}
-                    <div
-                      onClick={() => {
-                        deleteMutation.mutate();
-                      }}
-                      className="cursor-pointer absolute bottom-0 w-full pl-8 py-3 text-color-7 bg-background z-20"
-                    >
-                      Delete All
-                    </div>
-                  </>
-                ) : (
-                  <p className="p-8 text-color-4">
-                    You have no notifications. We’ll let you know when there’s something.
-                  </p>
-                )}
+                {notifications.filter((not) => !not.is_read).length}
               </div>
-            </Popover.Panel>
-          </Transition>
-        </>
-      </Popover>
-    </div>
+            )}
+            <NotificationIcon />
+          </div>
+        </Popover.Button>
+        <Transition
+          as={Fragment}
+          enter="transition ease-out duration-100"
+          enterFrom="opacity-0 translate-y-1"
+          enterTo="opacity-100 translate-y-0"
+          leave="transition ease-in duration-150"
+          leaveFrom="opacity-100 translate-y-0"
+          leaveTo="opacity-0 translate-y-1"
+        >
+          <Popover.Panel className="absolute w-96 md:w-72 -right-6 mt-2 flex flex-col border-foreground-5 border rounded shadow-lg bg-background text-color-4">
+            <div className="w-full relative">
+              <div className="absolute top-[-6px] w-[10px] h-[10px] right-7 border-l bg-background border-b border-foreground-5 transform rotate-[135deg]"></div>
+            </div>
+            <div className="absolute w-full pl-8 py-3 z-20 rounded-t">Notifications</div>
+            <div
+              className={`overflow-y-auto min-h-[120px] max-h-[40vh] ${notifications.length > 0 ? "pt-10 pb-10" : "pt-6"}`}
+            >
+              {notifications.length > 0 ? (
+                <>
+                  {notifications
+                    .sort((a, b) => (a.is_read === b.is_read ? 0 : a.is_read ? 1 : -1))
+                    .map((notification) => (
+                      <NotificationComponent
+                        key={notification.notification_id}
+                        notification={notification}
+                        setShowSidebar={() => setShowSidebar(true)}
+                      />
+                    ))}
+                  <div
+                    onClick={() => {
+                      deleteMutation.mutate();
+                    }}
+                    className="cursor-pointer absolute bottom-0 w-full pl-8 py-3 text-color-7 bg-background z-20"
+                  >
+                    Delete All
+                  </div>
+                </>
+              ) : (
+                <p className="p-8 text-color-4">
+                  You have no notifications. We’ll let you know when there’s something.
+                </p>
+              )}
+            </div>
+          </Popover.Panel>
+        </Transition>
+      </>
+    </Popover>
   );
 };

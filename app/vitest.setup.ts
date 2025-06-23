@@ -1,4 +1,16 @@
 import "@testing-library/jest-dom";
+import { vi } from "vitest";
+
+// Mock Silk wallet SDK to prevent async initialization in tests
+vi.mock("@silk-wallet/silk-wallet-sdk", () => ({
+  initSilk: vi.fn(() => ({
+    on: vi.fn(),
+    off: vi.fn(),
+    request: vi.fn(),
+    login: vi.fn(),
+    logout: vi.fn(),
+  })),
+}));
 
 const { info, log, warn, error } = console;
 const ignored = ["Lit is in dev mode"];

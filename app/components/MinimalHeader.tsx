@@ -1,5 +1,5 @@
 // --- React methods
-import React, { Fragment, useMemo } from "react";
+import React, { Fragment } from "react";
 import { AccountCenter } from "./AccountCenter";
 import { Notifications } from "./Notifications";
 import { OnchainSidebar } from "./OnchainSidebar";
@@ -197,22 +197,24 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   return (
     <>
       <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
-      <div className={`hidden md:flex gap-4 items-center h-16 ${className}`}>
+      <div className={`hidden md:flex items-center h-16 ${className}`}>
         <div className="flex-1 flex items-center">
           <HumanPassportLogoWithText />
         </div>
         {/* <AppSelector /> */}
-        <a href="https://humansignon.com/" target="_blank">
-          <WalletIcon />
-        </a>
-        <a href="https://human.tech/" target="_blank">
-          <ZeronymIcon />
-        </a>
-        <a href="https://humansignon.com/" target="_blank">
-          <BridgeIcon />
-        </a>
-        <AccountCenter />
-        {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
+        <div className="flex items-center gap-4">
+          <a href="https://humansignon.com/" target="_blank">
+            <WalletIcon />
+          </a>
+          <a href="https://human.tech/" target="_blank">
+            <ZeronymIcon />
+          </a>
+          <a href="https://humansignon.com/" target="_blank">
+            <BridgeIcon />
+          </a>
+          {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
+          <AccountCenter />
+        </div>
       </div>
 
       <div className={`flex md:hidden gap-4 items-center justify-between h-16 ${className}`}>

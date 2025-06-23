@@ -1,9 +1,48 @@
 import { wagmiChains, wagmiTransports } from "./chains";
+import { initSilkWithEIP6963 } from "./silkEIP6963";
 
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import { initSilk } from "@silk-wallet/silk-wallet-sdk";
 
 const projectId = (process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string) || "default-project-id";
+
+// Initialize Silk and announce via EIP-6963
+// WAGMI will automatically discover it and create an injected connector
+if (typeof window !== "undefined") {
+  try {
+    // Check if Silk is already initialized
+    if ((window as any).silk) {
+      initSilkWithEIP6963((window as any).silk);
+    } else {
+      const useStaging = process.env.NEXT_PUBLIC_USE_STAGING === "true";
+      const silk = initSilk({
+        config: {
+          allowedSocials: ["google", "twitter", "discord", "linkedin", "apple"],
+          authenticationMethods: ["email", "phone", "social", "wallet"],
+          styles: { darkMode: true },
+        },
+        walletConnectProjectId: projectId,
+        // Must set one to true and other to false
+        useStaging,
+        useProd: !useStaging,
+      });
+
+      // Announce via EIP-6963 so WAGMI can discover it
+      initSilkWithEIP6963(silk);
+
+      (window as any).silk = silk;
+
+      if (silk.on && typeof silk.on === "function") {
+        silk.on("error", (error: any) => {
+          console.error("Human Wallet provider error:", error);
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Failed to initialize Silk wallet:", error);
+  }
+}
 
 const metadata = {
   name: "Passport",
@@ -16,7 +55,6 @@ export const wagmiAdapter = new WagmiAdapter({
   projectId,
   networks: wagmiChains,
   transports: wagmiTransports,
-  // Prevents hydration mismatch errors
   ssr: true,
 });
 

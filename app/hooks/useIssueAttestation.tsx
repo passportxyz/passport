@@ -24,7 +24,8 @@ const useChainSwitch = ({ chain }: { chain?: Chain }) => {
     try {
       await switchChainAsync({ chainId });
       return true;
-    } catch {
+    } catch (error) {
+      console.warn("Chain switch error:", error);
       return false;
     }
   }, [connectedChain, chain, switchChainAsync]);
@@ -108,6 +109,10 @@ export const useIssueAttestation = ({ chain }: { chain?: Chain }) => {
         if (needToSwitchChain) {
           const switched = await switchChain();
           if (!switched) {
+            failure({
+              title: "Chain Switch Failed",
+              message: "Unable to switch to the required chain for attestation. Please switch manually and try again.",
+            });
             return;
           }
         }
