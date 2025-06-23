@@ -19,6 +19,7 @@ if (typeof window !== "undefined") {
     if ((window as any).silk) {
       initSilkWithEIP6963((window as any).silk);
     } else {
+      const useProd = process.env.NEXT_PUBLIC_HUMAN_WALLET_PROD === "true";
       const silk = initSilk({
         config: {
           allowedSocials: ["google", "twitter", "discord", "linkedin", "apple"],
@@ -26,7 +27,8 @@ if (typeof window !== "undefined") {
           styles: { darkMode: true },
         },
         walletConnectProjectId: projectId,
-        useStaging: process.env.NEXT_PUBLIC_HUMAN_WALLET_PROD !== "true",
+        useStaging: !useProd,
+        useProd,
       });
 
       // Announce via EIP-6963 so WAGMI can discover it
