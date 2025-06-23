@@ -1,13 +1,9 @@
 import { wagmiChains, wagmiTransports } from "./chains";
 import { initSilkWithEIP6963 } from "./silkEIP6963";
-import { setupErrorInterceptor } from "./errorInterceptor";
 
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { initSilk } from "@silk-wallet/silk-wallet-sdk";
-
-// Setup error interceptor to catch wallet errors before they hit analytics
-setupErrorInterceptor();
 
 const projectId = (process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string) || "default-project-id";
 
@@ -19,7 +15,7 @@ if (typeof window !== "undefined") {
     if ((window as any).silk) {
       initSilkWithEIP6963((window as any).silk);
     } else {
-      const useProd = process.env.NEXT_PUBLIC_HUMAN_WALLET_PROD === "true";
+      const useStaging = process.env.NEXT_PUBLIC_USE_STAGING === "true";
       const silk = initSilk({
         config: {
           allowedSocials: ["google", "twitter", "discord", "linkedin", "apple"],
@@ -27,8 +23,9 @@ if (typeof window !== "undefined") {
           styles: { darkMode: true },
         },
         walletConnectProjectId: projectId,
-        useStaging: !useProd,
-        useProd,
+        // Must set one to true and other to false
+        useStaging,
+        useProd: !useStaging,
       });
 
       // Announce via EIP-6963 so WAGMI can discover it

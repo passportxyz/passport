@@ -10,10 +10,8 @@ export const CustomAccountWidget = () => {
   const wagmiChains = useChains();
   const { open } = useAppKit();
 
-  // Only fetch ENS name if on mainnet
   const { data: ensName } = useEnsName({
     address: address,
-    enabled: isConnected && chainId === 1, // Only on mainnet
   });
 
   // Format address: 0x1234...567
