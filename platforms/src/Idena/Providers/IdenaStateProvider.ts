@@ -25,7 +25,6 @@ abstract class IdenaStateProvider implements Provider {
   }
 
   async verify(payload: RequestPayload, _context?: ProviderContext): Promise<VerifiedPayload> {
-    // TODO: geri review this
     const context = _context as IdenaContext;
     const token = payload.proofs.sessionKey;
     const { valid, address, expiresInSeconds, errors } = await this.checkState(token, context);
