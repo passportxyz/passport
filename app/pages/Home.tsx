@@ -30,7 +30,7 @@ export default function Home() {
 
   return (
     <PageRoot className="text-gray-900 flex flex-col min-h-screen overflow-auto pb-32 md:pb-0">
-      <Header />
+      <Header skipCustomisation={true} />
       <div className="mt-4 md:mt-0 pt-16 flex-1 m-auto overflow-visible grid grid-cols-1 grid-rows-1 content-center ">
         <div className="grid grid-cols-1 grid-rows-1 md:flex md:justify-start gap-12 overflow-visible m-8 md:max-h-[calc(100vh-16rem)]">
           <div className="flex flex-row justify-end">

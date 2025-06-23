@@ -10,20 +10,20 @@ import { useSupportBanners } from "../hooks/useSupportBanners";
 import { useCustomization } from "../hooks/useCustomization";
 import { ScorerContext } from "../context/scorerContext";
 
-export const useRadialBackgroundColorForHeader = (): string => {
+export const useRadialBackgroundColorForHeader = (skipCustomisation: Boolean): string => {
   const { customizationTheme } = useCustomization();
 
   const { rawScore, threshold } = React.useContext(ScorerContext);
   const aboveThreshold = threshold && rawScore >= threshold;
 
-  const fallbackBackgroundColor = aboveThreshold ? "#BEFEE2" : "#E5E5E5";
-  return customizationTheme?.colors.customizationBackground1 || fallbackBackgroundColor;
+  const fallbackBackgroundColor = !skipCustomisation && aboveThreshold ? "#BEFEE2" : "#E5E5E5";
+  return (!skipCustomisation && customizationTheme?.colors.customizationBackground1) || fallbackBackgroundColor;
 };
 
-const Header = (): JSX.Element => {
+const Header = ({ skipCustomisation }: { skipCustomisation?: Boolean }): JSX.Element => {
   const [userWarning, setUserWarning] = useAtom(userWarningAtom);
   const { banners, loadBanners } = useSupportBanners();
-  const backgroundColor = useRadialBackgroundColorForHeader();
+  const backgroundColor = useRadialBackgroundColorForHeader(skipCustomisation === true);
 
   useEffect(() => {
     loadBanners();
