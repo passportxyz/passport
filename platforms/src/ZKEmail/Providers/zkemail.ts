@@ -1,76 +1,47 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { type Provider, type ProviderOptions } from "../../types.js";
-
-// Tier thresholds
-const AMAZON_TIERS = {
-  CASUAL_PURCHASER: 1,
-  REGULAR_CUSTOMER: 10,
-  HEAVY_USER: 50,
-};
-
-const UBER_TIERS = {
-  OCCASIONAL_RIDER: 3,
-  REGULAR_RIDER: 25,
-  POWER_USER: 100,
-};
+import { initZkEmailSdk } from "@zk-email/sdk";
+import { UBER_EMAIL } from "../procedures/mocked_email.js";
 
 export class ZKEmailProvider implements Provider {
   type = "ZKEmail";
-  _options = {};
+  _options: ProviderOptions;
 
   constructor(options: ProviderOptions = {}) {
-    this._options = { ...this._options, ...options };
-  }
-
-  private getAmazonTier(purchases: number): string {
-    if (purchases >= AMAZON_TIERS.HEAVY_USER) return "Heavy User";
-    if (purchases >= AMAZON_TIERS.REGULAR_CUSTOMER) return "Regular Customer";
-    if (purchases >= AMAZON_TIERS.CASUAL_PURCHASER) return "Casual Purchaser";
-    return "";
-  }
-
-  private getUberTier(rides: number): string {
-    if (rides >= UBER_TIERS.POWER_USER) return "Power User";
-    if (rides >= UBER_TIERS.REGULAR_RIDER) return "Regular Rider";
-    if (rides >= UBER_TIERS.OCCASIONAL_RIDER) return "Occasional Rider";
-    return "";
+    this._options = { ...options };
   }
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    let record = undefined;
-    const errors = [];
+    const record: { data?: string } | undefined = undefined;
+    const errors: string[] = [];
 
-    // const verifiedPayload = await verifyZKEmail(payload.proofs.code);
-    const verifiedPayload = await Promise.resolve({
-      amazon: 20,
-      uber: 10,
-      errors: [],
-      emailVerified: true,
-    });
-    const valid = !verifiedPayload.errors && verifiedPayload.emailVerified;
+    try {
+      const sdk = initZkEmailSdk({});
 
-    if (valid) {
-      const amazonTier = this.getAmazonTier(verifiedPayload.amazon);
-      const uberTier = this.getUberTier(verifiedPayload.uber);
+      const blueprint = await sdk.getBlueprintById("85b4b54b-72c2-4a99-8393-7f8cc47332c8");
 
-      record = {
-        amazonPurchases: verifiedPayload.amazon.toString(),
-        amazonTier: amazonTier || "Not Qualified",
-        uberRides: verifiedPayload.uber.toString(),
-        uberTier: uberTier || "Not Qualified",
+      const prover = await blueprint.createProver();
+      const proof = await prover.generateProof(UBER_EMAIL);
+
+      // google oauth
+      // const accessToken = await requestAccessToken(payload.proofs.code);
+
+      const publicData = proof.getProofData().publicData.toString();
+
+      return {
+        valid: true,
+        errors,
+        record: {
+          data: publicData,
+        },
       };
-    } else {
-      errors.push("We couldn't verify the ZK Email you attempted to authorize with.");
+    } catch (error) {
+      errors.push(`Failed to verify email: ${error instanceof Error ? error.message : String(error)}`);
+      return {
+        valid: false,
+        errors,
+        record,
+      };
     }
-
-    if (verifiedPayload.errors) {
-      errors.push(...verifiedPayload.errors);
-    }
-
-    return {
-      valid,
-      errors,
-      record,
-    };
   }
 }
