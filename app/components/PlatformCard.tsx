@@ -1,17 +1,18 @@
 // --- React Methods
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 
 // --- Components
 import { Button } from "./Button";
-import { PlatformScoreSpec, ScorerContext } from "../context/scorerContext";
+import { PlatformScoreSpec } from "../context/scorerContext";
 import { CeramicContext } from "../context/ceramicContext";
 import { ProgressBar } from "./ProgressBar";
 import { getDaysToExpiration } from "../utils/duration";
 import { usePlatforms } from "../hooks/usePlatforms";
 import { useStampDeduplication } from "../hooks/useStampDeduplication";
+import { useOnChainData } from "../hooks/useOnChainData";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -29,6 +30,7 @@ type PlatformCardProps = {
 type StampProps = {
   idx: number;
   platform: PlatformScoreSpec;
+  platformProviders: PROVIDER_ID[];
   daysUntilExpiration?: number;
   className?: string;
   onClick: () => void;
@@ -118,7 +120,28 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps
   );
 };
 
-const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick, isDeduplicated }: StampProps) => {
+const VerifiedStamp = ({
+  idx,
+  platform,
+  platformProviders,
+  daysUntilExpiration,
+  className,
+  onClick,
+  isDeduplicated,
+}: StampProps) => {
+  const { activeChainProviders } = useOnChainData();
+  const [isAnyOnchain, setIsAnyOnchain] = useState(false);
+
+  useEffect(() => {
+    const onchainProviderSet = new Set(activeChainProviders.map((p) => p.providerName));
+    const providerSet = new Set(platformProviders);
+
+    const intersection = onchainProviderSet.intersection(providerSet);
+    setIsAnyOnchain(intersection.size > 0);
+    // TODO: #3502: We have no separate representation for `MOVED_OUT_OF_DATE` state,also no representation if onchain expiration is different than db-expiration date
+    // const isAllOnchain = intersection.size === providerSet.size;
+  }, [activeChainProviders, platformProviders]);
+
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
       <div className="group relative flex h-full cursor-pointer flex-col rounded-2xl p-0 transition-all ease-out bg-emerald-100">
@@ -141,7 +164,7 @@ const VerifiedStamp = ({ idx, platform, daysUntilExpiration, className, onClick,
             {/* <StampLabels primaryLabel="Verified" primaryBgColor="bg-foreground-4" isDeduplicated={isDeduplicated} /> */}
             {isDeduplicated || (
               <div className="px-2 py-1 text-l font-bold text-left text-emerald-600">
-                <p data-testid="verified-label">Verified</p>
+                <p data-testid="verified-label">{isAnyOnchain ? "Minted" : "Verified"}</p>
               </div>
             )}
             {isDeduplicated && (
@@ -318,6 +341,7 @@ export const PlatformCard = ({
       <ExpiredStamp
         idx={i}
         platform={platform}
+        platformProviders={platformProviderIds[platform.platform]}
         className={className}
         isDeduplicated={isDeduplicated}
         onClick={() => {
@@ -332,6 +356,7 @@ export const PlatformCard = ({
       <VerifiedStamp
         idx={i}
         platform={platform}
+        platformProviders={platformProviderIds[platform.platform]}
         daysUntilExpiration={daysUntilExpiration}
         className={className}
         isDeduplicated={isDeduplicated}
@@ -347,6 +372,7 @@ export const PlatformCard = ({
         variant={variant}
         idx={i}
         platform={platform}
+        platformProviders={platformProviderIds[platform.platform]}
         className={className}
         onClick={() => {
           setCurrentPlatform(platform);

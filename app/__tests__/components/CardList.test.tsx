@@ -16,6 +16,8 @@ import { DEFAULT_CUSTOMIZATION, useCustomization } from "../../hooks/useCustomiz
 import { platforms } from "@gitcoin/passport-platforms";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { usePlatforms } from "../../hooks/usePlatforms";
+import { WagmiProvider } from "wagmi";
+import { wagmiConfig } from "../../utils/web3";
 
 vi.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -36,6 +38,14 @@ vi.mock("../../hooks/usePlatforms", async (importActual) => {
   return {
     ...actual,
     usePlatforms: vi.fn().mockImplementation(actual.usePlatforms),
+  };
+});
+
+vi.mock("../../hooks/useOnChainData", async (importActual) => {
+  const actual = (await importActual()) as any;
+  return {
+    ...actual,
+    useOnChainData: vi.fn().mockImplementation(() => ({ activeChainProviders: [] })),
   };
 });
 
@@ -221,7 +231,11 @@ describe("<CardList />", () => {
 });
 
 test("renders Category component", () => {
-  render(<Category category={categoryProps["category"]} />);
+  render(
+    <WagmiProvider config={wagmiConfig}>
+      <Category category={categoryProps["category"]} />
+    </WagmiProvider>
+  );
 
   const button = screen.getByText(categoryProps["category"].name);
   expect(button).toBeInTheDocument();
