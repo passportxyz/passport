@@ -1,0 +1,138 @@
+/* CSS Variables for Gitcoin Passport Theme (LUNARPUNK_DARK_MODE) */
+:root {
+  /* Background colors */
+  --color-background: 245, 245, 245; /* #F5F5F5 - light gray */
+  --color-background-2: 8, 32, 95; /* #08205F - dark purple */
+  --color-background-3: 74, 71, 211; /* #4A47D3 - iris */
+  --color-background-4: 18, 43, 51; /* #122B33 - night blue */
+  --color-background-5: 255, 136, 70; /* #FF8846 - orange */
+  
+  /* Foreground colors */
+  --color-foreground: 255, 255, 255; /* #FFFFFF - white */
+  --color-foreground-2: 193, 246, 255; /* #C1F6FF - ice blue */
+  --color-foreground-3: 75, 95, 101; /* #4B5F65 - iron gray */
+  --color-foreground-4: 108, 182, 173; /* #6CB6AD - sea foam */
+  --color-foreground-5: 34, 100, 92; /* #22645C - green */
+  --color-foreground-6: 7, 72, 83; /* #074853 - turquoise */
+  --color-foreground-7: 210, 220, 149; /* #D2DC95 - pale yellow */
+  
+  /* Text colors */
+  --color-1: 255, 255, 255; /* #FFFFFF - white */
+  --color-2: 108, 182, 173; /* #6CB6AD - sea foam */
+  --color-3: 210, 210, 210; /* #D2D2D2 - light grey */
+  --color-4: 0, 0, 0; /* #000000 - black */
+  --color-5: 74, 190, 255; /* #4ABEFF - bright blue */
+  --color-6: 245, 245, 245; /* #F5F5F5 - background/light */
+  --color-7: 255, 136, 70; /* #FF8846 - orange */
+  --color-8: 160, 254, 127; /* #A0FE7F - yellow green */
+  --color-9: 115, 115, 115; /* #737373 - gray */
+  --color-10: 254, 165, 127; /* #FEA57F - orange red */
+  
+  /* Other colors */
+  --color-focus: 255, 136, 70; /* #FF8846 - red/orange */
+}
+
+/* Tailwind-style utility classes using CSS variables */
+.bg-background { background-color: rgb(var(--color-background)); }
+.bg-background-2 { background-color: rgb(var(--color-background-2)); }
+.bg-background-3 { background-color: rgb(var(--color-background-3)); }
+.bg-background-4 { background-color: rgb(var(--color-background-4)); }
+.bg-background-5 { background-color: rgb(var(--color-background-5)); }
+
+.bg-foreground { background-color: rgb(var(--color-foreground)); }
+.bg-foreground-2 { background-color: rgb(var(--color-foreground-2)); }
+.bg-foreground-3 { background-color: rgb(var(--color-foreground-3)); }
+.bg-foreground-4 { background-color: rgb(var(--color-foreground-4)); }
+.bg-foreground-5 { background-color: rgb(var(--color-foreground-5)); }
+.bg-foreground-6 { background-color: rgb(var(--color-foreground-6)); }
+.bg-foreground-7 { background-color: rgb(var(--color-foreground-7)); }
+
+.text-color-1 { color: rgb(var(--color-1)); }
+.text-color-2 { color: rgb(var(--color-2)); }
+.text-color-3 { color: rgb(var(--color-3)); }
+.text-color-4 { color: rgb(var(--color-4)); }
+.text-color-5 { color: rgb(var(--color-5)); }
+.text-color-6 { color: rgb(var(--color-6)); }
+.text-color-7 { color: rgb(var(--color-7)); }
+.text-color-8 { color: rgb(var(--color-8)); }
+.text-color-9 { color: rgb(var(--color-9)); }
+.text-color-10 { color: rgb(var(--color-10)); }
+
+.border-foreground-3 { border-color: rgb(var(--color-foreground-3)); }
+.border-foreground-4 { border-color: rgb(var(--color-foreground-4)); }
+.border-foreground-5 { border-color: rgb(var(--color-foreground-5)); }
+
+/* Hover states */
+.hover\:bg-foreground-3:hover { background-color: rgb(var(--color-foreground-3)); }
+.hover\:text-color-1:hover { color: rgb(var(--color-1)); }
+.hover\:text-color-5:hover { color: rgb(var(--color-5)); }
+
+/* Focus states */
+.focus\:border-focus:focus { border-color: rgb(var(--color-focus)); }
+
+/* Opacity variants */
+.bg-opacity-20 { opacity: 0.2; }
+.bg-opacity-90 { opacity: 0.9; }
+
+/* Custom styles for the test environment */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Animations */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-colors {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-transform {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.duration-300 {
+  transition-duration: 300ms;
+}
+
+.duration-500 {
+  transition-duration: 500ms;
+}
+
+/* Transforms */
+.translate-x-0 {
+  transform: translateX(0);
+}
+
+.translate-x-full {
+  transform: translateX(100%);
+}
+
+/* Special background opacity for verified state */
+.bg-foreground-4.bg-opacity-20 {
+  background-color: rgba(108, 182, 173, 0.2);
+}
+
+.bg-color-7.bg-opacity-20 {
+  background-color: rgba(255, 136, 70, 0.2);
+}
+
+.bg-color-9.bg-opacity-20 {
+  background-color: rgba(115, 115, 115, 0.2);
+}
+
+/* Whitespace utilities */
+.whitespace-pre-line {
+  white-space: pre-line;
+}

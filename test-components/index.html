@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stamp Drawer Test</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./StampDrawerTest.css">
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Load our components as modules -->
+  <script type="text/babel" data-type="module">
+    // Since we can't use ES modules directly with Babel standalone, 
+    // we'll include all components inline for the test
+    ${`
+    // Mock data for Variant 1
+    const ethereumMockData = {
+      variant: 1,
+      platformInfo: {
+        name: "Ethereum",
+        icon: "⟠",
+        description: "Passport analyzes your transaction history to detect Sybil behavior, awarding points based on your address's overall activity."
+      },
+      verificationState: {
+        isVerified: true,
+        pointsGained: 2.8,
+        totalPossiblePoints: 23,
+        validityDays: 89
+      },
+      credentialGroups: [
+        {
+          title: "Engagement Milestones",
+          credentials: [
+            {
+              id: "eth-enthusiast",
+              name: "ETH Enthusiast",
+              description: "Marks the initiation of engagement within the Ethereum ecosystem.",
+              state: "not-verified",
+              points: 16,
+              pointsDisplay: "16"
+            },
+            {
+              id: "eth-advocate",
+              name: "ETH Advocate",
+              description: "Represents a higher level of commitment and activity.",
+              state: "verified",
+              points: 2.4,
+              pointsDisplay: "+2.4",
+              flags: []
+            },
+            {
+              id: "eth-maxi",
+              name: "ETH MAXI",
+              description: "Denotes exceptional involvement and dedication.",
+              state: "verified",
+              points: 2.9,
+              pointsDisplay: "2.9",
+              flags: ["expired"]
+            }
+          ]
+        },
+        {
+          title: "Your Ethereum Activity Metrics",
+          credentials: [
+            {
+              id: "spend-gas",
+              name: "Spend more than 0.25 ETH on gas",
+              description: "Highlights significant financial engagement with the network.",
+              state: "verified",
+              points: 0.8,
+              pointsDisplay: "0.8",
+              flags: ["deduplicated"]
+            },
+            {
+              id: "execute-transactions",
+              name: "Execute over 100 transactions",
+              description: "Indicates a robust level of transactional activity.",
+              state: "verified",
+              points: 0.2,
+              pointsDisplay: "+0.2",
+              flags: []
+            },
+            {
+              id: "active-days",
+              name: "Active on over 50 distinct days",
+              description: "Showcases sustained interaction with Ethereum.",
+              state: "verified",
+              points: 0.2,
+              pointsDisplay: "+0.2",
+              flags: []
+            }
+          ]
+        }
+      ]
+    };
+
+    const allStatesTestData = {
+      variant: 1,
+      platformInfo: {
+        name: "Test Platform",
+        icon: "🧪",
+        description: "A test platform showcasing all possible credential states."
+      },
+      verificationState: {
+        isVerified: false,
+        pointsGained: 0,
+        totalPossiblePoints: 10
+      },
+      credentialGroups: [
+        {
+          title: "All Credential States",
+          credentials: [
+            {
+              id: "not-verified",
+              name: "Not Verified Credential",
+              description: "This credential has not been verified yet.",
+              state: "not-verified",
+              points: 2.5,
+              pointsDisplay: "2.5"
+            },
+            {
+              id: "verified-clean",
+              name: "Verified Credential",
+              description: "Successfully verified with no flags.",
+              state: "verified",
+              points: 2.5,
+              pointsDisplay: "+2.5",
+              flags: []
+            },
+            {
+              id: "verified-expired",
+              name: "Expired Credential",
+              description: "Previously verified but now expired.",
+              state: "verified",
+              points: 2.5,
+              pointsDisplay: "2.5",
+              flags: ["expired"]
+            },
+            {
+              id: "verified-deduplicated",
+              name: "Deduplicated Credential",
+              description: "Verified but not counted due to deduplication.",
+              state: "verified",
+              points: 0,
+              pointsDisplay: "0",
+              flags: ["deduplicated"]
+            },
+            {
+              id: "verified-both-flags",
+              name: "Multiple Flags Credential",
+              description: "Has both expired and deduplicated flags.",
+              state: "verified",
+              points: 0,
+              pointsDisplay: "0",
+              flags: ["expired", "deduplicated"]
+            }
+          ]
+        }
+      ]
+    };
+
+    // Mock data for Variant 2
+    const cleanHandsMockData = {
+      variant: 2,
+      platformInfo: {
+        name: "Clean hands",
+        icon: "🖐",
+        description: "Privately prove you are not sanctioned using Proof of Clean Hands"
+      },
+      verificationState: {
+        isVerified: false,
+        timeToGet: "~5 min",
+        price: "~$5.00",
+        pointsGained: 0,
+        totalPossiblePoints: 1
+      },
+      steps: [
+        {
+          number: 1,
+          title: "Visit the issuance page",
+          description: "Go to the credential issuance page.\\nNote: This attestation requires you to prove your identity first. If you've verified your identity with Holonym before, you will be redirected straight to step 5.",
+          actions: [
+            {
+              label: "Go to Proof of Clean Hands",
+              href: "https://app.holonym.io/prove/uniqueness",
+              icon: "external"
+            }
+          ]
+        },
+        {
+          number: 2,
+          title: "Connect your wallet",
+          description: "Connect your wallet to a supported network (Ethereum, Optimism, Avalanche, Fantom, or Base). Make sure your balance is greater than $1 to cover both the payment and gas fees, which vary by network.",
+          image: {
+            src: "/test-images/wallet-connect.png",
+            alt: "Wallet connection interface"
+          }
+        },
+        {
+          number: 3,
+          title: "Verify your clean hands status",
+          description: "Human ID will verify that you are not on any sanctions lists and are not a politically exposed person.",
+          image: {
+            src: "/test-images/verification-screen.png",
+            alt: "Clean hands verification screen"
+          }
+        },
+        {
+          number: 4,
+          title: "Pay for the verification",
+          description: "The attestation costs approximately $5. This fee helps maintain the privacy-preserving infrastructure.",
+          actions: [
+            {
+              label: "Learn about pricing",
+              href: "/help/clean-hands-pricing",
+              icon: "arrow"
+            }
+          ]
+        },
+        {
+          number: 5,
+          title: "Receive your attestation",
+          description: "Once verified, you'll receive your clean hands attestation. Return to Gitcoin Passport to complete the stamp verification."
+        }
+      ],
+      credentials: [
+        {
+          id: "sanctions-free-1",
+          name: "Sanctions-Free Identity Verified",
+          description: "Awarded after completing Holonym KYC and sanctions validation, strengthening your humanity proof",
+          state: "not-verified",
+          points: 1,
+          pointsDisplay: "1"
+        },
+        {
+          id: "sanctions-free-2",
+          name: "Sanctions-Free Identity Verified",
+          description: "Awarded after completing Holonym KYC and sanctions validation, strengthening your humanity proof",
+          state: "not-verified",
+          points: 1,
+          pointsDisplay: "1"
+        }
+      ]
+    };
+
+    const cleanHandsVerifiedMockData = {
+      ...cleanHandsMockData,
+      verificationState: {
+        isVerified: true,
+        pointsGained: 1,
+        totalPossiblePoints: 1
+      },
+      credentials: [
+        {
+          id: "sanctions-free-1",
+          name: "Sanctions-Free Identity Verified",
+          description: "Awarded after completing Holonym KYC and sanctions validation, strengthening your humanity proof",
+          state: "verified",
+          points: 1,
+          pointsDisplay: "+1"
+        },
+        {
+          id: "sanctions-free-2",
+          name: "Sanctions-Free Identity Verified",
+          description: "Awarded after completing Holonym KYC and sanctions validation, strengthening your humanity proof",
+          state: "verified",
+          points: 1,
+          pointsDisplay: "+1"
+        }
+      ]
+    };
+
+    const testScenarios = {
+      'ethereum-verified': ethereumMockData,
+      'all-states': allStatesTestData,
+      'clean-hands': cleanHandsMockData,
+      'clean-hands-verified': cleanHandsVerifiedMockData,
+    };
+    `}
+  </script>
+
+  <script type="text/babel" src="./shared/PointsModule.tsx"></script>
+  <script type="text/babel" src="./shared/CredentialCard.tsx"></script>
+  <script type="text/babel" src="./shared/StepGuide.tsx"></script>
+  <script type="text/babel" src="./MultiCredentialView.tsx"></script>
+  <script type="text/babel" src="./GuidedFlowView.tsx"></script>
+  <script type="text/babel" src="./StampDrawerTest.tsx"></script>
+
+  <script type="text/babel">
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<StampDrawerTest />);
+  </script>
+</body>
+</html>
