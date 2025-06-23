@@ -82,7 +82,12 @@ export const Category = ({
 
   return (
     <>
-      <Disclosure as="div" className="col-span-full p-8 bg-white rounded-xl" defaultOpen={true} key={category.name}>
+      <Disclosure
+        as="div"
+        className="col-span-full p-2 md:p-8 bg-white rounded-xl"
+        defaultOpen={true}
+        key={category.name}
+      >
         <Disclosure.Button className="flex items-center cursor-pointer" onClick={handleClick} as="div">
           <div className="flex grow">
             <div className="pr-4 flex-none">{category.icon}</div>

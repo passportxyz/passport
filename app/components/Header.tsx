@@ -10,7 +10,7 @@ import { useSupportBanners } from "../hooks/useSupportBanners";
 import { useCustomization } from "../hooks/useCustomization";
 import { ScorerContext } from "../context/scorerContext";
 
-export const useRadialBackgroundColorForHeader = (skipCustomisation: Boolean): string => {
+export const useRadialBackgroundColorForHeader = (skipCustomisation: Boolean = false): string => {
   const { customizationTheme } = useCustomization();
 
   const { rawScore, threshold } = React.useContext(ScorerContext);

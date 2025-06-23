@@ -48,11 +48,11 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
   return (
     <div className="relative col-span-full">
       <div className="col-span-full mt-2 flex flex-col xl:flex-row gap-8 relative left-0 top-0 z-10">
-        <div className="col-span-full order-2 flex flex-col grow lg:flex-row gap-8 mt-0.5">
+        <div className="col-span-full flex flex-col grow lg:flex-row gap-8 mt-0.5">
           <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
           {explanationPanel && <DashboardScoreExplanationPanel />}
         </div>
-        {useCustomDashboardPanel && <DynamicCustomDashboardPanel className="order-1 lg:order-2 max-w-full xl:w-2/3" />}
+        {useCustomDashboardPanel && <DynamicCustomDashboardPanel className="max-w-full xl:w-2/3" />}
       </div>
       <div
         style={{ background: `radial-gradient(ellipse 100vw 200px at 50% -32px, white, ${backgroundColor})` }}
@@ -255,11 +255,11 @@ export default function Dashboard() {
       <HeaderContentFooterGrid>
         <Confetti />
         <Header />
-        <BodyWrapper className="mt-4 md:mt-0 pt-16">
+        <BodyWrapper className="mt-4 md:mt-0 pt-12 pt-16:md">
           <PageWidthGrid>
             <DashboardCTAs customization={customization} />
 
-            <span id="add-stamps" className="col-span-full font-heading text-4xl text-gray-800 mt-12">
+            <span id="add-stamps" className="px-4 px-0:md col-span-full font-heading text-4xl text-gray-800 mt-12">
               Add Stamps
             </span>
             <CardList
