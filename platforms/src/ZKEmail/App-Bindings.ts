@@ -26,7 +26,7 @@ export class ZKEmailPlatform extends Platform {
   getOAuthUrl(state: string): Promise<string> {
     return new Promise((resolve) => {
       resolve(
-        `https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=${this.redirectUri}&prompt=consent&response_type=code&client_id=${this.clientId}&scope=email+profile&access_type=offline&state=${state}`
+        `https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=${this.redirectUri}&prompt=consent&response_type=code&client_id=${this.clientId}&scope=email+profile+https://www.googleapis.com/auth/gmail.readonly&access_type=offline&state=${state}`
       );
     });
   }
