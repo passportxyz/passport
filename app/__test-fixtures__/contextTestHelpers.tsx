@@ -96,6 +96,10 @@ export const makeTestCeramicContext = (initialState?: Partial<CeramicContextStat
         providerSpec: getProviderSpec("Coinbase", "CoinbaseDualVerification"),
         stamp: undefined,
       },
+      CleanHands: {
+        providerSpec: getProviderSpec("CleanHands", "CleanHands"),
+        stamp: undefined,
+      },
     },
     passportLoadResponse: undefined,
     handleAddStamps: vi.fn(),
@@ -157,6 +161,17 @@ export const scorerContext = {
       possiblePoints: 7.4399999999999995,
       displayPossiblePoints: 7.4399999999999995,
       earnedPoints: 0,
+    },
+    {
+      icon: "./assets/proofOfCleanHandsBlack.svg",
+      platform: "CleanHands",
+      name: "CleanHands",
+      description: "Awarded after completing Holonym KYC and sanctions validation, strengthening your humanity proof",
+      connectMessage: "Verify Account",
+      isEVM: true,
+      possiblePoints: 12.93,
+      displayPossiblePoints: 12.93,
+      earnedPoints: 11.93,
     },
     {
       icon: "./assets/gtcGrantsLightIcon.svg",

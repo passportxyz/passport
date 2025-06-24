@@ -136,7 +136,7 @@ describe("<CardList />", () => {
   it("renders cards by verification status and possible points", () => {
     renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
     const possiblePoints = screen.getAllByTestId("platform-name").map((el) => el.textContent);
-    expect(possiblePoints).toEqual(["Gitcoin", "GTC Staking", "Discord", "Google"]);
+    expect(possiblePoints).toEqual(["Gitcoin", "GTC Staking", "CleanHands", "Discord", "Google"]);
   });
 
   // TODO #3502: unskip once designs are clear
@@ -203,6 +203,12 @@ describe("<CardList />", () => {
 
     //the verified stamp no longer shows the score of availablepoints
     expect(availablePnts).toEqual(["12.9", "7.4", "0.7"]);
+  });
+
+  it("should render earned points in the top right of the card", () => {
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
+    const availablePnts = screen.getAllByTestId("received-points-tr").map((el) => el.textContent);
+    expect(availablePnts).toEqual(["+11.9", "+1"]);
   });
 
   it("renders allowList if stamp is present", () => {

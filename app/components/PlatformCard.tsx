@@ -175,7 +175,7 @@ const VerifiedStamp = ({
               )}
             </div>
             <div className="text-right inline-block bg-white pb-0 pt-1 px-2 rounded-2xl">
-              <div data-testid="available-points" className="text-l text-color-4">
+              <div data-testid="received-points-tr" className="text-l text-color-4">
                 <div className="flex w-full items-start justify-end">
                   <svg width="17" height="21" viewBox="0 0 17 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path

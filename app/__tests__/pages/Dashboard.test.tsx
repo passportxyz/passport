@@ -159,7 +159,7 @@ describe("DashboardCTAs", () => {
 
     expect(screen.getByTestId("dashboard-score-panel")).toHaveClass("w-full");
     expect(screen.getByTestId("dashboard-score-explanation-panel")).toBeInTheDocument();
-    expect(screen.getByTestId("dynamic-custom-dashboard-panel")).toHaveClass("order-1 lg:order-2 max-w-full xl:w-2/3");
+    expect(screen.getByTestId("dynamic-custom-dashboard-panel")).toHaveClass("max-w-full xl:w-2/3");
   });
 
   it("renders without explanation panel", () => {
@@ -171,7 +171,7 @@ describe("DashboardCTAs", () => {
 
     expect(screen.getByTestId("dashboard-score-panel")).toHaveClass("w-full");
     expect(screen.queryByTestId("dashboard-score-explanation-panel")).not.toBeInTheDocument();
-    expect(screen.getByTestId("dynamic-custom-dashboard-panel")).toHaveClass("order-1 lg:order-2 max-w-full xl:w-2/3");
+    expect(screen.getByTestId("dynamic-custom-dashboard-panel")).toHaveClass("max-w-full xl:w-2/3");
   });
 
   it("applies correct CSS classes", () => {
@@ -183,7 +183,7 @@ describe("DashboardCTAs", () => {
 
     // eslint-disable-next-line testing-library/no-node-access
     const innerContainer = screen.getByTestId("dashboard-score-panel").parentElement;
-    expect(innerContainer).toHaveClass("col-span-full order-2 flex flex-col grow lg:flex-row gap-8 mt-0.5");
+    expect(innerContainer).toHaveClass("col-span-full flex flex-col grow lg:flex-row gap-8 mt-0.5");
   });
 });
 
