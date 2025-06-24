@@ -1,6 +1,5 @@
 // TODO - Remove once ts lint has been unified across packages
-/* eslint-disable @typescript-eslint/require-await */
-/* eslint-disable @typescript-eslint/unbound-method */
+
 // ---- Test subject
 import { ClearTextGithubOrgProvider, ClientType, GHUserRequestPayload } from "../Providers/clearTextGithubOrg.js";
 

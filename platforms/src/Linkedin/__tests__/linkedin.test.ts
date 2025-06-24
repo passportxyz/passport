@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/require-await */
-/* eslint-disable @typescript-eslint/unbound-method */
 // ---- Test subject
 import { LinkedinProvider } from "../../Linkedin/Providers/linkedin.js";
 

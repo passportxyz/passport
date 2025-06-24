@@ -11,18 +11,41 @@ export const PlatformDetails: PlatformSpec = {
   website: "https://www.civic.com",
 };
 
+// Check if current date is past the deprecation dates
+const currentDate = new Date();
+const captchaDeprecationDate = new Date("2025-07-01");
+const uniquenessLivenessDeprecationDate = new Date("2025-07-31");
+
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "CAPTCHA Pass",
-    providers: [{ title: "holds a Civic CAPTCHA Pass", name: "CivicCaptchaPass" }],
+    providers: [
+      {
+        title: "holds a Civic CAPTCHA Pass",
+        name: "CivicCaptchaPass",
+        isDeprecated: currentDate >= captchaDeprecationDate,
+      },
+    ],
   },
   {
     platformGroup: "Uniqueness Pass",
-    providers: [{ title: "holds a Civic Uniqueness Pass", name: "CivicUniquenessPass" }],
+    providers: [
+      {
+        title: "holds a Civic Uniqueness Pass",
+        name: "CivicUniquenessPass",
+        isDeprecated: currentDate >= uniquenessLivenessDeprecationDate,
+      },
+    ],
   },
   {
     platformGroup: "Liveness Pass",
-    providers: [{ title: "holds a Civic Liveness Pass", name: "CivicLivenessPass" }],
+    providers: [
+      {
+        title: "holds a Civic Liveness Pass",
+        name: "CivicLivenessPass",
+        isDeprecated: currentDate >= uniquenessLivenessDeprecationDate,
+      },
+    ],
   },
 ];
 

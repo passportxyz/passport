@@ -59,7 +59,6 @@ describe("AccountAnalysis Providers", () => {
 
       expect(payload.valid).toBe(expected);
       if (expected) {
-        // eslint-disable-next-line jest/no-conditional-expect
         expect(payload.record).toEqual({ address: mockAddress });
       }
     });
@@ -80,7 +79,7 @@ describe("AccountAnalysis Providers", () => {
       const response2 = await getZkSyncAnalysis(mockAddress, mockContext);
       expect(response1.humanProbability).toEqual(80);
       expect(response2.humanProbability).toEqual(80);
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       expect(axios.post).toHaveBeenCalledTimes(1);
     });
   });

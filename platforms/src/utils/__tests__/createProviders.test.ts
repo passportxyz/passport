@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { PLATFORM_ID, PROVIDER_ID, ProviderContext, RequestPayload } from "@gitcoin/passport-types";
 import { SimpleProvider } from "../simpleProvider.js";
 import { createProviders } from "../createProviders.js";
