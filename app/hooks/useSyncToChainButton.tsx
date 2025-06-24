@@ -8,15 +8,7 @@ import { useCustomization } from "./useCustomization";
 import { useIssueAttestation, useAttestationNonce } from "./useIssueAttestation";
 import { useAccount } from "wagmi";
 
-export const useSyncToChainButton = ({
-  chain,
-  onChainStatus,
-  getButtonMsg,
-}: {
-  chain?: Chain;
-  onChainStatus: OnChainStatus;
-  getButtonMsg: (onChainStatus: OnChainStatus) => string;
-}) => {
+export const useSyncToChainButton = ({ chain, onChainStatus }: { chain?: Chain; onChainStatus: OnChainStatus }) => {
   const { failure } = useMessage();
 
   const { passport } = useContext(CeramicContext);
@@ -97,23 +89,14 @@ export const useSyncToChainButton = ({
   );
 
   const isActive = chain?.attestationProvider?.status === "enabled";
-  const disableBtn = !isActive || onChainStatus === OnChainStatus.MOVED_UP_TO_DATE;
 
   const onClick = () => onInitiateSyncToChain(passport);
-
-  const className = disableBtn ? "cursor-not-allowed" : "";
-  const disabled = disableBtn;
-
-  const text = isActive ? getButtonMsg(onChainStatus) : "Coming Soon";
 
   return {
     syncingToChain,
     needToSwitchChain: isActive && onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE && needToSwitchChain,
-    text,
     props: {
       onClick,
-      className,
-      disabled,
     },
   };
 };

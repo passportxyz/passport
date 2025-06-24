@@ -22,7 +22,7 @@ export function NetworkCard({ chain }: { chain: Chain }) {
 
   const expired = status === OnChainStatus.MOVED_EXPIRED;
   const showButton = status === OnChainStatus.MOVED_EXPIRED || status === OnChainStatus.NOT_MOVED;
-  let background = "bg-hmnBackground";
+  let background = "bg-background";
 
   if (isOnChain) {
     if (expired) {
