@@ -1,5 +1,5 @@
 // TODO - Remove once ts lint has been unified across packages
-/* eslint-disable @typescript-eslint/require-await */
+
 // ---- Test subject
 import { ClearTextTwitterProvider } from "../Providers/clearTextTwitter.js";
 

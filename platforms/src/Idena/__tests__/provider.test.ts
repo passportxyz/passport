@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
-/* eslint-disable @typescript-eslint/require-await */
-
 import { RequestPayload } from "@gitcoin/passport-types";
 import { IdenaContext } from "../procedures/idenaSignIn.js";
 import { initCacheSession, loadCacheSession } from "../../utils/platform-cache.js";

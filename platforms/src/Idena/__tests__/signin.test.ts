@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
-/* eslint-disable @typescript-eslint/require-await */
-
 import { authenticate, loadIdenaSession } from "../procedures/idenaSignIn.js";
 import { clearCacheSession, initCacheSession, loadCacheSession } from "../../utils/platform-cache.js";
 

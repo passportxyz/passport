@@ -44,10 +44,7 @@ describe("Attempt verification", function () {
         return await nftProvider.verify({
           address: MOCK_ADDRESS,
         } as unknown as RequestPayload);
-      }).rejects.toThrow(
-        // eslint-disable-next-line quotes
-        new Error("bad request")
-      );
+      }).rejects.toThrow(new Error("bad request"));
 
       // Check the request to get the NFTs
       expect(axios.get).toHaveBeenCalledTimes(1);
