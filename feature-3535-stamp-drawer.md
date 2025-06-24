@@ -30,6 +30,10 @@ This feature enhances the Stamp verification drawer with two new layout variants
    - Points value display
    - Optional: Time to Get
    - Optional: Price
+6. **Call-to-Action (CTA) Button**
+   - Custom CTA text (e.g., "Identity Staking") when specified
+   - Falls back to "Verify" button if no custom CTA defined
+   - Different styling for custom CTAs (rounded pill button with external link icon)
 
 ### Variant 1 - Multiple Credentials
 - Optimized for Stamps with many verification options
@@ -283,13 +287,24 @@ interface PointsModuleProps {
   // Pre-verification props
   timeToGet?: string;
   price?: string;
+  totalPossiblePoints?: number;
   // Post-verification props
   pointsGained?: number;
   validityDays?: number;
 }
 ```
-- Pre-verification: Shows time and price in side-by-side layout
-- Post-verification: Shows points gained with validity indicator
+
+**Pre-verification Display:**
+- Large "0/X points gained" text with progress bar below
+- Gray progress bar showing 0% completion
+- Time and price info displayed below in separate sections with icons
+- Clean, minimal layout focusing on potential points
+
+**Post-verification Display:**  
+- Green background card showing "X/Y points gained"
+- Progress bar showing completion percentage
+- Validity period indicator (e.g., "Valid for 90 more days")
+- Success state with enhanced visual feedback
 
 #### CredentialCard Component
 ```typescript
@@ -441,6 +456,7 @@ interface PlatformConfig {
   icon: string;
   description: string;
   drawerVariant: 1 | 2;
+  cta?: string; // Custom Call-to-Action text (e.g., "Identity Staking")
   // Variant 1 specific
   credentialGroups?: CredentialGroup[];
   // Variant 2 specific
@@ -561,6 +577,20 @@ A fully functional test implementation has been created in the `test-components/
 
 The drawer now uses a responsive column system that adapts based on viewport width and content:
 
+### Multi-Column Layout Rules
+
+#### Desktop Layouts (768px+)
+- **Description/CTA Section**: Takes up flexible space (up to 2 columns worth)
+- **Points/Cost Box**: Fixed width of 1 column (w-80 = 320px)
+- **Layout**: Horizontal flex container with 8-unit gap
+  - Left: Description text + CTA buttons
+  - Right: Points module with constrained width
+
+#### Mobile Layout (<768px)
+- **All elements stack vertically**
+- Points module appears below description and CTA buttons
+- Full width for all elements
+
 ### 1-Column Layout (Mobile/Narrow)
 - **When**: Viewport < 768px or narrow desktop drawer
 - **Structure** (top to bottom):
@@ -601,28 +631,35 @@ The drawer now uses a responsive column system that adapts based on viewport wid
      - Multi-column: Top-right of stamp section
 
 2. **Points/Score Module Placement**:
-   - Shows after or alongside title/description
+   - **Desktop**: Right side of description/CTA section in a fixed-width container (320px)
+   - **Mobile**: Below description/CTA section, full width
    - Pre-verification: Shows Time to Get + Price
    - Post-verification: Shows points gained + validity period
 
-3. **Scrolling Behavior**:
+3. **Description/CTA Layout**:
+   - **Desktop**: Flexible width (flex-1), takes remaining space after points module
+   - **Mobile**: Full width, stacked above points module
+   - Contains description text and action buttons (custom CTA or Verify)
+
+4. **Scrolling Behavior**:
    - 1-column: Entire body scrolls as one
    - Multi-column: Stamps and steps have independent scroll containers
 
-4. **Header Distribution**:
-   - In multi-column layouts, the title/description/points/action buttons are positioned above the stamps section only
+5. **Header Distribution**:
+   - In multi-column layouts, the description/CTA and points module form a horizontal layout
    - Steps section (when present) starts at the same top level as stamps
 
-5. **Layout Selection Logic**:
+6. **Layout Selection Logic**:
    - Check viewport width
    - Check if stamp has steps (guided flow)
    - Check number of stamps
    - Apply appropriate layout based on these factors
 
-6. **Implementation Notes**:
+7. **Implementation Notes**:
    - Use Tailwind's responsive modifiers (`sm:`, `md:`, `lg:`, `xl:`) for breakpoints
-   - Avoid manual media queries or custom breakpoint logic
-   - Let Tailwind handle responsive behavior with its built-in system
+   - Points module uses `flex-shrink-0 w-80` for fixed width on desktop
+   - Description section uses `flex-1` to take remaining space
+   - Mobile uses stacked layout with `mt-6` spacing
 
 ### Visual Reference:
 - See `./size-variant-drawers.png` for layout examples
@@ -664,5 +701,138 @@ The drawer now uses a responsive column system that adapts based on viewport wid
 - [ ] Add proper scroll containers for multi-column views
 - [ ] Test all breakpoints with browser resize
 - [ ] Verify layout selection logic works as expected
+
+## Implementation Status (Dec 2024)
+
+### Completed Fixes ✅
+1. **3-Column Layout for Steps Version**
+   - Wide desktop view now correctly shows 2 stamp columns + 1 steps column
+   - Stamps use `grid-cols-2` in wide view when steps are present
+
+2. **Stamp Grid Constraints**
+   - Stamps properly constrained to single cells
+   - Grid automatically adjusts: 1 → 2 → 3 columns based on viewport
+
+3. **Title Section Positioning**
+   - Header (title + close button) now contained within stamp column
+   - Only title and close button are fixed; all other content scrolls
+
+4. **Mobile Layout Order**
+   - Steps now appear before stamps in mobile view
+   - Proper content hierarchy maintained
+
+5. **Scrolling Behavior**
+   - Fixed header contains only title and close button
+   - Description, actions, points module, and stamps all scroll together
+   - Steps column has independent scroll with fixed "Step by step Guide" header
+
+6. **Verified State Behavior**
+   - Steps column completely hidden when stamp is verified
+   - Stamps column expands to full width
+   - No empty space where steps used to be
+
+7. **StampSection Component Implementation** (Dec 2024)
+   - Created new `StampSection` component to handle stamp column layouts
+   - Component takes a single `cols` prop (1, 2, or 3) representing stamp grid columns
+   - Automatically determines description/points layout based on available columns:
+     - `cols=1`: Stack description and points vertically (no horizontal space)
+     - `cols>1`: Display description and points side-by-side
+   - Parent components calculate appropriate column count based on:
+     - Viewport size (mobile/desktop/wide)
+     - Whether steps are shown alongside stamps
+     - Available space in the drawer
+   - Clean abstraction: StampSection doesn't need to know about viewport or steps
+
+### Current Test Coverage
+- Layout issue tests for all responsive breakpoints
+- Visual regression tests for all scenarios and viewports
+- Scrolling behavior tests
+- Conditional rendering tests (verified state)
+- Interaction tests (verify button, close button)
+- StampSection component tests for different column configurations
+
+### Testing Strategy
+Due to repeated issues with fixing one thing and breaking another, implementing UI tests would help ensure consistent behavior across all responsive breakpoints and layout variants.
+
+### Test File Management Rule
+**IMPORTANT**: Only maintain ONE test HTML file at a time. When making changes:
+1. Always use `stamp-drawer-unified.html` as the main test file
+2. Delete or archive old test files to avoid confusion
+3. All changes should be made to this single file
+4. This prevents working on the wrong file and losing changes
+
+### Test-Driven Development (TDD) Approach
+**RECOMMENDED**: Use TDD for all UI changes to prevent regression and ensure fixes work correctly:
+
+1. **Write the test first** - Add Playwright tests that describe the expected behavior
+2. **Run the test** - Verify it fails (red phase)
+3. **Implement the fix** - Make minimal changes to make the test pass
+4. **Verify visually** - Use Playwright browser automation to take screenshots
+5. **Refactor if needed** - Clean up the code while keeping tests green
+
+#### Example TDD Workflow:
+```bash
+# 1. Add test for new behavior
+# Edit: playwright-tests/stamp-drawer.spec.ts
+
+# 2. Run specific test
+cd test-components
+npm test -- --grep "steps column should be hidden when verified"
+
+# 3. Implement fix in stamp-drawer-unified.html
+
+# 4. Run test again to verify it passes
+npm test -- --grep "steps column should be hidden when verified"
+
+# 5. Run all tests to ensure no regression
+npm test
+```
+
+This approach has proven effective for catching layout issues early and ensuring fixes don't break other functionality.
+
+### Playwright Test Structure
+The test suite is organized into logical groups:
+
+```
+playwright-tests/stamp-drawer.spec.ts
+├── Layout Issues (original problems)
+│   ├── 3-column layout verification
+│   ├── Stamp grid constraints
+│   ├── Title positioning
+│   └── Mobile layout order
+├── Visual Regression Tests
+│   └── All scenarios × all viewports
+├── Scrolling Behavior
+│   ├── Guided flow column scrolling
+│   ├── Multi-credential content scrolling
+│   └── Steps column visibility when verified
+├── StampSection Component Tests
+│   ├── Column-based layout logic
+│   ├── Description/points stacking behavior
+│   └── Responsive grid adjustments
+└── Interaction Tests
+    ├── Verify button functionality
+    └── Close button positioning
+```
+
+### Running Tests
+```bash
+# Install dependencies (first time only)
+cd test-components
+npm install
+npm run install:playwright
+
+# Run all tests
+npm test
+
+# Run with UI (recommended for debugging)
+npm run test:ui
+
+# Run specific test file
+npm run test:specific
+
+# View HTML report after test run
+npm run test:report
+```
 
 

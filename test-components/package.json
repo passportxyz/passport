@@ -1,0 +1,19 @@
+{
+  "name": "stamp-drawer-tests",
+  "version": "1.0.0",
+  "description": "Playwright tests for stamp drawer UI",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:specific": "playwright test stamp-drawer.spec.ts",
+    "install:playwright": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0"
+  },
+  "type": "module"
+}
