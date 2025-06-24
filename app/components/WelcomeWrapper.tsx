@@ -76,14 +76,14 @@ export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
           </div>
 
           <div className="flex grow flex-col justify-between gap-4 z-10">
-            <div className="font-heading text-4xl md:text-5xl lg:text-7xl text-foreground-2 ">{content.header}</div>
-            <div className="flex justify-center gap-2 text-l text-color-2 ">
+            <div className="font-heading text-4xl md:text-5xl lg:text-7xl text-color-4">{content.header}</div>
+            <div className="flex justify-center gap-2 text-l text-color-9">
               {content.subHeaderIconSrc ? (
                 <img className="h-9 w-9" src={content.subHeaderIconSrc} alt="Subheader Icon" />
               ) : null}
               <p>{content.subHeader}</p>
             </div>
-            <div>{children}</div>
+            <div className="text-color-9">{children}</div>
             <WelcomePageButtons {...content.buttonsConfig} />
           </div>
         </div>
@@ -155,7 +155,7 @@ const WelcomePageButtons = ({
       </div>
 
       {showSkipNextTime ? (
-        <div className="mt-8 flex justify-center md:justify-start">
+        <div className="mt-8 flex justify-center md:justify-start text-color-9">
           <Checkbox
             id="skip-next-time"
             checked={skipNextTime}
@@ -170,7 +170,7 @@ const WelcomePageButtons = ({
               }
             }}
           />
-          <label htmlFor="skip-next-time" className="pl-2 font-alt text-sm">
+          <label htmlFor="skip-next-time" className="pl-2 text-sm">
             Skip this screen next time
           </label>
         </div>

@@ -4,7 +4,6 @@ import { PlatformGroupSpec } from "@gitcoin/passport-platforms";
 import { CeramicContext } from "../context/ceramicContext";
 import { ScorerContext } from "../context/scorerContext";
 import { useCustomization } from "../hooks/useCustomization";
-import { customSideBarGradient } from "./PlatformDetails";
 
 type StampSelectorProps = {
   currentProviders: PlatformGroupSpec[] | undefined;
@@ -15,7 +14,7 @@ const checkMark = () => (
   <svg className="inline-block" width="13" height="9" viewBox="0 0 13 9" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
       d="M1.74412 4.33333L4.32795 8L11.0122 1"
-      stroke="#C1F6FF"
+      stroke="#454545"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -41,7 +40,7 @@ const ProviderTitle = ({
       {isVerified && checkMark()} {title}
     </span>
     {isExpired && (
-      <span className="text-xs bg-background-5 px-1 rounded text-right font-alt text-black" data-testid="expired-label">
+      <span className="text-xs bg-background-5 px-1 rounded text-right text-black" data-testid="expired-label">
         Expired
       </span>
     )}
@@ -53,7 +52,7 @@ const ProviderTitle = ({
         className="no-underline"
       >
         <span
-          className="text-xs bg-foreground-7 px-1 rounded text-right font-alt text-color-4 cursor-pointer hover:bg-foreground-6 transition-colors"
+          className="text-xs bg-foreground-7 px-1 rounded text-right text-color-4 cursor-pointer hover:bg-foreground-6 transition-colors"
           data-testid="deduped-label"
         >
           Claimed by another wallet
@@ -123,20 +122,20 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
                   <React.Fragment key={provider.name}>
                     <div
                       data-testid={`indicator-${provider.name}`}
-                      className={`relative rounded border-foreground-2 text-base flex justify-between items-stretch border text-color-1 mt-4 `}
+                      className={`relative rounded text-base flex justify-between items-stretch border mt-4 text-gray-800`}
                     >
-                      <div className={`p-4 border-r w-3/4 ${customSideBarGradient}`}>
+                      <div className={`p-4 border-r w-3/4`}>
                         <ProviderTitle
                           title={provider.title}
                           isVerified={isVerified}
                           isExpired={isExpired}
                           isDeduplicated={isDeduplicated}
-                          className="font-bold text-color-6"
+                          className="font-bold"
                         />
                         {provider.description && <p className="my-2 text-sm leading-tight">{provider.description}</p>}
                       </div>
 
-                      <div className="bg-gradient-to-r from-foreground-2 to-foreground-4 w-1/4 flex items-center text-background-4 py-3">
+                      <div className="w-1/4 flex items-center py-3">
                         <p className="text-2xl text-center w-full text-s leading-none">
                           <span className="font-bold">{isDeduplicated ? "0" : weight}</span> <br />
                           <span className="text-base">points</span>
@@ -151,7 +150,7 @@ export function StampSelector({ currentProviders, verifiedProviders }: StampSele
                   <React.Fragment key={provider.name}>
                     <div
                       data-testid={`indicator-${provider.name}`}
-                      className={`relative rounded border-color-3 text-base text-color-3 flex justify-between items-stretch border mt-4 `}
+                      className={`relative rounded border-color-3 text-base flex justify-between items-stretch border mt-4 `}
                     >
                       <div className="p-4 border-r w-3/4">
                         <p>{provider.title}</p>

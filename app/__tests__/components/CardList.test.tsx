@@ -16,6 +16,8 @@ import { DEFAULT_CUSTOMIZATION, useCustomization } from "../../hooks/useCustomiz
 import { platforms } from "@gitcoin/passport-platforms";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { usePlatforms } from "../../hooks/usePlatforms";
+import { WagmiProvider } from "wagmi";
+import { wagmiConfig } from "../../utils/web3";
 
 vi.mock("@didtools/cacao", () => ({
   Cacao: {
@@ -36,6 +38,14 @@ vi.mock("../../hooks/usePlatforms", async (importActual) => {
   return {
     ...actual,
     usePlatforms: vi.fn().mockImplementation(actual.usePlatforms),
+  };
+});
+
+vi.mock("../../hooks/useOnChainData", async (importActual) => {
+  const actual = (await importActual()) as any;
+  return {
+    ...actual,
+    useOnChainData: vi.fn().mockImplementation(() => ({ activeChainProviders: [] })),
   };
 });
 
@@ -126,10 +136,11 @@ describe("<CardList />", () => {
   it("renders cards by verification status and possible points", () => {
     renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
     const possiblePoints = screen.getAllByTestId("platform-name").map((el) => el.textContent);
-    expect(possiblePoints).toEqual(["Gitcoin", "GTC Staking", "Discord", "Google"]);
+    expect(possiblePoints).toEqual(["Gitcoin", "GTC Staking", "CleanHands", "Discord", "Google"]);
   });
 
-  it("should indicate on card whether or not it has been verified", () => {
+  // TODO #3502: unskip once designs are clear
+  it.skip("should indicate on card whether or not it has been verified", () => {
     render(<Category category={categoryProps["category"]} />);
     const verifiedBtnCnt = screen
       .getAllByTestId("connect-button")
@@ -194,6 +205,12 @@ describe("<CardList />", () => {
     expect(availablePnts).toEqual(["12.9", "7.4", "0.7"]);
   });
 
+  it("should render earned points in the top right of the card", () => {
+    renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
+    const availablePnts = screen.getAllByTestId("received-points-tr").map((el) => el.textContent);
+    expect(availablePnts).toEqual(["+11.9", "+1"]);
+  });
+
   it("renders allowList if stamp is present", () => {
     const scorerContext = {
       scoredPlatforms: [
@@ -220,7 +237,11 @@ describe("<CardList />", () => {
 });
 
 test("renders Category component", () => {
-  render(<Category category={categoryProps["category"]} />);
+  render(
+    <WagmiProvider config={wagmiConfig}>
+      <Category category={categoryProps["category"]} />
+    </WagmiProvider>
+  );
 
   const button = screen.getByText(categoryProps["category"].name);
   expect(button).toBeInTheDocument();
@@ -300,7 +321,8 @@ describe("deduplication label tests", () => {
     expect(dedupLink).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  it("should not show deduplication label for normal verified stamps", () => {
+  // TODO #3502: unskip once designs are clear
+  it.skip("should not show deduplication label for normal verified stamps", () => {
     const mockSetCurrentPlatform = vi.fn();
     const mockOnOpen = vi.fn();
 

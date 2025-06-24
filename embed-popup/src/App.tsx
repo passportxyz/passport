@@ -16,9 +16,6 @@ const generateRandomState = (): string => {
 // the provider name will be received as a query parameter
 
 const getOAuthUrl = async (state: string, platformName: PLATFORM_ID): Promise<string> => {
-  console.log("geri getOAuthUrl", platformName);
-  console.log("geri state", state);
-
   const platform = defaultPlatformMap.get(platformName)?.platform;
   if (platform) {
     return platform.getOAuthUrl(state);
@@ -140,7 +137,6 @@ function App() {
             // Make the verify call
             const response = await fetchVerifiableCredential(verifyEndpoint, payload, _apiKey);
 
-            console.log("geri Verification response:", response);
             console.log("Verification response:", response);
             setStep("Verification successful!");
             setVerificationResponse(response);

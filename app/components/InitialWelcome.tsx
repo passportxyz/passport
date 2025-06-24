@@ -81,7 +81,7 @@ export const InitialWelcome = ({
       stampIcon: "./assets/passport-flash.svg",
       body: (
         <p>
-          <span className="text-color-6 font-bold">Verify your identity with just one click.</span> Our system will
+          <span className="text-color-9 font-bold">Verify your identity with just one click.</span> Our system will
           check your ETH account for activities that match our Stamp criteria. This quick verification is your first
           step into a broader Web3 world, giving you immediate access to what you qualify for today. To keep up with our
           90 day default expiry period for Stamps, you can re-verify whenever you need.

@@ -49,6 +49,7 @@ export type Customization = {
   partnerName: string;
   useCustomDashboardPanel: boolean;
   dashboardPanel: {
+    customDashboardPanelTitle?: string;
     logo: {
       image: React.ReactNode;
       caption?: React.ReactNode;
@@ -98,6 +99,7 @@ type CustomizationResponse = {
     text?: string;
   };
   dashboardPanel?: {
+    customDashboardPanelTitle?: string;
     logo?: {
       image?: string;
       caption?: string;
@@ -170,6 +172,7 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
       text: customizationResponse.scorerPanel?.text,
     },
     dashboardPanel: {
+      customDashboardPanelTitle: customizationResponse.dashboardPanel?.customDashboardPanelTitle,
       logo: {
         image: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.logo?.image || ""} />,
         caption: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.logo?.caption || ""} />,

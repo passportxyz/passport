@@ -12,7 +12,7 @@ export type CustomToastProps = {
 // This content overrides Chakra UI Toast style in render function
 export const DoneToastContent = ({ title, icon, result, testId, message = false }: CustomToastProps): JSX.Element => {
   return (
-    <div className="rounded-md bg-color-1 text-background-2" data-testid={`toast-done-${testId}`}>
+    <div className="rounded-md bg-color-6 text-background-2 shadow-md" data-testid={`toast-done-${testId}`}>
       <div className="flex p-4">
         <div className="mr-2">
           <div className="mt-1 cursor-not-allowed rounded-full">

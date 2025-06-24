@@ -14,7 +14,7 @@ const Checkbox = ({ className, ...props }: CheckboxProps) => {
   return (
     <Switch
       className={`group flex h-5 w-5 items-center justify-center rounded-sm
-        border-foreground focus:border focus:border-foreground-2
+        border-foreground-7 focus:border focus:border-foreground-2
         disabled:bg-foreground-3 enabled:ui-checked:bg-foreground-4
         enabled:ui-not-checked:border enabled:ui-not-checked:bg-background
         ${className}`}

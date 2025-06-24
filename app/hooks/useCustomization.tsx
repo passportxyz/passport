@@ -11,6 +11,7 @@ export const DEFAULT_CUSTOMIZATION: Customization = {
   partnerName: "",
   useCustomDashboardPanel: false,
   dashboardPanel: {
+    customDashboardPanelTitle: "",
     logo: {
       image: null,
     },

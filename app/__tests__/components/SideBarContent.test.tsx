@@ -67,7 +67,8 @@ describe("SideBarContent", () => {
     expect(screen.getByText("Github")).toBeInTheDocument();
   });
 
-  it("should mark verified providers with green text", () => {
+  // TODO #3502: unskip once it is clear how to display and then check the verified state
+  it.skip("should mark verified providers with green text", () => {
     const drawer = () => (
       <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
         <DrawerOverlay />

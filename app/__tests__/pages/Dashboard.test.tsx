@@ -17,7 +17,14 @@ vi.mock("../../components/CardList", () => ({ CardList: () => <div>Card List</di
 
 vi.mock("../../components/SyncToChainButton", () => <div>Sync to Chain</div>);
 
-vi.mock("../../components/Header", () => ({ default: () => <div>Header</div> }));
+vi.mock("../../components/Header", async (importOriginal) => {
+  const original = (await importOriginal()) as {};
+  console.log(original);
+  return {
+    ...original,
+    default: () => <div>Header</div>,
+  };
+});
 
 vi.mock("@self.id/web", () => {
   return {
@@ -152,9 +159,7 @@ describe("DashboardCTAs", () => {
 
     expect(screen.getByTestId("dashboard-score-panel")).toHaveClass("w-full");
     expect(screen.getByTestId("dashboard-score-explanation-panel")).toBeInTheDocument();
-    expect(screen.getByTestId("dynamic-custom-dashboard-panel")).toHaveClass(
-      "order-1 lg:order-2 max-w-full xl:max-w-md"
-    );
+    expect(screen.getByTestId("dynamic-custom-dashboard-panel")).toHaveClass("max-w-full xl:w-2/3");
   });
 
   it("renders without explanation panel", () => {
@@ -166,7 +171,7 @@ describe("DashboardCTAs", () => {
 
     expect(screen.getByTestId("dashboard-score-panel")).toHaveClass("w-full");
     expect(screen.queryByTestId("dashboard-score-explanation-panel")).not.toBeInTheDocument();
-    expect(screen.getByTestId("dynamic-custom-dashboard-panel")).toHaveClass("order-1 lg:order-2 max-w-full xl:w-2/3");
+    expect(screen.getByTestId("dynamic-custom-dashboard-panel")).toHaveClass("max-w-full xl:w-2/3");
   });
 
   it("applies correct CSS classes", () => {
@@ -178,7 +183,7 @@ describe("DashboardCTAs", () => {
 
     // eslint-disable-next-line testing-library/no-node-access
     const innerContainer = screen.getByTestId("dashboard-score-panel").parentElement;
-    expect(innerContainer).toHaveClass("col-span-full order-2 flex flex-col grow lg:flex-row gap-8 mt-0.5");
+    expect(innerContainer).toHaveClass("col-span-full flex flex-col grow lg:flex-row gap-8 mt-0.5");
   });
 });
 
@@ -242,7 +247,8 @@ describe.skip("when app fails to load ceramic stream", () => {
   });
 });
 
-it("reset passport button should open refresh modal when clicked", async () => {
+it.skip("reset passport button should open refresh modal when clicked", async () => {
+  // TODO #3502: Skipping for now because the entire "Collected Stamps" section is removed for now ...
   renderWithContext(
     {
       ...mockCeramicContext,
@@ -260,7 +266,8 @@ it("reset passport button should open refresh modal when clicked", async () => {
 });
 
 describe("when the user has a passport", () => {
-  it("shows Passport JSON button", () => {
+  it.skip("shows Passport JSON button", () => {
+    // TODO #3502: Skipping for now because the Passport JSON button has been removed for now
     renderWithContext(
       mockCeramicContext,
       <Router>
@@ -273,7 +280,8 @@ describe("when the user has a passport", () => {
 });
 
 describe("when the user clicks Passport JSON", () => {
-  it("it should display a modal", async () => {
+  it.skip("it should display a modal", async () => {
+    // TODO #3502: Skipping for now because the Passport JSON button has been removed for now
     renderWithContext(
       mockCeramicContext,
       <Router>

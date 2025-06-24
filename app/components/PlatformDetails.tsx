@@ -42,9 +42,9 @@ const PlatformJsonButton = ({
         <>
           <Popover.Button className="ml-auto p-2">
             <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="2" cy="2" rx="2" ry="2" fill="white" />
-              <ellipse cx="2" cy="8" rx="2" ry="2" fill="white" />
-              <ellipse cx="2" cy="13.7998" rx="2" ry="2" fill="white" />
+              <ellipse cx="2" cy="2" rx="2" ry="2" fill="#32325d" />
+              <ellipse cx="2" cy="8" rx="2" ry="2" fill="#32325d" />
+              <ellipse cx="2" cy="13.7998" rx="2" ry="2" fill="#32325d" />
             </svg>
           </Popover.Button>
           <Transition
@@ -56,7 +56,7 @@ const PlatformJsonButton = ({
             leaveFrom="opacity-100 translate-y-0"
             leaveTo="opacity-0 translate-y-1"
           >
-            <Popover.Panel className="absolute w-48 right-1 bg-background flex flex-col justify-start text-left p-4 rounded">
+            <Popover.Panel className="absolute w-48 right-1 bg-background flex flex-col justify-start text-left p-4 rounded shadow-lg border">
               <button onClick={() => setStampDetailsModal(true)} className="w-full text-left">
                 Stamp Details
               </button>
@@ -97,22 +97,20 @@ const ExpirationIndicator = ({ expirationDate }: { expirationDate: Date | string
     return (
       <div
         className="pl-4 flex items-center text-color-7 border-t-0 rounded-t-none rounded-b-lg py-2
-        border border-background-5 bg-gradient-to-b from-background to-background-5/30"
+        border border-foreground-5"
       >
         Stamp expired
       </div>
     );
   } else {
     return (
-      <div className="pl-4 flex items-center text-color-6 bg-gradient-to-b from-background via-background to-[#082F2A] border border-t-0 rounded-t-none rounded-b-lg border-foreground-5 py-2">
+      <div className="pl-4 flex items-center border border-t-0 rounded-t-none rounded-b-lg border-foreground-5 py-2">
         <span className={`text-3xl pr-2 ${statusClass}`}>{daysUntilExpiration}</span>{" "}
         {daysUntilExpiration === 1 ? "day" : "days"} until Stamps expire
       </div>
     );
   }
 };
-
-export const customSideBarGradient = "bg-gradient-to-b from-background via-background to-[#082F2A]";
 
 export const PlatformDetails = ({
   currentPlatform,
@@ -176,14 +174,14 @@ export const PlatformDetails = ({
       </>
     ) : (
       <>
-        <div className="mt-4 border-foreground-5 border rounded-t-lg px-4 py-2 bg-gradient-to-b from-background via-background to-[#082F2A]">
+        <div className="mt-4 border-foreground-5 border rounded-t-lg px-4 py-2">
           <div className="flex justify-between">
-            <p className="text-color-6">points gained</p>
-            <p className="text-color-2">points left</p>
+            <p>points gained</p>
+            <p>points left</p>
           </div>
           <div className="flex justify-between text-5xl">
-            <p className="text-color-6">{pointsGained}</p>
-            <p className="text-color-2">{pointsAvailable}</p>
+            <p>{pointsGained}</p>
+            <p>{pointsAvailable}</p>
           </div>
           <ProgressBar pointsGained={pointsGained} pointsAvailable={pointsAvailable} />
         </div>
@@ -200,7 +198,7 @@ export const PlatformDetails = ({
   ]);
 
   return (
-    <div className="w-full text-color-1">
+    <div className="w-full">
       <div className="flex w-full items-center justify-between">
         <div className="flex">
           <img alt="Platform Image" className="h-10 w-10" src={currentPlatform?.icon} />

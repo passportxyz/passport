@@ -2,7 +2,7 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { GitcoinContributorStatisticsProvider } from "./Providers/index.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/gtcGrantsLightIcon.svg",
+  icon: "./assets/gtcGrantsDarkIcon.svg",
   platform: "Gitcoin",
   name: "Gitcoin",
   description: "Verify your participation in Gitcoin Grants rounds.",

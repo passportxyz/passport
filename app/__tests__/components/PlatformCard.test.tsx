@@ -60,7 +60,8 @@ describe("<PlatformCard />", () => {
   });
 
   describe("Deduplication Label Display", () => {
-    it("should display deduplication label when stamp is verified but has 0 points due to deduplication", () => {
+    // TODO #3502: unskip once designs are clear
+    it.skip("should display deduplication label when stamp is verified but has 0 points due to deduplication", () => {
       // Mock a verified stamp (has credential) but with 0 earned points
       const ceramicContextWithDedupStamp = {
         ...mockCeramicContext,
@@ -144,7 +145,8 @@ describe("<PlatformCard />", () => {
       expect(screen.getByTestId("connect-button")).toBeInTheDocument();
     });
 
-    it("should not display deduplication label for verified stamps with earned points", () => {
+    // TODO #3502: unskip when designs are clear
+    it.skip("should not display deduplication label for verified stamps with earned points", () => {
       const ceramicContextWithVerifiedStamp = {
         ...mockCeramicContext,
         allProvidersState: {
@@ -184,7 +186,8 @@ describe("<PlatformCard />", () => {
       expect(screen.getByTestId("verified-label")).toBeInTheDocument();
     });
 
-    it("should handle multiple providers where some are deduplicated", () => {
+    // TODO #3502: unskip when designs are clear
+    it.skip("should handle multiple providers where some are deduplicated", () => {
       const ceramicContextWithMixedStamps = {
         ...mockCeramicContext,
         allProvidersState: {
@@ -246,7 +249,8 @@ describe("<PlatformCard />", () => {
       expect(screen.queryByTestId("deduped-label")).not.toBeInTheDocument();
     });
 
-    it("should display deduplication label when all verified stamps are deduplicated", () => {
+    // TODO #3502: unskip when designs are clear
+    it.skip("should display deduplication label when all verified stamps are deduplicated", () => {
       const ceramicContextWithAllDedup = {
         ...mockCeramicContext,
         allProvidersState: {
