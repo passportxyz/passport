@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "yarn lint",
+      "yarn test"
+    ],
+    "deny": []
+  }
+}

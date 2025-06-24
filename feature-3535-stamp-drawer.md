@@ -471,12 +471,16 @@ interface StepConfig {
 
 ### 3.7 Styling Strategy
 - Leverage existing design tokens and Tailwind classes
+- **Use Tailwind's built-in responsive modifiers** for all media queries:
+  - `sm:`, `md:`, `lg:`, `xl:` prefixes instead of custom breakpoints
+  - Example: `grid-cols-1 md:grid-cols-2 lg:grid-cols-3`
+  - No custom CSS media queries needed
 - New credential state classes:
   - Verified: `bg-green-50` with `border-green-200`
   - Expired flag: Badge or label overlay on verified card
   - Deduplicated flag: Badge or label overlay on verified card
 - Maintain consistent spacing and typography
-- Ensure responsive design for mobile/tablet views
+- Ensure responsive design for mobile/tablet views using Tailwind's responsive utilities
 
 ## Phase 4: Integration Plan
 
@@ -538,82 +542,127 @@ interface StepConfig {
 - Improved accessibility scores
 - Faster load times despite richer content
 
-## Test Component Implementation
+## Test Component Implementation ✅
 
-### Overview
-A fully functional test implementation has been created in the `test-components/` directory to validate the design before integration. This isolated environment allows for rapid iteration with designers and stakeholders.
+### Completed
+A fully functional test implementation has been created in the `test-components/` directory to validate the design before integration.
 
-### Test Component Structure
-```
-test-components/
-├── StampDrawerTest.tsx          # Main test harness with scenario controls
-├── StampDrawerTest.css          # Theme CSS with Tailwind utilities
-├── MultiCredentialView.tsx      # Variant 1 implementation
-├── GuidedFlowView.tsx          # Variant 2 implementation
-├── shared/
-│   ├── CredentialCard.tsx      # Credential card component
-│   ├── PointsModule.tsx        # Points/time/price display
-│   └── StepGuide.tsx           # Step-by-step guide component
-└── mockData/
-    ├── variant1Data.ts         # Ethereum test scenarios
-    └── variant2Data.ts         # Clean Hands test scenarios
-```
+**Final Test Component**: `test-components/stamp-drawer-responsive-v2.html`
 
 ### Key Features Implemented
-1. **Multiple Test Scenarios**: Ethereum (verified/not verified), Clean Hands, and all credential states
-2. **Responsive Drawer**: Slides in from right, proper overlay and animations
-3. **Theme Integration**: Uses LUNARPUNK_DARK_MODE color tokens via CSS custom properties
-4. **Interactive Elements**: Verify buttons, credential selection, score updates
-5. **Complete State Support**: All credential states (verified, expired, deduplicated) with proper visual indicators
+- Fully responsive layout using Tailwind CSS
+- Two layout variants (multi-credential and guided flow)
+- All credential states (verified, expired, deduplicated)
+- Mobile-first design with proper breakpoints
+- Independent scrolling for desktop two-column layouts
+- Clean component architecture ready for integration
 
-### Implementation Critique & Recommendations
+## Updated Layout System (December 2024)
 
-#### Strengths
-1. **Clear Separation of Concerns**: Mock data is cleanly separated from presentation components
-2. **Type Safety**: Full TypeScript interfaces for all data structures
-3. **Accessibility**: Proper ARIA labels and keyboard navigation support
-4. **Visual Consistency**: Follows the design spec closely with appropriate color usage
+The drawer now uses a responsive column system that adapts based on viewport width and content:
 
-#### Areas for Improvement
+### 1-Column Layout (Mobile/Narrow)
+- **When**: Viewport < 768px or narrow desktop drawer
+- **Structure** (top to bottom):
+  - Title/Description section
+  - Points/Time/Price module
+  - Action button (Verify/Close + Learn More)
+  - Steps (optional, for guided flow stamps)
+  - Stamps section
+- **Behavior**: Single scrollable body, fixed bottom button section
 
-1. **State Terminology Clarity**
-   - Current: Uses both `state` and `flags` properties which could be confusing
-   - Recommendation: Consider using only `verified: boolean` and `flags: string[]` to match the feature doc's model where there are only two states (verified/not-verified) with optional flags
+### 2-Column Layout (Medium Desktop)
+- **When**: Viewport 768px-1200px with appropriate content
+- **Options**:
+  - **Option A**: Grid of stamps (2 columns)
+  - **Option B**: 1 column stamps + 1 column steps (for guided flow)
+- **Structure**:
+  - Title/Description/Points module/Action button distributed over stamp section only
+  - Close button in top-right of stamp section
+  - Stamps and steps scroll independently
+  - Fixed bottom button section
 
-2. **Points Display Format**
-   - Current: Uses "+" prefix for verified credentials (e.g., "+2.4")
-   - Recommendation: Clarify in the spec whether this prefix is desired or if all points should display consistently
+### 3-Column Layout (Wide Desktop)
+- **When**: Viewport > 1200px with appropriate content
+- **Options**:
+  - **Option A**: Grid of stamps (3 columns)
+  - **Option B**: 2 columns stamps + 1 column steps (for guided flow)
+- **Structure**:
+  - Title/Description/Points module/Action button distributed over stamp section only
+  - Close button in top-right of stamp section
+  - Stamps and steps scroll independently
+  - Fixed bottom button section
 
-3. **Variant 2 Pre-verification Data**
-   - Current: Has `timeToGet` and `price` fields but doesn't fully implement the pre/post verification distinction
-   - Recommendation: Add explicit `verificationState` to control which information displays in the PointsModule
+### Key Layout Rules:
+1. **Fixed Elements**:
+   - Bottom button section ("Update Score") is always fixed
+   - Close button placement:
+     - 1-column: Top-right of drawer header
+     - Multi-column: Top-right of stamp section
 
-4. **Component Reusability**
-   - Current: Some layout logic is duplicated between variants
-   - Recommendation: Extract more shared layout patterns (headers, sections) into reusable components
+2. **Points/Score Module Placement**:
+   - Shows after or alongside title/description
+   - Pre-verification: Shows Time to Get + Price
+   - Post-verification: Shows points gained + validity period
 
-5. **Animation & Transitions**
-   - Current: Basic slide-in animation
-   - Recommendation: Add micro-interactions for state changes, credential selection, and point updates
+3. **Scrolling Behavior**:
+   - 1-column: Entire body scrolls as one
+   - Multi-column: Stamps and steps have independent scroll containers
 
-6. **Error States**
-   - Current: No error state handling
-   - Recommendation: Add error states for failed verifications or network issues
+4. **Header Distribution**:
+   - In multi-column layouts, the title/description/points/action buttons are positioned above the stamps section only
+   - Steps section (when present) starts at the same top level as stamps
 
-#### Integration Considerations
+5. **Layout Selection Logic**:
+   - Check viewport width
+   - Check if stamp has steps (guided flow)
+   - Check number of stamps
+   - Apply appropriate layout based on these factors
 
-1. **Data Flow**: The test implementation assumes all data is pre-processed, which aligns well with the proposed architecture
-2. **Context Integration**: Will need to connect to actual Ceramic and Scorer contexts
-3. **Platform Configuration**: Need to add `drawerVariant` field to existing platform configs
-4. **Image Assets**: Step guide images will need proper asset pipeline integration
-5. **Feature Flags**: Consider implementing feature flag support early for gradual rollout
+6. **Implementation Notes**:
+   - Use Tailwind's responsive modifiers (`sm:`, `md:`, `lg:`, `xl:`) for breakpoints
+   - Avoid manual media queries or custom breakpoint logic
+   - Let Tailwind handle responsive behavior with its built-in system
 
-### Next Steps
+### Visual Reference:
+- See `./size-variant-drawers.png` for layout examples
 
-1. **Design Review**: Use test component for final design validation
-2. **Refine Data Model**: Address state/flag terminology based on team feedback  
-3. **Performance Testing**: Verify render performance with large credential lists
-4. **Accessibility Audit**: Full screen reader and keyboard navigation testing
-5. **Integration Planning**: Map test component patterns to actual codebase structure
+## Next Steps for Test Component
+
+### Immediate Tasks
+1. **Create new test component with proper responsive layouts**:
+   - Start with `test-components/stamp-drawer-responsive-v2.html`
+   - Remove all manual media queries
+   - Use Tailwind responsive modifiers (`sm:`, `md:`, `lg:`, `xl:`)
+   - Implement three distinct layouts based on content + viewport
+
+2. **Fix layout structure for each breakpoint**:
+   - **Mobile (<768px)**: Single column with all elements stacked
+   - **Medium (768px-1200px)**: Either 2-col grid OR 1-col stamps + 1-col steps
+   - **Large (>1200px)**: Either 3-col grid OR 2-col stamps + 1-col steps
+
+3. **Correct element positioning**:
+   - Points/Time/Price module: After title/description, before action buttons
+   - Close button: Top-right of drawer (mobile) or stamp section (desktop)
+   - Update Score button: Always fixed at bottom
+
+4. **Implement independent scrolling**:
+   - In multi-column layouts, stamps and steps scroll separately
+   - Use `overflow-y-auto` on individual sections
+   - Ensure proper height constraints on parent containers
+
+5. **Test scenarios to verify**:
+   - Ethereum (many stamps, no steps) → Should use grid layout
+   - Clean Hands (1 stamp, with steps) → Should use stamps + steps layout
+   - Scroll behavior works correctly in each layout
+   - Responsive transitions are smooth
+
+### Quick Implementation Checklist
+- [ ] Remove custom CSS media queries
+- [ ] Replace with Tailwind classes like `md:grid-cols-2 lg:grid-cols-3`
+- [ ] Fix close button positioning with `md:absolute md:top-4 md:right-4`
+- [ ] Add proper scroll containers for multi-column views
+- [ ] Test all breakpoints with browser resize
+- [ ] Verify layout selection logic works as expected
 
 
