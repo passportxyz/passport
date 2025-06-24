@@ -3,13 +3,11 @@ import { SyncToChainButton } from "./SyncToChainButton";
 import { Chain } from "../utils/chains";
 import { useOnChainStatus } from "../hooks/useOnChainStatus";
 import { OnChainStatus } from "../utils/onChainStatus";
+import { getDaysToExpiration } from "../utils/duration";
+
 import { useOnChainData } from "../hooks/useOnChainData";
-import { Spinner } from "@chakra-ui/react";
 import { Hyperlink } from "@gitcoin/passport-platforms";
 import { useAccount } from "wagmi";
-
-const formatDate = (date: Date): string =>
-  Intl.DateTimeFormat("en-US", { month: "short", day: "2-digit", year: "numeric" }).format(date);
 
 export function NetworkCard({ chain }: { chain: Chain }) {
   const { status, isPending } = useOnChainStatus({ chain });
@@ -23,45 +21,71 @@ export function NetworkCard({ chain }: { chain: Chain }) {
   ].includes(status);
 
   const expired = status === OnChainStatus.MOVED_EXPIRED;
+  const showButton = status === OnChainStatus.MOVED_EXPIRED || status === OnChainStatus.NOT_MOVED;
+  let background = "bg-hmnBackground";
+
+  if (isOnChain) {
+    if (expired) {
+      background = "bg-[#e5e5e5]";
+    } else {
+      background = "bg-emerald-100";
+    }
+  }
+
+  const daysUntilExpiration = getDaysToExpiration({
+    expirationDate: expirationDate || "",
+  });
 
   return (
-    <div
-      className={`${
-        chain?.attestationProvider?.status === "enabled" && "bg-gradient-to-b from-background"
-      } ${expired ? "to-focus/25 border-focus text-focus" : "to-background-2/50 border-foreground-1 text-color-1"}
-      mb-6 rounded-lg border p-2 align-middle`}
-    >
-      <div className="mx-4 my-2">
-        <div className="flex items-center">
-          <img className="h-10" src={chain.attestationProvider?.monochromeIcon} alt={`${chain.label} logo`} />
-          <h1 className="ml-3 grow text-base font-heading">{chain.label}</h1>
-          <SyncToChainButton onChainStatus={status} chain={chain} isLoading={isPending} />
-        </div>
-        {isOnChain && (
-          <div className="flex flex-row-reverse text-sm items-center mt-2">
-            <div className={`text-right grow ${expired ? "text-inherit" : "text-color-6"} leading-tight`}>
-              {expired ? (
-                "Expired"
-              ) : expirationDate ? (
-                <>
-                  Expires
-                  <br />
-                  {formatDate(expirationDate)}
-                </>
-              ) : (
-                <Spinner size="sm" />
-              )}
-            </div>
+    <div className={`mb-6 rounded-lg border p-2 align-middle ${background}`}>
+      <div className="mx-2 my-2 h-full">
+        <div className="grid grid-rows-3 content-between h-full">
+          <div className="flex">
+            <img className="h-8" src={chain.icon} alt={`${chain.label} logo`} />
+          </div>
+          <div className="">
+            <h1 className="grow font-medium text-lg">{chain.label}</h1>
+          </div>
+          <div className={`mb-2 ${!showButton ? "hidden" : ""}`}>
+            <SyncToChainButton onChainStatus={status} chain={chain} isLoading={isPending} />
+          </div>
+          <div className={`mb-2 flex w-full justify-between ${showButton ? "hidden" : ""}`}>
             {address && chain.attestationProvider?.hasWebViewer && (
               <Hyperlink
                 href={chain.attestationProvider?.viewerUrl(address) || ""}
-                className={`font-alt leading-none w-[45%] ${expired ? "text-inherit" : ""}`}
+                className={`leading-none ${expired ? "text-inherit" : ""} text-xs flex items-center`}
               >
-                {chain.attestationProvider?.attestationExplorerLinkText}
+                <span className="text-nowrap">{chain.attestationProvider?.attestationExplorerLinkText}</span>
+                <svg width="20" height="20" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M7.66699 7H17.667M17.667 7V17M17.667 7L7.66699 17"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
               </Hyperlink>
             )}
+
+            <div className="flex justify-end pl-2 text-color-9 items-center text-xs">
+              <svg width="20" height="20" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M3.5 12.332C3.5 14.1121 4.02784 15.8521 5.01677 17.3322C6.00571 18.8122 7.41131 19.9658 9.05585 20.6469C10.7004 21.3281 12.51 21.5064 14.2558 21.1591C16.0016 20.8118 17.6053 19.9547 18.864 18.696C20.1226 17.4373 20.9798 15.8337 21.3271 14.0878C21.6743 12.342 21.4961 10.5324 20.8149 8.88788C20.1337 7.24335 18.9802 5.83774 17.5001 4.8488C16.0201 3.85987 14.28 3.33203 12.5 3.33203C9.98395 3.3415 7.56897 4.32325 5.76 6.07203L3.5 8.33203M3.5 8.33203V3.33203M3.5 8.33203H8.5M12.5 7.33203V12.332L16.5 14.332"
+                  stroke="black"
+                  strokeOpacity="0.5"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="pt-0.5">
+                Valid for<br></br>
+                {daysUntilExpiration} {daysUntilExpiration === 1 ? "day" : "days"}
+              </span>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
