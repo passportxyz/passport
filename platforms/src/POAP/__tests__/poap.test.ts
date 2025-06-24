@@ -1,4 +1,3 @@
-/* eslint-disable */
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
 import { POAPProvider, poapSubgraphs } from "../Providers/poap.js";

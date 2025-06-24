@@ -4,7 +4,7 @@ import { GtcStakingProvider } from "../Providers/GtcStaking.js";
 describe("GtcStakingProvider", () => {
   beforeAll(() => {
     process.env.GTC_STAKING_ROUNDS =
-      // eslint-disable-next-line prettier/prettier, quotes
+      // eslint-disable-next-line quotes
       '[{"id": 4, "start": 1693526400, "duration": 7592340}, {"id": 5, "start": 1701118741, "duration": 8157658}]';
   });
   afterEach(() => {

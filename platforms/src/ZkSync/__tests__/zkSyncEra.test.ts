@@ -1,5 +1,5 @@
 // TODO remove once tsconfig as unified across all packages
-/* eslint-disable @typescript-eslint/unbound-method */
+
 import { RequestPayload } from "@gitcoin/passport-types";
 
 // ----- Libs

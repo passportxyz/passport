@@ -158,4 +158,111 @@ describe("Civic Pass Provider", function () {
       record: {},
     });
   });
+
+  describe("deprecation", () => {
+    it("should return deprecation error for CAPTCHA pass after July 1, 2025", async () => {
+      // Mock a date after July 1, 2025
+      const deprecatedDate = new Date("2025-07-02");
+      jest.useFakeTimers();
+      jest.setSystemTime(deprecatedDate);
+
+      stubCivic({
+        CAPTCHA: [dummyPass],
+      });
+
+      const civic = new CivicPassProvider({
+        type: "CivicCaptchaPass",
+        passType: CivicPassType.CAPTCHA,
+      });
+
+      const verifiedPayload = await civic.verify(requestPayload);
+
+      expect(verifiedPayload).toMatchObject({
+        valid: false,
+        errors: ["The Civic CAPTCHA Pass has been retired as of July 1, 2025."],
+      });
+
+      jest.useRealTimers();
+    });
+
+    it("should return deprecation error for UNIQUENESS pass after July 31, 2025", async () => {
+      // Mock a date after July 31, 2025
+      const deprecatedDate = new Date("2025-08-01");
+      jest.useFakeTimers();
+      jest.setSystemTime(deprecatedDate);
+
+      stubCivic({
+        UNIQUENESS: [dummyPass],
+      });
+
+      const civic = new CivicPassProvider({
+        type: "CivicUniquenessPass",
+        passType: CivicPassType.UNIQUENESS,
+      });
+
+      const verifiedPayload = await civic.verify(requestPayload);
+
+      expect(verifiedPayload).toMatchObject({
+        valid: false,
+        errors: ["The Civic UNIQUENESS Pass has been retired as of July 31, 2025."],
+      });
+
+      jest.useRealTimers();
+    });
+
+    it("should return deprecation error for LIVENESS pass after July 31, 2025", async () => {
+      // Mock a date after July 31, 2025
+      const deprecatedDate = new Date("2025-08-01");
+      jest.useFakeTimers();
+      jest.setSystemTime(deprecatedDate);
+
+      stubCivic({
+        LIVENESS: [dummyPass],
+      });
+
+      const civic = new CivicPassProvider({
+        type: "CivicLivenessPass",
+        passType: CivicPassType.LIVENESS,
+      });
+
+      const verifiedPayload = await civic.verify(requestPayload);
+
+      expect(verifiedPayload).toMatchObject({
+        valid: false,
+        errors: ["The Civic LIVENESS Pass has been retired as of July 31, 2025."],
+      });
+
+      jest.useRealTimers();
+    });
+
+    it("should allow CAPTCHA pass before July 1, 2025", async () => {
+      // Mock a date before July 1, 2025
+      const beforeDeprecationDate = new Date("2025-06-30");
+      jest.useFakeTimers();
+      jest.setSystemTime(beforeDeprecationDate);
+
+      // Create a pass that will be valid in 2025
+      const futureExpiry = Math.floor(beforeDeprecationDate.getTime() / 1000) + expirySeconds;
+      const captchaPass = { ...dummyPass, expiry: futureExpiry };
+
+      stubCivic({
+        CAPTCHA: [captchaPass],
+      });
+
+      const civic = new CivicPassProvider({
+        type: "CivicCaptchaPass",
+        passType: CivicPassType.CAPTCHA,
+      });
+
+      const verifiedPayload = await civic.verify(requestPayload);
+
+      expect(axios.get).toHaveBeenCalled();
+      expect(verifiedPayload).toMatchObject({
+        valid: true,
+        record: { address: userAddress },
+      });
+
+      jest.useRealTimers();
+    });
+  });
 });
