@@ -11,7 +11,7 @@ jest.useFakeTimers(); // Use Jest's timer mocks
 
 jest.mock("../simpleProviderVerifier", () => {
   const originalModule = jest.requireActual("../simpleProviderVerifier");
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+
   return {
     __esModule: true,
     ...originalModule,

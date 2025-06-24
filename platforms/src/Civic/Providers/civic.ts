@@ -44,7 +44,7 @@ export class CivicPassProvider implements Provider {
     if (this.passType === CivicPassType.CAPTCHA && currentDate >= captchaDeprecationDate) {
       return {
         deprecated: true,
-        message: `The Civic CAPTCHA Pass has been retired as of July 1, 2025.`,
+        message: "The Civic CAPTCHA Pass has been retired as of July 1, 2025.",
       };
     }
 

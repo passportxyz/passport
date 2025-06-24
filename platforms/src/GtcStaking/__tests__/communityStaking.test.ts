@@ -25,7 +25,7 @@ jest.mock("axios");
 // });
 
 process.env.GTC_STAKING_ROUNDS =
-  // eslint-disable-next-line prettier/prettier, quotes
+  // eslint-disable-next-line quotes
   '[{"id": 4, "start": 1693526400, "duration": 7592340}, {"id": 5, "start": 1701118741, "duration": 8157658}]';
 
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
