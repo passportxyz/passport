@@ -16,6 +16,13 @@ type GmailMessagesListResponse = {
   resultSizeEstimate?: number;
 };
 
+type RawEmailResponse = {
+  emailMessageId: string;
+  subject: string;
+  internalDate: string;
+  decodedContents: string;
+};
+
 export const requestAccessToken = async (code: string): Promise<string> => {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -67,3 +74,48 @@ export const fetchUserEmails = async (
     throw new ProviderExternalVerificationError(errorString);
   }
 };
+
+export async function fetchEmailsRaw(accessToken: string, messageIds: string[]): Promise<RawEmailResponse[]> {
+  try {
+    const fetchPromises = messageIds.map((messageId) => {
+      const url = `https://www.googleapis.com/gmail/v1/users/me/messages/${messageId}?format=raw`;
+
+      return fetch(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch email with ID: ${messageId}`);
+          }
+
+          return response.json();
+        })
+        .then((data) => {
+          let rawBase64 = data.raw.replace(/-/g, "+").replace(/_/g, "/");
+
+          while (rawBase64.length % 4) {
+            rawBase64 += "=";
+          }
+
+          const decodedContents = atob(rawBase64);
+
+          const subject = decodedContents.match(/Subject: (.*)/)?.[1] || "No Subject";
+
+          return {
+            emailMessageId: messageId,
+            subject,
+            internalDate: data.internalDate,
+            decodedContents,
+          };
+        }) as Promise<RawEmailResponse>;
+    });
+
+    const results = await Promise.all(fetchPromises);
+
+    return results;
+  } catch (error) {
+    throw new Error(`Error fetching emails: ${error}`);
+  }
+}
