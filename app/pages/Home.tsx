@@ -33,10 +33,10 @@ export default function Home() {
       <Header skipCustomisation={true} />
       <div className="mt-4 md:mt-0 pt-16 flex-1 m-auto overflow-visible grid grid-cols-1 grid-rows-1 content-center ">
         <div className="grid grid-cols-1 grid-rows-1 md:flex md:justify-start gap-12 overflow-visible m-8 md:max-h-[calc(100vh-16rem)]">
-          <div className="flex flex-row justify-end">
+          <div className="flex flex-row justify-end md:max-w-[740px]">
             <img src="/assets/hmnWelcomeImage.svg" alt="Welcome"></img>
           </div>
-          <div className="flex flex-col justify-center gap-6 relative z-10 overflow-visible">
+          <div className="flex flex-col justify-center gap-6 relative z-10 overflow-visible md:max-w-[740px]">
             <div
               style={{
                 background: "radial-gradient(closest-side, #EBFFF7, rgb(255,255,255,0))",
