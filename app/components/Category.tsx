@@ -131,6 +131,7 @@ export const Category = ({
           platform={platformProps.platform}
           platformScoreSpec={currentPlatform}
           platFormGroupSpec={platformProps.platFormGroupSpec}
+          steps={platformProps.steps}
           isOpen={isOpen}
           onClose={() => {
             setCurrentPlatform(undefined);

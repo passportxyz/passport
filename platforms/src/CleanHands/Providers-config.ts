@@ -24,3 +24,39 @@ export const ProviderConfig: PlatformGroupSpec[] = [
 ];
 
 export const providers: Provider[] = [new ClanHandsProvider()];
+
+// Step-by-step guide for the drawer UI
+export const steps = [
+  {
+    number: 1,
+    title: "Visit the issuance page",
+    description: "Navigate to the Proof of Clean Hands issuance page to begin the verification process.",
+    actions: [
+      {
+        label: "Go to Proof of Clean Hands",
+        href: "https://app.holonym.io/clean-hands",
+        icon: "external" as const,
+      },
+    ],
+  },
+  {
+    number: 2,
+    title: "Connect your wallet",
+    description: "Connect the wallet you want to verify to the issuance page.",
+    image: {
+      src: "/images/stamps/clean-hands-step-2.png",
+      alt: "Wallet connection interface",
+    },
+  },
+  {
+    number: 3,
+    title: "Complete verification",
+    description: "Follow the on-screen instructions to verify your clean hands status.",
+    actions: [
+      {
+        label: "Learn more about verification",
+        href: "/help/clean-hands",
+      },
+    ],
+  },
+];

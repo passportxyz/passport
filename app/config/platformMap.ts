@@ -217,6 +217,7 @@ if (process.env.NEXT_PUBLIC_FF_CLEAN_HANDS_STAMP === "on") {
   defaultPlatformMap.set("CleanHands", {
     platform: new CleanHands.CleanHandsPlatform(),
     platFormGroupSpec: CleanHands.ProviderConfig,
+    steps: CleanHands.steps,
   });
 }
 
@@ -224,6 +225,7 @@ if (process.env.NEXT_PUBLIC_FF_HUMAN_ID_STAMP === "on") {
   defaultPlatformMap.set("HumanIdPhone", {
     platform: new HumanIdPhone.HumanIdPhonePlatform(),
     platFormGroupSpec: HumanIdPhone.ProviderConfig,
+    steps: HumanIdPhone.steps,
   });
 
   defaultPlatformMap.set("HumanIdKyc", {

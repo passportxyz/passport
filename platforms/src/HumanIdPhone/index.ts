@@ -1,2 +1,2 @@
 export { HumanIdPhonePlatform } from "./App-Bindings.js";
-export { PlatformDetails, ProviderConfig, providers } from "./Providers-config.js";
+export { PlatformDetails, ProviderConfig, providers, steps } from "./Providers-config.js";

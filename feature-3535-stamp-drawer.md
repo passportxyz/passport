@@ -573,6 +573,86 @@ A fully functional test implementation has been created in the `test-components/
 - Independent scrolling for desktop two-column layouts
 - Clean component architecture ready for integration
 
+## Final Implementation Plan (December 2024)
+
+### Unified Component Architecture
+
+After thorough testing and iteration, we've determined that the two "variants" are actually just one responsive component with conditional rendering. The drawer adapts based on:
+1. Whether the stamp has steps (`steps.length > 0`)
+2. Whether the stamp is verified (hides steps when verified)
+3. Viewport size (mobile/desktop/wide)
+
+### Component Structure
+```
+app/components/StampDrawer/
+├── index.tsx                    # Main responsive container
+├── components/
+│   ├── DrawerHeader.tsx         # Platform icon + name + close button
+│   ├── CTAButtons.tsx           # Verify/custom CTA + Learn More link
+│   ├── PointsModule.tsx         # Points/time/price display
+│   ├── CredentialCard.tsx       # Individual stamp cards
+│   ├── CredentialGrid.tsx       # Grid layout for stamps
+│   ├── StepGuide.tsx            # Step-by-step instructions
+│   └── DrawerFooter.tsx         # Update Score button
+└── types.ts                     # TypeScript interfaces
+```
+
+### Shared Components Breakdown
+
+All stamps share these components:
+- **DrawerHeader**: Platform icon, name, and close button positioning
+- **CTAButtons**: Either Verify/Close buttons or custom CTA with Learn More
+- **PointsModule**: Pre-verification (time/price) or post-verification (points gained)
+- **CredentialGrid/Cards**: The stamp display with all state variations
+- **StepGuide**: Conditionally shown only for stamps that have steps
+- **DrawerFooter**: Fixed "Update Score" button at bottom
+
+### Example: HumanID Phone Steps
+```typescript
+const humanIdPhoneSteps = [
+  {
+    number: 1,
+    title: "Visit the HumanID verification page",
+    description: "Navigate to the HumanID Phone verification page to begin the process.",
+    actions: [{
+      label: "Go to HumanID Phone Verification",
+      href: "https://humanid.org/verify",
+      icon: "external"
+    }]
+  },
+  {
+    number: 2,
+    title: "Enter your phone number",
+    description: "Provide your phone number to receive a verification code. Your number will be hashed and not stored.",
+    image: {
+      src: "/images/stamps/humanid-phone-entry.png",
+      alt: "Phone number entry interface"
+    }
+  },
+  {
+    number: 3,
+    title: "Complete SMS verification",
+    description: "Enter the verification code sent to your phone. This proves ownership of the phone number.",
+    actions: [{
+      label: "Learn about privacy protection",
+      href: "/help/humanid-privacy"
+    }]
+  },
+  {
+    number: 4,
+    title: "Return to Passport",
+    description: "After successful verification, return to Passport and click 'Verify' to claim your stamp."
+  }
+];
+```
+
+### Integration Plan
+1. Create component structure in `app/components/StampDrawer/`
+2. Port shared components from test implementation
+3. Implement responsive layout logic in main StampDrawer
+4. Replace SideBarContent with StampDrawer in GenericPlatform
+5. Add steps data to platform configurations where needed
+
 ## Updated Layout System (December 2024)
 
 The drawer now uses a responsive column system that adapts based on viewport width and content:
@@ -663,6 +743,81 @@ The drawer now uses a responsive column system that adapts based on viewport wid
 
 ### Visual Reference:
 - See `./size-variant-drawers.png` for layout examples
+
+## Implementation Complete (December 2024)
+
+### What Was Implemented
+
+1. **Created StampDrawer Component Structure**
+   - Location: `/app/components/StampDrawer/`
+   - All shared components ported from test implementation
+   - Responsive layouts working with Tailwind CSS
+   - Connected to real data from CeramicContext and ScorerContext
+
+2. **Component Architecture**
+   ```
+   app/components/StampDrawer/
+   ├── index.tsx                    # Main responsive container
+   ├── components/
+   │   ├── DrawerHeader.tsx         # Platform icon + name + close button
+   │   ├── CTAButtons.tsx           # Verify/custom CTA + Learn More link
+   │   ├── PointsModule.tsx         # Points/time/price display
+   │   ├── CredentialCard.tsx       # Individual stamp cards
+   │   ├── CredentialGrid.tsx       # Grid layout for stamps
+   │   ├── StepGuide.tsx            # Step-by-step instructions
+   │   └── DrawerFooter.tsx         # Update Score button
+   ├── hooks/
+   │   └── useViewport.tsx          # Viewport detection hook
+   └── types.ts                     # TypeScript interfaces
+   ```
+
+3. **Integration with GenericPlatform**
+   - Replaced SideBarContent with StampDrawer in GenericPlatform.tsx
+   - Updated platform data flow to support new drawer
+   - Added steps property to PlatformProps type
+
+4. **Platform Configurations Updated**
+   - **HumanID Phone**: Added 4-step guide for phone verification
+   - **Clean Hands**: Added 3-step guide for sanctions verification
+   - Both platforms now export steps data and include it in platformMap
+
+5. **Key Features Implemented**
+   - ✅ Responsive layouts (mobile/desktop/wide)
+   - ✅ All credential states (verified, expired, deduplicated)
+   - ✅ Points module with pre/post verification states
+   - ✅ Custom CTAs for platforms that need them
+   - ✅ Step-by-step guides with actions and placeholder images
+   - ✅ Real data integration from contexts
+   - ✅ Proper error handling with default values
+
+### Technical Notes
+
+- No separate variants needed - single responsive component
+- Steps are not hidden when verified (per request)
+- Used existing theme colors from CLAUDE.md
+- Maintained compatibility with existing verification logic
+- Fixed runtime errors by adding default values for context data
+
+### Remaining Work
+
+1. **Visual Polish**
+   - Add actual images for step guides (currently using placeholders)
+   - Fine-tune spacing and typography to match Figma designs
+   - Test with all platforms to ensure proper display
+
+2. **Additional Platform Steps**
+   - Add step guides for other complex platforms that could benefit
+   - Work with product team to identify which platforms need guides
+
+3. **Testing**
+   - Comprehensive testing across all breakpoints
+   - Test with various stamp configurations
+   - Ensure accessibility compliance
+
+4. **Clean Up**
+   - Remove old SideBarContent component once fully migrated
+   - Clean up test-components directory
+   - Update any documentation
 
 ## Next Steps for Test Component
 
