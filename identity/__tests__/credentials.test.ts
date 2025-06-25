@@ -195,8 +195,6 @@ describe("issueNullifiableCredential", function () {
       nullifierGenerators: [
         hashNullifierGenerator,
         HumanNetworkNullifierGenerator({
-          clientPrivateKey: "",
-          relayUrl: "",
           localSecret: secret,
           version: 3,
         }),
@@ -216,8 +214,6 @@ describe("issueNullifiableCredential", function () {
     expect(credential["@context"]).toContain("https://w3id.org/vc/status-list/2021/v1");
     expect(humanNetworkOprf).toHaveBeenCalledWith({
       value: expectedOprfInput,
-      clientPrivateKey: "",
-      relayUrl: "",
     });
   });
 });
