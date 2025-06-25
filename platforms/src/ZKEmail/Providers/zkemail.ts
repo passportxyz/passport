@@ -1,6 +1,6 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { type Provider, type ProviderOptions } from "../../types.js";
-import { extractEMLDetails, initZkEmailSdk, RawEmailResponse, testBlueprint } from "@zk-email/sdk";
+import { extractEMLDetails, initZkEmailSdk, Proof, RawEmailResponse, testBlueprint } from "@zk-email/sdk";
 import { UBER_EMAIL } from "../procedures/mocked_email.js";
 import { fetchEmailsRaw, fetchUserEmails, requestAccessToken } from "../procedures/gmail.js";
 
@@ -20,63 +20,27 @@ export class ZKEmailProvider implements Provider {
     const record: { data?: string } | undefined = undefined;
     const errors: string[] = [];
 
-    const googleAuthToken = await requestAccessToken(payload.proofs.code);
+    const proofs = JSON.parse(payload.proofs.uberProofs) as Proof[];
 
     try {
       const sdk = initZkEmailSdk({});
 
       const blueprint = await sdk.getBlueprintById("85b4b54b-72c2-4a99-8393-7f8cc47332c8");
 
-      const emailListResponse = await fetchUserEmails(googleAuthToken, { q: "from:uber.com" });
-
-      if (emailListResponse.messages.length === 0) {
-        throw new Error("No emails found");
-      }
-
-      const emailResponseMessages = emailListResponse.messages;
-
-      const emailIds = emailResponseMessages.map((message) => message.id);
-      const emails = await fetchEmailsRaw(googleAuthToken, emailIds);
-
-      const validatedEmails: {
-        email: RawEmailResponse;
-        senderDomain: string;
-        selector: string;
-      }[] = await Promise.all(
-        emails.map(async (email) => {
-          const { senderDomain, selector } = await extractEMLDetails(email.decodedContents);
-          return {
-            email,
-            senderDomain,
-            selector,
-          };
+      // count how many proofs are valid
+      const validProofs = await Promise.all(
+        proofs.map(async (proof) => {
+          const verified = await blueprint.verifyProof(proof);
+          return verified;
         })
       );
-
-      // Process validation for all emails
-      // const processedEmails: Email[] = await Promise.all(
-      //   validatedEmails.map(async ({ email }) => {
-      //     const validationResult = await testBlueprint(email.decodedContents, blueprint.props);
-      //     return {
-      //       ...email,
-      //       valid: validationResult.length > 0,
-      //     };
-      //   })
-      // );
-
-      // const prover = await blueprint.createProver();
-      // const proof = await prover.generateProof(UBER_EMAIL);
-
-      // google oauth
-      // const accessToken = await requestAccessToken(payload.proofs.code);
-
-      // const publicData = proof.getProofData().publicData.toString();
+      const validProofCount = validProofs.filter((verified) => verified).length;
 
       return {
         valid: true,
         errors,
         record: {
-          validEmails: validatedEmails.length.toString(),
+          totalProofs: validProofCount.toString(),
         },
       };
     } catch (error) {

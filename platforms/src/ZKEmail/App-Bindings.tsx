@@ -1,14 +1,15 @@
 /* eslint-disable no-console */
 import React from "react";
-import { PlatformBanner, PlatformOptions } from "../types.js";
+import { AppContext, PlatformBanner, PlatformOptions, ProviderPayload } from "../types.js";
 import { Platform } from "../utils/platform.js";
-import { initZkEmailSdk, Gmail, LoginWithGoogle } from "@zk-email/sdk";
+import { initZkEmailSdk, Gmail, LoginWithGoogle, Proof } from "@zk-email/sdk";
 
 export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
   path = "ZKEmail";
 
-  loginWithGoogle: LoginWithGoogle;
+  // loginWithGoogle: LoginWithGoogle;
+  private uberProofs: Proof[] = [];
 
   constructor(options: PlatformOptions = {}) {
     super();
@@ -93,7 +94,27 @@ export class ZKEmailPlatform extends Platform {
     );
     console.log("Proofs: ", proofs);
 
+    this.uberProofs = proofs;
+
+    // const verified = await blueprint.verifyProof(proofs[0]);
+
+    const { proofData, publicData } = proofs[0].getProofData();
+    const verified = await blueprint.verifyProofData(publicData.toString(), proofData);
+    console.log("Verified: ", verified);
+
     // send proofs to the server
+  }
+
+  async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
+    // If no proofs generated yet, trigger the login and prove process
+    if (this.uberProofs.length === 0) {
+      await this.handleLoginAndProve();
+    }
+
+    return {
+      uberProofs: JSON.stringify(this.uberProofs), // Pass proofs as serialized JSON
+      validEmails: this.uberProofs.length.toString(),
+    };
   }
 
   // getOAuthUrl(state: string): Promise<string> {
