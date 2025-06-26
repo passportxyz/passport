@@ -13,6 +13,8 @@ export type PlatformSpec = {
   isEVM?: boolean;
   enablePlatformCardUpdate?: boolean;
   website?: string;
+  timeToGet?: string;
+  price?: string;
 };
 
 export type ProviderSpec = {

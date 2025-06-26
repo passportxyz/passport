@@ -7,15 +7,52 @@ import { CTAButtons } from "./components/CTAButtons";
 import { PointsModule } from "./components/PointsModule";
 import { CredentialGrid } from "./components/CredentialGrid";
 import { StepGuide } from "./components/StepGuide";
-import { useViewport } from "./hooks/useViewport";
-import { StampDrawerProps, Credential, CredentialGroup, PlatformInfo, VerificationState, StepConfig } from "./types";
+import { StampDrawerProps, CredentialGroup, PlatformInfo, VerificationState, StepConfig } from "./types";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 
-// Helper to determine how many columns the stamp grid should have
-const getStampGridCols = (isMobile: boolean, isWide: boolean, hasSteps: boolean): 1 | 2 | 3 => {
-  if (isMobile) return 1;
-  if (isWide && hasSteps) return 2; // With steps, stamps get 2 columns max
-  if (isWide) return 3; // Without steps, stamps can use 3 columns
-  return hasSteps ? 1 : 2; // Medium desktop
+const useStampGridCols = ({
+  hasSteps,
+  maxCredentialsInGroup,
+  numGroups,
+}: {
+  hasSteps: boolean;
+  maxCredentialsInGroup: number;
+  numGroups: number;
+}): 1 | 2 | 3 => {
+  const isXl = useBreakpoint("xl");
+  const isLg = useBreakpoint("lg");
+
+  if (
+    !isLg ||
+    (numGroups <= 1 && maxCredentialsInGroup <= 2) || // Single group with 2 or fewer credentials
+    (numGroups <= 2 && maxCredentialsInGroup === 1) // Two groups with 1 credential each
+  ) {
+    return 1;
+  }
+
+  if (isXl) {
+    if (hasSteps || (numGroups <= 2 && maxCredentialsInGroup <= 3)) {
+      return 2;
+    }
+    return 3;
+  }
+
+  return hasSteps ? 1 : 2;
+};
+
+const useDrawerSize = ({
+  hasSteps,
+  stampGridCols,
+}: {
+  hasSteps: boolean;
+  stampGridCols: 1 | 2 | 3;
+}): "full" | "md" | "lg" | "xl" => {
+  const isSm = useBreakpoint("sm");
+
+  if (!isSm) return "full";
+  if (stampGridCols === 3 || (stampGridCols === 2 && hasSteps)) return "xl";
+  if (stampGridCols === 2 || (stampGridCols === 1 && hasSteps)) return "lg";
+  return "md";
 };
 
 const StampDrawer = ({
@@ -23,14 +60,13 @@ const StampDrawer = ({
   onClose,
   platform,
   onVerify,
-  onUpdateScore,
   verifiedProviders,
   expiredProviders,
   stampWeights,
   stampDedupStatus,
+  isLoading = false,
 }: StampDrawerProps) => {
-  const { isMobile, isWide } = useViewport();
-
+  const isLg = useBreakpoint("lg");
   // Process platform data
   const processedData = useMemo(() => {
     // Platform info
@@ -41,50 +77,81 @@ const StampDrawer = ({
       description: platform.description,
       cta: platform.cta,
       ctaHref: platform.ctaHref,
+      website: platform.website,
     };
 
-    // Process credentials
-    const credentials: Credential[] = (platform.providers || []).map((provider: any) => {
-      const providerId = provider.name as PROVIDER_ID;
-      const isVerified = verifiedProviders.includes(providerId);
-      const isExpired = expiredProviders.includes(providerId);
-      const isDeduplicated = stampDedupStatus[providerId] === true;
+    // Process and group credentials
+    const credentialGroups: CredentialGroup[] = platform.credentialGroups
+      ? platform.credentialGroups.map((group: any) => ({
+          title: group.platformGroup,
+          credentials: group.providers.map((provider: any) => {
+            const providerId = provider.name as PROVIDER_ID;
+            const isVerified = verifiedProviders.includes(providerId);
+            const isExpired = expiredProviders.includes(providerId);
+            const isDeduplicated = stampDedupStatus?.[providerId] === true;
 
-      const points = stampWeights[providerId] || 0;
-      const pointsDisplay = isVerified && !isDeduplicated ? `+${points}` : "0";
+            const points = stampWeights?.[providerId] ? parseFloat(String(stampWeights[providerId])) : 0;
 
-      const flags: ("expired" | "deduplicated")[] = [];
-      if (isExpired) flags.push("expired");
-      if (isDeduplicated) flags.push("deduplicated");
+            const flags: ("expired" | "deduplicated")[] = [];
+            if (isExpired) flags.push("expired");
+            if (isDeduplicated) flags.push("deduplicated");
 
-      return {
-        id: providerId,
-        name: provider.title,
-        description: provider.description,
-        verified: isVerified,
-        flags,
-        points,
-        pointsDisplay,
-      };
-    });
+            return {
+              id: providerId,
+              name: provider.title,
+              description: provider.description,
+              verified: isVerified,
+              flags,
+              points,
+            };
+          }),
+        }))
+      : [
+          {
+            title: "Available Stamps",
+            credentials: (platform.providers || []).map((provider: any) => {
+              const providerId = provider.name as PROVIDER_ID;
+              const isVerified = verifiedProviders.includes(providerId);
+              const isExpired = expiredProviders.includes(providerId);
+              const isDeduplicated = stampDedupStatus?.[providerId] === true;
 
-    // Group credentials
-    const credentialGroups: CredentialGroup[] = platform.credentialGroups || [
-      {
-        title: "Available Stamps",
-        credentials,
-      },
-    ];
+              const points = stampWeights?.[providerId] ? parseFloat(String(stampWeights[providerId])) : 0;
+              const pointsDisplay = isVerified && !isDeduplicated ? `+${points}` : "0";
 
-    // Calculate points
-    const verifiedCredentials = credentials.filter((c) => c.verified && !c.flags.includes("deduplicated"));
+              const flags: ("expired" | "deduplicated")[] = [];
+              if (isExpired) flags.push("expired");
+              if (isDeduplicated) flags.push("deduplicated");
+
+              return {
+                id: providerId,
+                name: provider.title,
+                description: provider.description,
+                verified: isVerified,
+                flags,
+                points,
+                pointsDisplay,
+              };
+            }),
+          },
+        ];
+
+    // Calculate points from all credentials across groups
+    const allCredentials = credentialGroups.flatMap((group) => group.credentials);
+    const verifiedCredentials = allCredentials.filter(
+      (c) => c.verified && !c.flags.includes("deduplicated") && !c.flags.includes("expired")
+    );
     const pointsGained = verifiedCredentials.reduce((sum, c) => sum + c.points, 0);
-    const totalPossiblePoints = credentials.reduce((sum, c) => sum + c.points, 0);
+    const totalPossiblePoints = allCredentials.reduce((sum, c) => sum + c.points, 0);
+
+    // Check if all stamps are verified
+    const hasExpiredProviders = allCredentials.some((c) => c.flags.includes("expired"));
+    const allStampsVerified =
+      allCredentials.length > 0 && allCredentials.every((c) => c.verified) && !hasExpiredProviders;
 
     // Verification state
     const verificationState: VerificationState = {
       isVerified: verifiedCredentials.length > 0,
-      isLoading: false, // TODO: Get from actual loading state
+      isLoading: isLoading,
       canSubmit: true, // TODO: Get from actual submit state
       timeToGet: platform.timeToGet,
       price: platform.price,
@@ -101,142 +168,174 @@ const StampDrawer = ({
       verificationState,
       credentialGroups,
       steps,
+      allStampsVerified,
     };
-  }, [platform, verifiedProviders, expiredProviders, stampWeights, stampDedupStatus]);
+  }, [platform, verifiedProviders, expiredProviders, stampWeights, stampDedupStatus, isLoading]);
 
-  const { platformInfo, verificationState, credentialGroups, steps } = processedData;
+  const { platformInfo, verificationState, credentialGroups, steps, allStampsVerified } = processedData;
+
   const hasSteps = steps.length > 0;
-  const stampGridCols = getStampGridCols(isMobile, isWide, hasSteps);
+  const stampGridCols = useStampGridCols({
+    hasSteps,
+    maxCredentialsInGroup: Math.max(...credentialGroups.map((g) => g.credentials.length)),
+    numGroups: credentialGroups.length,
+  });
+  const drawerSize = useDrawerSize({ hasSteps, stampGridCols });
 
   // Determine if description/points should stack vertically
   const shouldStack = stampGridCols === 1;
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} placement="right" size={isMobile ? "full" : isWide ? "xl" : "md"}>
+    <Drawer isOpen={isOpen} onClose={onClose} placement="right" size={drawerSize}>
       <DrawerOverlay />
       <DrawerContent
         style={{
-          background: "rgb(var(--color-background))",
+          background: "rgb(var(--color-foreground))",
           border: "1px solid rgb(var(--color-foreground-5))",
-          borderRadius: isMobile ? "0" : "16px 0 0 16px",
+          borderRadius: drawerSize === "full" ? "0" : "16px 0 0 16px",
         }}
       >
-        <DrawerBody padding="0" display="flex" flexDirection="column" height="100vh">
-          {isMobile ? (
-            // Mobile layout - single column
+        <DrawerBody padding="0" display="flex" flexDirection="column" height="100vh" overflow="hidden">
+          {["full", "md"].includes(drawerSize) || (hasSteps && !isLg) ? (
             <>
-              <DrawerHeader icon={platformInfo.icon} name={platformInfo.name} onClose={onClose} />
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
+                  <div className="p-4">
+                    <DrawerHeader
+                      icon={platformInfo.icon}
+                      name={platformInfo.name}
+                      website={platformInfo.website}
+                      onClose={onClose}
+                    />
 
-              <div className="flex-1 overflow-y-auto px-4 py-6">
-                <PointsModule
-                  variant={verificationState.isVerified ? "post-verification" : "pre-verification"}
-                  timeToGet={verificationState.timeToGet}
-                  price={verificationState.price}
-                  pointsGained={verificationState.pointsGained}
-                  totalPossiblePoints={verificationState.totalPossiblePoints}
-                  compact={true}
-                />
+                    <div className="mt-4">
+                      <PointsModule {...verificationState} />
 
-                <p className="text-sm text-color-4 mt-6">{platformInfo.description}</p>
+                      <p className="text-sm text-color-4 mt-6">{platformInfo.description}</p>
 
-                <CTAButtons
-                  platformInfo={platformInfo}
-                  verificationState={verificationState}
-                  onVerify={onVerify}
-                  onClose={onClose}
-                />
-
-                {hasSteps && <StepGuide steps={steps} isMobile={true} />}
-
-                <h3 className="text-lg font-semibold text-gray-700 mb-4 mt-8">Stamps</h3>
-                <CredentialGrid credentialGroups={credentialGroups} columns={1} />
-              </div>
-
-              <DrawerFooter onUpdateScore={onUpdateScore} />
-            </>
-          ) : hasSteps ? (
-            // Desktop with steps - two column layout
-            <div className="flex-1 overflow-hidden flex">
-              {/* Left Column - Stamps */}
-              <div className={`${isWide ? "w-2/3" : "w-1/2"} flex flex-col h-full border-r border-gray-200`}>
-                <DrawerHeader icon={platformInfo.icon} name={platformInfo.name} onClose={onClose} />
-
-                <div className="flex-1 overflow-y-auto p-8">
-                  {/* Description/CTA and Points layout */}
-                  <div className={`${shouldStack ? "space-y-6" : "flex gap-8 justify-between"} mb-6`}>
-                    {/* Description and CTA section */}
-                    <div className={`${shouldStack ? "" : "flex-1 min-w-0 max-w-2xl"}`}>
-                      <p className="text-base text-color-4 leading-relaxed">{platformInfo.description}</p>
                       <CTAButtons
                         platformInfo={platformInfo}
                         verificationState={verificationState}
                         onVerify={onVerify}
                         onClose={onClose}
                       />
-                    </div>
 
-                    {/* Points module section */}
-                    <div className={`${shouldStack ? "" : "flex-shrink-0 w-80"}`}>
-                      <PointsModule
-                        variant={verificationState.isVerified ? "post-verification" : "pre-verification"}
-                        timeToGet={verificationState.timeToGet}
-                        price={verificationState.price}
-                        pointsGained={verificationState.pointsGained}
-                        totalPossiblePoints={verificationState.totalPossiblePoints}
-                        validityDays={verificationState.validityDays}
-                      />
+                      {hasSteps && <StepGuide steps={steps} isMobile={true} />}
+
+                      <h3 className="text-lg font-semibold text-gray-700 mb-4 mt-8">Stamps</h3>
+                      <CredentialGrid credentialGroups={credentialGroups} columns={1} />
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  {/* Stamps */}
-                  <CredentialGrid credentialGroups={credentialGroups} columns={stampGridCols} />
+              <DrawerFooter
+                onVerify={onVerify}
+                onClose={onClose}
+                isLoading={verificationState.isLoading}
+                isVerified={allStampsVerified}
+              />
+            </>
+          ) : hasSteps ? (
+            // Desktop with steps - two/three column layout
+            <>
+              <div className="flex-1 overflow-hidden flex">
+                {/* Left Section - Stamps */}
+                <div className={`${stampGridCols === 3 ? "w-2/3" : "w-1/2"} flex flex-col h-full`}>
+                  <div className="flex-1 overflow-y-auto">
+                    <div className="p-4 md:p-6">
+                      <DrawerHeader
+                        icon={platformInfo.icon}
+                        name={platformInfo.name}
+                        website={platformInfo.website}
+                        onClose={onClose}
+                      />
+
+                      <div className="mt-4 md:mt-6">
+                        {/* Description/CTA and Points layout */}
+                        <div className={`${shouldStack ? "space-y-6" : "flex gap-8 justify-between"} mb-6`}>
+                          {/* Description and CTA section */}
+                          <div className={`${shouldStack ? "" : "flex-1 min-w-0 max-w-2xl"}`}>
+                            <p className="text-base text-color-4 leading-relaxed">{platformInfo.description}</p>
+                            <CTAButtons
+                              platformInfo={platformInfo}
+                              verificationState={verificationState}
+                              onVerify={onVerify}
+                              onClose={onClose}
+                            />
+                          </div>
+
+                          {/* Points module section */}
+                          <div className={`${shouldStack ? "" : "flex-shrink-0 w-1/2 max-w-80"}`}>
+                            <PointsModule {...verificationState} />
+                          </div>
+                        </div>
+
+                        {/* Stamps */}
+                        <CredentialGrid credentialGroups={credentialGroups} columns={stampGridCols} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <DrawerFooter onUpdateScore={onUpdateScore} />
+                {/* Right Section - Steps */}
+                <div className={`${stampGridCols === 3 ? "w-1/3" : "w-1/2"} p-8 overflow-y-auto bg-background`}>
+                  <StepGuide steps={steps} />
+                </div>
               </div>
 
-              {/* Right Column - Steps */}
-              <div className={`${isWide ? "w-1/3" : "w-1/2"} p-8 overflow-y-auto`}>
-                <StepGuide steps={steps} />
-              </div>
-            </div>
+              <DrawerFooter
+                onVerify={onVerify}
+                onClose={onClose}
+                isLoading={verificationState.isLoading}
+                isVerified={allStampsVerified}
+              />
+            </>
           ) : (
-            // Desktop without steps - single column
             <>
-              <DrawerHeader icon={platformInfo.icon} name={platformInfo.name} onClose={onClose} />
-
-              <div className="flex-1 overflow-y-auto p-8">
-                {/* Description/CTA and Points layout */}
-                <div className={`${shouldStack ? "space-y-6" : "flex gap-8 justify-between"} mb-6`}>
-                  {/* Description and CTA section */}
-                  <div className={`${shouldStack ? "" : "flex-1 min-w-0 max-w-2xl"}`}>
-                    <p className="text-base text-color-4 leading-relaxed">{platformInfo.description}</p>
-                    <CTAButtons
-                      platformInfo={platformInfo}
-                      verificationState={verificationState}
-                      onVerify={onVerify}
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
+                  <div className="p-4 md:p-6">
+                    <DrawerHeader
+                      icon={platformInfo.icon}
+                      name={platformInfo.name}
+                      website={platformInfo.website}
                       onClose={onClose}
                     />
-                  </div>
 
-                  {/* Points module section */}
-                  <div className={`${shouldStack ? "" : "flex-shrink-0 w-80"}`}>
-                    <PointsModule
-                      variant={verificationState.isVerified ? "post-verification" : "pre-verification"}
-                      timeToGet={verificationState.timeToGet}
-                      price={verificationState.price}
-                      pointsGained={verificationState.pointsGained}
-                      totalPossiblePoints={verificationState.totalPossiblePoints}
-                      validityDays={verificationState.validityDays}
-                    />
+                    <div className="mt-4 md:mt-6">
+                      {/* Description/CTA and Points layout */}
+                      <div className={`${shouldStack ? "space-y-6" : "flex gap-8 justify-between"} mb-6`}>
+                        {/* Description and CTA section */}
+                        <div className={`${shouldStack ? "" : "flex-1 min-w-0 max-w-2xl"}`}>
+                          <p className="text-base text-color-4 leading-relaxed">{platformInfo.description}</p>
+                          <CTAButtons
+                            platformInfo={platformInfo}
+                            verificationState={verificationState}
+                            onVerify={onVerify}
+                            onClose={onClose}
+                          />
+                        </div>
+
+                        {/* Points module section */}
+                        <div className={`${shouldStack ? "" : "flex-shrink-0 w-1/2 max-w-80"}`}>
+                          <PointsModule {...verificationState} />
+                        </div>
+                      </div>
+
+                      {/* Stamps */}
+                      <CredentialGrid credentialGroups={credentialGroups} columns={stampGridCols} />
+                    </div>
                   </div>
                 </div>
-
-                {/* Stamps */}
-                <CredentialGrid credentialGroups={credentialGroups} columns={stampGridCols} />
               </div>
 
-              <DrawerFooter onUpdateScore={onUpdateScore} />
+              <DrawerFooter
+                onVerify={onVerify}
+                onClose={onClose}
+                isLoading={verificationState.isLoading}
+                isVerified={allStampsVerified}
+              />
             </>
           )}
         </DrawerBody>

@@ -25,7 +25,6 @@ export interface Credential {
   verified: boolean;
   flags: ("expired" | "deduplicated")[];
   points: number;
-  pointsDisplay: string;
 }
 
 export interface CredentialGroup {
@@ -36,10 +35,11 @@ export interface CredentialGroup {
 export interface PlatformInfo {
   id: string;
   name: string;
-  icon: React.ReactNode;
+  icon: string;
   description: string;
   cta?: string; // Custom CTA text like "Identity Staking"
   ctaHref?: string; // URL for custom CTA
+  website?: string; // Platform website URL
 }
 
 export interface VerificationState {
@@ -58,17 +58,18 @@ export interface StampDrawerProps {
   onClose: () => void;
   platform: any; // TODO: Use proper Platform type from existing codebase
   onVerify: () => void;
-  onUpdateScore: () => void;
   verifiedProviders: string[];
   expiredProviders: string[];
-  stampWeights: Record<string, number>;
-  stampDedupStatus: Record<string, boolean>;
+  stampWeights: Partial<Record<string, string | number>>;
+  stampDedupStatus: Partial<Record<string, boolean>>;
+  isLoading?: boolean;
 }
 
 export interface DrawerHeaderProps {
-  icon: React.ReactNode;
+  icon: string;
   name: string;
   onClose: () => void;
+  website?: string;
 }
 
 export interface CTAButtonsProps {
@@ -79,13 +80,10 @@ export interface CTAButtonsProps {
 }
 
 export interface PointsModuleProps {
-  variant: "pre-verification" | "post-verification";
   timeToGet?: string;
   price?: string;
   pointsGained?: number;
   totalPossiblePoints?: number;
-  validityDays?: number;
-  compact?: boolean;
 }
 
 export interface CredentialCardProps {
@@ -94,7 +92,6 @@ export interface CredentialCardProps {
   verified: boolean;
   flags?: ("expired" | "deduplicated")[];
   points: number;
-  pointsDisplay: string;
 }
 
 export interface CredentialGridProps {
@@ -108,5 +105,8 @@ export interface StepGuideProps {
 }
 
 export interface DrawerFooterProps {
-  onUpdateScore: () => void;
+  onVerify: () => void;
+  onClose?: () => void;
+  isLoading?: boolean;
+  isVerified?: boolean;
 }

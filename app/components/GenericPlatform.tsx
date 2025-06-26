@@ -426,9 +426,17 @@ export const GenericPlatform = ({
     name: platformScoreSpec.name,
     icon: platformScoreSpec.icon,
     description: platformScoreSpec.description,
+    timeToGet: platformScoreSpec.timeToGet,
+    price: platformScoreSpec.price,
+    website: platformScoreSpec.website,
+    // Extract CTA data from banner if it exists
+    cta: platform.banner?.cta?.label,
+    ctaHref: platform.banner?.cta?.url,
     providers: platFormGroupSpec.reduce((acc, group) => {
       return acc.concat(group.providers);
     }, [] as any[]),
+    // Pass the original platFormGroupSpec as credentialGroups
+    credentialGroups: platFormGroupSpec,
     steps: steps,
   };
 
@@ -439,11 +447,11 @@ export const GenericPlatform = ({
         onClose={onClose}
         platform={platformData}
         onVerify={handleFetchCredential}
-        onUpdateScore={onClose} // TODO: Implement actual score update
         verifiedProviders={verifiedProviders}
         expiredProviders={expiredProviders}
         stampWeights={stampWeights || {}}
         stampDedupStatus={stampDedupStatus || {}}
+        isLoading={isLoading}
       />
       <JsonOutputModal
         isOpen={payloadModalIsOpen}

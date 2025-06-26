@@ -9,6 +9,8 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect to GitHub to verify your activity based on days with active commits.",
   connectMessage: "Connect Account",
   website: "https://github.com",
+  timeToGet: "2-5 min",
+  price: "Free",
 };
 
 let providers: Provider[] = [];

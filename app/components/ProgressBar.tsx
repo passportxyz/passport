@@ -17,47 +17,38 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
 }) => {
   const percentGained = (pointsGained / (pointsGained + pointsAvailable)) * 100 || 0;
 
-  const gainedBarWidth = isSlim ? 3 : 6;
-  const remainingBarWidth = isSlim ? 3 : 3;
-  const capDistance = isSlim ? 2 : 4; // The additional space required at the progress bar end, to allow for nice rounding
-  const gainedBarBorder = isSlim ? 3 : 3;
-
-  const heightClass = `h-[${gainedBarWidth + 2 * gainedBarBorder}px]`;
+  const gainedBarWidth = isSlim ? 8 : 12;
+  const remainingBarWidth = 8;
+  const barHeight = Math.max(gainedBarWidth, remainingBarWidth);
 
   return (
-    <div className={heightClass}>
-      <svg viewBox={`0 0 ${100 + 2 * capDistance} 10`} preserveAspectRatio="none">
-        {/* We draw the thinner bar, that indicates the remaining part */}
-        <line
-          x1={capDistance}
-          y1="5"
-          x2={100 + capDistance}
-          y2="5"
-          stroke={availableBarColor}
-          strokeWidth={remainingBarWidth}
-          strokeLinecap="round"
-        />
-        {/* We draw the "border" as wider bar than the "gained" bar. */}
-        {/* <line
-          x1={capDistance}
-          y1="5"
-          x2={percentGained + capDistance}
-          y2="5"
-          stroke="#0E2825"
-          strokeWidth={gainedBarWidth + gainedBarBorder}
-          strokeLinecap="round"
-        /> */}
-        {/* We draw the "gained" part of the bar, on top of the "border". What remains visible of the border bar will look like a nice border */}
-        <line
-          x1={capDistance}
-          y1="5"
-          x2={percentGained + capDistance}
-          y2="5"
-          stroke={gainedBarColor}
-          strokeWidth={gainedBarWidth}
-          strokeLinecap="round"
-        />
-      </svg>
+    <div style={{ height: `${barHeight}px`, width: "100%", position: "relative" }}>
+      {/* Background bar */}
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          transform: "translateY(-50%)",
+          left: 0,
+          right: 0,
+          height: `${remainingBarWidth}px`,
+          backgroundColor: availableBarColor,
+          borderRadius: `${remainingBarWidth / 2}px`,
+        }}
+      />
+      {/* Progress bar */}
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          transform: "translateY(-50%)",
+          left: 0,
+          width: `${percentGained}%`,
+          height: `${gainedBarWidth}px`,
+          backgroundColor: gainedBarColor,
+          borderRadius: `${gainedBarWidth / 2}px`,
+        }}
+      />
     </div>
   );
 };

@@ -8,6 +8,8 @@ export const PlatformDetails: PlatformSpec = {
   description: "Privately prove you are not sanctioned using Proof of Clean Hands",
   connectMessage: "Verify Account",
   isEVM: true,
+  timeToGet: "10-15 min",
+  price: "$15",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

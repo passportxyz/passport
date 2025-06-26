@@ -10,7 +10,7 @@ export const useViewport = () => {
     const handleResize = () => {
       setViewport({
         isMobile: window.innerWidth < 768,
-        isWide: window.innerWidth >= 1200,
+        isWide: window.innerWidth >= 1100,
       });
     };
 

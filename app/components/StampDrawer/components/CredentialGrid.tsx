@@ -13,7 +13,7 @@ export const CredentialGrid = ({ credentialGroups, columns }: CredentialGridProp
     <div>
       {credentialGroups.map((group, groupIndex) => (
         <div key={groupIndex} className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-500 mb-4">{group.title}</h3>
+          <h3 className="text-base font-semibold text-color-9 mb-4">{group.title}</h3>
           <div className={`grid ${gridCols[columns]} gap-2`}>
             {group.credentials.map((credential) => (
               <CredentialCard
@@ -22,7 +22,6 @@ export const CredentialGrid = ({ credentialGroups, columns }: CredentialGridProp
                 description={credential.description}
                 verified={credential.verified}
                 points={credential.points}
-                pointsDisplay={credential.pointsDisplay}
                 flags={credential.flags}
               />
             ))}

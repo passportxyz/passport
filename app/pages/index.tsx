@@ -12,6 +12,7 @@ import Welcome from "./Welcome";
 import Dashboard from "./Dashboard";
 import Privacy from "./privacy";
 import Maintenance from "./Maintenance";
+import Palette from "./palette";
 
 // -- Datadog
 import { datadogRum } from "@datadog/browser-rum";
@@ -58,6 +59,7 @@ export const AppRoutes = () => (
         <Route path="" element={<Dashboard />} />
       </Route>
       <Route path="privacy" element={<Privacy />} />
+      <Route path="palette" element={<Palette />} />
       <Route path="*" element={<NotFound />} />
     </Route>
   </Routes>
