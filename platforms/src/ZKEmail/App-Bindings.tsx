@@ -114,7 +114,9 @@ export class ZKEmailPlatform extends Platform {
     }
 
     return {
-      uberProofs: this.uberProofs,
+      proofs: {
+        uberProofs: this.uberProofs,
+      },
       validEmails: this.uberProofs.length.toString(),
     };
   }
