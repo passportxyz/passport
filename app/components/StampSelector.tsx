@@ -202,7 +202,7 @@ const useIncludedGroupsAndProviders = (specs: PlatformGroupSpec[]): Record<strin
     });
 
     return included;
-  }, [specs, customization]);
+  }, [specs, customization, stampScores]);
 
   return included;
 };

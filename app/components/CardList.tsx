@@ -77,7 +77,7 @@ const useShouldDisplayPlatform = () => {
 
       return true;
     },
-    [customization, platformProviderIds]
+    [customization, platformProviderIds, platforms]
   );
 
   return { shouldDisplayPlatform };

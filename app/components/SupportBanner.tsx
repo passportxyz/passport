@@ -9,7 +9,7 @@ export function SupportBanner({ banners }: { banners: SupportBannerProps[] }): J
           key={banner.banner_id}
           userWarning={{ content: banner.content, link: banner.link, dismissible: true }}
           onDismiss={banner.dismiss}
-          className="max-w-full border-t border-background px-4"
+          className="max-w-full border-t border-background px-4 h-8"
         />
       ))}
     </>

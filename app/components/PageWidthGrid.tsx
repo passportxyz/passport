@@ -7,7 +7,7 @@ export const CONTENT_MAX_WIDTH = "max-w-screen-xl";
 const PageWidthGrid = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <div
     className={`col-span-full grid w-full grid-cols-4 gap-4 justify-self-center
-      md:grid-cols-6 md:gap-6 lg:grid-cols-8 xl:grid-cols-12 ${className}`}
+      md:grid-cols-6 md:gap-6 lg:grid-cols-8 xl:grid-cols-12 ${className || ""}`}
   >
     {children}
   </div>

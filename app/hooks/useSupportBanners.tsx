@@ -1,7 +1,9 @@
 import axios from "axios";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import { datadogRum } from "@datadog/browser-rum";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
+import { useQuery } from "@tanstack/react-query";
+import { create } from "zustand";
 
 export type SupportBannerProps = {
   content: string;
@@ -10,35 +12,43 @@ export type SupportBannerProps = {
   dismiss: () => Promise<void>;
 };
 
-export const useSupportBanners = (): { banners: SupportBannerProps[]; loadBanners: () => Promise<void> } => {
-  const [banners, setBanners] = useState<SupportBannerProps[]>([]);
+type BannerStore = {
+  banners: SupportBannerProps[];
+  dismiss: (bannerId: number) => void;
+  update: (banners: SupportBannerProps[]) => void;
+};
 
-  const { dbAccessToken, dbAccessTokenStatus } = useDatastoreConnectionContext();
+const useBannerStore = create<BannerStore>((set) => ({
+  banners: [],
+  dismiss: (bannerId: number) =>
+    set((state) => ({ banners: state.banners.filter((banner) => banner.banner_id !== bannerId) })),
+  update: (banners: SupportBannerProps[]) => set((state) => ({ banners })),
+}));
 
-  const loadBanners = useCallback(async () => {
-    if (dbAccessTokenStatus === "connected" && dbAccessToken) {
-      const banners: {
-        data: Omit<SupportBannerProps, "dismiss">[];
-      } = await axios.get(`${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/banners`, {
-        headers: {
-          Authorization: `Bearer ${dbAccessToken}`,
-        },
-      });
+const fetchBanners = async (dbAccessToken: string | undefined, fnDismiss: (bannerId: number) => void) => {
+  if (dbAccessToken) {
+    const banners: {
+      data: Omit<SupportBannerProps, "dismiss">[];
+    } = await axios.get(`${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/banners`, {
+      headers: {
+        Authorization: `Bearer ${dbAccessToken}`,
+      },
+    });
 
-      setBanners(
-        banners.data.map((banner: Omit<SupportBannerProps, "dismiss">) => ({
-          ...banner,
-          dismiss: creatDismissSupportBannerCallback(banner.banner_id),
-        }))
-      );
-    }
-  }, [dbAccessToken, dbAccessTokenStatus]);
+    return banners.data.map((banner: Omit<SupportBannerProps, "dismiss">) => ({
+      ...banner,
+      dismiss: creatDismissSupportBannerCallback(dbAccessToken, banner.banner_id, fnDismiss),
+    }));
+  }
+};
 
-  const creatDismissSupportBannerCallback = (banner_id: number) => async () => {
+const creatDismissSupportBannerCallback =
+  (dbAccessToken: string, bannerId: number, fnDismiss: (bannerId: number) => void) => async () => {
+    fnDismiss(bannerId);
     try {
       if (!dbAccessToken) throw new Error("No access token");
       await axios.post(
-        `${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/banners/${banner_id}/dismiss`,
+        `${process.env.NEXT_PUBLIC_SCORER_ENDPOINT}/passport-admin/banners/${bannerId}/dismiss`,
         {},
         {
           headers: {
@@ -46,11 +56,34 @@ export const useSupportBanners = (): { banners: SupportBannerProps[]; loadBanner
           },
         }
       );
-      setBanners((oldBanners) => oldBanners.filter((banner) => banner.banner_id !== banner_id));
     } catch (err) {
       datadogRum.addError(err);
     }
   };
+
+export const useSupportBanners = (): { banners: SupportBannerProps[]; loadBanners: () => Promise<void> } => {
+  const { banners, dismiss, update } = useBannerStore();
+
+  const { dbAccessToken, dbAccessTokenStatus } = useDatastoreConnectionContext();
+
+  const query = useQuery({
+    enabled: false,
+    queryKey: ["banners", dbAccessToken],
+    queryFn: () => fetchBanners(dbAccessToken, dismiss),
+  });
+
+  useEffect(() => {
+    if (query.isSuccess) {
+      // side effect on success
+      update(query.data || []);
+    }
+  }, [query.isSuccess, update]);
+
+  const loadBanners = useCallback(async () => {
+    if (dbAccessTokenStatus === "connected" && dbAccessToken) {
+      query.refetch();
+    }
+  }, [dbAccessToken, dbAccessTokenStatus]);
 
   return useMemo(() => ({ banners, loadBanners }), [banners, loadBanners]);
 };

@@ -53,7 +53,7 @@ export const DashboardValidStampsPanel = ({ className }: { className: string }) 
 
       return providerIds?.some((providerId) => activeChainProviders.find((p) => p.providerName === providerId));
     },
-    [activeChainProviders, allProvidersState, verifiedPlatforms]
+    [activeChainProviders, verifiedPlatforms]
   );
 
   const onChainPlatformIds = useMemo(

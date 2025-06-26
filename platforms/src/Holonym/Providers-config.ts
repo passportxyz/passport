@@ -2,7 +2,7 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { HolonymGovIdProvider } from "./Providers/holonymGovIdProvider.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/holonymStampIcon.svg",
+  icon: "./assets/humanTechIcon.svg",
   platform: "Holonym",
   name: "Holonym",
   description: "Connect to Holonym to verify your identity without revealing any personal information.",

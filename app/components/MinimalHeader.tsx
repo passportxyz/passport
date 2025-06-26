@@ -212,8 +212,8 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
           <a href="https://humansignon.com/" target="_blank">
             <BridgeIcon />
           </a>
-          {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
           <AccountCenter />
+          {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
         </div>
       </div>
 

@@ -2,7 +2,7 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { ZeronymPhoneProvider } from "./Providers/zeronymPhone.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/zeronymLogo.png",
+  icon: "./assets/humanTechIcon.svg",
   platform: "PhoneVerification",
   name: "Phone Verification",
   description: "Connect to Zeronym by Holonym to verify your phone number.",
