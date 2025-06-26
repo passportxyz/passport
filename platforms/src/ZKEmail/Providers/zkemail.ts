@@ -1,10 +1,10 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { type Provider, type ProviderOptions } from "../../types.js";
-import { extractEMLDetails, initZkEmailSdk, Proof, RawEmailResponse, testBlueprint } from "@zk-email/sdk";
-import { UBER_EMAIL } from "../procedures/mocked_email.js";
+// Use dynamic import to avoid build-time slowness
+// import { extractEMLDetails, initZkEmailSdk, Proof, RawEmailResponse, testBlueprint } from "@zk-email/sdk";
 import { fetchEmailsRaw, fetchUserEmails, requestAccessToken } from "../procedures/gmail.js";
 
-type Email = RawEmailResponse & {
+type Email = any & {
   valid: boolean;
 };
 
@@ -17,24 +17,32 @@ export class ZKEmailProvider implements Provider {
   }
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+    console.log("payload: ", payload);
+    const { initZkEmailSdk  } = await import("@zk-email/sdk");
+    const sdk = initZkEmailSdk({logging: {enabled: true, level: 'debug'}});
+    
     const record: { data?: string } | undefined = undefined;
     const errors: string[] = [];
 
-    const proofs = JSON.parse(payload.proofs.uberProofs) as Proof[];
+    const proofs = await Promise.all((payload.proofs.uberProofs as unknown as string[]).map((p: string) => sdk.unPackProof(p)));
+    console.log("proofs: ", proofs);
 
     try {
-      const sdk = initZkEmailSdk({});
-
-      const blueprint = await sdk.getBlueprintById("85b4b54b-72c2-4a99-8393-7f8cc47332c8");
-
       // count how many proofs are valid
       const validProofs = await Promise.all(
-        proofs.map(async (proof) => {
-          const verified = await blueprint.verifyProof(proof);
-          return verified;
+        proofs.map(async (proof: any) => {
+          try {
+            const verified = await proof.verify();
+            return verified;
+          } catch (err) {
+            console.error("err during verify: ", err);
+            return false;
+          }
         })
       );
+      console.log("validProofs: ", validProofs);
       const validProofCount = validProofs.filter((verified) => verified).length;
+      console.log("validProofCount: ", validProofCount);
 
       return {
         valid: true,

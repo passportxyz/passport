@@ -2,14 +2,15 @@
 import React from "react";
 import { AppContext, PlatformBanner, PlatformOptions, ProviderPayload } from "../types.js";
 import { Platform } from "../utils/platform.js";
-import { initZkEmailSdk, Gmail, LoginWithGoogle, Proof } from "@zk-email/sdk";
+// Defer SDK import to avoid build-time slowness
+// import { initZkEmailSdk, Gmail, LoginWithGoogle, Proof } from "@zk-email/sdk";
 
 export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
   path = "ZKEmail";
 
   // loginWithGoogle: LoginWithGoogle;
-  private uberProofs: Proof[] = [];
+  private uberProofs: string[] = [];
 
   constructor(options: PlatformOptions = {}) {
     super();
@@ -17,17 +18,8 @@ export class ZKEmailPlatform extends Platform {
       heading: "To add the ZKEmail Stamp to your Passport...",
       content: (
         <div>
-          <p>To add the ZKEmail Stamp to your Passport, you need to login with Google.</p>
-          <button
-            onClick={() => {
-              this.handleLoginAndProve().catch((error) => {
-                // It's a good practice to handle potential errors
-                console.error("An error occurred during the login process:", error);
-              });
-            }}
-          >
-            Login with Google and Prove Uber trips
-          </button>
+          <p>To add the ZKEmail Stamp to your Passport, you need to login with Google and prove your Uber trips.</p>
+          <p>Click "Connect Account" below to start the verification process.</p>
         </div>
       ),
       cta: {
@@ -38,6 +30,9 @@ export class ZKEmailPlatform extends Platform {
   }
 
   async handleLoginAndProve(): Promise<void> {
+    // Dynamic import to avoid build-time slowness
+    const { initZkEmailSdk, Gmail, LoginWithGoogle } = await import("@zk-email/sdk");
+    
     const loginWithGoogle = new LoginWithGoogle();
     const gmail = new Gmail(loginWithGoogle);
     if (!loginWithGoogle.accessToken) {
@@ -45,12 +40,14 @@ export class ZKEmailPlatform extends Platform {
     }
 
     const sdk = initZkEmailSdk({});
-    const blueprint = await sdk.getBlueprintById("f9de1c4a-b90c-47af-941f-d21a0ecf1411");
+    const blueprint = await sdk.getBlueprintById("4cfc3efd-7215-4e96-9b4e-291d2a9cc702");
+    console.log("blueprint app bindings: ", blueprint);
 
     // fetch emails
     const emailResponses = await gmail.fetchEmails([blueprint], {
-      replaceQuery: "from:uber.com",
+      replaceQuery: "from:amazon.de \"Delivered: Your Amazon.de order\"",
     });
+    // const emailResponses = await gmail.fetchEmails([blueprint]);
     console.log("Email responses: ", emailResponses);
 
     const moreEmails = await gmail.fetchMore();
@@ -94,13 +91,18 @@ export class ZKEmailPlatform extends Platform {
     );
     console.log("Proofs: ", proofs);
 
-    this.uberProofs = proofs;
+    this.uberProofs = proofs.map(p => p.packProof());
 
     // const verified = await blueprint.verifyProof(proofs[0]);
 
-    const { proofData, publicData } = proofs[0].getProofData();
-    const verified = await blueprint.verifyProofData(publicData.toString(), proofData);
-    console.log("Verified: ", verified);
+    // const packedProof = proofs[0].packProof();
+    // try {
+    //   const verified = await proofs[0].verify();
+    //   console.log("Verified: ", verified);
+    // } catch(err){
+    //   console.error("failed to verify err: ", err);
+    // }
+    // const verified = await blueprint.verifyProofData(publicData.toString(), proofData);
 
     // send proofs to the server
   }
@@ -112,7 +114,7 @@ export class ZKEmailPlatform extends Platform {
     }
 
     return {
-      uberProofs: JSON.stringify(this.uberProofs), // Pass proofs as serialized JSON
+      uberProofs: this.uberProofs,
       validEmails: this.uberProofs.length.toString(),
     };
   }
