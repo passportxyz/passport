@@ -1,5 +1,4 @@
 import React, { ReactNode, useMemo, useState } from "react";
-import { VeraxPanel } from "../components/VeraxPanel";
 import { TestingPanel } from "../components/TestingPanel";
 import { Button } from "../components/Button";
 import { CustomizationLogoBackground } from "../utils/customizationUtils";
@@ -59,9 +58,10 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
 export const DynamicCustomDashboardPanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
 
-  if (customization.key === "verax") {
-    return <VeraxPanel className={className} />;
-  }
+  // TODO: #3533 Do we still need the custom Verax Panel?
+  // if (customization.key === "verax") {
+  //   return <VeraxPanel className={className} />;
+  // }
 
   if (customization.key === "testing") {
     return <TestingPanel className={className} />;

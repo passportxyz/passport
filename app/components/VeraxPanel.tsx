@@ -49,13 +49,13 @@ export const VeraxPanel = ({ className }: { className: string }) => {
   const {
     props: buttonProps,
     syncingToChain,
-    text,
     needToSwitchChain,
   } = useSyncToChainButton({
     chain,
     onChainStatus,
-    getButtonMsg,
   });
+
+  const text = "TODO ...";
 
   return (
     <>
@@ -100,7 +100,7 @@ export const VeraxPanel = ({ className }: { className: string }) => {
           {...buttonProps}
           isLoading={syncingToChain || onChainStatus === OnChainStatus.LOADING}
           variant="custom"
-          className={`${buttonProps.className} rounded-s mr-2 mt-2 w-fit  self-end bg-customization-background-1 text-color-4 hover:bg-customization-background-1/75 enabled:hover:text-color-1 disabled:bg-customization-background-1 disabled:brightness-100`}
+          className={`rounded-s mr-2 mt-2 w-fit  self-end bg-customization-background-1 text-color-4 hover:bg-customization-background-1/75 enabled:hover:text-color-1 disabled:bg-customization-background-1 disabled:brightness-100`}
           onClick={() => {
             if (score < 1) {
               setConfirmModalOpen(true);

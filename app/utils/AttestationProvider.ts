@@ -65,7 +65,7 @@ class BaseAttestationProvider implements AttestationProvider {
   status: AttestationProviderStatus;
   skipByDefault: boolean = false;
   hasWebViewer = false;
-  attestationExplorerLinkText = "Check attestation on EAS";
+  attestationExplorerLinkText = "Attestation on EAS";
   chainId: string;
   monochromeIcon: string;
 
@@ -190,7 +190,7 @@ export class EASAttestationProvider extends BaseAttestationProvider {
 
 export class VeraxAndEASAttestationProvider extends EASAttestationProvider {
   name = "Verax, Ethereum Attestation Service";
-  attestationExplorerLinkText = "Check attestation on Verax";
+  attestationExplorerLinkText = "Attestation on Verax";
 
   viewerUrl(address: string): string {
     return this.easScanUrl || "";

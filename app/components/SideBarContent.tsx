@@ -38,12 +38,7 @@ export const SideBarContent = ({
         borderRadius: "6px",
       }}
     >
-      <CancelButton
-        onClose={onClose}
-        className={`visible z-10 text-color-1 md:invisible absolute right-2 top-0`}
-        width={42}
-        height={42}
-      />
+      <CancelButton onClose={onClose} className={`visible z-10 text-color-1 md:invisible absolute right-2 top-0`} />
       {currentPlatform && currentProviders ? (
         <div className="overflow-auto p-10 text-gray-800">
           <DrawerHeader

@@ -93,11 +93,6 @@ const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean
               <GitHubIcon />
             </Link>
           </div>
-          <div className="md:pr-2 md:px-2 md:mr-20">
-            <Link href="https://docs.passport.xyz/">
-              <SyncIcon />
-            </Link>
-          </div>
         </div>
       </div>
     </footer>

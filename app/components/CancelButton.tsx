@@ -1,24 +1,7 @@
-export const CancelButton = ({
-  onClose,
-  width = 56,
-  height = 56,
-  className,
-}: {
-  onClose: () => void;
-  className?: string;
-  width?: number;
-  height?: number;
-}) => (
+export const CancelButton = ({ onClose, className }: { onClose: () => void; className?: string }) => (
   <button onClick={onClose} className={className}>
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M41.5 14.4131L14.0978 41.8153" stroke="#C1F6FF" strokeWidth="2" strokeLinecap="round" />
-      <path d="M41.5 41.8154L14.0978 14.4132" stroke="#C1F6FF" strokeWidth="2" strokeLinecap="round" />
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 8L8 24M8 8L24 24" stroke="#737373" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   </button>
 );
