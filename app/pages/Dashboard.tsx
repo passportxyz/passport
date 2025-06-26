@@ -264,8 +264,8 @@ export default function Dashboard() {
         <BodyWrapper className="mt-4 md:mt-0 pt-12 md:pt-16">
           {
             // This is just offsetting the dashboard, such that it is shown below the banners
-            banners.map(() => (
-              <div className="col-span-full h-8"></div>
+            banners.map((_v, idx) => (
+              <div className="col-span-full h-8" key={idx}></div>
             ))
           }
           <PageWidthGrid>
