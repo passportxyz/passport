@@ -455,7 +455,12 @@ export type PROVIDER_ID =
   | "BinanceBABT2"
   | `DeveloperList#${string}#${string}`
   | "CleanHands"
-  | "ZKEmail";
+  | "ZKEmail#AmazonCasualPurchaser"
+  | "ZKEmail#AmazonRegularCustomer"
+  | "ZKEmail#AmazonHeavyUser"
+  | "ZKEmail#UberOccasionalRider"
+  | "ZKEmail#UberRegularRider"
+  | "ZKEmail#UberPowerUser";
 
 export type StampBit = {
   bit: number;

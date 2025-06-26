@@ -1,55 +1,79 @@
 import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { type Provider, type ProviderOptions } from "../../types.js";
+import {
+  AMAZON_CASUAL_PURCHASER_THRESHOLD,
+  AMAZON_REGULAR_CUSTOMER_THRESHOLD,
+  AMAZON_HEAVY_USER_THRESHOLD,
+  UBER_OCCASIONAL_RIDER_THRESHOLD,
+  UBER_REGULAR_RIDER_THRESHOLD,
+  UBER_POWER_USER_THRESHOLD,
+} from "../types.js";
 // Use dynamic import to avoid build-time slowness
 // import { extractEMLDetails, initZkEmailSdk, Proof, RawEmailResponse, testBlueprint } from "@zk-email/sdk";
-import { fetchEmailsRaw, fetchUserEmails, requestAccessToken } from "../procedures/gmail.js";
 
 type Email = any & {
   valid: boolean;
 };
 
-export class ZKEmailProvider implements Provider {
-  type = "ZKEmail";
+// Base ZKEmail Provider
+abstract class ZKEmailBaseProvider implements Provider {
+  type: string;
   _options: ProviderOptions;
 
-  constructor(options: ProviderOptions = {}) {
+  constructor(type: string, options: ProviderOptions = {}) {
+    this.type = type;
     this._options = { ...options };
   }
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     console.log("payload: ", payload);
+    const { initZkEmailSdk } = await import("@zk-email/sdk");
+    const sdk = initZkEmailSdk({ logging: { enabled: true, level: "debug" } });
+
     const errors: string[] = [];
     const record: { data?: string } | undefined = undefined;
 
     try {
       // Validate payload structure
-      if (!payload.proofs || !payload.proofs.uberProofs) {
+      if (!payload.proofs) {
         return {
           valid: false,
-          errors: ["No uber proofs provided in payload"],
+          errors: ["No proofs provided in payload"],
+          record,
+        };
+      }
+
+      // Get the appropriate proof type for this provider
+      const proofType = this.getProofType();
+      const proofsField = proofType === "amazon" ? "amazonProofs" : "uberProofs";
+
+      if (!payload.proofs[proofsField]) {
+        return {
+          valid: false,
+          errors: [`No ${proofType} proofs provided in payload`],
           record,
         };
       }
 
       const { initZkEmailSdk } = await import("@zk-email/sdk");
-      const sdk = initZkEmailSdk({logging: {enabled: true, level: 'debug'}});
-      
-      const uberProofs = payload.proofs.uberProofs as unknown as string[];
-      
-      if (!Array.isArray(uberProofs) || uberProofs.length === 0) {
+      const sdk = initZkEmailSdk({ logging: { enabled: true, level: "debug" } });
+
+      const proofs = payload.proofs[proofsField] as unknown as string[];
+
+      if (!Array.isArray(proofs) || proofs.length === 0) {
         return {
           valid: false,
-          errors: ["Invalid or empty uber proofs array"],
+          errors: [`Invalid or empty ${proofType} proofs array`],
           record,
         };
       }
 
-      const proofs = await Promise.all(uberProofs.map((p: string) => sdk.unPackProof(p)));
-      console.log("proofs: ", proofs);
+      const unpackedProofs = await Promise.all(proofs.map((p: string) => sdk.unPackProof(p)));
+      console.log(`${proofType} proofs: `, unpackedProofs);
 
       // count how many proofs are valid
       const validProofs = await Promise.all(
-        proofs.map(async (proof: any) => {
+        unpackedProofs.map(async (proof: any) => {
           try {
             const verified = await proof.verify();
             return verified;
@@ -59,14 +83,24 @@ export class ZKEmailProvider implements Provider {
           }
         })
       );
-      console.log("validProofs: ", validProofs);
+      console.log(`valid ${proofType} proofs: `, validProofs);
       const validProofCount = validProofs.filter((verified) => verified).length;
-      console.log("validProofCount: ", validProofCount);
+      console.log(`valid ${proofType} proof count: `, validProofCount);
 
       if (validProofCount === 0) {
         return {
           valid: false,
-          errors: ["No valid proofs found"],
+          errors: [`No valid ${proofType} proofs found`],
+          record,
+        };
+      }
+
+      // Check if the proof count meets the threshold for this specific provider
+      const threshold = this.getThreshold();
+      if (validProofCount < threshold) {
+        return {
+          valid: false,
+          errors: [`Need at least ${threshold} valid ${proofType} proofs, but only found ${validProofCount}`],
           record,
         };
       }
@@ -76,6 +110,7 @@ export class ZKEmailProvider implements Provider {
         errors,
         record: {
           totalProofs: validProofCount.toString(),
+          proofType: proofType,
         },
       };
     } catch (error) {
@@ -87,5 +122,109 @@ export class ZKEmailProvider implements Provider {
         record,
       };
     }
+  }
+
+  abstract getThreshold(): number;
+  abstract getProofType(): "amazon" | "uber";
+}
+
+// Amazon Providers
+export class AmazonCasualPurchaserProvider extends ZKEmailBaseProvider {
+  constructor() {
+    super("ZKEmail#AmazonCasualPurchaser");
+  }
+
+  getThreshold(): number {
+    return AMAZON_CASUAL_PURCHASER_THRESHOLD;
+  }
+
+  getProofType(): "amazon" {
+    return "amazon";
+  }
+}
+
+export class AmazonRegularCustomerProvider extends ZKEmailBaseProvider {
+  constructor() {
+    super("ZKEmail#AmazonRegularCustomer");
+  }
+
+  getThreshold(): number {
+    return AMAZON_REGULAR_CUSTOMER_THRESHOLD;
+  }
+
+  getProofType(): "amazon" {
+    return "amazon";
+  }
+}
+
+export class AmazonHeavyUserProvider extends ZKEmailBaseProvider {
+  constructor() {
+    super("ZKEmail#AmazonHeavyUser");
+  }
+
+  getThreshold(): number {
+    return AMAZON_HEAVY_USER_THRESHOLD;
+  }
+
+  getProofType(): "amazon" {
+    return "amazon";
+  }
+}
+
+// Uber Providers
+export class UberOccasionalRiderProvider extends ZKEmailBaseProvider {
+  constructor() {
+    super("ZKEmail#UberOccasionalRider");
+  }
+
+  getThreshold(): number {
+    return UBER_OCCASIONAL_RIDER_THRESHOLD;
+  }
+
+  getProofType(): "uber" {
+    return "uber";
+  }
+}
+
+export class UberRegularRiderProvider extends ZKEmailBaseProvider {
+  constructor() {
+    super("ZKEmail#UberRegularRider");
+  }
+
+  getThreshold(): number {
+    return UBER_REGULAR_RIDER_THRESHOLD;
+  }
+
+  getProofType(): "uber" {
+    return "uber";
+  }
+}
+
+export class UberPowerUserProvider extends ZKEmailBaseProvider {
+  constructor() {
+    super("ZKEmail#UberPowerUser");
+  }
+
+  getThreshold(): number {
+    return UBER_POWER_USER_THRESHOLD;
+  }
+
+  getProofType(): "uber" {
+    return "uber";
+  }
+}
+
+// Legacy provider for backwards compatibility
+export class ZKEmailProvider extends ZKEmailBaseProvider {
+  constructor(options: ProviderOptions = {}) {
+    super("ZKEmail", options);
+  }
+
+  getThreshold(): number {
+    return 1; // Default threshold
+  }
+
+  getProofType(): "amazon" | "uber" {
+    return "amazon";
   }
 }
