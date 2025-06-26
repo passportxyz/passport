@@ -13,7 +13,9 @@ import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import { DashboardScorePanel, DashboardScoreExplanationPanel } from "../components/DashboardScorePanel";
 import { DashboardValidStampsPanel } from "../components/DashboardValidStampsPanel";
 import { ExpiredStampsPanel } from "../components/ExpiredStampsPanel";
+import { SupportBanner } from "../components/SupportBanner";
 import { OnchainSidebar } from "../components/OnchainSidebar";
+import { useSupportBanners } from "../hooks/useSupportBanners";
 
 // --Chakra UI Elements
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalOverlay, useDisclosure } from "@chakra-ui/react";
@@ -71,10 +73,18 @@ export default function Dashboard() {
   const { initiateVerification } = useOneClickVerification();
   const { success, failure } = useMessage();
   const [showOnchainSidebar, setShowOnchainSidebar] = React.useState(false);
+  const { banners, loadBanners } = useSupportBanners();
+  const bannersOffset = `h-[${banners.length * 60}px]`;
 
   // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
   // until ceramicContext is refactored and memoized
   const verifiedParamsHash = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    loadBanners();
+  }, [loadBanners]);
+
+  console.log("geri --- banners", banners);
 
   useEffect(() => {
     if (did && address && databaseReady) {
@@ -259,6 +269,7 @@ export default function Dashboard() {
         <Header />
         <BodyWrapper className="mt-4 md:mt-0 pt-12 md:pt-16">
           <PageWidthGrid>
+            <div className={`col-span-full h-[${banners.length * 60}]`}></div>
             <DashboardCTAs customization={customization} />
 
             <span id="add-stamps" className="px-4 md:px-0 col-span-full font-heading text-4xl text-gray-800 mt-12">
