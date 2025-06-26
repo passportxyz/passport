@@ -51,7 +51,7 @@ export function OnchainSidebar({ isOpen, onClose }: OnchainSidebarProps) {
           </div>
         </DrawerHeader>
         <DrawerBody>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-[repeat(auto-fit,_minmax(250px,_1fr))] gap-3">
             {validChains.map((chain) => (
               <NetworkCard key={chain.id} chain={chain} />
             ))}

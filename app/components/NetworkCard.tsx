@@ -79,7 +79,7 @@ export function NetworkCard({ chain }: { chain: Chain }) {
                   strokeLinejoin="round"
                 />
               </svg>
-              <span className="pt-0.5">
+              <span className="pt-0.5 min-w-14">
                 Valid for<br></br>
                 {daysUntilExpiration} {daysUntilExpiration === 1 ? "day" : "days"}
               </span>
