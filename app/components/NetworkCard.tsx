@@ -46,9 +46,12 @@ export function NetworkCard({ chain }: { chain: Chain }) {
           <div className="">
             <h1 className="grow font-medium text-lg">{chain.label}</h1>
           </div>
-          <div className={`mb-2 ${!showButton ? "hidden" : ""}`}>
-            <SyncToChainButton onChainStatus={status} chain={chain} isLoading={isPending} />
-          </div>
+          <SyncToChainButton
+            onChainStatus={status}
+            chain={chain}
+            isLoading={isPending}
+            className={`mb-2 ${!showButton ? "hidden" : ""}`}
+          />
           <div className={`mb-2 flex w-full justify-between ${showButton ? "hidden" : ""}`}>
             {address && chain.attestationProvider?.hasWebViewer && (
               <Hyperlink

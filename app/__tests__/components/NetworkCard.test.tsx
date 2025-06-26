@@ -11,10 +11,20 @@ import { Drawer, DrawerOverlay } from "@chakra-ui/react";
 
 import { useOnChainData } from "../../hooks/useOnChainData";
 import { Chain } from "../../utils/chains";
+import { useOnChainStatus } from "../../hooks/useOnChainStatus";
+import { OnChainStatus } from "../../utils/onChainStatus";
 
 vi.mock("../../hooks/useOnChainData");
+vi.mock("../../hooks/useOnChainStatus", async (importActual) => {
+  const actual = (await importActual()) as any;
+  return {
+    ...actual,
+    useOnChainStatus: vi.fn().mockImplementation(() => ({ isPending: false, status: OnChainStatus.NOT_MOVED })),
+  };
+});
 
 const mockUseOnChainData = vi.mocked(useOnChainData);
+const mockUseOnChainStatus = vi.mocked(useOnChainStatus);
 
 vi.mock("next/router", () => ({
   useRouter: () => ({
@@ -54,7 +64,6 @@ describe("OnChainSidebar", () => {
           providers: [
             {
               providerName: "NFT",
-              credentialHash: "12345",
               expirationDate: new Date("2021-01-01"),
               issuanceDate: new Date("2021-01-01"),
             },
@@ -83,7 +92,6 @@ describe("OnChainSidebar", () => {
           providers: [
             {
               providerName: "NFT",
-              credentialHash: "12345",
               expirationDate: new Date("2021-01-01"),
               issuanceDate: new Date("2021-01-01"),
             },
@@ -100,5 +108,37 @@ describe("OnChainSidebar", () => {
     renderWithContext(mockCeramicContext, drawer());
     waitFor(() => expect(screen.getByText("Expires")).toBeInTheDocument());
     waitFor(() => expect(screen.getByText("Feb 4, 2099")).toBeInTheDocument());
+  });
+
+  it("shows hides mint button if stamp is moved and not expired", () => {
+    mockUseOnChainData.mockReturnValue({
+      ...defaultUseOnChainData,
+      data: {
+        12345: {
+          expirationDate: new Date("2099-02-04"),
+          score: 0,
+          providers: [
+            {
+              providerName: "NFT",
+              expirationDate: new Date("2021-01-01"),
+              issuanceDate: new Date("2021-01-01"),
+            },
+          ],
+        },
+      },
+    });
+    mockUseOnChainStatus.mockReturnValue({
+      isPending: false,
+      status: OnChainStatus.NOT_MOVED,
+    });
+    const drawer = () => (
+      <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
+        <DrawerOverlay />
+        <NetworkCard key={4} chain={chain} />
+      </Drawer>
+    );
+    renderWithContext(mockCeramicContext, drawer());
+    waitFor(() => expect(screen.getByText("Expires")).toBeInTheDocument());
+    waitFor(() => expect(screen.getByTestId("sync-to-chain-button")).not.toBeVisible());
   });
 });

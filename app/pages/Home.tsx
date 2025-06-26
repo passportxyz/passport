@@ -46,7 +46,7 @@ export default function Home() {
             <div className="mb-4 text-2xl leading-none md:text-7xl font-bold font-alt">Unlock the best of web3</div>
             <div className="max-w-sm text-lg">Access a world of Web3 opportunities securely with a single sign-in.</div>
 
-            <div className="flex justify-center md:justify-start items-center w-full">
+            <div className="flex justify-center md:justify-start items-center w-full mb-8">
               <SIWEButton
                 subtext={(() => {
                   if (loginStep === "PENDING_WALLET_CONNECTION") {

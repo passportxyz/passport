@@ -101,7 +101,6 @@ export function SyncToChainButton({ onChainStatus, chain, className, isLoading }
     syncingToChain ||
     onChainStatus === OnChainStatus.LOADING ||
     scoreState.status === "loading";
-  const expired = onChainStatus === OnChainStatus.MOVED_EXPIRED;
 
   return (
     <>

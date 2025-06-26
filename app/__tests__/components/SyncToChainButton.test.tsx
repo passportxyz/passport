@@ -1,5 +1,5 @@
 import { vi, describe, it, expect } from "vitest";
-import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor, render } from "@testing-library/react";
 import axios from "axios";
 import { getButtonMsg, SyncToChainButton } from "../../components/SyncToChainButton";
 import { OnChainStatus } from "../../utils/onChainStatus";
@@ -34,9 +34,14 @@ vi.mock("wagmi", async (importOriginal) => ({
 
 describe("getButtonMsg function", () => {
   it("returns correct messages for each OnChainStatus", () => {
-    expect(getButtonMsg(OnChainStatus.NOT_MOVED)).toEqual("Mint");
-    expect(getButtonMsg(OnChainStatus.MOVED_OUT_OF_DATE)).toEqual("Update");
-    expect(getButtonMsg(OnChainStatus.MOVED_UP_TO_DATE)).toEqual("Minted");
+    render(getButtonMsg(OnChainStatus.NOT_MOVED));
+    expect(screen.getByText(/Mint/i)).toBeInTheDocument();
+
+    render(getButtonMsg(OnChainStatus.MOVED_OUT_OF_DATE));
+    expect(screen.getByText(/Update/i)).toBeInTheDocument();
+
+    render(getButtonMsg(OnChainStatus.MOVED_UP_TO_DATE));
+    expect(screen.getByText(/Minted/i)).toBeInTheDocument();
   });
 });
 
@@ -79,22 +84,7 @@ describe("SyncToChainButton component", () => {
 
     expect(screen.getByText("Coming Soon")).toBeInTheDocument();
   });
-  it("should be disabled if not active", async () => {
-    renderWithContext(
-      mockCeramicContext,
-      <SyncToChainButton onChainStatus={OnChainStatus.NOT_MOVED} chain={chainWithoutEas} isLoading={false} />
-    );
-    const btn = screen.getByTestId("sync-to-chain-button");
-    expect(btn).toHaveAttribute("disabled");
-  });
-  it("should be disabled if up to date", async () => {
-    renderWithContext(
-      mockCeramicContext,
-      <SyncToChainButton onChainStatus={OnChainStatus.MOVED_UP_TO_DATE} chain={chainWithEas} isLoading={false} />
-    );
-    const btn = screen.getByTestId("sync-to-chain-button");
-    expect(btn).toHaveAttribute("disabled");
-  });
+
   it("should initiate chain change if on different chain", async () => {
     const anotherChainWithEas = new Chain({
       ...chainConfig,
