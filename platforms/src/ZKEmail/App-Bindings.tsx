@@ -9,8 +9,8 @@ export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
   path = "ZKEmail";
 
-  // loginWithGoogle: LoginWithGoogle;
   private uberProofs: string[] = [];
+  private amazonProofs: string[] = [];
 
   constructor(options: PlatformOptions = {}) {
     super();
@@ -32,7 +32,7 @@ export class ZKEmailPlatform extends Platform {
   async handleLoginAndProve(): Promise<void> {
     // Dynamic import to avoid build-time slowness
     const { initZkEmailSdk, Gmail, LoginWithGoogle } = await import("@zk-email/sdk");
-    
+
     const loginWithGoogle = new LoginWithGoogle();
     const gmail = new Gmail(loginWithGoogle);
     if (!loginWithGoogle.accessToken) {
@@ -40,35 +40,44 @@ export class ZKEmailPlatform extends Platform {
     }
 
     const sdk = initZkEmailSdk({});
-    const blueprint = await sdk.getBlueprintById("4cfc3efd-7215-4e96-9b4e-291d2a9cc702");
-    console.log("blueprint app bindings: ", blueprint);
+    const uberBlueprint = await sdk.getBlueprintById("f9de1c4a-b90c-47af-941f-d21a0ecf1411");
+    const amazonBlueprint = await sdk.getBlueprintById("da877bd1-b8f8-48c2-a36c-c71f73f9dbb9");
+    console.log("uber blueprint app bindings: ", uberBlueprint);
 
     // fetch emails
-    const emailResponses = await gmail.fetchEmails([blueprint], {
-      replaceQuery: "from:amazon.de \"Delivered: Your Amazon.de order\"",
+    const uberEmailResponses = await gmail.fetchEmails([uberBlueprint], {
+      replaceQuery: "from:uber.com",
     });
-    // const emailResponses = await gmail.fetchEmails([blueprint]);
-    console.log("Email responses: ", emailResponses);
+    let moreUberEmails = await gmail.fetchMore();
+    while (moreUberEmails.length > 0) {
+      uberEmailResponses.push(...moreUberEmails);
+      moreUberEmails = await gmail.fetchMore();
+    }
+    const filteredUberEmails = uberEmailResponses.filter((email) =>
+      email.decodedContents.includes(uberBlueprint.props.senderDomain)
+    );
 
-    const moreEmails = await gmail.fetchMore();
-    console.log("More emails: ", moreEmails);
+    const amazonEmailResponses = await gmail.fetchEmails([amazonBlueprint], {
+      replaceQuery: "from:amazon.com",
+    });
+    let moreAmazonEmails = await gmail.fetchMore();
+    while (moreAmazonEmails.length > 0) {
+      amazonEmailResponses.push(...moreAmazonEmails);
+      moreAmazonEmails = await gmail.fetchMore();
+    }
+    const filteredAmazonEmails = amazonEmailResponses.filter((email) =>
+      email.decodedContents.includes(amazonBlueprint.props.senderDomain)
+    );
 
-    const moreMoreEmails = await gmail.fetchMore();
-    console.log("More more emails: ", moreMoreEmails);
+    // console.log("Email responses: ", emailResponses);
 
-    const moreMoreMoreEmails = await gmail.fetchMore();
-    console.log("More more more emails: ", moreMoreMoreEmails);
-
-    emailResponses.push(...moreEmails, ...moreMoreEmails, ...moreMoreMoreEmails);
-
-    console.log("Email responses: ", emailResponses);
-
-    // validate emails
-    const validatedEmails = await Promise.all(
-      emailResponses.map(async (rawEmail) => {
+    // validate emails and proof valid emails
+    const uberProofs = await Promise.all(
+      filteredUberEmails.map(async (rawEmail) => {
         try {
-          await blueprint.validateEmail(rawEmail.decodedContents);
-          return rawEmail;
+          await uberBlueprint.validateEmail(rawEmail.decodedContents);
+          const proof = await uberBlueprint.createProver().generateProof(rawEmail.decodedContents);
+          return proof;
         } catch (err: unknown) {
           console.log("Error validating email: ", err);
           return undefined;
@@ -76,22 +85,35 @@ export class ZKEmailPlatform extends Platform {
       })
     );
 
-    const filteredEmails = validatedEmails.filter((email) => email !== undefined);
-
-    console.log("Filtered emails: ", filteredEmails);
-
-    const prover = blueprint.createProver();
-
-    // for validated emails, generate proofs
-    const proofs = await Promise.all(
-      filteredEmails.map(async (email) => {
-        const proof = await prover.generateProof(email.decodedContents);
-        return proof;
+    const amazonProofs = await Promise.all(
+      filteredAmazonEmails.map(async (rawEmail) => {
+        try {
+          await amazonBlueprint.validateEmail(rawEmail.decodedContents);
+          const proof = await amazonBlueprint.createProver().generateProof(rawEmail.decodedContents);
+          return proof;
+        } catch (err: unknown) {
+          console.log("Error validating email: ", err);
+          return undefined;
+        }
       })
     );
-    console.log("Proofs: ", proofs);
 
-    this.uberProofs = proofs.map(p => p.packProof());
+    // const filteredEmails = validatedEmails.filter((email) => email !== undefined);
+
+    // const prover = blueprint.createProver();
+
+    // // for validated emails, generate proofs
+    // const proofs = await Promise.all(
+    //   filteredEmails.map(async (email) => {
+    //     const proof = await prover.generateProof(email.decodedContents);
+    //     return proof;
+    //   })
+    // );
+    console.log("Uber proofs: ", uberProofs);
+    console.log("Amazon proofs: ", amazonProofs);
+
+    this.uberProofs = uberProofs.filter((p) => p !== undefined).map((p) => p.packProof());
+    this.amazonProofs = amazonProofs.filter((p) => p !== undefined).map((p) => p.packProof());
 
     // const verified = await blueprint.verifyProof(proofs[0]);
 
@@ -114,10 +136,8 @@ export class ZKEmailPlatform extends Platform {
     }
 
     return {
-      proofs: {
-        uberProofs: this.uberProofs,
-      },
-      validEmails: this.uberProofs.length.toString(),
+      uberProofs: this.uberProofs,
+      amazonProofs: this.amazonProofs,
     };
   }
 
