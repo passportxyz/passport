@@ -73,18 +73,12 @@ export default function Dashboard() {
   const { initiateVerification } = useOneClickVerification();
   const { success, failure } = useMessage();
   const [showOnchainSidebar, setShowOnchainSidebar] = React.useState(false);
-  const { banners, loadBanners } = useSupportBanners();
+  const { banners } = useSupportBanners();
   const bannersOffset = `h-[${banners.length * 60}px]`;
 
   // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
   // until ceramicContext is refactored and memoized
   const verifiedParamsHash = useRef<string | undefined>(undefined);
-
-  useEffect(() => {
-    loadBanners();
-  }, [loadBanners]);
-
-  console.log("geri --- banners", banners);
 
   useEffect(() => {
     if (did && address && databaseReady) {
@@ -268,10 +262,14 @@ export default function Dashboard() {
         <Confetti />
         <Header />
         <BodyWrapper className="mt-4 md:mt-0 pt-12 md:pt-16">
+          {
+            // This is just offsetting the dashboard, such that it is shown below the banners
+            banners.map(() => (
+              <div className="col-span-full h-8"></div>
+            ))
+          }
           <PageWidthGrid>
-            <div className={`col-span-full h-[${banners.length * 60}]`}></div>
             <DashboardCTAs customization={customization} />
-
             <span id="add-stamps" className="px-4 md:px-0 col-span-full font-heading text-4xl text-gray-800 mt-12">
               Add Stamps
             </span>
