@@ -3,10 +3,11 @@
     "app",
     "database-client",
     "iam",
+    "embed",
     "identity",
-    "schemas",
     "types",
-    "platforms"
+    "platforms",
+    "embed-popup"
   ],
   "npmClient": "yarn",
   "version": "independent",
