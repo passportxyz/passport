@@ -36,19 +36,17 @@ export default function Home() {
           <div className="flex flex-row justify-end md:max-w-[740px]">
             <img src="/assets/hmnWelcomeImage.svg" alt="Welcome"></img>
           </div>
-          <div className="flex flex-col justify-center gap-6 relative z-10 overflow-visible md:max-w-[740px]">
+          <div className="md:col-span-5 flex flex-col justify-center items-center md:items-start gap-6 relative z-10 overflow-visible md:max-w-[740px]">
             <div
               style={{
-                background: "radial-gradient(closest-side, #EBFFF7, rgb(255,255,255,0))",
+                background: "radial-gradient(closest-side, #EBFFF7, #EBFFF7, rgb(255,255,255,0), rgb(255,255,255,0))",
               }}
               className="w-[200%] h-full absolute -z-10 -left-[50%]"
             />
-            <div className="mb-4 text-2xl leading-none md:text-6xl font-alt">Unlock the best of web3</div>
-            <div className="max-w-md text-lg lg:max-w-sm">
-              Access a world of Web3 opportunities securely with a single sign-in.
-            </div>
+            <div className="mb-4 text-2xl leading-none md:text-7xl font-bold font-alt">Unlock the best of web3</div>
+            <div className="max-w-sm text-lg">Access a world of Web3 opportunities securely with a single sign-in.</div>
 
-            <div className="flex justify-start items-center">
+            <div className="flex justify-center md:justify-start items-center w-full">
               <SIWEButton
                 subtext={(() => {
                   if (loginStep === "PENDING_WALLET_CONNECTION") {
@@ -63,7 +61,7 @@ export default function Home() {
                 enableEthBranding={enableEthBranding}
                 data-testid="connectWalletButton"
                 onClick={signIn}
-                className="px-10"
+                className="px-10 mmb-12 md:w-2/3"
               />
             </div>
             <div className="flex flex-row  bg-emerald-100 items-center rounded-3xl">

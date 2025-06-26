@@ -13,9 +13,11 @@ export default {
   safelist: ["shadow-background-5"],
   theme: {
     screens: {
-      md: "480px",
-      lg: "1020px",
-      xl: "1280px",
+      sm: "40rem",
+      md: "48rem",
+      lg: "64rem",
+      xl: "80rem",
+      "2xl": "96rem",
     },
     extend: {
       backgroundImage: {
