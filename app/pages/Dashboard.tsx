@@ -257,11 +257,11 @@ export default function Dashboard() {
       <HeaderContentFooterGrid>
         <Confetti />
         <Header />
-        <BodyWrapper className="mt-4 md:mt-0 pt-12 pt-16:md">
+        <BodyWrapper className="mt-4 md:mt-0 pt-12 md:pt-16">
           <PageWidthGrid>
             <DashboardCTAs customization={customization} />
 
-            <span id="add-stamps" className="px-4 px-0:md col-span-full font-heading text-4xl text-gray-800 mt-12">
+            <span id="add-stamps" className="px-4 md:px-0 col-span-full font-heading text-4xl text-gray-800 mt-12">
               Add Stamps
             </span>
             <CardList
