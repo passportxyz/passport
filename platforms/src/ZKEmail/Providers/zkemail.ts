@@ -18,16 +18,35 @@ export class ZKEmailProvider implements Provider {
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     console.log("payload: ", payload);
-    const { initZkEmailSdk  } = await import("@zk-email/sdk");
-    const sdk = initZkEmailSdk({logging: {enabled: true, level: 'debug'}});
-    
-    const record: { data?: string } | undefined = undefined;
     const errors: string[] = [];
-
-    const proofs = await Promise.all((payload.proofs.uberProofs as unknown as string[]).map((p: string) => sdk.unPackProof(p)));
-    console.log("proofs: ", proofs);
+    const record: { data?: string } | undefined = undefined;
 
     try {
+      // Validate payload structure
+      if (!payload.proofs || !payload.proofs.uberProofs) {
+        return {
+          valid: false,
+          errors: ["No uber proofs provided in payload"],
+          record,
+        };
+      }
+
+      const { initZkEmailSdk } = await import("@zk-email/sdk");
+      const sdk = initZkEmailSdk({logging: {enabled: true, level: 'debug'}});
+      
+      const uberProofs = payload.proofs.uberProofs as unknown as string[];
+      
+      if (!Array.isArray(uberProofs) || uberProofs.length === 0) {
+        return {
+          valid: false,
+          errors: ["Invalid or empty uber proofs array"],
+          record,
+        };
+      }
+
+      const proofs = await Promise.all(uberProofs.map((p: string) => sdk.unPackProof(p)));
+      console.log("proofs: ", proofs);
+
       // count how many proofs are valid
       const validProofs = await Promise.all(
         proofs.map(async (proof: any) => {
@@ -44,6 +63,14 @@ export class ZKEmailProvider implements Provider {
       const validProofCount = validProofs.filter((verified) => verified).length;
       console.log("validProofCount: ", validProofCount);
 
+      if (validProofCount === 0) {
+        return {
+          valid: false,
+          errors: ["No valid proofs found"],
+          record,
+        };
+      }
+
       return {
         valid: true,
         errors,
@@ -52,6 +79,7 @@ export class ZKEmailProvider implements Provider {
         },
       };
     } catch (error) {
+      console.error("Error in ZKEmailProvider verify:", error);
       errors.push(`Failed to verify email: ${error instanceof Error ? error.message : String(error)}`);
       return {
         valid: false,
