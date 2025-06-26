@@ -8,6 +8,7 @@ import { getDaysToExpiration } from "../utils/duration";
 import { useOnChainData } from "../hooks/useOnChainData";
 import { Hyperlink } from "@gitcoin/passport-platforms";
 import { useAccount } from "wagmi";
+import { ExpiredLabel } from "./LabelExpired";
 
 export function NetworkCard({ chain }: { chain: Chain }) {
   const { status, isPending } = useOnChainStatus({ chain });
@@ -40,8 +41,9 @@ export function NetworkCard({ chain }: { chain: Chain }) {
     <div className={`mb-6 rounded-lg border p-2 align-middle ${background}`}>
       <div className="mx-2 my-2 h-full">
         <div className="grid grid-rows-3 content-between h-full">
-          <div className="flex">
+          <div className="flex justify-between">
             <img className="h-8" src={chain.icon} alt={`${chain.label} logo`} />
+            {!expired || <ExpiredLabel className="" />}
           </div>
           <div className="">
             <h1 className="grow font-medium text-lg">{chain.label}</h1>
