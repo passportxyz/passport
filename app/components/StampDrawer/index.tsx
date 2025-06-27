@@ -6,8 +6,8 @@ import { DrawerFooter } from "./components/DrawerFooter";
 import { CTAButtons } from "./components/CTAButtons";
 import { PointsModule } from "./components/PointsModule";
 import { CredentialGrid } from "./components/CredentialGrid";
-import { StepGuide } from "./components/StepGuide";
-import { StampDrawerProps, CredentialGroup, PlatformInfo, VerificationState, StepConfig } from "./types";
+import { PlatformGuide } from "./components/PlatformGuide";
+import { StampDrawerProps, CredentialGroup, VerificationState } from "./types";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 
 const useStampGridCols = ({
@@ -58,7 +58,8 @@ const useDrawerSize = ({
 const StampDrawer = ({
   isOpen,
   onClose,
-  platform,
+  platformSpec,
+  credentialGroups,
   onVerify,
   verifiedProviders,
   expiredProviders,
@@ -67,75 +68,36 @@ const StampDrawer = ({
   isLoading = false,
 }: StampDrawerProps) => {
   const isLg = useBreakpoint("lg");
-  // Process platform data
+  // Process credential groups with runtime data
   const processedData = useMemo(() => {
-    // Platform info
-    const platformInfo: PlatformInfo = {
-      id: platform.id,
-      name: platform.name,
-      icon: platform.icon,
-      description: platform.description,
-      cta: platform.cta,
-      website: platform.website,
-    };
-
     // Process and group credentials
-    const credentialGroups: CredentialGroup[] = platform.credentialGroups
-      ? platform.credentialGroups.map((group: any) => ({
-          title: group.platformGroup,
-          credentials: group.providers.map((provider: any) => {
-            const providerId = provider.name as PROVIDER_ID;
-            const isVerified = verifiedProviders.includes(providerId);
-            const isExpired = expiredProviders.includes(providerId);
-            const isDeduplicated = stampDedupStatus?.[providerId] === true;
+    const processedCredentialGroups: CredentialGroup[] = credentialGroups.map((group) => ({
+      title: group.platformGroup,
+      credentials: group.providers.map((provider) => {
+        const providerId = provider.name;
+        const isVerified = verifiedProviders.includes(providerId);
+        const isExpired = expiredProviders.includes(providerId);
+        const isDeduplicated = stampDedupStatus?.[providerId] === true;
 
-            const points = stampWeights?.[providerId] ? parseFloat(String(stampWeights[providerId])) : 0;
+        const points = stampWeights?.[providerId] ? parseFloat(String(stampWeights[providerId])) : 0;
 
-            const flags: ("expired" | "deduplicated")[] = [];
-            if (isExpired) flags.push("expired");
-            if (isDeduplicated) flags.push("deduplicated");
+        const flags: ("expired" | "deduplicated")[] = [];
+        if (isExpired) flags.push("expired");
+        if (isDeduplicated) flags.push("deduplicated");
 
-            return {
-              id: providerId,
-              name: provider.title,
-              description: provider.description,
-              verified: isVerified,
-              flags,
-              points,
-            };
-          }),
-        }))
-      : [
-          {
-            title: "Available Stamps",
-            credentials: (platform.providers || []).map((provider: any) => {
-              const providerId = provider.name as PROVIDER_ID;
-              const isVerified = verifiedProviders.includes(providerId);
-              const isExpired = expiredProviders.includes(providerId);
-              const isDeduplicated = stampDedupStatus?.[providerId] === true;
-
-              const points = stampWeights?.[providerId] ? parseFloat(String(stampWeights[providerId])) : 0;
-              const pointsDisplay = isVerified && !isDeduplicated ? `+${points}` : "0";
-
-              const flags: ("expired" | "deduplicated")[] = [];
-              if (isExpired) flags.push("expired");
-              if (isDeduplicated) flags.push("deduplicated");
-
-              return {
-                id: providerId,
-                name: provider.title,
-                description: provider.description,
-                verified: isVerified,
-                flags,
-                points,
-                pointsDisplay,
-              };
-            }),
-          },
-        ];
+        return {
+          id: providerId,
+          name: provider.title,
+          description: provider.description,
+          verified: isVerified,
+          flags,
+          points,
+        };
+      }),
+    }));
 
     // Calculate points from all credentials across groups
-    const allCredentials = credentialGroups.flatMap((group) => group.credentials);
+    const allCredentials = processedCredentialGroups.flatMap((group) => group.credentials);
     const verifiedCredentials = allCredentials.filter(
       (c) => c.verified && !c.flags.includes("deduplicated") && !c.flags.includes("expired")
     );
@@ -152,34 +114,29 @@ const StampDrawer = ({
       isVerified: verifiedCredentials.length > 0,
       isLoading: isLoading,
       canSubmit: true, // TODO: Get from actual submit state
-      timeToGet: platform.timeToGet,
-      price: platform.price,
+      timeToGet: platformSpec.timeToGet,
+      price: platformSpec.price,
       pointsGained,
       totalPossiblePoints,
       validityDays: 90, // TODO: Calculate from actual expiry
     };
 
-    // Steps (if any)
-    const steps: StepConfig[] = platform.steps || [];
-
     return {
-      platformInfo,
       verificationState,
-      credentialGroups,
-      steps,
+      credentialGroups: processedCredentialGroups,
       allStampsVerified,
     };
-  }, [platform, verifiedProviders, expiredProviders, stampWeights, stampDedupStatus, isLoading]);
+  }, [credentialGroups, verifiedProviders, expiredProviders, stampWeights, stampDedupStatus, platformSpec, isLoading]);
 
-  const { platformInfo, verificationState, credentialGroups, steps, allStampsVerified } = processedData;
+  const { verificationState, allStampsVerified } = processedData;
 
-  const hasSteps = steps.length > 0;
+  const hasGuide = Boolean(platformSpec.guide && platformSpec.guide.length > 0);
   const stampGridCols = useStampGridCols({
-    hasSteps,
-    maxCredentialsInGroup: Math.max(...credentialGroups.map((g) => g.credentials.length)),
-    numGroups: credentialGroups.length,
+    hasSteps: hasGuide,
+    maxCredentialsInGroup: Math.max(...processedData.credentialGroups.map((g) => g.credentials.length)),
+    numGroups: processedData.credentialGroups.length,
   });
-  const drawerSize = useDrawerSize({ hasSteps, stampGridCols });
+  const drawerSize = useDrawerSize({ hasSteps: hasGuide, stampGridCols });
 
   // Determine if description/points should stack vertically
   const shouldStack = stampGridCols === 1;
@@ -195,34 +152,36 @@ const StampDrawer = ({
         }}
       >
         <DrawerBody padding="0" display="flex" flexDirection="column" height="100vh" overflow="hidden">
-          {["full", "md"].includes(drawerSize) || (hasSteps && !isLg) ? (
+          {["full", "md"].includes(drawerSize) || (hasGuide && !isLg) ? (
             <>
               <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="flex-1 overflow-y-auto">
                   <div className="p-4">
                     <DrawerHeader
-                      icon={platformInfo.icon}
-                      name={platformInfo.name}
-                      website={platformInfo.website}
+                      icon={platformSpec.icon || ""}
+                      name={platformSpec.name}
+                      website={platformSpec.website}
                       onClose={onClose}
                     />
 
                     <div className="mt-4">
                       <PointsModule {...verificationState} />
 
-                      <p className="text-sm text-color-4 mt-6">{platformInfo.description}</p>
+                      <p className="text-sm text-color-4 mt-6">{platformSpec.description}</p>
 
                       <CTAButtons
-                        platformInfo={platformInfo}
+                        platformSpec={platformSpec}
                         verificationState={verificationState}
                         onVerify={onVerify}
                         onClose={onClose}
                       />
 
-                      {hasSteps && <StepGuide steps={steps} isMobile={true} />}
+                      {hasGuide && platformSpec.guide && (
+                        <PlatformGuide sections={platformSpec.guide} isMobile={true} />
+                      )}
 
                       <h3 className="text-lg font-semibold text-gray-700 mb-4 mt-8">Stamps</h3>
-                      <CredentialGrid credentialGroups={credentialGroups} columns={1} />
+                      <CredentialGrid credentialGroups={processedData.credentialGroups} columns={1} />
                     </div>
                   </div>
                 </div>
@@ -235,8 +194,8 @@ const StampDrawer = ({
                 isVerified={allStampsVerified}
               />
             </>
-          ) : hasSteps ? (
-            // Desktop with steps - two/three column layout
+          ) : hasGuide ? (
+            // Desktop with guide - two/three column layout
             <>
               <div className="flex-1 overflow-hidden flex">
                 {/* Left Section - Stamps */}
@@ -244,9 +203,9 @@ const StampDrawer = ({
                   <div className="flex-1 overflow-y-auto">
                     <div className="p-4 md:p-6">
                       <DrawerHeader
-                        icon={platformInfo.icon}
-                        name={platformInfo.name}
-                        website={platformInfo.website}
+                        icon={platformSpec.icon || ""}
+                        name={platformSpec.name}
+                        website={platformSpec.website}
                         onClose={onClose}
                       />
 
@@ -255,9 +214,9 @@ const StampDrawer = ({
                         <div className={`${shouldStack ? "space-y-6" : "flex gap-8 justify-between"} mb-6`}>
                           {/* Description and CTA section */}
                           <div className={`${shouldStack ? "" : "flex-1 min-w-0 max-w-2xl"}`}>
-                            <p className="text-base text-color-4 leading-relaxed">{platformInfo.description}</p>
+                            <p className="text-base text-color-4 leading-relaxed">{platformSpec.description}</p>
                             <CTAButtons
-                              platformInfo={platformInfo}
+                              platformSpec={platformSpec}
                               verificationState={verificationState}
                               onVerify={onVerify}
                               onClose={onClose}
@@ -271,15 +230,15 @@ const StampDrawer = ({
                         </div>
 
                         {/* Stamps */}
-                        <CredentialGrid credentialGroups={credentialGroups} columns={stampGridCols} />
+                        <CredentialGrid credentialGroups={processedData.credentialGroups} columns={stampGridCols} />
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Right Section - Steps */}
+                {/* Right Section - Guide */}
                 <div className={`${stampGridCols === 3 ? "w-1/3" : "w-1/2"} p-8 overflow-y-auto bg-background`}>
-                  <StepGuide steps={steps} />
+                  <PlatformGuide sections={platformSpec.guide!} />
                 </div>
               </div>
 
@@ -296,9 +255,9 @@ const StampDrawer = ({
                 <div className="flex-1 overflow-y-auto">
                   <div className="p-4 md:p-6">
                     <DrawerHeader
-                      icon={platformInfo.icon}
-                      name={platformInfo.name}
-                      website={platformInfo.website}
+                      icon={platformSpec.icon || ""}
+                      name={platformSpec.name}
+                      website={platformSpec.website}
                       onClose={onClose}
                     />
 
@@ -307,9 +266,9 @@ const StampDrawer = ({
                       <div className={`${shouldStack ? "space-y-6" : "flex gap-8 justify-between"} mb-6`}>
                         {/* Description and CTA section */}
                         <div className={`${shouldStack ? "" : "flex-1 min-w-0 max-w-2xl"}`}>
-                          <p className="text-base text-color-4 leading-relaxed">{platformInfo.description}</p>
+                          <p className="text-base text-color-4 leading-relaxed">{platformSpec.description}</p>
                           <CTAButtons
-                            platformInfo={platformInfo}
+                            platformSpec={platformSpec}
                             verificationState={verificationState}
                             onVerify={onVerify}
                             onClose={onClose}
@@ -323,7 +282,7 @@ const StampDrawer = ({
                       </div>
 
                       {/* Stamps */}
-                      <CredentialGrid credentialGroups={credentialGroups} columns={stampGridCols} />
+                      <CredentialGrid credentialGroups={processedData.credentialGroups} columns={stampGridCols} />
                     </div>
                   </div>
                 </div>

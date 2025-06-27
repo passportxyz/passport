@@ -15,7 +15,7 @@ export type PlatformSpec = {
   website?: string;
   timeToGet?: string;
   price?: string;
-  steps?: StepConfig[]; // Optional step-by-step guide for complex verification flows
+  guide?: GuideSection[]; // Guide sections supporting steps, lists, etc.
   cta?: StepAction; // Optional custom call-to-action
 };
 
@@ -129,8 +129,8 @@ export interface Platform {
   getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;
 }
 
-export interface StepConfig {
-  number: number;
+// Step item for step-by-step guides
+export interface StepItem {
   title: string;
   description: string;
   actions?: StepAction[];
@@ -139,6 +139,19 @@ export interface StepConfig {
     alt: string;
   };
 }
+
+// Guide sections with discriminated union
+export type GuideSection =
+  | {
+      type: "steps";
+      title?: string; // defaults to "Step-by-Step Guide"
+      items: StepItem[];
+    }
+  | {
+      type: "list";
+      title?: string; // defaults to "Important considerations"
+      items: string[];
+    };
 
 export type StepAction =
   | {

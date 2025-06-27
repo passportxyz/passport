@@ -14,6 +14,28 @@ export const PlatformDetails: PlatformSpec = {
   connectMessage: "Connect NFT",
   isEVM: true,
   website: "https://ethereum.org/en/nft/",
+  guide: [
+    {
+      type: "steps",
+      items: [
+        {
+          title: "Connect your wallet",
+          description: "Connect your Ethereum wallet to verify your NFT ownership.",
+          actions: [
+            {
+              label: "Connect Wallet",
+              href: "/connect-wallet",
+            },
+          ],
+        },
+        {
+          title: "Verify NFT Ownership",
+          description:
+            "Once connected, the system will automatically check your wallet for eligible NFTs to verify your ownership.",
+        },
+      ],
+    },
+  ],
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
@@ -57,25 +79,4 @@ export const providers: Provider[] = [
   new DigitalCollectorProvider(),
   new ArtAficionadoProvider(),
   new NftVisionaryProvider(),
-];
-
-export const steps = [
-  {
-    number: 1,
-    title: "Connect your wallet",
-    description: "Connect your Ethereum wallet to verify your NFT ownership.",
-    actions: [
-      {
-        label: "Connect Wallet",
-        href: "/connect-wallet",
-        icon: "wallet" as const,
-      },
-    ],
-  },
-  {
-    number: 2,
-    title: "Verify NFT Ownership",
-    description:
-      "Once connected, the system will automatically check your wallet for eligible NFTs to verify your ownership.",
-  },
 ];

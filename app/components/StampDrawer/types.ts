@@ -1,22 +1,11 @@
 // Types for the StampDrawer component
 
-export interface StepAction {
-  label: string;
-  href?: string;
-  onClick?: () => void;
-  icon?: "external";
-}
+import { PlatformGroupSpec, StepItem, GuideSection } from "@gitcoin/passport-platforms/types";
+import { PROVIDER_ID } from "@gitcoin/passport-types";
+import { PlatformScoreSpec } from "../../context/scorerContext";
 
-export interface StepConfig {
-  number: number;
-  title: string;
-  description: string;
-  actions?: StepAction[];
-  image?: {
-    src: string;
-    alt: string;
-  };
-}
+// Re-export platform types that we use
+export type { StepItem, GuideSection } from "@gitcoin/passport-platforms/types";
 
 export interface Credential {
   id: string;
@@ -30,15 +19,6 @@ export interface Credential {
 export interface CredentialGroup {
   title: string;
   credentials: Credential[];
-}
-
-export interface PlatformInfo {
-  id: string;
-  name: string;
-  icon: string;
-  description: string;
-  cta?: StepAction; // Custom CTA action
-  website?: string; // Platform website URL
 }
 
 export interface VerificationState {
@@ -55,12 +35,13 @@ export interface VerificationState {
 export interface StampDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  platform: any; // TODO: Use proper Platform type from existing codebase
+  platformSpec: PlatformScoreSpec;
+  credentialGroups: PlatformGroupSpec[];
   onVerify: () => void;
-  verifiedProviders: string[];
-  expiredProviders: string[];
-  stampWeights: Partial<Record<string, string | number>>;
-  stampDedupStatus: Partial<Record<string, boolean>>;
+  verifiedProviders: PROVIDER_ID[];
+  expiredProviders: PROVIDER_ID[];
+  stampWeights: Partial<Record<PROVIDER_ID, string | number>>;
+  stampDedupStatus: Partial<Record<PROVIDER_ID, boolean>>;
   isLoading?: boolean;
 }
 
@@ -72,7 +53,7 @@ export interface DrawerHeaderProps {
 }
 
 export interface CTAButtonsProps {
-  platformInfo: PlatformInfo;
+  platformSpec: PlatformScoreSpec;
   verificationState: VerificationState;
   onVerify: () => void;
   onClose: () => void;
@@ -99,7 +80,7 @@ export interface CredentialGridProps {
 }
 
 export interface StepGuideProps {
-  steps: StepConfig[];
+  steps: StepItem[];
   isMobile?: boolean;
 }
 

@@ -2,12 +2,12 @@ import React from "react";
 import { CTAButtonsProps } from "../types";
 import { Button } from "../../Button";
 
-export const CTAButtons = ({ platformInfo, verificationState, onVerify, onClose }: CTAButtonsProps) => {
+export const CTAButtons = ({ platformSpec, verificationState, onVerify, onClose }: CTAButtonsProps) => {
   const { isVerified, isLoading, canSubmit } = verificationState;
 
   // Always show custom CTA if it exists
-  if (platformInfo.cta) {
-    const { cta } = platformInfo;
+  if (platformSpec.cta) {
+    const { cta } = platformSpec;
     const buttonClassName =
       "w-full bg-background text-color-4 font-medium rounded-lg hover:bg-foreground-2 transition-colors px-5 py-2";
 

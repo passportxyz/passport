@@ -47,6 +47,7 @@ const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
 const EnsScoreSpec: PlatformScoreSpec = {
   ...platforms["Ens"].PlatformDetails,
   possiblePoints: 3,
+  displayPossiblePoints: 3,
   earnedPoints: 1,
 };
 

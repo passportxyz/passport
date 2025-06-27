@@ -45,7 +45,6 @@ import { useAccount, useSignMessage, useSendTransaction, useSwitchChain } from "
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
   platform: PlatformClass;
-  steps?: any[]; // Step-by-step guide data for drawer UI
 };
 
 enum VerificationStatuses {
@@ -67,7 +66,6 @@ type GenericPlatformProps = PlatformProps & {
   isOpen: boolean;
   onClose: () => void;
   platformScoreSpec: PlatformScoreSpec;
-  steps?: any[];
 };
 
 const arraysContainSameElements = (a: any[], b: any[]) => {
@@ -80,7 +78,6 @@ export const GenericPlatform = ({
   platformScoreSpec,
   isOpen,
   onClose,
-  steps,
 }: GenericPlatformProps): JSX.Element => {
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
@@ -419,32 +416,13 @@ export const GenericPlatform = ({
     hasExpiredProviders,
   ]);
 
-  // Prepare platform data for StampDrawer
-  const platformData = {
-    ...platform,
-    id: platform.platformId,
-    name: platformScoreSpec.name,
-    icon: platformScoreSpec.icon,
-    description: platformScoreSpec.description,
-    timeToGet: platformScoreSpec.timeToGet,
-    price: platformScoreSpec.price,
-    website: platformScoreSpec.website,
-    // Extract CTA from platform config
-    cta: platformScoreSpec.cta,
-    providers: platFormGroupSpec.reduce((acc, group) => {
-      return acc.concat(group.providers);
-    }, [] as any[]),
-    // Pass the original platFormGroupSpec as credentialGroups
-    credentialGroups: platFormGroupSpec,
-    steps: steps,
-  };
-
   return (
     <>
       <StampDrawer
         isOpen={isOpen}
         onClose={onClose}
-        platform={platformData}
+        platformSpec={platformScoreSpec}
+        credentialGroups={platFormGroupSpec}
         onVerify={handleFetchCredential}
         verifiedProviders={verifiedProviders}
         expiredProviders={expiredProviders}
