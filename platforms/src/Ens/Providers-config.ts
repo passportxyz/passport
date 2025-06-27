@@ -5,16 +5,24 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/ensStampIcon.svg",
   platform: "Ens",
   name: "ENS",
-  description: "Connect to ENS to verify your ownership of your web3 domain name.",
+  description: "Verify ownership of your ENS domain",
   connectMessage: "Connect Account",
   isEVM: true,
   website: "https://ens.domains/",
+  timeToGet: "5 minutes",
+  price: "Variable",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Account Name",
-    providers: [{ title: "Encrypted", name: "Ens" }],
+    platformGroup: "Domain Verification",
+    providers: [
+      {
+        title: "ENS Domain Owner",
+        description: "Owned and configured an ENS domain as primary name, establishing decentralized identity",
+        name: "Ens",
+      },
+    ],
   },
 ];
 

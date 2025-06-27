@@ -15,19 +15,18 @@ export const PlatformGuide = ({ sections, isMobile = false }: PlatformGuideProps
         <div key={sectionIndex} className={sectionIndex > 0 ? "mt-8" : ""}>
           {section.type === "steps" ? (
             <>
-              <h3 className="text-xl font-semibold text-color-4 mb-6">{section.title || "Step-by-Step Guide"}</h3>
+              {section.title && <h3 className="text-xl font-semibold text-black mb-6">{section.title}</h3>}
               <div className="space-y-8">
                 {section.items.map((step, index) => (
                   <div key={index} className="flex gap-4">
                     <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-lg font-semibold text-color-4">{index + 1}</span>
+                      <span className="text-lg font-semibold text-black">{index + 1}</span>
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-color-4 mb-2 text-base">{step.title}</h4>
-                      <p className="text-sm text-color-9 whitespace-pre-line leading-relaxed">{step.description}</p>
+                      <p className="text-sm text-black whitespace-pre-line leading-relaxed">{step.description}</p>
 
                       {step.actions && step.actions.length > 0 && (
-                        <div className="mt-3">
+                        <div className="mt-4 space-y-2">
                           {step.actions.map((action, actionIndex) => {
                             const isExternal = "href" in action;
                             return (
@@ -35,21 +34,21 @@ export const PlatformGuide = ({ sections, isMobile = false }: PlatformGuideProps
                                 key={actionIndex}
                                 href={isExternal ? action.href : "#"}
                                 onClick={!isExternal ? action.onClick : undefined}
-                                className="inline-flex items-center gap-1 text-sm font-medium text-color-5 hover:underline"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-black hover:bg-gray-50 transition-colors"
                                 target={isExternal && action.href.startsWith("http") ? "_blank" : undefined}
                                 rel={isExternal && action.href.startsWith("http") ? "noopener noreferrer" : undefined}
                               >
-                                {action.label}
                                 {isExternal && action.href.startsWith("http") && (
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
                                       strokeLinecap="round"
                                       strokeLinejoin="round"
                                       strokeWidth={2}
-                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                      d="M7 7H17M17 7V17M17 7L7 17"
                                     />
                                   </svg>
                                 )}
+                                {action.label}
                               </a>
                             );
                           })}
@@ -73,12 +72,12 @@ export const PlatformGuide = ({ sections, isMobile = false }: PlatformGuideProps
             </>
           ) : (
             <>
-              <h3 className="text-xl font-semibold text-color-4 mb-6">{section.title || "Important Considerations"}</h3>
-              <ul className="space-y-3">
+              <h3 className="text-xl font-semibold text-black mb-6">{section.title || "Important Considerations"}</h3>
+              <ul className="space-y-1.5">
                 {section.items.map((item, index) => (
                   <li key={index} className="flex gap-3">
-                    <span className="text-color-4 mt-1">•</span>
-                    <p className="text-sm text-color-9 leading-relaxed">{item}</p>
+                    <span className="text-black text-sm leading-relaxed">•</span>
+                    <p className="text-sm text-black leading-relaxed">{item}</p>
                   </li>
                 ))}
               </ul>

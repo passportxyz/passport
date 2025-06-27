@@ -12,11 +12,6 @@ class CommunityStakingBaseProvider extends GtcStakingProvider {
 
   async verify(payload: RequestPayload, context: GtcStakingContext): Promise<VerifiedPayload> {
     const address = this.getAddress(payload);
-    // TODO
-    return {
-      valid: true,
-      record: { address },
-    };
     const stakeData = await this.getStakes(payload, context);
     const communityStakes = stakeData.communityStakes;
     const communityStakesV2 = stakeData.communityStakesV2;

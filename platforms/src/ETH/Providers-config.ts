@@ -12,51 +12,54 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/ethereumStampIcon.svg",
   platform: "ETH",
   name: "Ethereum",
-  description: "Verify Ethereum activity.",
+  description: "Verify your Ethereum (Mainnet & L2s) transaction history",
   connectMessage: "Verify Account",
   isEVM: true,
   website:
     "https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/navigating-your-ethereum-stamp-insights-and-updates",
+  timeToGet: "< 1 minute",
+  price: "Free",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Engagement Milestones",
+    platformGroup: "Network Participation Levels",
     providers: [
       {
         title: "ETH Enthusiast",
         name: "ETHScore#50",
-        description: "Marks the initiation of engagement within the Ethereum ecosystem.",
+        description:
+          "Show authentic engagement patterns within the Ethereum ecosystem (and L2s) based on transaction quality and diversity",
       },
       {
         title: "ETH Advocate",
         name: "ETHScore#75",
-        description: "Represents a higher level of commitment and activity.",
+        description: "Demonstrate higher-quality transaction patterns that indicate genuine network participation",
       },
       {
         title: "ETH Maxi",
         name: "ETHScore#90",
-        description: "Denotes exceptional involvement and dedication.",
+        description: "Exhibit exceptional transaction diversity and authentic usage patterns across Ethereum networks",
       },
     ],
   },
   {
-    platformGroup: "Your Ethereum Activity Metrics",
+    platformGroup: "Ethereum Activity Metrics",
     providers: [
       {
         title: "Spend more than 0.25 ETH on gas",
         name: "ETHGasSpent#0.25",
-        description: "Highlights significant financial engagement with the network.",
+        description: "Demonstrate significant gas spending",
       },
       {
         title: "Execute over 100 transactions",
         name: "ETHnumTransactions#100",
-        description: "Indicates a robust level of transactional activity.",
+        description: "Exhibit high transaction volume",
       },
       {
         title: "Active on over 50 distinct days",
         name: "ETHDaysActive#50",
-        description: "Showcases sustained interaction with Ethereum.",
+        description: "Show sustained activity over time",
       },
     ],
   },

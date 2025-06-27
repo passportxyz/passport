@@ -4,19 +4,19 @@ import { ClanHandsProvider } from "./Providers/index.js";
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/humanTechIcon.svg",
   platform: "CleanHands",
-  name: "Clean Hands",
-  description: "Privately prove you are not sanctioned using Proof of Clean Hands",
+  name: "Proof of Clean Hands",
+  description: "Prove you're not on sanctions lists, powered by human.tech",
   connectMessage: "Verify Account",
   isEVM: true,
-  timeToGet: "10-15 min",
-  price: "$15",
+  timeToGet: "10 minutes",
+  price: "$5 + gas fees",
   guide: [
     {
       type: "steps",
       items: [
         {
-          title: "Navigate to Proof of Clean Hands verification module",
-          description: "Visit the verification page to begin the sanctions check process.",
+          title: "Step 1",
+          description: "Navigate to Proof of Clean Hands verification module.",
           actions: [
             {
               label: "Verify Clean Hands",
@@ -25,20 +25,20 @@ export const PlatformDetails: PlatformSpec = {
           ],
         },
         {
-          title: "Verify your government ID",
+          title: "Step 2",
           description: "Follow prompts to verify your government ID and complete liveness check to prove identity.",
         },
         {
-          title: "Generate sanctions-free proof",
+          title: "Step 3",
           description: "Generate proof that you are not on sanctions lists or politically exposed person lists.",
         },
         {
-          title: "Mint verification token",
+          title: "Step 4",
           description: "Mint the verification token to your wallet (requires $5 for payment and gas fees).",
         },
         {
-          title: "Return to Passport",
-          description: "Return to Passport and click 'Check Eligibility' below to add your Proof of Clean Hands Stamp.",
+          title: "Step 5",
+          description: 'Return to Passport and click "Check Eligibility" below to add your Proof of Clean Hands Stamp.',
         },
       ],
     },
@@ -61,7 +61,8 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     providers: [
       {
         title: "Sanctions-Free Identity Verified",
-        description: "Awarded after completing Holonym KYC and sanctions validation, strengthening your humanity proof",
+        description:
+          "Awarded after completing identity verification and sanctions validation, strengthening your humanity proof",
         name: "CleanHands",
       },
     ],

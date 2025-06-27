@@ -151,6 +151,7 @@ export type GuideSection =
       type: "list";
       title?: string; // defaults to "Important considerations"
       items: string[];
+      actions?: StepAction[];
     };
 
 export type StepAction =

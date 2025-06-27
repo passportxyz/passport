@@ -5,15 +5,23 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/linkedinStampIcon.svg",
   platform: "Linkedin",
   name: "LinkedIn",
-  description:
-    "This stamp confirms that your LinkedIn account is verified and includes a valid, verified email address.",
-  connectMessage: "Connect Account to LinkedIn",
+  description: "Verify your LinkedIn account ownership",
+  connectMessage: "Connect Account",
+  website: "https://www.linkedin.com/",
+  timeToGet: "1-2 minutes",
+  price: "Free",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
     platformGroup: "Account Verification",
-    providers: [{ title: "Verified email address", name: "Linkedin" }],
+    providers: [
+      {
+        title: "Verify LinkedIn Account Ownership",
+        description: "Connect and verify ownership of your LinkedIn account",
+        name: "Linkedin",
+      },
+    ],
   },
 ];
 
