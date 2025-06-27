@@ -49,8 +49,7 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 3",
-          description:
-            'Click "Check Eligibility" below to claim your Gitcoin Stamp based on your total contribution amount.',
+          description: `Click "Check Eligibility" below to claim your Gitcoin Stamp based on your total contribution amount.`,
         },
       ],
     },

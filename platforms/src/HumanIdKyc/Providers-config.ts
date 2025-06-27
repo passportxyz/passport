@@ -34,7 +34,7 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 4",
-          description: 'Click "Check Eligibility" to add the Government ID Stamp.',
+          description: `Click "Check Eligibility" to add the Government ID Stamp.`,
         },
       ],
     },

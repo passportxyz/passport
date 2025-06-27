@@ -31,7 +31,7 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 3",
-          description: 'Click "Check Eligibility" below to verify your Lens Handle ownership.',
+          description: `Click "Check Eligibility" below to verify your Lens Handle ownership.`,
         },
       ],
     },

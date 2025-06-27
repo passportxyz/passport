@@ -30,8 +30,7 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 2",
-          description:
-            'Click "Check Eligibility" below to check that BABT is owned by this wallet address. This proves you\'ve completed the Government ID verification process (KYC) on Binance.',
+          description: `Click "Check Eligibility" below to check that BABT is owned by this wallet address. This proves you've completed the Government ID verification process (KYC) on Binance.`,
         },
       ],
     },

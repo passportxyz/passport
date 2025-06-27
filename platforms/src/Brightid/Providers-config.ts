@@ -42,7 +42,7 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 4",
-          description: 'Click "Check Eligibility" below to verify your BrightID connection and claim your stamp.',
+          description: `Click "Check Eligibility" below to verify your BrightID connection and claim your stamp.`,
         },
       ],
     },

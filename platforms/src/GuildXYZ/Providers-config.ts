@@ -27,7 +27,7 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 2",
-          description: 'Click "Check Eligibility" below to claim your Guild credentials based on your membership.',
+          description: `Click "Check Eligibility" below to claim your Guild credentials based on your membership.`,
         },
       ],
     },

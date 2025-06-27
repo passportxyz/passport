@@ -30,7 +30,7 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 3",
-          description: 'Click "Check Eligibility" below to link your verified Coinbase account to Passport.',
+          description: `Click "Check Eligibility" below to link your verified Coinbase account to Passport.`,
         },
       ],
     },

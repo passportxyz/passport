@@ -32,17 +32,15 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 2",
-          description:
-            'Participate in validation ceremonies to achieve at least "Newbie" status by solving human-verification puzzles.',
+          description: `Participate in validation ceremonies to achieve at least "Newbie" status by solving human-verification puzzles.`,
         },
         {
           title: "Step 3",
-          description:
-            'Continue participating in consecutive validation ceremonies to advance your identity state - achieve 75%+ score in three consecutive validations for "Verified" status, or 92%+ score in four consecutive validations for "Human" status.',
+          description: `Continue participating in consecutive validation ceremonies to advance your identity state - achieve 75%+ score in three consecutive validations for "Verified" status, or 92%+ score in four consecutive validations for "Human" status.`,
         },
         {
           title: "Step 4",
-          description: 'Click "Check Eligibility" below to claim your Stamp based on your current identity state.',
+          description: `Click "Check Eligibility" below to claim your Stamp based on your current identity state.`,
         },
       ],
     },

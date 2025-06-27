@@ -1,4 +1,4 @@
-import { PlatformSpec } from "../types.js";
+import { PlatformGroupSpec, PlatformSpec } from "../types.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/humanIdStampIcon.svg",
@@ -35,7 +35,7 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 4",
-          description: 'Click "Check Eligibility" below to add your Biometrics Stamp once verification is complete.',
+          description: `Click "Check Eligibility" below to add your Biometrics Stamp once verification is complete.`,
         },
       ],
     },
@@ -50,5 +50,18 @@ export const PlatformDetails: PlatformSpec = {
     },
   ],
 };
+
+export const ProviderConfig: PlatformGroupSpec[] = [
+  {
+    platformGroup: "Biometric Verification",
+    providers: [
+      {
+        title: "Unique Biometric Identity",
+        name: "Biometrics",
+        description: "Proves unique humanity through 3D facial liveness verification and deduplication technology",
+      },
+    ],
+  },
+];
 
 export { providers } from "./Providers/index.js";

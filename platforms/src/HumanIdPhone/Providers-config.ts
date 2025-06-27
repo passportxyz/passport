@@ -38,7 +38,7 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 5",
-          description: 'Return to Passport and click "Check Eligibility" below to add your Phone Verification Stamp.',
+          description: `Return to Passport and click "Check Eligibility" below to add your Phone Verification Stamp.`,
         },
       ],
     },

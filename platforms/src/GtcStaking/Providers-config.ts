@@ -54,7 +54,7 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 4",
-          description: 'Click "Check Eligibility" below to claim your credentials based on your staking activity.',
+          description: `Click "Check Eligibility" below to claim your credentials based on your staking activity.`,
         },
       ],
     },
