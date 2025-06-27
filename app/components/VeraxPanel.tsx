@@ -71,7 +71,7 @@ export const VeraxPanel = ({ className, actionClassName }: { className: string; 
           </div>
         </div>
         <Tooltip
-          className={`pl-2 self-start ${onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE ? "block" : "hidden"}`}
+          className={`pl-2 self-start ${needToSwitchChain && onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE ? "block" : "hidden"}`}
           panelClassName="w-[200px] border-customization-background-1"
           iconClassName="text-customization-background-1"
         >
