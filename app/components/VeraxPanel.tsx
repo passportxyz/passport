@@ -6,10 +6,12 @@ import Tooltip from "./Tooltip";
 import { Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay } from "@chakra-ui/react";
 import { Button } from "./Button";
 import { ScorerContext } from "../context/scorerContext";
-import { useContext, useState } from "react";
+import { useContext, useState, ReactNode } from "react";
 import { CustomDashboardPanel } from "./CustomDashboardPanel";
 import { useOnChainStatus } from "../hooks/useOnChainStatus";
 import { mintFee } from "../config/mintFee";
+import { twMerge } from "tailwind-merge";
+import { OnchainSidebar } from "./OnchainSidebar";
 
 const VeraxLogo = () => (
   <svg width="64" height="56" viewBox="0 0 64 56" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -38,14 +40,32 @@ const getButtonMsg = (onChainStatus: OnChainStatus): string => {
   }
 };
 
-const LINEA_CHAIN_NAME = process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on" ? "Linea Goerli" : "Linea";
-const chain = chains.find(({ label }) => label === LINEA_CHAIN_NAME);
+// 0xe704 - Linea Goerli
+const LINEA_CHAIN_ID = process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on" ? "0xe704" : "0xe708";
+const chain = chains.find(({ id }) => id === LINEA_CHAIN_ID);
 
-export const VeraxPanel = ({ className }: { className: string }) => {
-  const { status: onChainStatus } = useOnChainStatus({ chain });
-  const { score } = useContext(ScorerContext);
+export const VeraxPanel = ({
+  className,
+  actionClassName,
+  mainText,
+  subText,
+  actionText,
+  onActionClick,
+}: {
+  className: string;
+  actionClassName?: string;
+  mainText: ReactNode;
+  subText: ReactNode;
+  actionText: ReactNode;
+  onActionClick: () => void;
+}) => {
+  const [showSidebar, setShowSidebar] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const { score, scoreState } = useContext(ScorerContext);
+  const { status: onChainStatus } = useOnChainStatus({ chain });
+  const buttonText = getButtonMsg(onChainStatus);
 
+  const enableWriteToChain = scoreState.status === "success";
   const {
     props: buttonProps,
     syncingToChain,
@@ -55,72 +75,69 @@ export const VeraxPanel = ({ className }: { className: string }) => {
     onChainStatus,
   });
 
-  const text = "TODO ...";
-
   return (
-    <>
-      <CustomDashboardPanel
-        className={`${className} ${
-          onChainStatus === OnChainStatus.MOVED_UP_TO_DATE
-            ? "text-customization-background-1 brightness-50 saturate-50"
-            : ""
-        } ${
-          onChainStatus === OnChainStatus.MOVED_OUT_OF_DATE
-            ? "shadow-[0_0_15px_rgb(var(--color-customization-background-1)/.75)]"
-            : ""
-        }`}
-        logo={{ image: <VeraxLogo />, caption: "Verax" }}
-      >
+    <div className={`${className} flex flex-col rounded-3xl text-color-4 bg-[#ffffff99] p-4 justify-between`}>
+      <div className="flex items-start justify-end h-16">
+        <div className="grow font-medium text-lg">Verax</div>
+        <div className="flex bg-white p-2 rounded-md">
+          <div className="h-10 [&_svg]:h-full">
+            <VeraxLogo />
+          </div>
+        </div>
         <Tooltip
-          className={`absolute top-0 right-0 p-2 ${
-            needToSwitchChain && onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE ? "block" : "hidden"
-          }`}
+          className={`pl-2 ${needToSwitchChain && onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE ? "block" : "hidden"}`}
           panelClassName="w-[200px] border-customization-background-1"
           iconClassName="text-customization-background-1"
         >
           You will be prompted to switch to {chain?.label} and sign the transaction.
         </Tooltip>
-        {onChainStatus === OnChainStatus.NOT_MOVED || onChainStatus === OnChainStatus.MOVED_OUT_OF_DATE ? (
-          <>
-            Verax is a community maintained public attestation registry on Linea. Push your Passport Stamps onto Verax
-            to gain rewards for early adopters in the Linea ecosystem.
-            <span className="text-xs text-customization-background-1 brightness-[1.4]">
-              This action requires ETH bridged to Linea Mainnet to cover network fees, as well as a ${mintFee} mint fee
-              which goes to the Passport treasury.
-            </span>
-          </>
-        ) : (
-          <p>
-            Verax is a community maintained public attestation registry on Linea. Push your Passport Stamps onto Verax
-            to gain rewards for early adopters in the Linea ecosystem.
-          </p>
-        )}
-        <div className="grow" />
+      </div>
+      Verax is a community maintained public attestation registry on Linea. Push your Passport Stamps onto Verax to gain
+      rewards for early adopters in the Linea ecosystem.
+      <div className="flex items-center">
         <LoadButton
           {...buttonProps}
-          isLoading={syncingToChain || onChainStatus === OnChainStatus.LOADING}
+          disabled={!enableWriteToChain}
           variant="custom"
-          className={`rounded-s mr-2 mt-2 w-fit  self-end bg-customization-background-1 text-color-4 hover:bg-customization-background-1/75 enabled:hover:text-color-1 disabled:bg-customization-background-1 disabled:brightness-100`}
+          isLoading={syncingToChain || onChainStatus === OnChainStatus.LOADING}
+          className={twMerge(
+            "rounded-md mr-2 w-fit self-end bg-customization-background-3 text-customization-foreground-2 hover:bg-customization-background-3/75 disabled:bg-customization-background-1 disabled:brightness-100",
+            actionClassName
+          )}
           onClick={() => {
-            if (score < 1) {
+            if (score < 100) {
               setConfirmModalOpen(true);
             } else {
-              buttonProps.onClick();
+              setShowSidebar(true);
             }
           }}
         >
-          {text}
+          <span className="text-nowrap">{buttonText}</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M5 12H19M19 12L12 5M19 12L12 19"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </LoadButton>
-      </CustomDashboardPanel>
+        <div className="text-sm grow">
+          This action requires ETH bridged to Linea Mainnet to cover network fees, as well as a ${mintFee} mint fee
+          which goes to the Passport treasury.
+        </div>
+      </div>
+      <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />{" "}
       <VeraxPanelApprovalModal
         isOpen={confirmModalOpen}
         onReject={() => setConfirmModalOpen(false)}
         onConfirm={() => {
-          buttonProps.onClick();
+          setShowSidebar(true);
           setConfirmModalOpen(false);
         }}
       />
-    </>
+    </div>
   );
 };
 
@@ -139,10 +156,10 @@ export const VeraxPanelApprovalModal = ({
       <ModalContent rounded={"none"} padding={5}>
         <ModalHeader>
           <img alt="shield alert" src="../assets/shield-alert.svg" className="m-auto mb-4 w-10" />
-          <p className="text-center">Alert: Low Score</p>
+          <p className="text-center text-color-4">Alert: Low Score</p>
         </ModalHeader>
         <ModalCloseButton />
-        <ModalBody color="rgb(var(--color-text-5))" className="mb-10 overflow-auto text-center">
+        <ModalBody className="mb-10 overflow-auto text-center text-color-9">
           Your Passport score is currently below the Unique Humanity Verification threshold. Submitting this Passport
           onchain might not qualify your account as a valid unique human on Linea. Please review your stamps or reach
           out to support before proceeding.

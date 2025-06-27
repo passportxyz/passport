@@ -7,6 +7,7 @@ import { OnchainSidebar } from "./OnchainSidebar";
 import Tooltip from "./Tooltip";
 import { useAllOnChainStatus } from "../hooks/useOnChainStatus";
 import { twMerge } from "tailwind-merge";
+import { VeraxPanel } from "./VeraxPanel";
 
 type CustomDashboardPanelProps = {
   logo: {
@@ -58,10 +59,9 @@ export const CustomDashboardPanel = ({ logo, className, children }: CustomDashbo
 export const DynamicCustomDashboardPanel = ({ className }: { className: string }) => {
   const customization = useCustomization();
 
-  // TODO: #3533 Do we still need the custom Verax Panel?
-  // if (customization.key === "verax") {
-  //   return <VeraxPanel className={className} />;
-  // }
+  if (customization.key === "verax") {
+    return <VeraxPanel className={className} />;
+  }
 
   if (customization.key === "testing") {
     return <TestingPanel className={className} />;
@@ -147,7 +147,6 @@ const StandardCustomDashboardPanel = ({
           {logo.caption && <span className="mt-1 text-3xl leading-none">{logo.caption}</span>}
         </div>
       </div>
-
       {mainText}
       <div className="flex items-center">
         <Button
