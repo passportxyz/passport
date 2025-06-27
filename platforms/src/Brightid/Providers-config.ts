@@ -9,6 +9,10 @@ export const PlatformDetails: PlatformSpec = {
   connectMessage: "Connect Account",
   isEVM: true,
   website: "https://brightid.org/",
+  cta: {
+    label: "Test Alert",
+    onClick: () => window.alert("BrightID CTA clicked!"),
+  },
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

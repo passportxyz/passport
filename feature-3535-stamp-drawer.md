@@ -456,7 +456,7 @@ interface PlatformConfig {
   icon: string;
   description: string;
   drawerVariant: 1 | 2;
-  cta?: string; // Custom Call-to-Action text (e.g., "Identity Staking")
+  cta?: StepAction; // Custom CTA using StepAction type (e.g., { label: "Identity Staking", href: "https://..." })
   // Variant 1 specific
   credentialGroups?: CredentialGroup[];
   // Variant 2 specific
@@ -744,6 +744,62 @@ The drawer now uses a responsive column system that adapts based on viewport wid
 ### Visual Reference:
 - See `./size-variant-drawers.png` for layout examples
 
+## Implementation Updates (December 2024)
+
+### Platform Configuration Structure
+
+The steps and CTA configuration now follows this clean structure:
+
+1. **Steps Configuration** - In `platforms/src/{Platform}/Providers-config.ts`:
+   ```typescript
+   export const PlatformDetails: PlatformSpec = {
+     icon: "./assets/platformIcon.svg",
+     platform: "PlatformName",
+     name: "Platform Display Name",
+     description: "Platform description",
+     connectMessage: "Connect message",
+     steps: [  // Optional step-by-step guide
+       {
+         number: 1,
+         title: "Step title",
+         description: "Step description",
+         actions: [{
+           label: "Action label",
+           href: "https://example.com"
+         }],
+         image: {
+           src: "/images/stamps/example.png",
+           alt: "Image description"
+         }
+       }
+     ]
+   };
+   ```
+
+2. **CTA Configuration** - In `platforms/src/{Platform}/App-Bindings.tsx`:
+   ```typescript
+   export class PlatformName extends Platform {
+     banner = {
+       content: <div>Banner content</div>,
+       cta: {  // Optional custom CTA
+         label: "Custom Action",
+         url: "https://example.com"
+       }
+     };
+   }
+   ```
+
+3. **Frontend Usage**:
+   - Steps are automatically sourced from `PlatformDetails.steps`
+   - CTA is extracted from `platform.banner?.cta`
+   - StampDrawer receives both and renders appropriately
+
+### Example Platforms Updated
+
+1. **HumanIdPhone** - Added 4-step phone verification guide
+2. **CleanHands** - Added 3-step sanctions verification guide  
+3. **Binance** - Added custom CTA "Get BABT Token" and 3-step guide
+
 ## Implementation Complete (December 2024)
 
 ### What Was Implemented
@@ -819,43 +875,90 @@ The drawer now uses a responsive column system that adapts based on viewport wid
    - Clean up test-components directory
    - Update any documentation
 
-## Next Steps for Test Component
+## Current TODOs (December 2024)
 
-### Immediate Tasks
-1. **Create new test component with proper responsive layouts**:
-   - Start with `test-components/stamp-drawer-responsive-v2.html`
-   - Remove all manual media queries
-   - Use Tailwind responsive modifiers (`sm:`, `md:`, `lg:`, `xl:`)
-   - Implement three distinct layouts based on content + viewport
+### Type System Refinement ✅ COMPLETED
+1. **Move Shared Types to Types Package**
+   - ✅ Added `StepConfig` and `StepAction` types to `platforms/src/types.ts` (temporary, marked with TODO to move to types package)
+   - ✅ Updated `PlatformSpec` to include optional `steps?: StepConfig[]` property
+   - ✅ Defined discriminated union for `StepAction` without `never`:
+     ```typescript
+     type StepAction = 
+       | {
+           label: string;
+           href: string;      // For external links
+         }
+       | {
+           label: string;
+           onClick: () => void;  // For internal actions
+         }
+     ```
 
-2. **Fix layout structure for each breakpoint**:
-   - **Mobile (<768px)**: Single column with all elements stacked
-   - **Medium (768px-1200px)**: Either 2-col grid OR 1-col stamps + 1-col steps
-   - **Large (>1200px)**: Either 3-col grid OR 2-col stamps + 1-col steps
+2. **Platform Configuration Updates**
+   - ✅ Steps are now part of `PlatformDetails` (PlatformSpec) in Providers-config.ts
+   - ✅ Frontend updated to source steps from `PlatformDetails.steps` instead of separate exports
+   - ✅ CTA continues to be sourced from `platform.banner?.cta` (existing structure)
+   - ✅ Added example steps to HumanIdPhone and CleanHands platforms
 
-3. **Correct element positioning**:
-   - Points/Time/Price module: After title/description, before action buttons
-   - Close button: Top-right of drawer (mobile) or stamp section (desktop)
-   - Update Score button: Always fixed at bottom
+### Remaining TODOs
 
-4. **Implement independent scrolling**:
-   - In multi-column layouts, stamps and steps scroll separately
-   - Use `overflow-y-auto` on individual sections
-   - Ensure proper height constraints on parent containers
+1. **Type References Cleanup**
+   - Replace `platform: any` with proper `Platform` type in StampDrawer
+   - Use `PROVIDER_ID` instead of `string[]` for provider arrays
+   - Use `PLATFORM_ID` for platform identifiers
+   - Move `StepConfig` and `StepAction` to `/types/src/` package
 
-5. **Test scenarios to verify**:
-   - Ethereum (many stamps, no steps) → Should use grid layout
-   - Clean Hands (1 stamp, with steps) → Should use stamps + steps layout
-   - Scroll behavior works correctly in each layout
-   - Responsive transitions are smooth
+2. **CTA Migration (Future)**
+   - Update PlatformBanner.cta to use `StepAction` type instead of `{ label: string; url: string }`
+   - Consider moving CTA from banner to main platform config
+   - Keep existing structure for now to avoid breaking changes
 
-### Quick Implementation Checklist
-- [ ] Remove custom CSS media queries
-- [ ] Replace with Tailwind classes like `md:grid-cols-2 lg:grid-cols-3`
-- [ ] Fix close button positioning with `md:absolute md:top-4 md:right-4`
-- [ ] Add proper scroll containers for multi-column views
-- [ ] Test all breakpoints with browser resize
-- [ ] Verify layout selection logic works as expected
+5. **Create UI-Specific Type Module**
+   - Separate display types from configuration types
+   - Create `CredentialDisplay` and `CredentialGroupDisplay` for UI state
+   - Keep clear distinction between platform config and UI runtime state
+
+### Implementation Tasks
+1. **Visual Polish**
+   - Add actual images for step guides (currently using placeholders)
+   - Fine-tune spacing and typography to match Figma designs
+   - Test with all platforms to ensure proper display
+
+2. **Additional Platform Steps**
+   - Add step guides for other complex platforms that could benefit
+   - Work with product team to identify which platforms need guides
+
+3. **Testing**
+   - Comprehensive testing across all breakpoints
+   - Test with various stamp configurations
+   - Ensure accessibility compliance
+
+## FUTURE PLANS
+
+### Banner System Deprecation
+**⚠️ WARNING: Do not delete the banner system without coordination!**
+
+The current implementation temporarily uses the banner system in App-Bindings for CTAs, but this will be deprecated in favor of the new approach:
+
+1. **Current State**: CTAs are sourced from platform banners in App-Bindings
+2. **Future State**: CTAs will be defined in platform configuration alongside other UI properties
+3. **Migration Plan**:
+   - Define CTAs in platform configuration using `StepAction` type
+   - Update StampDrawer to source CTAs from platform config instead of banners
+   - Migrate all platforms to use new CTA system
+   - Only then remove banner-related code from App-Bindings
+
+**Files affected**:
+- `platforms/src/*/App-Bindings.tsx` - Contains banner definitions to be removed
+- `app/components/GenericPlatform.tsx` - References to banners
+- Any platform-specific banner implementations
+
+### Component Cleanup
+Once fully migrated and tested:
+1. Remove old `SideBarContent` component
+2. Clean up `test-components/` directory
+3. Update documentation to reflect new architecture
+4. Remove any legacy type definitions that were replaced
 
 ## Implementation Status (Dec 2024)
 

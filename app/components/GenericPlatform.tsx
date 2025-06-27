@@ -429,9 +429,8 @@ export const GenericPlatform = ({
     timeToGet: platformScoreSpec.timeToGet,
     price: platformScoreSpec.price,
     website: platformScoreSpec.website,
-    // Extract CTA data from banner if it exists
-    cta: platform.banner?.cta?.label,
-    ctaHref: platform.banner?.cta?.url,
+    // Extract CTA from platform config
+    cta: platformScoreSpec.cta,
     providers: platFormGroupSpec.reduce((acc, group) => {
       return acc.concat(group.providers);
     }, [] as any[]),

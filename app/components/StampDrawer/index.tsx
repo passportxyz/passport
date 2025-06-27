@@ -25,7 +25,7 @@ const useStampGridCols = ({
   if (
     !isLg ||
     (numGroups <= 1 && maxCredentialsInGroup <= 2) || // Single group with 2 or fewer credentials
-    (numGroups <= 2 && maxCredentialsInGroup === 1) // Two groups with 1 credential each
+    (numGroups <= 4 && maxCredentialsInGroup <= 1) // No group with more than 1 credential, 4 or fewer groups
   ) {
     return 1;
   }
@@ -76,7 +76,6 @@ const StampDrawer = ({
       icon: platform.icon,
       description: platform.description,
       cta: platform.cta,
-      ctaHref: platform.ctaHref,
       website: platform.website,
     };
 

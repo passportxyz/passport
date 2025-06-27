@@ -52,7 +52,7 @@ export const PointsModule = ({ timeToGet, price, pointsGained = 0, totalPossible
 
       {/* Time and Price info */}
       {(timeToGet || price) && (
-        <div className="bg-background rounded-lg">
+        <div className="rounded-lg">
           <div className="flex items-center gap-6">
             {timeToGet && (
               <div className="flex items-center gap-3 flex-1">

@@ -37,8 +37,7 @@ export interface PlatformInfo {
   name: string;
   icon: string;
   description: string;
-  cta?: string; // Custom CTA text like "Identity Staking"
-  ctaHref?: string; // URL for custom CTA
+  cta?: StepAction; // Custom CTA action
   website?: string; // Platform website URL
 }
 

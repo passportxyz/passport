@@ -15,6 +15,8 @@ export type PlatformSpec = {
   website?: string;
   timeToGet?: string;
   price?: string;
+  steps?: StepConfig[]; // Optional step-by-step guide for complex verification flows
+  cta?: StepAction; // Optional custom call-to-action
 };
 
 export type ProviderSpec = {
@@ -126,5 +128,26 @@ export interface Platform {
   getOAuthUrl?(state: string): Promise<string>;
   getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;
 }
+
+export interface StepConfig {
+  number: number;
+  title: string;
+  description: string;
+  actions?: StepAction[];
+  image?: {
+    src: string;
+    alt: string;
+  };
+}
+
+export type StepAction =
+  | {
+      label: string;
+      href: string; // For external links
+    }
+  | {
+      label: string;
+      onClick: () => void; // For internal actions
+    };
 
 export type PlatformOptions = Record<string, unknown>;

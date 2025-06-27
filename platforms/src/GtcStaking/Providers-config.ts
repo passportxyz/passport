@@ -16,6 +16,10 @@ export const PlatformDetails: PlatformSpec = {
   connectMessage: "Verify amount",
   website: "https://staking.passport.gitcoin.co/",
   isEVM: true,
+  cta: {
+    label: "Identity Staking",
+    href: "https://www.staking.passport.gitcoin.co/",
+  },
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

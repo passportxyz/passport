@@ -58,3 +58,24 @@ export const providers: Provider[] = [
   new ArtAficionadoProvider(),
   new NftVisionaryProvider(),
 ];
+
+export const steps = [
+  {
+    number: 1,
+    title: "Connect your wallet",
+    description: "Connect your Ethereum wallet to verify your NFT ownership.",
+    actions: [
+      {
+        label: "Connect Wallet",
+        href: "/connect-wallet",
+        icon: "wallet" as const,
+      },
+    ],
+  },
+  {
+    number: 2,
+    title: "Verify NFT Ownership",
+    description:
+      "Once connected, the system will automatically check your wallet for eligible NFTs to verify your ownership.",
+  },
+];
