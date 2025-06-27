@@ -11,9 +11,6 @@ import BodyWrapper from "../components/BodyWrapper";
 import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import { DashboardScorePanel, DashboardScoreExplanationPanel } from "../components/DashboardScorePanel";
-import { DashboardValidStampsPanel } from "../components/DashboardValidStampsPanel";
-import { ExpiredStampsPanel } from "../components/ExpiredStampsPanel";
-import { SupportBanner } from "../components/SupportBanner";
 import { OnchainSidebar } from "../components/OnchainSidebar";
 import { useSupportBanners } from "../hooks/useSupportBanners";
 
@@ -26,7 +23,12 @@ import { useOneClickVerification } from "../hooks/useOneClickVerification";
 
 import ProcessingPopup from "../components/ProcessingPopup";
 import { Button } from "../components/Button";
-import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useNavigateToPage } from "../hooks/useCustomization";
+import {
+  DEFAULT_CUSTOMIZATION_KEY,
+  useCustomization,
+  useNavigateToPage,
+  useSetCustomizationKey,
+} from "../hooks/useCustomization";
 import { DynamicCustomDashboardPanel } from "../components/CustomDashboardPanel";
 import hash from "object-hash";
 
@@ -36,7 +38,7 @@ import { useDatastoreConnectionContext } from "../context/datastoreConnectionCon
 import Script from "next/script";
 import { Confetti } from "../components/Confetti";
 import { useMessage } from "../hooks/useMessage";
-import { Customization } from "../utils/customizationUtils";
+import { Customization, requestCustomizationConfig } from "../utils/customizationUtils";
 import { useAccount } from "wagmi";
 import { useRadialBackgroundColorForHeader } from "../components/Header";
 
@@ -74,7 +76,7 @@ export default function Dashboard() {
   const { success, failure } = useMessage();
   const [showOnchainSidebar, setShowOnchainSidebar] = React.useState(false);
   const { banners } = useSupportBanners();
-  const bannersOffset = `h-[${banners.length * 60}px]`;
+  const setCK = useSetCustomizationKey();
 
   // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
   // until ceramicContext is refactored and memoized
@@ -273,6 +275,14 @@ export default function Dashboard() {
             <span id="add-stamps" className="px-4 md:px-0 col-span-full font-heading text-4xl text-gray-800 mt-12">
               Add Stamps
             </span>
+            <button
+              className="text-black"
+              onClick={async () => {
+                await setCK(customization.key);
+              }}
+            >
+              Reload
+            </button>
             <CardList
               className="col-span-full"
               isLoading={
