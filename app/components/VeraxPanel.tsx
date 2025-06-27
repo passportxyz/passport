@@ -44,21 +44,7 @@ const getButtonMsg = (onChainStatus: OnChainStatus): string => {
 const LINEA_CHAIN_ID = process.env.NEXT_PUBLIC_ENABLE_TESTNET === "on" ? "0xe704" : "0xe708";
 const chain = chains.find(({ id }) => id === LINEA_CHAIN_ID);
 
-export const VeraxPanel = ({
-  className,
-  actionClassName,
-  mainText,
-  subText,
-  actionText,
-  onActionClick,
-}: {
-  className: string;
-  actionClassName?: string;
-  mainText: ReactNode;
-  subText: ReactNode;
-  actionText: ReactNode;
-  onActionClick: () => void;
-}) => {
+export const VeraxPanel = ({ className, actionClassName }: { className: string; actionClassName?: string }) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const { score, scoreState } = useContext(ScorerContext);
