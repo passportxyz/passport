@@ -130,22 +130,21 @@ const StandardCustomDashboardPanel = ({
 
   return (
     <div className={`${className} flex flex-col rounded-3xl text-color-4 bg-[#ffffff99] p-4 justify-between`}>
-      {body.displayInfoTooltip && body.displayInfoTooltip.shouldDisplay && body.displayInfoTooltip.text ? (
-        <Tooltip
-          iconClassName="text-customization-background-1"
-          className="absolute top-2 right-2"
-          panelClassName="border-customization-background-1"
-        >
-          {body.displayInfoTooltip.text}
-        </Tooltip>
-      ) : null}
-
       <div className="flex flex-row items-center justify-end h-16">
         <div className="grow font-medium text-lg">{customDashboardPanelTitle}</div>
         <div className="flex bg-white p-2 rounded-md">
           <div className="h-10 [&_svg]:h-full">{logo.image}</div>
           {logo.caption && <span className="mt-1 text-3xl leading-none">{logo.caption}</span>}
         </div>
+        {body.displayInfoTooltip && body.displayInfoTooltip.shouldDisplay && body.displayInfoTooltip.text ? (
+          <Tooltip
+            iconClassName="text-customization-background-1"
+            className="pl-2 self-start"
+            panelClassName="border-customization-background-1"
+          >
+            {body.displayInfoTooltip.text}
+          </Tooltip>
+        ) : null}
       </div>
       {mainText}
       <div className="flex items-center">

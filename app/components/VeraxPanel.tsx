@@ -77,7 +77,7 @@ export const VeraxPanel = ({
 
   return (
     <div className={`${className} flex flex-col rounded-3xl text-color-4 bg-[#ffffff99] p-4 justify-between`}>
-      <div className="flex items-start justify-end h-16">
+      <div className="flex items-center justify-end h-16">
         <div className="grow font-medium text-lg">Verax</div>
         <div className="flex bg-white p-2 rounded-md">
           <div className="h-10 [&_svg]:h-full">
@@ -85,7 +85,7 @@ export const VeraxPanel = ({
           </div>
         </div>
         <Tooltip
-          className={`pl-2 ${needToSwitchChain && onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE ? "block" : "hidden"}`}
+          className={`pl-2 self-start ${onChainStatus !== OnChainStatus.MOVED_UP_TO_DATE ? "block" : "hidden"}`}
           panelClassName="w-[200px] border-customization-background-1"
           iconClassName="text-customization-background-1"
         >
