@@ -57,7 +57,7 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
     <PanelDiv className={`font-heading ${className}`}>
       <div className="flex items-center w-full">
         <span className="grow font-medium">{customTitle || "Unique Humanity Score"}</span>
-        <Tooltip className="px-0">
+        <Tooltip className="px-0 self-start">
           Your Unique Humanity Score is based out of 100 and measures your uniqueness. The current passing threshold is{" "}
           {threshold}. Scores may vary across different apps, especially due to abuse or attacks on the service.
         </Tooltip>
