@@ -8,12 +8,7 @@ import {
   UBER_REGULAR_RIDER_THRESHOLD,
   UBER_POWER_USER_THRESHOLD,
 } from "../types.js";
-// Use dynamic import to avoid build-time slowness
-// import { extractEMLDetails, initZkEmailSdk, Proof, RawEmailResponse, testBlueprint } from "@zk-email/sdk";
-
-type Email = any & {
-  valid: boolean;
-};
+import { Proof } from "@zk-email/sdk";
 
 // Base ZKEmail Provider
 abstract class ZKEmailBaseProvider implements Provider {
@@ -26,10 +21,6 @@ abstract class ZKEmailBaseProvider implements Provider {
   }
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    console.log("payload: ", payload);
-    const { initZkEmailSdk } = await import("@zk-email/sdk");
-    const sdk = initZkEmailSdk({ logging: { enabled: true, level: "debug" } });
-
     const errors: string[] = [];
     const record: { data?: string } | undefined = undefined;
 
@@ -56,7 +47,7 @@ abstract class ZKEmailBaseProvider implements Provider {
       }
 
       const { initZkEmailSdk } = await import("@zk-email/sdk");
-      const sdk = initZkEmailSdk({ logging: { enabled: true, level: "debug" } });
+      const sdk = initZkEmailSdk();
 
       const proofs = payload.proofs[proofsField] as unknown as string[];
 
@@ -69,23 +60,19 @@ abstract class ZKEmailBaseProvider implements Provider {
       }
 
       const unpackedProofs = await Promise.all(proofs.map((p: string) => sdk.unPackProof(p)));
-      console.log(`${proofType} proofs: `, unpackedProofs);
 
       // count how many proofs are valid
       const validProofs = await Promise.all(
-        unpackedProofs.map(async (proof: any) => {
+        unpackedProofs.map(async (proof: Proof) => {
           try {
             const verified = await proof.verify();
             return verified;
           } catch (err) {
-            console.error("err during verify: ", err);
             return false;
           }
         })
       );
-      console.log(`valid ${proofType} proofs: `, validProofs);
       const validProofCount = validProofs.filter((verified) => verified).length;
-      console.log(`valid ${proofType} proof count: `, validProofCount);
 
       if (validProofCount === 0) {
         return {
@@ -114,7 +101,6 @@ abstract class ZKEmailBaseProvider implements Provider {
         },
       };
     } catch (error) {
-      console.error("Error in ZKEmailProvider verify:", error);
       errors.push(`Failed to verify email: ${error instanceof Error ? error.message : String(error)}`);
       return {
         valid: false,
@@ -211,20 +197,5 @@ export class UberPowerUserProvider extends ZKEmailBaseProvider {
 
   getProofType(): "uber" {
     return "uber";
-  }
-}
-
-// Legacy provider for backwards compatibility
-export class ZKEmailProvider extends ZKEmailBaseProvider {
-  constructor(options: ProviderOptions = {}) {
-    super("ZKEmail", options);
-  }
-
-  getThreshold(): number {
-    return 1; // Default threshold
-  }
-
-  getProofType(): "amazon" | "uber" {
-    return "amazon";
   }
 }
