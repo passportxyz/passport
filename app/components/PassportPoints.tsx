@@ -41,7 +41,7 @@ export const PassportPoints: React.FC<PassportPointsProps> = ({ points, size = "
     lg: "px-2.5 py-1.5",
   };
 
-  const formattedPoints = typeof points === "number" ? points.toFixed(1) : points;
+  const formattedPoints = typeof points === "number" ? String(+points.toFixed(1)) : points;
 
   return (
     <div className={`inline-block bg-white rounded-2xl ${containerPadding[size]} ${className}`}>

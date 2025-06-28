@@ -168,8 +168,9 @@ describe("HumanID Platform Integration", () => {
       );
 
       renderWithContext(mockCeramicContext, drawer());
-      const verifyButton = screen.queryByTestId("button-verify-HumanID");
-      expect(verifyButton).toBeInTheDocument();
+      // The drawer should be open and show the Check Eligibility button
+      const checkButtons = screen.getAllByText("Check Eligibility");
+      expect(checkButtons.length).toBeGreaterThan(0);
     });
   });
 
