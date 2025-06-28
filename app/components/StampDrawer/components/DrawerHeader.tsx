@@ -32,9 +32,9 @@ export const DrawerHeader = ({ icon, name, website, onClose }: DrawerHeaderProps
           <path
             d="M24 8L8 24M8 8L24 24"
             stroke="#737373"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </svg>
       </button>
