@@ -363,7 +363,8 @@ export type PLATFORM_ID =
   | `Custom#${string}`
   | "CleanHands"
   | "HumanIdPhone"
-  | "HumanIdKyc";
+  | "HumanIdKyc"
+  | "Biometrics";
 
 export type PLATFORM_CATEGORY = {
   name: string;
@@ -455,7 +456,8 @@ export type PROVIDER_ID =
   | "BinanceBABT"
   | "BinanceBABT2"
   | `DeveloperList#${string}#${string}`
-  | "CleanHands";
+  | "CleanHands"
+  | "Biometrics";
 
 export type StampBit = {
   bit: number;

@@ -105,7 +105,7 @@ const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
       </svg>
     ),
     description: "Connect your blockchain-based profiles and assets to prove your identity.",
-    platforms: ["Civic"],
+    platforms: ["Civic", "Biometrics"],
   },
 ];
 
