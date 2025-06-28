@@ -292,7 +292,6 @@ export default function Dashboard() {
               }
             />
             {/* <span className="col-start-1 col-end-5 font-heading text-3xl">Collected Stamps</span> */}
-            {/* <PassportDetailsButton className="col-end-[-1] col-start-1 md:col-start-[-3] justify-self-end self-center" /> */}
             {/* <DashboardValidStampsPanel className="col-span-full" /> */}
             {/* <ExpiredStampsPanel className="col-span-full" /> */}
 

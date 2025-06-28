@@ -113,12 +113,10 @@ const StampDrawer = ({
     const verificationState: VerificationState = {
       isVerified: verifiedCredentials.length > 0,
       isLoading: isLoading,
-      canSubmit: true, // TODO: Get from actual submit state
       timeToGet: platformSpec.timeToGet,
       price: platformSpec.price,
       pointsGained,
       totalPossiblePoints,
-      validityDays: 90, // TODO: Calculate from actual expiry
     };
 
     return {

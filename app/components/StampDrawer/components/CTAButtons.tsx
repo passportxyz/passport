@@ -3,7 +3,7 @@ import { CTAButtonsProps } from "../types";
 import { Button } from "../../Button";
 
 export const CTAButtons = ({ platformSpec, verificationState, onVerify, onClose }: CTAButtonsProps) => {
-  const { isVerified, isLoading, canSubmit } = verificationState;
+  const { isVerified, isLoading } = verificationState;
 
   // Always show custom CTA if it exists
   if (platformSpec.cta) {
@@ -51,7 +51,7 @@ export const CTAButtons = ({ platformSpec, verificationState, onVerify, onClose 
         <Button
           variant="custom"
           onClick={onVerify}
-          disabled={!canSubmit || isLoading}
+          disabled={isLoading}
           className="w-full bg-background text-color-4 font-medium rounded-lg hover:bg-foreground-2 transition-colors px-5 py-2 disabled:opacity-50"
         >
           {isLoading ? "Verifying..." : "Check Eligibility"}

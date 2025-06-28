@@ -24,12 +24,10 @@ export interface CredentialGroup {
 export interface VerificationState {
   isVerified: boolean;
   isLoading: boolean;
-  canSubmit: boolean;
   timeToGet?: string;
   price?: string;
   pointsGained: number;
   totalPossiblePoints: number;
-  validityDays?: number;
 }
 
 export interface StampDrawerProps {

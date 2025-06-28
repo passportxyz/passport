@@ -15,7 +15,6 @@ import {
 import { fetchVerifiableCredential } from "../utils/credentials";
 
 // --- Style Components
-import { SideBarContent } from "./SideBarContent";
 import { StampDrawer } from "./StampDrawer";
 import { Drawer, DrawerOverlay } from "@chakra-ui/react";
 import { LoadButton } from "./LoadButton";
