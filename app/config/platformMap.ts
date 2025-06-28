@@ -31,6 +31,7 @@ const {
   CleanHands,
   HumanIdPhone,
   HumanIdKyc,
+  Biometrics,
 } = platforms;
 
 type CustomPlatformTypeInfo = {
@@ -230,3 +231,8 @@ if (process.env.NEXT_PUBLIC_FF_HUMAN_ID_STAMP === "on") {
     platFormGroupSpec: HumanIdKyc.ProviderConfig,
   });
 }
+
+defaultPlatformMap.set("Biometrics", {
+  platform: new Biometrics.BiometricsPlatform(),
+  platFormGroupSpec: Biometrics.ProviderConfig,
+});
