@@ -14,7 +14,7 @@ export const PlatformDetails: PlatformSpec = {
 // Check if current date is past the deprecation dates
 const currentDate = new Date();
 const captchaDeprecationDate = new Date("2025-07-01");
-const uniquenessLivenessDeprecationDate = new Date("2025-07-31");
+const uniquenessLivenessDeprecationDate = new Date("2025-07-01");
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
