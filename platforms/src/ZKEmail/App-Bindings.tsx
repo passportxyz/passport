@@ -1,5 +1,5 @@
 import React from "react";
-import { AppContext, PlatformBanner, PlatformOptions, ProviderPayload } from "../types.js";
+import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
 import { Platform } from "../utils/platform.js";
 import { AMAZON_BLUEPRINTS, UBER_BLUEPRINTS } from "./types.js";
 
@@ -18,14 +18,31 @@ export class ZKEmailPlatform extends Platform {
       heading: "To add the ZKEmail Stamp to your Passport...",
       content: (
         <div>
-          <p>To add the ZKEmail Stamp to your Passport, you need to login with Google and prove your Uber trips.</p>
-          <p>Click "Connect Account" below to start the verification process.</p>
+          <p>You need to login with Google and prove your Uber trips and/or Amazon purchases.</p>
+          <p>Click "Verify" below to start the verification process. Please be patient as this can take some time.</p>
+          <br />
+          <p>
+            If you have some trouble proving your emails, you can contribute to our public archive of dkim keys{" "}
+            <a
+              style={{ color: "#4abeff" }}
+              href="https://archive.zk.email/contribute"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              here
+            </a>{" "}
+            or contact us at{" "}
+            <a style={{ color: "#4abeff" }} href="mailto:support@zk.email" target="_blank" rel="noopener noreferrer">
+              support@zk.email
+            </a>
+            .
+          </p>
         </div>
       ),
-      cta: {
-        label: "Learn more",
-        url: "",
-      },
+      // cta: {
+      //   label: "Learn more",
+      //   url: "",
+      // },
     };
   }
 
