@@ -5,17 +5,24 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/snapshotStampIcon.svg",
   platform: "Snapshot",
   name: "Snapshot",
-  description: "Connect to Snapshot to verify your DAO voting power.",
+  description: "Verify your DAO governance participation",
   connectMessage: "Verify Account",
   isEVM: true,
   website: "https://snapshot.org/",
+  timeToGet: "1 minute",
+  price: "Free",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Snapshot Proposal Creator",
+    platformGroup: "DAO Governance",
     providers: [
-      { title: "Created a DAO proposal that was voted on by at least 1 account", name: "SnapshotProposalsProvider" },
+      {
+        title: "Proposal Creator",
+        description:
+          "Created DAO proposals that received community votes, demonstrating active governance participation",
+        name: "SnapshotProposalsProvider",
+      },
     ],
   },
 ];

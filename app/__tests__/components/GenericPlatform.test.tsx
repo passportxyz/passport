@@ -47,6 +47,7 @@ const mockCeramicContext: CeramicContextState = makeTestCeramicContext({
 const EnsScoreSpec: PlatformScoreSpec = {
   ...platforms["Ens"].PlatformDetails,
   possiblePoints: 3,
+  displayPossiblePoints: 3,
   earnedPoints: 1,
 };
 
@@ -69,8 +70,9 @@ describe("when user has not verified with EnsProvider", () => {
     );
 
     renderWithContext(mockCeramicContext, drawer());
-    const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
-    expect(initialVerifyButton).toBeInTheDocument();
+    // The drawer should be open and show the Check Eligibility button
+    const checkButtons = screen.getAllByText("Check Eligibility");
+    expect(checkButtons.length).toBeGreaterThan(0);
   });
   it("should attempt to fetch a verifiable credential when the button is clicked", async () => {
     const drawer = () => (
@@ -84,9 +86,9 @@ describe("when user has not verified with EnsProvider", () => {
     );
     renderWithContext(mockCeramicContext, drawer());
 
-    const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
-
-    fireEvent.click(initialVerifyButton as HTMLElement);
+    const verifyButtons = screen.getAllByText("Check Eligibility");
+    // Click the first one (from CTAButtons)
+    fireEvent.click(verifyButtons[0]);
     await waitFor(() => {
       expect(fetchVerifiableCredential).toHaveBeenCalled();
     });
@@ -106,9 +108,9 @@ describe("when user has not verified with EnsProvider", () => {
     );
     renderWithContext(mockCeramicContext, drawer());
 
-    const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
-
-    fireEvent.click(initialVerifyButton as HTMLElement);
+    const verifyButtons = screen.getAllByText("Check Eligibility");
+    // Click the first one (from CTAButtons)
+    fireEvent.click(verifyButtons[0]);
     // Wait to see the done toast
     await waitFor(() => {
       expect(screen.getByText("All Ens data points verified.")).toBeInTheDocument();
@@ -131,9 +133,9 @@ describe("when user has not verified with EnsProvider", () => {
       checkSessionIsValid: () => false,
     });
 
-    const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
-
-    fireEvent.click(initialVerifyButton as HTMLElement);
+    const verifyButtons = screen.getAllByText("Check Eligibility");
+    // Click the first one (from CTAButtons)
+    fireEvent.click(verifyButtons[0]);
     // Wait to see the error toast
     await waitFor(() => {
       expect(screen.getByText("Please refresh the page to reset your session.")).toBeInTheDocument();
@@ -177,8 +179,9 @@ describe("when user has previously verified with EnsProvider", () => {
       },
       drawer()
     );
-    const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
-    fireEvent.click(initialVerifyButton as HTMLElement);
+    const verifyButtons = screen.getAllByText("Check Eligibility");
+    // Click the first one (from CTAButtons)
+    fireEvent.click(verifyButtons[0]);
 
     // Wait to see the done toast
     await waitFor(() => {
@@ -220,8 +223,9 @@ describe("when user has previously verified with EnsProvider", () => {
       },
       drawer()
     );
-    const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
-    fireEvent.click(initialVerifyButton as HTMLElement);
+    const verifyButtons = screen.getAllByText("Check Eligibility");
+    // Click the first one (from CTAButtons)
+    fireEvent.click(verifyButtons[0]);
 
     // Wait to see the done toast
     await waitFor(() => {
@@ -253,9 +257,9 @@ describe("Mulitple EVM plaftorms", () => {
     );
     renderWithContext(mockCeramicContext, drawer());
 
-    const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
-
-    fireEvent.click(initialVerifyButton as HTMLElement);
+    const verifyButtons = screen.getAllByText("Check Eligibility");
+    // Click the first one (from CTAButtons)
+    fireEvent.click(verifyButtons[0]);
     await waitFor(async () => {
       const verifyModal = await screen.findByRole("dialog");
       expect(verifyModal).toBeInTheDocument();
@@ -276,9 +280,9 @@ it("should indicate that there was an error issuing the credential", async () =>
     </ChakraProvider>
   );
   renderWithContext({ ...mockCeramicContext, handlePatchStamps: vi.fn().mockRejectedValue(500) }, drawer());
-  const initialVerifyButton = screen.queryByTestId("button-verify-Ens");
-
-  fireEvent.click(initialVerifyButton as HTMLElement);
+  const verifyButtons = screen.getAllByText("Check Eligibility");
+  // Click the first one (from CTAButtons)
+  fireEvent.click(verifyButtons[0]);
   await waitFor(() => {
     expect(screen.getByText("There was an error verifying your stamp. Please try again.")).toBeInTheDocument();
   });

@@ -200,6 +200,59 @@ Each service needs its own `.env` file based on `.env-example.env`. Critical var
 - **API Communication**: REST APIs with typed interfaces
 - **Verification**: DIDKit for credential issuance, EAS for on-chain attestations
 
+## Styling Guidelines
+
+### Color System
+Always use the theme-defined color tokens instead of hardcoded colors. The app uses a palette system with CSS custom properties accessible through Tailwind classes.
+
+**Color Palette Reference (LUNARPUNK_DARK_MODE theme):**
+- `background` → #F5F5F5 (light gray)
+- `background-2` → #08205F (dark purple)
+- `background-3` → #4A47D3 (iris)
+- `background-4` → #122B33 (night blue)
+- `background-5` → #FF8846 (orange)
+- `foreground` → #FFFFFF (white)
+- `foreground-2` → #C1F6FF (ice blue)
+- `foreground-3` → #4B5F65 (iron gray)
+- `foreground-4` → #6CB6AD (sea foam)
+- `foreground-5` → #22645C (green)
+- `foreground-6` → #074853 (turquoise)
+- `foreground-7` → #D2DC95 (pale yellow)
+
+**Text Colors:**
+- `color-1` → #FFFFFF (white)
+- `color-2` → #6CB6AD (sea foam)
+- `color-3` → #D2D2D2 (light grey)
+- `color-4` → #000000 (black)
+- `color-5` → #4ABEFF (bright blue)
+- `color-6` → #F5F5F5 (background/light)
+- `color-7` → #FF8846 (orange)
+- `color-8` → #A0FE7F (yellow green)
+- `color-9` → #737373 (gray)
+- `color-10` → #FEA57F (orange red)
+
+**Other Theme Colors:**
+- `focus` → #FF8846 (red/orange)
+
+**Usage Examples:**
+```tsx
+// Correct - using theme colors with Tailwind classes
+<div className="text-color-1 bg-background border-foreground-5">
+  <p className="text-color-2">Secondary text in sea foam</p>
+  <button className="bg-foreground-2 hover:bg-foreground-3">Ice blue button</button>
+</div>
+
+// Also correct when Tailwind doesn't support it
+<div style={{ backgroundColor: "rgb(var(--color-background-2))" }}>
+
+// Incorrect - hardcoded colors
+<div className="text-gray-800 bg-white border-gray-200">
+```
+
+**Note:** All colors can be used with any Tailwind prefix (text-, bg-, border-, etc.). The theme system converts hex values to RGB format for CSS custom properties.
+
+Always check existing components for color usage patterns before implementing new features.
+
 ### Stamp/Provider Architecture
 
 The codebase uses a clean separation between platforms (frontend) and providers (backend):

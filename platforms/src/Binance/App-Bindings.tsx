@@ -44,6 +44,11 @@ export class BinancePlatform extends Platform {
         </ul>
       </div>
     ),
+    // Custom CTA to get BABT token
+    cta: {
+      label: "Get BABT Token",
+      url: "https://www.binance.com/en/babt",
+    },
   };
 
   constructor(options: PlatformOptions = {}) {

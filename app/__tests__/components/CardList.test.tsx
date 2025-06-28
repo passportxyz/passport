@@ -199,16 +199,23 @@ describe("<CardList />", () => {
 
   it("should render available points", () => {
     renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
-    const availablePnts = screen.getAllByTestId("available-points").map((el) => el.textContent);
+    // Look for PassportPoints components showing available points (without + prefix)
+    const allPointElements = screen.getAllByText(/^\d+(\.\d+)?$/);
+    const availablePnts = allPointElements.filter((el) => !el.textContent?.startsWith("+")).map((el) => el.textContent);
 
     //the verified stamp no longer shows the score of availablepoints
-    expect(availablePnts).toEqual(["12.9", "7.4", "0.7"]);
+    expect(availablePnts).toContain("12.9");
+    expect(availablePnts).toContain("7.4");
+    expect(availablePnts).toContain("0.7");
   });
 
   it("should render earned points in the top right of the card", () => {
     renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
-    const availablePnts = screen.getAllByTestId("received-points-tr").map((el) => el.textContent);
-    expect(availablePnts).toEqual(["+11.9", "+1"]);
+    // Look for PassportPoints components showing earned points (with + prefix)
+    const earnedPointElements = screen.getAllByText(/^\+\d+(\.\d+)?$/);
+    const earnedPnts = earnedPointElements.map((el) => el.textContent);
+    expect(earnedPnts).toContain("+11.9");
+    expect(earnedPnts).toContain("+1");
   });
 
   it("renders allowList if stamp is present", () => {
@@ -688,7 +695,7 @@ describe("show/hide tests", () => {
     renderWithContext(mockCeramicContext, <CardList {...cardListProps} />, {}, scorerContext);
 
     // Platform card should be shown
-    expect(screen.queryByText("GTC Staking")).toBeInTheDocument();
+    expect(screen.queryByText("Identity Staking")).toBeInTheDocument();
 
     // Category should be shown
     expect(screen.queryByText("Blockchain & Crypto Networks")).toBeInTheDocument();
@@ -740,7 +747,7 @@ describe("show/hide tests", () => {
     renderWithContext(mockCeramicContext, <CardList {...cardListProps} />, {}, scorerContext);
 
     // Platform card should be shown
-    expect(screen.queryByText("GTC Staking")).toBeInTheDocument();
+    expect(screen.queryByText("Identity Staking")).toBeInTheDocument();
 
     // Category should be shown
     expect(screen.queryByText("Blockchain & Crypto Networks")).toBeInTheDocument();

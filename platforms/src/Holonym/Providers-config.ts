@@ -9,6 +9,8 @@ export const PlatformDetails: PlatformSpec = {
   connectMessage: "Connect Account",
   isEVM: true,
   website: "https://silksecure.net/holonym/diff-wallet",
+  timeToGet: "5-10 min",
+  price: "$10",
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [

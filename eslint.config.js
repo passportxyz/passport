@@ -25,12 +25,9 @@ export const REACT_CONFIGS = tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true },
-      ],
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
     },
-  },
+  }
 );
 
 export const MODULE_CONFIGS = tseslint.config(
@@ -69,7 +66,7 @@ export const MODULE_CONFIGS = tseslint.config(
     },
     rules: {
       // Base rules
-      quotes: ["error", "double"],
+      quotes: ["error", "double", { avoidEscape: true, allowTemplateLiterals: true }],
       "no-console": "warn",
       "no-unused-vars": "off",
       "no-empty": "warn",
@@ -96,5 +93,5 @@ export const MODULE_CONFIGS = tseslint.config(
         version: "detect",
       },
     },
-  },
+  }
 );

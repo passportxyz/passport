@@ -15,13 +15,14 @@ import {
 import { fetchVerifiableCredential } from "../utils/credentials";
 
 // --- Style Components
-import { SideBarContent } from "./SideBarContent";
+import { StampDrawer } from "./StampDrawer";
 import { Drawer, DrawerOverlay } from "@chakra-ui/react";
 import { LoadButton } from "./LoadButton";
 import { JsonOutputModal } from "./JsonOutputModal";
 
 // --- Context
 import { CeramicContext } from "../context/ceramicContext";
+import { ScorerContext } from "../context/scorerContext";
 import { waitForRedirect } from "../context/stampClaimingContext";
 
 // --- Types
@@ -82,6 +83,7 @@ export const GenericPlatform = ({
   const { sendTransactionAsync } = useSendTransaction();
   const { switchChainAsync } = useSwitchChain();
   const { handlePatchStamps, verifiedProviderIds, userDid, expiredProviders } = useContext(CeramicContext);
+  const { stampWeights, stampDedupStatus } = useContext(ScorerContext);
   const [isLoading, setLoading] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -414,32 +416,18 @@ export const GenericPlatform = ({
   ]);
 
   return (
-    <Drawer
-      isOpen={isOpen}
-      placement="right"
-      size="sm"
-      onClose={onClose}
-      trapFocus={false} // TODO: Make this conditional (trapFocus={platform.platformId !== "HumanID"}) to preserve accessibility for other platforms
-    >
-      <DrawerOverlay />
-      <SideBarContent
+    <>
+      <StampDrawer
+        isOpen={isOpen}
         onClose={onClose}
-        currentPlatform={platformScoreSpec}
-        bannerConfig={platform.banner}
-        currentProviders={platFormGroupSpec}
+        platformSpec={platformScoreSpec}
+        credentialGroups={platFormGroupSpec}
+        onVerify={handleFetchCredential}
         verifiedProviders={verifiedProviders}
+        expiredProviders={expiredProviders}
+        stampWeights={stampWeights || {}}
+        stampDedupStatus={stampDedupStatus || {}}
         isLoading={isLoading}
-        verifyButton={
-          <LoadButton
-            className="mt-10 w-full bg-gradient-to-3 from-foreground-2 to-foreground-4"
-            isLoading={isLoading || isReverifying}
-            disabled={!submitted && !canSubmit}
-            onClick={canSubmit ? handleFetchCredential : onClose}
-            data-testid={`button-verify-${platform.platformId}`}
-          >
-            {buttonText}
-          </LoadButton>
-        }
       />
       <JsonOutputModal
         isOpen={payloadModalIsOpen}
@@ -448,6 +436,6 @@ export const GenericPlatform = ({
         subheading="To preserve your privacy, error information is not stored; please share with Gitcoin support at your discretion."
         jsonOutput={verificationResponse}
       />
-    </Drawer>
+    </>
   );
 };

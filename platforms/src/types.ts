@@ -13,6 +13,10 @@ export type PlatformSpec = {
   isEVM?: boolean;
   enablePlatformCardUpdate?: boolean;
   website?: string;
+  timeToGet?: string;
+  price?: string;
+  guide?: GuideSection[]; // Guide sections supporting steps, lists, etc.
+  cta?: StepAction; // Optional custom call-to-action
 };
 
 export type ProviderSpec = {
@@ -124,5 +128,40 @@ export interface Platform {
   getOAuthUrl?(state: string): Promise<string>;
   getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;
 }
+
+// Step item for step-by-step guides
+export interface StepItem {
+  title: string;
+  description: string;
+  actions?: StepAction[];
+  image?: {
+    src: string;
+    alt: string;
+  };
+}
+
+// Guide sections with discriminated union
+export type GuideSection =
+  | {
+      type: "steps";
+      title?: string; // defaults to "Step-by-Step Guide"
+      items: StepItem[];
+    }
+  | {
+      type: "list";
+      title?: string; // defaults to "Important considerations"
+      items: string[];
+      actions?: StepAction[];
+    };
+
+export type StepAction =
+  | {
+      label: string;
+      href: string; // For external links
+    }
+  | {
+      label: string;
+      onClick: () => void; // For internal actions
+    };
 
 export type PlatformOptions = Record<string, unknown>;
