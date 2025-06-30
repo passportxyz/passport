@@ -64,16 +64,25 @@ export const issueEip712Credential = async (
   const issuer = DIDKit.keyToDID("ethr", key);
 
   const expiresInSeconds = (expiration as CredentialExpiresInSeconds).expiresInSeconds;
-  const expirationDate =
+  const issuanceDate = new Date();
+  let expirationDate =
     expiresInSeconds !== undefined
-      ? addSeconds(new Date(), expiresInSeconds).toISOString()
-      : (expiration as CredentialExpiresAt).expiresAt.toISOString();
+      ? addSeconds(issuanceDate, expiresInSeconds)
+      : (expiration as CredentialExpiresAt).expiresAt;
+  const latestExpirationDate = addSeconds(issuanceDate, CREDENTIAL_EXPIRES_AFTER_SECONDS);
+
+  // Just in case an expiration date that is more than 90 days in the future got set, we will
+  // change that to a max of 90 days in the future
+  if (expirationDate > latestExpirationDate) {
+    expirationDate = latestExpirationDate;
+  }
+
   const credentialInput = {
     "@context": ["https://www.w3.org/2018/credentials/v1", ...additionalContexts],
     type: ["VerifiableCredential"],
     issuer,
     issuanceDate: new Date().toISOString(),
-    expirationDate,
+    expirationDate: expirationDate.toISOString(),
     ...fields,
   };
 
