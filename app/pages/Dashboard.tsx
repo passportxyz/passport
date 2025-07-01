@@ -76,7 +76,6 @@ export default function Dashboard() {
   const { success, failure } = useMessage();
   const [showOnchainSidebar, setShowOnchainSidebar] = React.useState(false);
   const { banners } = useSupportBanners();
-  const setCK = useSetCustomizationKey();
 
   // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
   // until ceramicContext is refactored and memoized
@@ -275,14 +274,6 @@ export default function Dashboard() {
             <span id="add-stamps" className="px-4 md:px-0 col-span-full font-heading text-4xl text-gray-800 mt-12">
               Add Stamps
             </span>
-            <button
-              className="text-black"
-              onClick={async () => {
-                await setCK(customization.key);
-              }}
-            >
-              Reload
-            </button>
             <CardList
               className="col-span-full"
               isLoading={

@@ -1,10 +1,12 @@
 // --- React methods
 import React, { Fragment } from "react";
+import { ScorerContext } from "../context/scorerContext";
 import { AccountCenter } from "./AccountCenter";
 import { Notifications } from "./Notifications";
 import { OnchainSidebar } from "./OnchainSidebar";
 import { useOneClickVerification } from "../hooks/useOneClickVerification";
 import { Popover, Transition } from "@headlessui/react";
+import { HumanPointsLabel } from "./humanPoints";
 
 type MinimalHeaderProps = {
   className?: string;
@@ -193,6 +195,7 @@ const AppSelector = () => {
 const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   const [showSidebar, setShowSidebar] = React.useState(false);
   const { verificationComplete } = useOneClickVerification();
+  const { scoreState, pointsData } = React.useContext(ScorerContext);
 
   return (
     <>
@@ -212,6 +215,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
           <a href="https://humansignon.com/" target="_blank">
             <BridgeIcon />
           </a>
+          {scoreState.status !== "initial" && <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} />}
           <AccountCenter />
           {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
         </div>
