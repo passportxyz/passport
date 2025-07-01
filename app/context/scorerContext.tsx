@@ -116,7 +116,11 @@ const processScoreResponse = (response: any) => {
   }
 };
 
-export type ScoreState = { status: "loading" } | { status: "success" } | { status: "error"; error: string };
+export type ScoreState =
+  | { status: "initial" }
+  | { status: "loading" }
+  | { status: "success" }
+  | { status: "error"; error: string };
 
 export type Weights = {
   [key in PROVIDER_ID]: string;
@@ -156,6 +160,13 @@ export type PlatformScoreSpec = PlatformSpec & {
   earnedPoints: number;
 };
 
+export type PointsData = {
+  total_points: number;
+  is_eligible: Boolean;
+  multiplier: number;
+  breakdown: any;
+};
+
 export interface ScorerContextState {
   score: number;
   rawScore: number;
@@ -169,6 +180,7 @@ export interface ScorerContextState {
   stampScores: Partial<StampScores>;
   stampDedupStatus: Partial<StampDedupStatus>;
   passingScore: boolean;
+  pointsData?: PointsData;
 }
 
 const startingState: ScorerContextState = {
@@ -198,11 +210,13 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [rawScore, setRawScore] = useState(0);
   const [threshold, setThreshold] = useState(0);
   const [scoreDescription, setScoreDescription] = useState("");
-  const [scoreState, setScoreState] = useState<ScoreState>({ status: "loading" });
+  const [scoreState, setScoreState] = useState<ScoreState>({ status: "initial" });
   const [stampScores, setStampScores] = useState<Partial<StampScores>>({});
   const [stampDedupStatus, setStampDedupStatus] = useState<Partial<StampDedupStatus>>({});
   const [stampWeights, setStampWeights] = useState<Partial<Weights>>({});
   const [scoredPlatforms, setScoredPlatforms] = useState<PlatformScoreSpec[]>([]);
+  const [pointsData, setPointsData] = useState<PointsData>();
+
   const [passingScore, setPassingScore] = useState(false);
   const customization = useCustomization();
   const { platformSpecs, platformProviders, platforms, getPlatformSpec } = usePlatforms();
@@ -213,6 +227,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     rescore: boolean = false
   ): Promise<void> => {
     let response;
+    setScoreState({ status: "loading" });
     try {
       const useAlternateScorer = customization.scorer?.id;
       const method = rescore ? "post" : "get";
@@ -250,6 +265,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     setScore(processed.score);
     setScoreDescription(processed.scoreDescription);
     setPassingScore(processed.passingScore);
+    setPointsData(response.data.points_data);
 
     const { scores, dedupStatus } = processStampScores(response.data);
     setStampScores(scores);
@@ -333,6 +349,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     refreshScore,
     fetchStampWeights,
     passingScore,
+    pointsData,
   };
 
   return <ScorerContext.Provider value={providerProps}>{children}</ScorerContext.Provider>;
