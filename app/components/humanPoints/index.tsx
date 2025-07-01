@@ -22,13 +22,17 @@ export const Icon: FC<IconProps> = ({ width, height }: IconProps) => {
 };
 
 type HumanPointsLabelProps = {
+  prefix?: string;
   points: number;
 };
-export const HumanPointsLabel: FC<HumanPointsLabelProps> = ({ points }: HumanPointsLabelProps) => {
+export const HumanPointsLabel: FC<HumanPointsLabelProps> = ({ prefix, points }: HumanPointsLabelProps) => {
   return (
     <div className="flex items-center bg-emerald-100 rounded-full px-2 py-1">
       <Icon width={18} height={19} />
-      <span className="px-1 pt-0.5 text-color-4">{points.toFixed(0)}</span>
+      <span className="px-1 pt-0.5 text-color-4">
+        {prefix}
+        {points.toFixed(0)}
+      </span>
     </div>
   );
 };

@@ -15,6 +15,8 @@ import { useStampDeduplication } from "../hooks/useStampDeduplication";
 import { useOnChainData } from "../hooks/useOnChainData";
 import { ExpiredLabel } from "./LabelExpired";
 import { PassportPoints } from "./PassportPoints";
+import { HumanPointsLabel } from "./humanPoints";
+import { providersForPoints } from "../context/scorerContext";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -120,6 +122,11 @@ const VerifiedStamp = ({
   useEffect(() => {
     const onchainProviderSet = new Set(activeChainProviders.map((p) => p.providerName));
     const providerSet = new Set(platformProviders);
+    const pointedProviders = providersForPoints.intersection(providerSet);
+
+    if (pointedProviders.size > 0) {
+      const entries = pointedProviders.entries().take();
+    }
 
     const intersection = onchainProviderSet.intersection(providerSet);
     setIsAnyOnchain(intersection.size > 0);
@@ -160,6 +167,7 @@ const VerifiedStamp = ({
               )}
             </div>
             <PassportPoints points={platform.earnedPoints} prefix="+" className="text-right" />
+            <HumanPointsLabel points={123} />
           </div>
 
           <div className="mt-4 h-full md:mt-6 inline-block justify-start text-color-4">
