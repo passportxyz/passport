@@ -221,6 +221,7 @@ export const scorerContext = {
   stampScores: {},
   stampDedupStatus: {},
   passingScore: false,
+  pointsDataForStamps: {},
 } as ScorerContextState;
 
 export const createWalletStoreMock = () => {

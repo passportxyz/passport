@@ -294,13 +294,14 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     setScoreDescription(processed.scoreDescription);
     setPassingScore(processed.passingScore);
     setPointsData(response.data.points_data);
-    setPointsDataForStamps(
-      STAMP_PROVIDER_TO_ACTION.reduce((acc, [provider, key]) => {
-        acc[provider] = pointsData.breakdown[key];
-        return acc;
-      }, {} as PointsDataForStamps)
-    );
-
+    if (pointsData) {
+      setPointsDataForStamps(
+        STAMP_PROVIDER_TO_ACTION.reduce((acc, [provider, key]) => {
+          acc[provider] = pointsData.breakdown[key];
+          return acc;
+        }, {} as PointsDataForStamps)
+      );
+    }
     const { scores, dedupStatus } = processStampScores(response.data);
     setStampScores(scores);
     setStampDedupStatus(dedupStatus);
