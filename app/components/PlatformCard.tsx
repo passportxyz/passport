@@ -1,5 +1,5 @@
 // --- React Methods
-import { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 
 // --- Types
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
@@ -16,7 +16,8 @@ import { useOnChainData } from "../hooks/useOnChainData";
 import { ExpiredLabel } from "./LabelExpired";
 import { PassportPoints } from "./PassportPoints";
 import { HumanPointsLabel } from "./humanPoints";
-import { providersForPoints } from "../context/scorerContext";
+import { HumanPointsLabelSMDark } from "./humanPoints";
+import { providersForPoints, ScorerContext } from "../context/scorerContext";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -55,7 +56,7 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant }: StampProps
       <div
         className={`group relative flex h-full cursor-pointer flex-col rounded-2xl p-0 transition-all ease-out ${variantClasses[variant || "default"]}`}
       >
-        <div className="m-6 flex h-full flex-col justify-between">
+        <div className="m-4 flex h-full flex-col justify-between">
           <div className="flex w-full items-center justify-between">
             {platform.icon ? (
               <div>
@@ -118,14 +119,22 @@ const VerifiedStamp = ({
 }: StampProps) => {
   const { activeChainProviders } = useOnChainData();
   const [isAnyOnchain, setIsAnyOnchain] = useState(false);
+  const { pointsDataForStamps } = useContext(ScorerContext);
+  const [humanPoints, setHumanPoints] = useState<number>();
 
   useEffect(() => {
     const onchainProviderSet = new Set(activeChainProviders.map((p) => p.providerName));
     const providerSet = new Set(platformProviders);
     const pointedProviders = providersForPoints.intersection(providerSet);
 
+    console.log("geri pointsDataForStamps", { pointsDataForStamps });
+    console.log("geri pointedProviders", { pointedProviders });
     if (pointedProviders.size > 0) {
-      const entries = pointedProviders.entries().take();
+      const providerWithHumanPoints = pointedProviders.values().next().value;
+      console.log("geri providerWithHumanPoints", { providerWithHumanPoints });
+      if (providerWithHumanPoints) {
+        setHumanPoints(pointsDataForStamps[providerWithHumanPoints]);
+      }
     }
 
     const intersection = onchainProviderSet.intersection(providerSet);
@@ -134,10 +143,22 @@ const VerifiedStamp = ({
     // const isAllOnchain = intersection.size === providerSet.size;
   }, [activeChainProviders, platformProviders]);
 
+  const style = {
+    background:
+      "conic-gradient(from 186.26deg at 50% 50%,#0e6a50 -160.96deg,#6bf1ca 109.04deg,#0e6a50 199.04deg,#6bf1ca 469.04deg)",
+
+    boxShadow: "0px 4px 16px 0px #0E865066",
+  };
   return (
-    <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
+    <div
+      data-testid="platform-card"
+      onClick={onClick}
+      className={`${className} rounded-2xl p-[2.5px]`}
+      key={`${platform.name}${idx}`}
+      style={style}
+    >
       <div className="group relative flex h-full cursor-pointer flex-col rounded-2xl p-0 transition-all ease-out bg-emerald-100">
-        <div className="m-6 flex h-full flex-col justify-between">
+        <div className="m-4 flex h-full flex-col justify-between">
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center">
               {platform.icon ? (
@@ -156,7 +177,7 @@ const VerifiedStamp = ({
               )}
               {/* <StampLabels primaryLabel="Verified" primaryBgColor="bg-foreground-4" isDeduplicated={isDeduplicated} /> */}
               {isDeduplicated || (
-                <div className="px-2 py-1 text-l font-bold text-left text-emerald-600">
+                <div className="pr-2 py-1 text-md font-medium text-left text-emerald-600">
                   <p data-testid="verified-label">{isAnyOnchain ? "Minted" : "Verified"}</p>
                 </div>
               )}
@@ -166,8 +187,14 @@ const VerifiedStamp = ({
                 </div>
               )}
             </div>
-            <PassportPoints points={platform.earnedPoints} prefix="+" className="text-right" />
-            <HumanPointsLabel points={123} />
+
+            <div className="flex items-center">
+              <div className="relative -right-1">
+                {humanPoints && <HumanPointsLabelSMDark points={humanPoints} prefix="+" />}
+              </div>
+
+              <PassportPoints points={platform.earnedPoints} prefix="+" className="text-right" />
+            </div>
           </div>
 
           <div className="mt-4 h-full md:mt-6 inline-block justify-start text-color-4">
@@ -188,9 +215,9 @@ const VerifiedStamp = ({
             </p>
           </div>
 
-          <div className="text-sm font-bold text-color-9 mb-2">
-            <span className="text-xl text-color-4">{+platform.earnedPoints.toFixed(1)} </span> /{" "}
-            {platform.displayPossiblePoints.toFixed(1)} points gained
+          <div className="text-sm font-medium text-color-9">
+            <span className="text-xl text-color-4">{+platform.earnedPoints.toFixed(1)}</span>/
+            {platform.displayPossiblePoints.toFixed()} points gained
           </div>
           <ProgressBar
             pointsGained={platform.earnedPoints}
@@ -229,7 +256,7 @@ const ExpiredStamp = ({ idx, platform, daysUntilExpiration, className, onClick, 
         onMouseLeave={() => setHovering(false)}
         className="group relative flex h-full cursor-pointer flex-col rounded-2xl p-0 bg-[#e5e5e5]"
       >
-        <div className="m-6 flex h-full flex-col justify-between">
+        <div className="m-4 flex h-full flex-col justify-between">
           <div className="flex w-full items-center justify-between">
             {platform.icon ? (
               <img src={platform.icon} alt={platform.name} className="h-10 w-10" />
