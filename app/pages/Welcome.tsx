@@ -18,7 +18,6 @@ export default function Welcome() {
 
   const navigateToPage = useNavigateToPage();
 
-  console.log("geri onboarding");
   // Route user to home page when wallet is disconnected
   useEffect(() => {
     if (!address || dbAccessTokenStatus !== "connected") {
