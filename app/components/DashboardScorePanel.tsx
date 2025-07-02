@@ -94,6 +94,30 @@ interface OnchainCTAProps {
   setShowSidebar: (show: boolean) => void;
 }
 
+const IconHammer: React.FC = () => (
+  <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M15.5001 12.9033L7.12706 21.2763C6.72923 21.6741 6.18967 21.8976 5.62706 21.8976C5.06445 21.8976 4.52488 21.6741 4.12706 21.2763C3.72923 20.8785 3.50574 20.3389 3.50574 19.7763C3.50574 19.2137 3.72923 18.6741 4.12706 18.2763L12.5001 9.90328M18.5001 15.9033L22.5001 11.9033M22.0001 12.4033L20.0861 10.4893C19.711 10.1143 19.5002 9.60567 19.5001 9.07528V7.90328L17.2401 5.64328C16.1246 4.52847 14.6151 3.89764 13.0381 3.88728L9.50006 3.86328L10.4201 4.68328C11.0735 5.26267 11.5968 5.97398 11.9553 6.77033C12.3138 7.56667 12.4995 8.42995 12.5001 9.30328V10.9033L14.5001 12.9033H15.6721C16.2024 12.9034 16.7111 13.1142 17.0861 13.4893L19.0001 15.4033"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const IconArrowDown: React.FC = () => (
+  <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M7.5 6L12.5 11L17.5 6M7.5 13L12.5 18L17.5 13"
+      stroke="white"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+);
+
 export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
   const { rawScore, threshold } = React.useContext(ScorerContext);
   const { someChainUpToDate, onChainAttestationProviders } = useAllOnChainStatus();
@@ -104,25 +128,37 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
   const customText = customization?.scorerPanel?.text;
   const mintPointsGained = pointsData?.breakdown.PMT;
 
-  const renderContent = (title: string, description?: string, linkText?: string, linkHref?: string) => (
-    <div className="flex flex-col h-full w-full pt-10">
-      <h2 className={`text-xl text-black ${!description && "mb-4"}`}>{title}</h2>
-      {description && <p className="py-2">{description}</p>}
-      {linkText && linkHref && <Hyperlink href={linkHref}>{linkText}</Hyperlink>}
+  const renderContent = (
+    title: string,
+    description?: string,
+    linkText?: string,
+    linkHref?: string,
+    button?: React.ReactNode
+  ) => (
+    <div className="w-full h-full p-4 flex flex-col">
+      <div className="flex flex-col h-full w-full">
+        <div className="flex flex-col md:flex-row items-start justify-between flex-wrap">
+          <div className="flex justify-start">
+            <h2 className={`text-2xl text-black font-semibold pr-4 text-nowrap ${!description && "mb-4"}`}>{title}</h2>
+            {mintPointsGained !== undefined && <HumanPointsLabel points={123} prefix="+" />}
+          </div>
+        </div>
+        <p className="py-2 self-center md:self-start">{description}</p>
+      </div>
+      <div className="w-full flex flex-col md:flex-row justify-between items-center">
+        {button}
+        {linkText && linkHref && (
+          <Hyperlink href={linkHref} className="font-normal text-gray-500 pl-4">
+            {linkText}
+          </Hyperlink>
+        )}
+      </div>
     </div>
   );
 
-  const renderButton = (text: string, onClick: () => void, className: string = "w-auto mt-4") => (
-    <LoadButton className={`${className} gap-0`} onClick={onClick}>
-      <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M15.5001 12.9033L7.12706 21.2763C6.72923 21.6741 6.18967 21.8976 5.62706 21.8976C5.06445 21.8976 4.52488 21.6741 4.12706 21.2763C3.72923 20.8785 3.50574 20.3389 3.50574 19.7763C3.50574 19.2137 3.72923 18.6741 4.12706 18.2763L12.5001 9.90328M18.5001 15.9033L22.5001 11.9033M22.0001 12.4033L20.0861 10.4893C19.711 10.1143 19.5002 9.60567 19.5001 9.07528V7.90328L17.2401 5.64328C16.1246 4.52847 14.6151 3.89764 13.0381 3.88728L9.50006 3.86328L10.4201 4.68328C11.0735 5.26267 11.5968 5.97398 11.9553 6.77033C12.3138 7.56667 12.4995 8.42995 12.5001 9.30328V10.9033L14.5001 12.9033H15.6721C16.2024 12.9034 16.7111 13.1142 17.0861 13.4893L19.0001 15.4033"
-          stroke="white"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+  const renderButton = (text: string, onClick: () => void, icon: React.ReactElement) => (
+    <LoadButton className="gap-0" onClick={onClick}>
+      {icon}
       {text}
     </LoadButton>
   );
@@ -164,8 +200,10 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
           <p className="py-2 self-center md:self-start">Message for minting onchain</p>
         </div>
         <div className="w-full flex flex-col md:flex-row justify-between items-center">
-          <span className="text-nowrap">{renderButton("Open Minting Dashboard", () => setShowSidebar(true), "")}</span>
-          <Hyperlink href="https://human.tech" className="font-normal text-gray-500 pl-4">
+          <span className="text-nowrap">
+            {renderButton("Open Minting Dashboard", () => setShowSidebar(true), <IconHammer />)}
+          </span>
+          <Hyperlink href="https://www.passport.xyz/ecosystem" className="font-normal text-gray-500 pl-4">
             <span className="text-nowrap">Here&apos;s what you can</span>{" "}
             <span className="text-nowrap">do with your passport.</span>
           </Hyperlink>
@@ -178,12 +216,12 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
     return (
       <>
         {renderContent(
-          "Congratulations. You have a passing Score",
+          "Congrats! You have a passing score!",
           "Next up, mint your Passport onchain!",
           "Here’s what you can do with your Passport!",
-          "https://www.passport.xyz/ecosystem"
+          "https://www.passport.xyz/ecosystem",
+          renderButton("Mint onchain", () => setShowSidebar(true), <IconHammer />)
         )}
-        {renderButton("Mint onchain", () => setShowSidebar(true))}
       </>
     );
   }
@@ -192,16 +230,20 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
     <>
       {renderContent(
         "Let's increase that score",
-        undefined,
-        "Here's some tips on how to raise your score to a minimum of 20.",
-        "https://support.passport.xyz/passport-knowledge-base/stamps/scoring-20-for-humans"
+        "You will need at least 20 points to verify your humanity",
+        "Here’s some tips on how to raise your score",
+        "https://support.passport.xyz/passport-knowledge-base/stamps/scoring-20-for-humans",
+        renderButton(
+          "Verify Stamps",
+          () => {
+            const addStamps = document.getElementById("add-stamps");
+            if (addStamps) {
+              addStamps.scrollIntoView({ behavior: "smooth" });
+            }
+          },
+          <IconArrowDown />
+        )
       )}
-      {renderButton("Verify Stamps", () => {
-        const addStamps = document.getElementById("add-stamps");
-        if (addStamps) {
-          addStamps.scrollIntoView({ behavior: "smooth" });
-        }
-      })}
     </>
   );
 };

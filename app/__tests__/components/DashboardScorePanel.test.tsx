@@ -106,7 +106,7 @@ describe("OnchainCTA", () => {
       { ...scorerContext, rawScore: 25, threshold: 20 }
     );
 
-    expect(screen.getByText("Congratulations. You have a passing Score")).toBeInTheDocument();
+    expect(screen.getByText("Congrats! You have a passing score!")).toBeInTheDocument();
     expect(screen.getByText("Mint onchain")).toBeInTheDocument();
   });
 
