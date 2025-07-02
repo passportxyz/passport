@@ -296,9 +296,70 @@ The codebase uses a clean separation between platforms (frontend) and providers 
 - `/platforms/src/{Platform}/Providers-config.ts` - UI metadata and grouping
 - `/types/src/index.d.ts` - Type definitions for provider IDs
 
+## Dev Mode - UI Development Without Authentication
+
+### Overview
+Dev mode allows rapid UI development without needing wallet connection or external services. It uses Mock Service Worker (MSW) to intercept API calls and webpack aliases to mock blockchain libraries.
+
+### Quick Start
+```bash
+cd app/
+NEXT_PUBLIC_DEV_MODE=true yarn dev
+```
+
+Navigate to http://localhost:3000/#/dashboard - you're automatically "logged in"!
+
+### Features
+- **Automatic Authentication**: Mock wallet address `0x0000000000000000000000000000000000000001`
+- **Pre-built Scenarios**: Switch between different user states via DevPanel
+- **Mock API Responses**: All endpoints return realistic data
+- **No External Dependencies**: Works offline, no wallet needed
+
+### DevPanel Controls
+A panel appears in the bottom-right corner with:
+- Scenario dropdown (New User, Basic User, Power User, etc.)
+- Current stats display
+- Tips for usage
+
+### Available Scenarios
+1. **New User - Empty Passport**: No stamps, score 0
+2. **Basic User - Few Stamps**: 3-5 stamps, score ~15
+3. **Power User - 50+ Stamps**: Many stamps, high score
+4. **Expired Stamps - Mixed States**: Some expired stamps
+5. **Low Score - Below Threshold**: Score below 20
+6. **On-chain Activity Focus**: Blockchain-related stamps only
+7. **Social Media Focus**: Social platform stamps only
+8. **DeFi Power User**: DeFi protocol stamps
+
+### Implementation Details
+- Mock handlers: `/app/mocks/handlers.ts`
+- Mock data generators: `/app/mocks/generators.ts`
+- Scenarios config: `/app/mocks/scenarios.json`
+- Dev panel UI: `/app/components/DevPanel.tsx`
+
+### Known Limitations
+- Loading overlay may persist (stamps still load in background)
+- Scenario changes require page refresh
+- Some features like stamp verification flows not fully mocked
+
+### Adding New Scenarios
+Edit `/app/mocks/scenarios.json`:
+```json
+{
+  "my-scenario": {
+    "description": "My Custom Scenario",
+    "stamps": ["Google", "Discord", "Github"],
+    "score": 25.5,
+    "evidence": { /* optional evidence data */ }
+  }
+}
+```
+
 ## Troubleshooting
 
 - **Module not found**: Run `lerna bootstrap` from root
 - **Type errors**: Rebuild packages with `yarn build`
 - **Test failures**: Check if services are running (Redis, APIs)
 - **Port conflicts**: Default ports are 3000 (app), 65535 (IAM), 80 (embed)
+- **Dev mode not working**: Ensure `NEXT_PUBLIC_DEV_MODE=true` is set
+- **MSW not intercepting**: Check browser console for "🔧 Dev Mode: MSW Started"

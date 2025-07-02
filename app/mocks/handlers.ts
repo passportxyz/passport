@@ -3,8 +3,8 @@ import { generateMockCredential, generateStampsForScenario, getCurrentScenario }
 import scenarios from "./scenarios.json";
 
 // Get base URLs from environment or use defaults
-const SCORER_ENDPOINT = process.env.NEXT_PUBLIC_SCORER_ENDPOINT || "https://api.scorer.gitcoin.co";
-const IAM_URL = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "https://iam.passport.gitcoin.co";
+const SCORER_ENDPOINT = process.env.NEXT_PUBLIC_SCORER_ENDPOINT || "http://localhost:8002";
+const IAM_URL = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "http://localhost:8003";
 
 export const handlers = [
   // Skip wallet authentication for Scorer API
@@ -18,7 +18,7 @@ export const handlers = [
   // Mock getting passport data
   http.get(`${SCORER_ENDPOINT}/ceramic-cache/passport`, ({ request }) => {
     const url = new URL(request.url);
-    const address = url.searchParams.get("address") || "0xDEV123456789ABCDEF123456789ABCDEF123456";
+    const address = url.searchParams.get("address") || "0x0000000000000000000000000000000000000001";
     const scenarioName = getCurrentScenario();
     const scenario = scenarios[scenarioName as keyof typeof scenarios];
     const stamps = generateStampsForScenario(scenarioName, address);
@@ -182,6 +182,66 @@ export const handlers = [
     return HttpResponse.json({
       success: true,
       score: scenario.score,
+    });
+  }),
+
+  // Mock getting weights for stamp scoring
+  http.get(`${SCORER_ENDPOINT}/ceramic-cache/weights`, () => {
+    return HttpResponse.json({
+      Google: 1.0,
+      Discord: 0.5,
+      Github: 2.0,
+      Twitter: 1.5,
+      Linkedin: 1.0,
+      NFT: 2.5,
+      ETHBalance: 3.0,
+      FirstEthTxnProvider: 1.5,
+      GnosisSafe: 2.0,
+      Snapshot: 1.5,
+      ENS: 2.0,
+      POH: 3.0,
+      BrightId: 3.0,
+      Civic: 3.0,
+      CyberConnect: 1.0,
+      Lens: 1.5,
+    });
+  }),
+
+  // Mock admin banners
+  http.get(`${SCORER_ENDPOINT}/passport-admin/banners`, () => {
+    return HttpResponse.json({
+      banners: [],
+    });
+  }),
+
+  // Mock getting passport data with address in URL
+  http.get(`${SCORER_ENDPOINT}/ceramic-cache/passport/:address`, ({ params }) => {
+    const address = (params.address as string) || "0x0000000000000000000000000000000000000001";
+    const scenarioName = getCurrentScenario();
+    const stamps = generateStampsForScenario(scenarioName, address);
+
+    return HttpResponse.json({
+      passport: {
+        stamps,
+      },
+    });
+  }),
+
+  // Mock POST score endpoint (for score calculation)
+  http.post(`${SCORER_ENDPOINT}/ceramic-cache/score/:address`, ({ params }) => {
+    const scenarioName = getCurrentScenario();
+    const scenario = scenarios[scenarioName as keyof typeof scenarios];
+
+    return HttpResponse.json({
+      address: params.address,
+      score: scenario.score.toString(),
+      status: "DONE",
+      last_score_timestamp: new Date().toISOString(),
+      evidence: scenario.evidence || {
+        success: true,
+        type: "MOCK",
+      },
+      error: null,
     });
   }),
 ];
