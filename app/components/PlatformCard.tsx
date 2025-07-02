@@ -141,16 +141,13 @@ const VerifiedStamp = ({
   }, [activeChainProviders, platformProviders]);
 
   const style = {
-    background:
-      "conic-gradient(from 186.26deg at 50% 50%,#0e6a50 -160.96deg,#6bf1ca 109.04deg,#0e6a50 199.04deg,#6bf1ca 469.04deg)",
-
     boxShadow: "0px 4px 16px 0px #0E865066",
   };
   return (
     <div
       data-testid="platform-card"
       onClick={onClick}
-      className={`${className} rounded-2xl p-[2.5px]`}
+      className={`${className} rounded-2xl`}
       key={`${platform.name}${idx}`}
       style={style}
     >
