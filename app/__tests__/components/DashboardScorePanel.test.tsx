@@ -84,7 +84,7 @@ describe("OnchainCTA", () => {
   });
 
   it("renders content for above threshold and all chains up to date", async () => {
-    mockedUseAllOnChainStatus.mockReturnValue({ allChainsUpToDate: true });
+    mockedUseAllOnChainStatus.mockReturnValue({ someChainUpToDate: true });
 
     renderWithContext(
       mockCeramicContext,
@@ -92,12 +92,12 @@ describe("OnchainCTA", () => {
       {},
       { ...scorerContext, rawScore: 25, threshold: 20 }
     );
-    expect(screen.getByText("Congratulations. Your Passport is onchain.")).toBeInTheDocument();
-    expect(screen.getByText("See onchain passport")).toBeInTheDocument();
+    expect(screen.getByText("Passport minted!")).toBeInTheDocument();
+    expect(screen.getByText("Open Minting Dashboard")).toBeInTheDocument();
   });
 
   it("renders content for above threshold but chains not up to date", async () => {
-    mockedUseAllOnChainStatus.mockReturnValue({ allChainsUpToDate: false });
+    mockedUseAllOnChainStatus.mockReturnValue({ someChainUpToDate: false });
 
     renderWithContext(
       mockCeramicContext,
@@ -106,12 +106,12 @@ describe("OnchainCTA", () => {
       { ...scorerContext, rawScore: 25, threshold: 20 }
     );
 
-    expect(screen.getByText("Congratulations. You have a passing Score")).toBeInTheDocument();
+    expect(screen.getByText("Congrats! You have a passing score!")).toBeInTheDocument();
     expect(screen.getByText("Mint onchain")).toBeInTheDocument();
   });
 
   it("renders content for below threshold", async () => {
-    mockedUseAllOnChainStatus.mockReturnValue({ allChainsUpToDate: false });
+    mockedUseAllOnChainStatus.mockReturnValue({ someChainUpToDate: false });
 
     renderWithContext(
       mockCeramicContext,
@@ -125,7 +125,7 @@ describe("OnchainCTA", () => {
   });
 
   it("calls setShowSidebar when 'See onchain passport' button is clicked", async () => {
-    mockedUseAllOnChainStatus.mockReturnValue({ allChainsUpToDate: true });
+    mockedUseAllOnChainStatus.mockReturnValue({ someChainUpToDate: true });
 
     renderWithContext(
       mockCeramicContext,
@@ -134,7 +134,7 @@ describe("OnchainCTA", () => {
       { ...scorerContext, rawScore: 25, threshold: 20 }
     );
 
-    await userEvent.click(screen.getByText("See onchain passport"));
+    await userEvent.click(screen.getByText("Open Minting Dashboard"));
 
     await waitFor(() => {
       expect(mockSetShowSidebar).toHaveBeenCalledWith(true);
@@ -142,7 +142,7 @@ describe("OnchainCTA", () => {
   });
 
   it("scrolls to 'add-stamps' element when 'Verify Stamps' button is clicked", async () => {
-    mockedUseAllOnChainStatus.mockReturnValue({ allChainsUpToDate: false });
+    mockedUseAllOnChainStatus.mockReturnValue({ someChainUpToDate: false });
 
     const mockScrollIntoView = vi.fn();
     document.getElementById = vi.fn().mockReturnValue({ scrollIntoView: mockScrollIntoView });

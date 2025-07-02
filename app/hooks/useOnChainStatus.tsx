@@ -3,7 +3,7 @@ import { CeramicContext } from "../context/ceramicContext";
 import { parseFloatOneDecimal, ScorerContext } from "../context/scorerContext";
 import { Chain, chains } from "../utils/chains";
 import { AttestationProvider } from "../utils/AttestationProvider";
-import { OnChainStatus } from "../utils/onChainStatus";
+import { OnChainStatus, onChainStatusString } from "../utils/onChainStatus";
 import { useOnChainData } from "./useOnChainData";
 import { useCustomization } from "./useCustomization";
 import { Customization } from "../utils/customizationUtils";
@@ -74,10 +74,16 @@ export const useAllOnChainStatus = () => {
   const { rawScore, scoreState } = useContext(ScorerContext);
   const customization = useCustomization();
 
-  const { allChainsUpToDate, anyChainExpired } = useMemo(() => {
+  const {
+    allChainsUpToDate,
+    anyChainExpired,
+    someChainUpToDate,
+    allAttestationProviders,
+    onChainAttestationProviders,
+  } = useMemo(() => {
     if (isPending) return { allChainsUpToDate: false, anyChainExpired: false };
 
-    const statuses = chains
+    const statuses: { attestationProvider?: AttestationProvider; status: OnChainStatus }[] = chains
       .filter((chain) => parseValidChains(customization, chain))
       .map((activeChain) => {
         const { score, providers, expirationDate } = data[activeChain.id] || {
@@ -86,26 +92,55 @@ export const useAllOnChainStatus = () => {
         };
         const attestationProvider = activeChain.attestationProvider;
 
-        if (!attestationProvider) return false;
+        if (!attestationProvider)
+          return {
+            status: OnChainStatus.NOT_MOVED,
+          };
 
-        return attestationProvider.checkOnChainStatus(
-          allProvidersState,
-          providers,
-          rawScore,
-          scoreState,
-          parseFloatOneDecimal(String(score)),
-          expirationDate
-        );
+        return {
+          attestationProvider,
+          status: attestationProvider.checkOnChainStatus(
+            allProvidersState,
+            providers,
+            rawScore,
+            scoreState,
+            parseFloatOneDecimal(String(score)),
+            expirationDate
+          ),
+        };
       });
 
     return {
-      allChainsUpToDate: statuses.every((status) => status === OnChainStatus.MOVED_UP_TO_DATE),
-      anyChainExpired: statuses.find((status) => status === OnChainStatus.MOVED_EXPIRED),
+      allChainsUpToDate: statuses.every(
+        (s) => s.status === OnChainStatus.MOVED_UP_TO_DATE || s.status === OnChainStatus.MOVED_OUT_OF_DATE
+      ),
+      someChainUpToDate: statuses.some(
+        (s) => s.status === OnChainStatus.MOVED_UP_TO_DATE || s.status === OnChainStatus.MOVED_OUT_OF_DATE
+      ),
+      anyChainExpired: statuses.find((s) => s.status === OnChainStatus.MOVED_EXPIRED),
+      allAttestationProviders: statuses.filter((s) => !!s.attestationProvider),
+      onChainAttestationProviders: statuses.filter(
+        (s) => s.status === OnChainStatus.MOVED_UP_TO_DATE || s.status === OnChainStatus.MOVED_OUT_OF_DATE
+      ),
     };
   }, [allProvidersState, customization, data, isPending, rawScore, scoreState]);
 
   return useMemo(
-    () => ({ allChainsUpToDate, anyChainExpired, isPending }),
-    [allChainsUpToDate, anyChainExpired, isPending]
+    () => ({
+      allChainsUpToDate,
+      anyChainExpired,
+      isPending,
+      someChainUpToDate,
+      allAttestationProviders,
+      onChainAttestationProviders,
+    }),
+    [
+      allChainsUpToDate,
+      anyChainExpired,
+      someChainUpToDate,
+      isPending,
+      allAttestationProviders,
+      onChainAttestationProviders,
+    ]
   );
 };

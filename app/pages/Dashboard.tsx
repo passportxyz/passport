@@ -23,12 +23,7 @@ import { useOneClickVerification } from "../hooks/useOneClickVerification";
 
 import ProcessingPopup from "../components/ProcessingPopup";
 import { Button } from "../components/Button";
-import {
-  DEFAULT_CUSTOMIZATION_KEY,
-  useCustomization,
-  useNavigateToPage,
-  useSetCustomizationKey,
-} from "../hooks/useCustomization";
+import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useNavigateToPage } from "../hooks/useCustomization";
 import { DynamicCustomDashboardPanel } from "../components/CustomDashboardPanel";
 import hash from "object-hash";
 

@@ -127,11 +127,8 @@ const VerifiedStamp = ({
     const providerSet = new Set(platformProviders);
     const pointedProviders = providersForPoints.intersection(providerSet);
 
-    console.log("geri pointsDataForStamps", { pointsDataForStamps });
-    console.log("geri pointedProviders", { pointedProviders });
     if (pointedProviders.size > 0) {
       const providerWithHumanPoints = pointedProviders.values().next().value;
-      console.log("geri providerWithHumanPoints", { providerWithHumanPoints });
       if (providerWithHumanPoints) {
         setHumanPoints(pointsDataForStamps[providerWithHumanPoints]);
       }

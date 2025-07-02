@@ -37,6 +37,7 @@ export interface AttestationProvider {
   skipByDefault: boolean;
   hasWebViewer: boolean;
   attestationExplorerLinkText: string;
+  icon: string;
   monochromeIcon: string;
   viewerUrl: (address: string) => string;
   verifierAddress: () => string;
@@ -68,21 +69,25 @@ class BaseAttestationProvider implements AttestationProvider {
   attestationExplorerLinkText = "Attestation on EAS";
   chainId: string;
   monochromeIcon: string;
+  icon: string;
 
   constructor({
     chainId,
     status,
     monochromeIcon,
+    icon,
     skipByDefault = false,
   }: {
     chainId: string;
     status: AttestationProviderStatus;
     monochromeIcon: string;
+    icon: string;
     skipByDefault: boolean;
   }) {
     this.chainId = chainId;
     this.status = status;
     this.monochromeIcon = monochromeIcon;
+    this.icon = icon;
     this.skipByDefault = skipByDefault;
   }
 
@@ -169,6 +174,7 @@ export class EASAttestationProvider extends BaseAttestationProvider {
     chainId,
     status,
     easScanUrl,
+    icon,
     monochromeIcon,
     skipByDefault = false,
   }: {
@@ -176,9 +182,10 @@ export class EASAttestationProvider extends BaseAttestationProvider {
     status: AttestationProviderStatus;
     easScanUrl?: string;
     monochromeIcon: string;
+    icon: string;
     skipByDefault: boolean;
   }) {
-    super({ status, chainId, monochromeIcon, skipByDefault });
+    super({ status, chainId, monochromeIcon, icon, skipByDefault });
     this.easScanUrl = easScanUrl;
     this.hasWebViewer = !!easScanUrl;
   }

@@ -85,7 +85,7 @@ export class Chain {
     this.useCustomCommunityId = useCustomCommunityId;
 
     if (attestationProviderConfig) {
-      const attestationConfig = { ...attestationProviderConfig, chainId: this.id };
+      const attestationConfig = { ...attestationProviderConfig, chainId: this.id, icon: this.icon };
       switch (attestationConfig.name) {
         case "Ethereum Attestation Service":
           this.attestationProvider = new EASAttestationProvider(attestationConfig);
