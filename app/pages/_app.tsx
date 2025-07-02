@@ -20,6 +20,8 @@ import { StampClaimingContextProvider } from "../context/stampClaimingContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useIntercom } from "../hooks/useIntercom";
 import { Web3Context, Web3ErrorContext } from "../hooks/Web3Context";
+import { DevModeProvider } from "../components/DevModeProvider";
+import { DevPanel } from "../components/DevPanel";
 
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 
@@ -97,23 +99,26 @@ function App({ Component, pageProps }: AppProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
       <Web3Context>
-        <QueryClientProvider client={queryClient}>
-          <DatastoreConnectionContextProvider>
-            <ScorerContextProvider>
-              <CeramicContextProvider>
-                <StampClaimingContextProvider>
-                  <RenderOnlyOnClient>
-                    <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                      <Web3ErrorContext>
-                        <Component {...pageProps} />
-                      </Web3ErrorContext>
-                    </ThemeWrapper>
-                  </RenderOnlyOnClient>
-                </StampClaimingContextProvider>
-              </CeramicContextProvider>
-            </ScorerContextProvider>
-          </DatastoreConnectionContextProvider>
-        </QueryClientProvider>
+        <DevModeProvider>
+          <QueryClientProvider client={queryClient}>
+            <DatastoreConnectionContextProvider>
+              <ScorerContextProvider>
+                <CeramicContextProvider>
+                  <StampClaimingContextProvider>
+                    <RenderOnlyOnClient>
+                      <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
+                        <Web3ErrorContext>
+                          <Component {...pageProps} />
+                          <DevPanel />
+                        </Web3ErrorContext>
+                      </ThemeWrapper>
+                    </RenderOnlyOnClient>
+                  </StampClaimingContextProvider>
+                </CeramicContextProvider>
+              </ScorerContextProvider>
+            </DatastoreConnectionContextProvider>
+          </QueryClientProvider>
+        </DevModeProvider>
       </Web3Context>
     </>
   );

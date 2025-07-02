@@ -1,0 +1,122 @@
+{
+  "new-user": {
+    "description": "New User - Empty Passport",
+    "stamps": [],
+    "score": 0,
+    "evidence": {
+      "success": true,
+      "type": "NO_STAMPS"
+    }
+  },
+  "basic-user": {
+    "description": "Basic User - Few Stamps",
+    "stamps": ["Google", "Discord", "Github"],
+    "score": 15.5,
+    "evidence": {
+      "success": true,
+      "type": "HAS_STAMPS",
+      "detail": {
+        "Google": 5.0,
+        "Discord": 5.0,
+        "Github": 5.5
+      }
+    }
+  },
+  "power-user": {
+    "description": "Power User - 50+ Stamps",
+    "stamps": [
+      "Google", "Discord", "Github", "Linkedin",
+      "NFT", "ETHBalance", "FirstEthTxnProvider",
+      "GnosisSafe", "Snapshot", "ENS", "POH",
+      "BrightId", "Civic", "CyberConnect", "Lens",
+      "TwitterAccountAgeGte365Days", "TwitterFollowerGT500",
+      "FacebookFriends", "InstagramFollowers",
+      "TrustaLabs", "GuildMember", "GuildAdmin",
+      "GuildPassportMember", "GrantsContributor",
+      "EthGasSpent", "EthTransactionCount", "ZkSyncBalance",
+      "ZkSyncAccount", "PolygonBalance", "OptimismBalance",
+      "SelfStakingBronze", "SelfStakingSilver", "GuildActiveMember",
+      "CoinbaseVerifiedAccount", "AllowListVerified",
+      "GitcoinDonations", "GitcoinTrustedGranteeProject",
+      "GitcoinGrantApplications", "FacebookAccountAge",
+      "FacebookProfilePicture", "InstagramAccountAge",
+      "LinkedinProfilePicture", "TwitterTweetGte10",
+      "TwitterAccountName", "AaveDepositV2", "AaveDepositV3",
+      "BaseBalance", "ScrollBalance", "ArbitrumBalance",
+      "CeloBalance", "LineaBalance", "IdenaState"
+    ],
+    "score": 85.5,
+    "evidence": {
+      "success": true,
+      "type": "HAS_STAMPS"
+    }
+  },
+  "expired-stamps": {
+    "description": "Expired Stamps - Mixed States",
+    "stamps": [
+      { "provider": "Google", "expirationDate": "2023-12-01T00:00:00.000Z" },
+      { "provider": "Discord", "expirationDate": "2024-06-01T00:00:00.000Z" },
+      { "provider": "Github", "expirationDate": "2024-01-20T00:00:00.000Z" }
+    ],
+    "score": 12.5,
+    "evidence": {
+      "success": true,
+      "type": "SOME_EXPIRED"
+    }
+  },
+  "low-score": {
+    "description": "Low Score - Below Threshold",
+    "stamps": ["Google"],
+    "score": 2.5,
+    "evidence": {
+      "success": true,
+      "type": "LOW_SCORE",
+      "detail": {
+        "Google": 2.5
+      }
+    }
+  },
+  "onchain-focus": {
+    "description": "On-chain Activity Focus",
+    "stamps": [
+      "ETHBalance", "FirstEthTxnProvider", "EthGasSpent",
+      "EthTransactionCount", "NFT", "GnosisSafe", "ENS",
+      "ZkSyncBalance", "PolygonBalance", "OptimismBalance",
+      "BaseBalance", "ScrollBalance", "ArbitrumBalance"
+    ],
+    "score": 45.0,
+    "evidence": {
+      "success": true,
+      "type": "ONCHAIN_FOCUS"
+    }
+  },
+  "social-media-focus": {
+    "description": "Social Media Focus",
+    "stamps": [
+      "Google", "Discord", "Github", "Twitter",
+      "TwitterAccountAgeGte365Days", "TwitterFollowerGT500",
+      "TwitterTweetGte10", "FacebookFriends", 
+      "FacebookAccountAge", "InstagramFollowers",
+      "InstagramAccountAge", "Linkedin", "LinkedinProfilePicture"
+    ],
+    "score": 38.5,
+    "evidence": {
+      "success": true,
+      "type": "SOCIAL_FOCUS"
+    }
+  },
+  "defi-user": {
+    "description": "DeFi Power User",
+    "stamps": [
+      "ETHBalance", "AaveDepositV2", "AaveDepositV3",
+      "GnosisSafe", "SelfStakingBronze", "SelfStakingSilver",
+      "ZkSyncBalance", "PolygonBalance", "OptimismBalance",
+      "BaseBalance", "ArbitrumBalance", "EthGasSpent"
+    ],
+    "score": 52.0,
+    "evidence": {
+      "success": true,
+      "type": "DEFI_USER"
+    }
+  }
+}

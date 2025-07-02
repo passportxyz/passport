@@ -93,6 +93,7 @@
     "eslint-plugin-testing-library": "^6.2.0",
     "happy-dom": "^15.11.0",
     "identity-obj-proxy": "^3.0.0",
+    "msw": "^2.10.2",
     "postcss": "^8.4.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "react-qr-code": "^2.0.7",
@@ -114,5 +115,10 @@
   "optionalDependencies": {
     "bufferutil": "^4.0.7",
     "utf-8-validate": "^6.0.3"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }
