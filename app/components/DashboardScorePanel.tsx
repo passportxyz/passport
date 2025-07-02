@@ -10,6 +10,10 @@ import { LoadButton } from "./LoadButton";
 import { Hyperlink } from "@gitcoin/passport-platforms";
 import { OnchainSidebar } from "./OnchainSidebar";
 import { LoadingBar } from "./LoadingBar";
+import { PassportPoints } from "./PassportPoints";
+import { HumanPointsLabel } from "./humanPoints";
+import { useOnChainData } from "../hooks/useOnChainData";
+import { OnChainStatus } from "../utils/onChainStatus";
 
 const PanelDiv = ({ className, children }: { className: string; children: React.ReactNode }) => {
   return (
@@ -92,11 +96,13 @@ interface OnchainCTAProps {
 
 export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
   const { rawScore, threshold } = React.useContext(ScorerContext);
-  const { allChainsUpToDate } = useAllOnChainStatus();
+  const { someChainUpToDate, onChainAttestationProviders } = useAllOnChainStatus();
   const customization = useCustomization();
+  const { pointsData } = React.useContext(ScorerContext);
 
   const aboveThreshold = rawScore >= threshold;
   const customText = customization?.scorerPanel?.text;
+  const mintPointsGained = pointsData?.breakdown.PMT;
 
   const renderContent = (title: string, description?: string, linkText?: string, linkHref?: string) => (
     <div className="flex flex-col h-full w-full pt-10">
@@ -107,37 +113,64 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
   );
 
   const renderButton = (text: string, onClick: () => void, className: string = "w-auto mt-4") => (
-    <div className="flex w-full justify-end px-4">
-      <LoadButton className={`${className} gap-0`} onClick={onClick}>
-        <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M7.5 6L12.5 11L17.5 6M7.5 13L12.5 18L17.5 13"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        {text}
-      </LoadButton>
-    </div>
+    <LoadButton className={`${className} gap-0`} onClick={onClick}>
+      <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M15.5001 12.9033L7.12706 21.2763C6.72923 21.6741 6.18967 21.8976 5.62706 21.8976C5.06445 21.8976 4.52488 21.6741 4.12706 21.2763C3.72923 20.8785 3.50574 20.3389 3.50574 19.7763C3.50574 19.2137 3.72923 18.6741 4.12706 18.2763L12.5001 9.90328M18.5001 15.9033L22.5001 11.9033M22.0001 12.4033L20.0861 10.4893C19.711 10.1143 19.5002 9.60567 19.5001 9.07528V7.90328L17.2401 5.64328C16.1246 4.52847 14.6151 3.89764 13.0381 3.88728L9.50006 3.86328L10.4201 4.68328C11.0735 5.26267 11.5968 5.97398 11.9553 6.77033C12.3138 7.56667 12.4995 8.42995 12.5001 9.30328V10.9033L14.5001 12.9033H15.6721C16.2024 12.9034 16.7111 13.1142 17.0861 13.4893L19.0001 15.4033"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {text}
+    </LoadButton>
   );
 
   if (customText) {
     return renderContent(customText);
   }
 
-  if (aboveThreshold && allChainsUpToDate) {
+  if (aboveThreshold && someChainUpToDate) {
     return (
-      <>
-        {renderContent(
-          "Congratulations. Your Passport is onchain.",
-          undefined,
-          "Here’s what you can do with your passport!",
-          "https://www.passport.xyz/ecosystem"
-        )}
-        {renderButton("See onchain passport", () => setShowSidebar(true))}
-      </>
+      <div className="w-full h-full p-4 flex flex-col">
+        <div className="flex flex-col h-full w-full">
+          <div className="flex flex-col md:flex-row items-start justify-between flex-wrap">
+            <div className="flex justify-start">
+              <h2 className="text-2xl text-black font-semibold pr-4 text-nowrap">Passport minted!</h2>
+              {mintPointsGained !== undefined && <HumanPointsLabel points={123} prefix="+" />}
+            </div>
+            <div className="flex w-full md:w-auto justify-center gap-0">
+              {onChainAttestationProviders?.map(({ attestationProvider, status }, idx) => {
+                const isExpired = status === OnChainStatus.MOVED_EXPIRED;
+                return (
+                  <div key={idx} className="flex flex-col items-center">
+                    <div className="relative flex flex-col items-center w-[70px] h-[80px] bg-center bg-[url(/assets/onchain-shield.svg)]">
+                      <img src={attestationProvider?.icon} className="m-auto"></img>
+                      <div
+                        className={`${isExpired ? "" : "hidden"} bg-white bg-opacity-50 absolute h-full w-full`}
+                      ></div>
+                    </div>
+                    <span
+                      className={`${isExpired ? "" : "hidden"} bg-color-9 text-white p-0 m-0 align-middle rounded-full px-2 relative -top-7`}
+                    >
+                      Expired
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <p className="py-2 self-center md:self-start">Message for minting onchain</p>
+        </div>
+        <div className="w-full flex flex-col md:flex-row justify-between items-center">
+          <span className="text-nowrap">{renderButton("Open Minting Dashboard", () => setShowSidebar(true), "")}</span>
+          <Hyperlink href="https://human.tech" className="font-normal text-gray-500 pl-4">
+            <span className="text-nowrap">Here&apos;s what you can</span>{" "}
+            <span className="text-nowrap">do with your passport.</span>
+          </Hyperlink>
+        </div>
+      </div>
     );
   }
 
