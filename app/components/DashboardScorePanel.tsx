@@ -197,7 +197,9 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
               })}
             </div>
           </div>
-          <p className="py-2 self-center md:self-start">Message for minting onchain</p>
+          <p className="py-2 self-center md:self-start">
+            Success! Mint on other networks to maximize your onchain presence.
+          </p>
         </div>
         <div className="w-full flex flex-col md:flex-row justify-between items-center">
           <span className="text-nowrap">
