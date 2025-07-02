@@ -1,7 +1,7 @@
 import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
 import { Platform } from "../utils/platform.js";
-import { AMAZON_BLUEPRINTS, UBER_BLUEPRINTS } from "./types.js";
+import { AMAZON_GROUP, UBER_GROUP } from "./types.js";
 
 export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
@@ -60,13 +60,19 @@ export class ZKEmailPlatform extends Platform {
     const loginWithGoogle = new LoginWithGoogle();
     const gmail = new Gmail(loginWithGoogle);
     if (!loginWithGoogle.accessToken) {
-      void loginWithGoogle.authorize({});
+      await loginWithGoogle.authorize({
+        prompt: "consent",
+        access_type: "online",
+      });
     }
 
     const sdk = initZkEmailSdk({});
 
-    const uberBlueprints = await Promise.all(UBER_BLUEPRINTS.map(async (id) => sdk.getBlueprintById(id)));
-    const amazonBlueprints = await Promise.all(AMAZON_BLUEPRINTS.map(async (id) => sdk.getBlueprintById(id)));
+    const amazonGroup = await sdk.getBlueprintGroupById(AMAZON_GROUP);
+    const amazonBlueprints = await amazonGroup.fetchBlueptrints();
+
+    const uberGroup = await sdk.getBlueprintGroupById(UBER_GROUP);
+    const uberBlueprints = await uberGroup.fetchBlueptrints();
 
     // fetch uber emails
     const uberEmailResponses = await gmail.fetchEmails(uberBlueprints);

@@ -52,7 +52,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
       {
         title: "Occasional Rider",
         name: "ZKEmail#UberOccasionalRider",
-        description: `Having made at least ${UBER_OCCASIONAL_RIDER_THRESHOLD} Uber ride.`,
+        description: `Having made at least ${UBER_OCCASIONAL_RIDER_THRESHOLD} Uber rides.`,
       },
       {
         title: "Regular Rider",
