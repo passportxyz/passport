@@ -22,11 +22,9 @@ const isStampObject = (value: any): value is StampScoreResponse =>
   typeof value === "object" && value !== null && "score" in value;
 
 /**
- * Processes stamp scores from API response, handling both V2 and legacy formats.
- * Both are now synchronous, so no polling complexity needed.
+ * Processes stamp scores from API response (V2 format).
  *
  * V2 format: { stamps: { providerId: { score, dedup, expiration_date } } }
- * Legacy format: { stamp_scores: { providerId: "score" } }
  *
  * @param apiResponse - The API response data
  * @returns Object containing extracted scores and deduplication status
@@ -47,73 +45,28 @@ const processStampScores = (
     }
   }
 
-  // Process legacy format (stamp_scores with strings) - also synchronous now
-  if (apiResponse.stamp_scores) {
-    for (const [providerId, score] of Object.entries(apiResponse.stamp_scores)) {
-      extractedScores[providerId as PROVIDER_ID] = String(score);
-      extractedDedupStatus[providerId as PROVIDER_ID] = false;
-    }
-  }
-
   return { scores: extractedScores, dedupStatus: extractedDedupStatus };
 };
 
 /**
- * Processes score response data from both V2 and legacy API formats.
- * Both formats are now synchronous.
+ * Processes score response data from V2 API format.
  */
 const processScoreResponse = (response: any) => {
   const data = response.data;
 
-  // V2 format detection - has passing_score field (most reliable indicator)
-  // Legacy format always has "status" field, V2 format does not
-  const isV2 = "passing_score" in data && !("status" in data);
+  // V2 format
+  const score = parseFloatOneDecimal(data.score || "0");
+  const threshold = parseFloatOneDecimal(data.threshold || "0");
+  const passingScore = data.passing_score ?? score >= threshold;
 
-  if (isV2) {
-    // V2 format
-    const score = parseFloatOneDecimal(data.score || "0");
-    const threshold = parseFloatOneDecimal(data.threshold || "0");
-    const passingScore = data.passing_score ?? score >= threshold;
-
-    return {
-      score,
-      rawScore: score,
-      threshold,
-      passingScore,
-      scoreDescription: passingScore ? "Passing Score" : "Low Score",
-      error: data.error || null,
-    };
-  } else {
-    // Legacy format - also synchronous now
-    const score = parseFloatOneDecimal(data.score || "0");
-    const error = data.status === "ERROR" ? "Error" : null;
-
-    if (data.evidence) {
-      // Binary scorer
-      const rawScore = parseFloatOneDecimal(data.evidence.rawScore || "0");
-      const threshold = parseFloatOneDecimal(data.evidence.threshold || "0");
-      const passingScore = rawScore >= threshold;
-
-      return {
-        score,
-        rawScore,
-        threshold,
-        passingScore,
-        error,
-        scoreDescription: passingScore ? "Passing Score" : "Low Score",
-      };
-    } else {
-      // Non-binary scorer
-      return {
-        score,
-        rawScore: score,
-        threshold: 0,
-        passingScore: true,
-        scoreDescription: "Passing Score",
-        error,
-      };
-    }
-  }
+  return {
+    score,
+    rawScore: score,
+    threshold,
+    passingScore,
+    scoreDescription: passingScore ? "Passing Score" : "Low Score",
+    error: data.error || null,
+  };
 };
 
 export type ScoreState =

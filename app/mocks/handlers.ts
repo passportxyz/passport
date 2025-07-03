@@ -79,135 +79,6 @@ export const handlers = [
   }),
 
   // Mock score retrieval
-  http.get(`${SCORER_ENDPOINT}/ceramic-cache/score/:scorer_id/:address`, ({ params }) => {
-    const scenarioName = getCurrentScenario();
-    const scenario = scenarios[scenarioName as keyof typeof scenarios];
-    const stamps = generateStampsForScenario(scenarioName, params.address as string);
-
-    // Generate stamp_scores based on the stamps in the scenario
-    const stamp_scores: Record<string, string> = {};
-    const stampScoresV2: Record<string, { score: string; dedup: boolean }> = {};
-
-    // Calculate individual stamp scores using the actual weights
-    stamps.forEach((stamp, index) => {
-      const provider = stamp.credential.credentialSubject.provider as string;
-      // Check if this stamp is marked as deduplicated in the scenario
-      const scenarioStamp = scenario.stamps[index];
-      const isDeduped = typeof scenarioStamp === "object" && scenarioStamp.dedup === true;
-
-      // Get the actual weight for this provider from the weights endpoint
-      const providerWeights: Record<string, number> = {
-        // Social platforms
-        Google: 1.0,
-        Discord: 0.5,
-        Github: 2.0,
-        Twitter: 1.5,
-        Linkedin: 1.0,
-        TwitterAccountAgeGte365Days: 1.0,
-        TwitterFollowerGT500: 1.5,
-        TwitterTweetGte10: 0.5,
-        TwitterAccountName: 0.5,
-        FacebookFriends: 1.0,
-        FacebookAccountAge: 1.0,
-        FacebookProfilePicture: 0.5,
-        InstagramFollowers: 1.0,
-        InstagramAccountAge: 1.0,
-        LinkedinProfilePicture: 0.5,
-        // On-chain activity
-        NFT: 2.5,
-        ETHBalance: 3.0,
-        FirstEthTxnProvider: 1.5,
-        EthGasSpent: 2.0,
-        EthTransactionCount: 1.5,
-        // DeFi protocols
-        GnosisSafe: 2.0,
-        Snapshot: 1.5,
-        ENS: 2.0,
-        AaveDepositV2: 2.5,
-        AaveDepositV3: 2.5,
-        // Identity providers
-        POH: 3.0,
-        BrightId: 3.0,
-        Civic: 3.0,
-        CyberConnect: 1.0,
-        Lens: 1.5,
-        TrustaLabs: 2.0,
-        IdenaState: 2.5,
-        // Guild related
-        GuildMember: 1.0,
-        GuildAdmin: 2.0,
-        GuildPassportMember: 1.5,
-        GuildActiveMember: 1.5,
-        // Gitcoin related
-        GrantsContributor: 2.0,
-        GitcoinDonations: 2.0,
-        GitcoinTrustedGranteeProject: 3.0,
-        GitcoinGrantApplications: 1.5,
-        // L2s and other chains
-        ZkSyncBalance: 2.0,
-        ZkSyncAccount: 1.5,
-        PolygonBalance: 2.0,
-        OptimismBalance: 2.0,
-        BaseBalance: 2.0,
-        ScrollBalance: 2.0,
-        ArbitrumBalance: 2.0,
-        CeloBalance: 2.0,
-        LineaBalance: 2.0,
-        // Staking
-        SelfStakingBronze: 2.0,
-        SelfStakingSilver: 3.0,
-        // Other
-        CoinbaseVerifiedAccount: 2.0,
-        AllowListVerified: 1.0,
-      };
-      const baseScore = providerWeights[provider] || 1.0;
-      const finalScore = isDeduped ? 0 : baseScore;
-      stamp_scores[provider] = finalScore.toString();
-      stampScoresV2[provider] = {
-        score: finalScore.toString(),
-        dedup: isDeduped,
-      };
-    });
-
-    // Calculate the actual total score based on deduplication
-    const actualScore = Object.values(stampScoresV2).reduce((sum, stampData) => {
-      return sum + parseFloat(stampData.score);
-    }, 0);
-
-    console.log("🔧 Dev Mode: Score API response for", params.address);
-    console.log("🔧 Dev Mode: Stamps with dedup status:", stampScoresV2);
-    console.log("🔧 Dev Mode: Total score:", actualScore);
-
-    const response = {
-      address: params.address,
-      score: actualScore.toString(),
-      last_score_timestamp: new Date().toISOString(),
-      error: null,
-      // Include both legacy and v2 formats for compatibility
-      stamp_scores,
-      stamps: stampScoresV2,
-      passing_score: actualScore >= 20,
-      threshold: "20.0",
-      // Add points_data for the header display
-      points_data: {
-        total_points: actualScore,
-        breakdown: {
-          PMT: 0, // Passport Minting Token points
-          stamps: actualScore, // Points from stamps
-        },
-      },
-    };
-
-    console.log("🔧 Dev Mode: Scorer API response with dedup info:", {
-      address: params.address,
-      stamps: stampScoresV2,
-      hasDedup: Object.values(stampScoresV2).some((s: any) => s.dedup === true),
-    });
-
-    return HttpResponse.json(response);
-  }),
-
-  // Mock score retrieval without scorer_id (used by scorerContext)
   http.get(`${SCORER_ENDPOINT}/ceramic-cache/score/:address`, ({ params }) => {
     const scenarioName = getCurrentScenario();
     const scenario = scenarios[scenarioName as keyof typeof scenarios];
@@ -235,8 +106,7 @@ export const handlers = [
 
     const stamps = generateStampsForScenario(scenarioName, params.address as string);
 
-    // Generate stamp_scores based on the stamps in the scenario
-    const stamp_scores: Record<string, string> = {};
+    // Generate stamp scores based on the stamps in the scenario
     const stampScoresV2: Record<string, { score: string; dedup: boolean }> = {};
 
     // Calculate individual stamp scores using the actual weights
@@ -313,7 +183,6 @@ export const handlers = [
       };
       const baseScore = providerWeights[provider] || 1.0;
       const finalScore = isDeduped ? 0 : baseScore;
-      stamp_scores[provider] = finalScore.toString();
       stampScoresV2[provider] = {
         score: finalScore.toString(),
         dedup: isDeduped,
@@ -334,8 +203,6 @@ export const handlers = [
       score: actualScore.toString(),
       last_score_timestamp: new Date().toISOString(),
       error: null,
-      // Include both legacy and v2 formats for compatibility
-      stamp_scores,
       stamps: stampScoresV2,
       passing_score: actualScore >= 20,
       threshold: "20.0",

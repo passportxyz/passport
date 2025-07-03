@@ -49,31 +49,7 @@ const createV2Response = ({
   },
 });
 
-const createLegacyResponse = ({
-  status = "DONE",
-  score = "10.0",
-  rawScore = "10.0",
-  threshold = "20.0",
-  stamps = {},
-  stamp_scores = null,
-}: {
-  status?: string;
-  score?: string;
-  rawScore?: string;
-  threshold?: string;
-  stamps?: Record<string, any>;
-  stamp_scores?: Record<string, string> | null;
-}) => ({
-  data: {
-    status,
-    score,
-    evidence: {
-      rawScore,
-      threshold,
-    },
-    ...(stamp_scores ? { stamp_scores } : { stamps }),
-  },
-});
+// Legacy response helper removed - only using V2 format now
 
 describe("ScorerContext", () => {
   const mockAddress = "0x123";
@@ -93,23 +69,26 @@ describe("ScorerContext", () => {
   });
 
   describe("API Response Handling", () => {
-    it("should handle old API response format (stamp_scores field)", async () => {
-      const oldFormatResponse = {
-        data: {
-          status: "DONE",
-          score: "15.5",
-          evidence: {
-            rawScore: "15.5",
-            threshold: "10.0",
+    it("should handle V2 API response format", async () => {
+      const v2Response = createV2Response({
+        score: "15.5",
+        passing_score: true,
+        threshold: "10.0",
+        stamps: {
+          Github: {
+            score: "5.5",
+            dedup: false,
+            expiration_date: "2024-12-31",
           },
-          stamp_scores: {
-            Github: "5.5",
-            Google: "10.0",
+          Google: {
+            score: "10.0",
+            dedup: false,
+            expiration_date: "2024-12-31",
           },
         },
-      };
+      });
 
-      vi.mocked(axios).mockResolvedValueOnce(oldFormatResponse as any);
+      vi.mocked(axios).mockResolvedValueOnce(v2Response as any);
 
       const TestComponent = () => {
         const context = React.useContext(ScorerContext);
@@ -138,31 +117,26 @@ describe("ScorerContext", () => {
       });
     });
 
-    it("should handle new API response format (stamps field with objects)", async () => {
-      const newFormatResponse = {
-        data: {
-          status: "DONE",
-          score: "15.5",
-          evidence: {
-            rawScore: "15.5",
-            threshold: "10.0",
+    it("should handle V2 API response format with deduplication", async () => {
+      const v2Response = createV2Response({
+        score: "15.5",
+        passing_score: true,
+        threshold: "10.0",
+        stamps: {
+          Github: {
+            score: "5.5",
+            dedup: false,
+            expiration_date: "2024-12-31",
           },
-          stamps: {
-            Github: {
-              score: "5.5",
-              dedup: false,
-              expiration_date: "2024-12-31",
-            },
-            Google: {
-              score: "10.0",
-              dedup: true,
-              expiration_date: "2024-12-31",
-            },
+          Google: {
+            score: "10.0",
+            dedup: true,
+            expiration_date: "2024-12-31",
           },
         },
-      };
+      });
 
-      vi.mocked(axios).mockResolvedValueOnce(newFormatResponse as any);
+      vi.mocked(axios).mockResolvedValueOnce(v2Response as any);
 
       const TestComponent = () => {
         const context = React.useContext(ScorerContext);
@@ -175,6 +149,7 @@ describe("ScorerContext", () => {
           <div>
             <div data-testid="score">{context.score}</div>
             <div data-testid="stamp-scores">{JSON.stringify(context.stampScores)}</div>
+            <div data-testid="stamp-dedup">{JSON.stringify(context.stampDedupStatus)}</div>
           </div>
         );
       };
@@ -187,32 +162,31 @@ describe("ScorerContext", () => {
 
       await waitFor(() => {
         expect(screen.getByTestId("score")).toHaveTextContent("15.5");
-        // The context should extract just the scores from the new format
         expect(screen.getByTestId("stamp-scores")).toHaveTextContent('{"Github":"5.5","Google":"10.0"}');
+        expect(screen.getByTestId("stamp-dedup")).toHaveTextContent('{"Github":false,"Google":true}');
       });
     });
 
-    it("should handle new API response format for non-binary scorer", async () => {
-      const newFormatResponse = {
-        data: {
-          status: "DONE",
-          score: "25.0",
-          stamps: {
-            Github: {
-              score: "15.0",
-              dedup: false,
-              expiration_date: "2024-12-31",
-            },
-            Discord: {
-              score: "10.0",
-              dedup: false,
-              expiration_date: "2024-12-31",
-            },
+    it("should handle V2 API response format with high score", async () => {
+      const v2Response = createV2Response({
+        score: "25.0",
+        passing_score: true,
+        threshold: "20.0",
+        stamps: {
+          Github: {
+            score: "15.0",
+            dedup: false,
+            expiration_date: "2024-12-31",
+          },
+          Discord: {
+            score: "10.0",
+            dedup: false,
+            expiration_date: "2024-12-31",
           },
         },
-      };
+      });
 
-      vi.mocked(axios).mockResolvedValueOnce(newFormatResponse as any);
+      vi.mocked(axios).mockResolvedValueOnce(v2Response as any);
 
       const TestComponent = () => {
         const context = React.useContext(ScorerContext);
@@ -226,6 +200,7 @@ describe("ScorerContext", () => {
             <div data-testid="score">{context.score}</div>
             <div data-testid="raw-score">{context.rawScore}</div>
             <div data-testid="threshold">{context.threshold}</div>
+            <div data-testid="passing-score">{context.passingScore ? "true" : "false"}</div>
             <div data-testid="stamp-scores">{JSON.stringify(context.stampScores)}</div>
           </div>
         );
@@ -240,41 +215,37 @@ describe("ScorerContext", () => {
       await waitFor(() => {
         expect(screen.getByTestId("score")).toHaveTextContent("25");
         expect(screen.getByTestId("raw-score")).toHaveTextContent("25");
-        expect(screen.getByTestId("threshold")).toHaveTextContent("0");
+        expect(screen.getByTestId("threshold")).toHaveTextContent("20");
+        expect(screen.getByTestId("passing-score")).toHaveTextContent("true");
         expect(screen.getByTestId("stamp-scores")).toHaveTextContent('{"Github":"15.0","Discord":"10.0"}');
       });
     });
 
     it("should preserve deduplication information in stampScores", async () => {
-      const responseWithDedupInfo = {
-        data: {
-          status: "DONE",
-          score: "10.0",
-          evidence: {
-            rawScore: "10.0",
-            threshold: "20.0",
+      const v2Response = createV2Response({
+        score: "10.0",
+        passing_score: false,
+        threshold: "20.0",
+        stamps: {
+          Github: {
+            score: "10.0",
+            dedup: false,
+            expiration_date: "2024-12-31",
           },
-          stamps: {
-            Github: {
-              score: "10.0",
-              dedup: false,
-              expiration_date: "2024-12-31",
-            },
-            Google: {
-              score: "0",
-              dedup: true,
-              expiration_date: "2024-12-31",
-            },
-            Discord: {
-              score: "0",
-              dedup: true,
-              expiration_date: "2024-12-31",
-            },
+          Google: {
+            score: "0",
+            dedup: true,
+            expiration_date: "2024-12-31",
+          },
+          Discord: {
+            score: "0",
+            dedup: true,
+            expiration_date: "2024-12-31",
           },
         },
-      };
+      });
 
-      vi.mocked(axios).mockResolvedValueOnce(responseWithDedupInfo as any);
+      vi.mocked(axios).mockResolvedValueOnce(v2Response as any);
 
       const TestComponent = () => {
         const context = React.useContext(ScorerContext);
@@ -286,6 +257,7 @@ describe("ScorerContext", () => {
         return (
           <div>
             <div data-testid="stamp-scores">{JSON.stringify(context.stampScores)}</div>
+            <div data-testid="stamp-dedup">{JSON.stringify(context.stampDedupStatus)}</div>
           </div>
         );
       };
@@ -298,27 +270,28 @@ describe("ScorerContext", () => {
 
       await waitFor(() => {
         const stampScores = JSON.parse(screen.getByTestId("stamp-scores").textContent || "{}");
+        const stampDedup = JSON.parse(screen.getByTestId("stamp-dedup").textContent || "{}");
         // Verify that deduplicated stamps have score of 0
         expect(stampScores.Google).toBe("0");
         expect(stampScores.Discord).toBe("0");
         // Verify that non-deduplicated stamps have their actual score
         expect(stampScores.Github).toBe("10.0");
+        // Verify dedup status is preserved
+        expect(stampDedup.Google).toBe(true);
+        expect(stampDedup.Discord).toBe(true);
+        expect(stampDedup.Github).toBe(false);
       });
     });
 
     it("should handle stamps field being undefined", async () => {
-      const responseWithoutStamps = {
-        data: {
-          status: "DONE",
-          score: "0",
-          evidence: {
-            rawScore: "0",
-            threshold: "10.0",
-          },
-        },
-      };
+      const v2Response = createV2Response({
+        score: "0",
+        passing_score: false,
+        threshold: "10.0",
+        stamps: {},
+      });
 
-      vi.mocked(axios).mockResolvedValueOnce(responseWithoutStamps as any);
+      vi.mocked(axios).mockResolvedValueOnce(v2Response as any);
 
       const TestComponent = () => {
         const context = React.useContext(ScorerContext);
@@ -466,13 +439,15 @@ describe("ScorerContext", () => {
       expect(states).toContain("success");
     });
 
-    it("should handle legacy format errors", async () => {
-      const legacyErrorResponse = createLegacyResponse({
-        status: "ERROR",
+    it("should handle V2 format errors", async () => {
+      const v2ErrorResponse = createV2Response({
         score: "0",
+        passing_score: false,
+        threshold: "20.0",
+        error: "Score calculation failed",
       });
 
-      vi.mocked(axios).mockResolvedValueOnce(legacyErrorResponse as any);
+      vi.mocked(axios).mockResolvedValueOnce(v2ErrorResponse as any);
 
       const TestComponent = () => {
         const context = React.useContext(ScorerContext);
@@ -499,7 +474,7 @@ describe("ScorerContext", () => {
 
       await waitFor(() => {
         expect(screen.getByTestId("score-status")).toHaveTextContent("error");
-        expect(screen.getByTestId("score-error")).toHaveTextContent("Error");
+        expect(screen.getByTestId("score-error")).toHaveTextContent("Score calculation failed");
       });
     });
   });
@@ -535,33 +510,28 @@ describe("ScorerContext", () => {
         })),
       } as any);
 
-      const responseWithDedupScores = {
-        data: {
-          status: "DONE",
-          score: "5.0",
-          evidence: {
-            rawScore: "5.0",
-            threshold: "10.0",
+      const responseWithDedupScores = createV2Response({
+        score: "5.0",
+        passing_score: false,
+        threshold: "10.0",
+        stamps: {
+          GithubContributor: {
+            score: "5.0",
+            dedup: false,
+            expiration_date: "2024-12-31",
           },
-          stamps: {
-            GithubContributor: {
-              score: "5.0",
-              dedup: false,
-              expiration_date: "2024-12-31",
-            },
-            GithubFollower: {
-              score: "0",
-              dedup: true,
-              expiration_date: "2024-12-31",
-            },
-            GoogleAccount: {
-              score: "0",
-              dedup: true,
-              expiration_date: "2024-12-31",
-            },
+          GithubFollower: {
+            score: "0",
+            dedup: true,
+            expiration_date: "2024-12-31",
+          },
+          GoogleAccount: {
+            score: "0",
+            dedup: true,
+            expiration_date: "2024-12-31",
           },
         },
-      };
+      });
 
       vi.mocked(axios).mockImplementation((config: any) => {
         if (config.url && config.url.includes("/weights")) {
