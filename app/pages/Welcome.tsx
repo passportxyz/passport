@@ -34,7 +34,7 @@ export default function Welcome() {
           <span className="font-bold">HUMN Points</span> simultaneously.{" "}
         </p>
         <p className="pt-4">
-          <span className="font-bold">Unique Humanity Points</span> prove you're human and unlock access to web3
+          <span className="font-bold">Unique Humanity Points</span> prove you&apos;re human and unlock access to web3
           programs. You need a score of 20+ to get verified and start accessing web3 opportunities.
         </p>
         <p className="pt-4">

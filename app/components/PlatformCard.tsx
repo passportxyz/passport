@@ -138,7 +138,7 @@ const VerifiedStamp = ({
     setIsAnyOnchain(intersection.size > 0);
     // TODO: #3502: We have no separate representation for `MOVED_OUT_OF_DATE` state,also no representation if onchain expiration is different than db-expiration date
     // const isAllOnchain = intersection.size === providerSet.size;
-  }, [activeChainProviders, platformProviders]);
+  }, [activeChainProviders, platformProviders, pointsDataForStamps]);
 
   const style = {
     boxShadow: "0px 4px 16px 0px #0E865066",
