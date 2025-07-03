@@ -6,13 +6,19 @@ export const DevPanel: React.FC = () => {
     // Get initial scenario from localStorage, window, or default
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("mockScenario");
-      if (stored) {
+      // Validate that the stored scenario exists
+      if (stored && scenarios[stored as keyof typeof scenarios]) {
         window.__mockScenario = stored;
         return stored;
       }
-      return window.__mockScenario || "new-user";
+      // Check window variable
+      const windowScenario = window.__mockScenario;
+      if (windowScenario && scenarios[windowScenario as keyof typeof scenarios]) {
+        return windowScenario;
+      }
     }
-    return "new-user";
+    // Default to basic-user (which we know exists)
+    return "basic-user";
   });
 
   const [isMinimized, setIsMinimized] = useState(false);
@@ -81,10 +87,13 @@ export const DevPanel: React.FC = () => {
           </div>
           <div>
             Stamps:{" "}
-            <span className="text-color-2">{scenarios[currentScenario as keyof typeof scenarios].stamps.length}</span>
+            <span className="text-color-2">
+              {scenarios[currentScenario as keyof typeof scenarios]?.stamps?.length || 0}
+            </span>
           </div>
           <div>
-            Score: <span className="text-color-2">{scenarios[currentScenario as keyof typeof scenarios].score}</span>
+            Score:{" "}
+            <span className="text-color-2">{scenarios[currentScenario as keyof typeof scenarios]?.score || 0}</span>
           </div>
         </div>
       </div>

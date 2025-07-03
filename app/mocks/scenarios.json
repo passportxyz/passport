@@ -176,5 +176,27 @@
       "success": true,
       "type": "DEFI_USER"
     }
+  },
+  "deduplicated-stamps": {
+    "description": "Deduplicated Stamps Demo",
+    "stamps": [
+      "Google",
+      "Discord",
+      "Github",
+      { "provider": "Linkedin", "dedup": true },
+      { "provider": "ETHBalance", "dedup": true },
+      { "provider": "NFT", "dedup": true },
+      { "provider": "GnosisSafe", "dedup": true },
+      "BrightId",
+      "ENS"
+    ],
+    "score": 25.5,
+    "evidence": {
+      "success": true,
+      "type": "HAS_DEDUPLICATED_STAMPS",
+      "detail": {
+        "note": "This scenario shows stamps that are verified but deduplicated (earning 0 points)"
+      }
+    }
   }
 }

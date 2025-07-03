@@ -36,6 +36,15 @@ export const handlers = [
     const address = url.searchParams.get("address") || "0x0000000000000000000000000000000000000001";
     const scenarioName = getCurrentScenario();
     const scenario = scenarios[scenarioName as keyof typeof scenarios];
+
+    if (!scenario) {
+      console.error(`Scenario "${scenarioName}" not found in scenarios.json`);
+      return HttpResponse.json({
+        success: true,
+        stamps: [],
+      });
+    }
+
     const stamps = generateStampsForScenario(scenarioName, address);
 
     return HttpResponse.json({
@@ -80,8 +89,12 @@ export const handlers = [
     const stampScoresV2: Record<string, { score: string; dedup: boolean }> = {};
 
     // Calculate individual stamp scores using the actual weights
-    stamps.forEach((stamp) => {
+    stamps.forEach((stamp, index) => {
       const provider = stamp.credential.credentialSubject.provider as string;
+      // Check if this stamp is marked as deduplicated in the scenario
+      const scenarioStamp = scenario.stamps[index];
+      const isDeduped = typeof scenarioStamp === "object" && scenarioStamp.dedup === true;
+
       // Get the actual weight for this provider from the weights endpoint
       const providerWeights: Record<string, number> = {
         // Social platforms
@@ -148,35 +161,78 @@ export const handlers = [
         AllowListVerified: 1.0,
       };
       const baseScore = providerWeights[provider] || 1.0;
-      stamp_scores[provider] = baseScore.toString();
+      const finalScore = isDeduped ? 0 : baseScore;
+      stamp_scores[provider] = finalScore.toString();
       stampScoresV2[provider] = {
-        score: baseScore.toString(),
-        dedup: false,
+        score: finalScore.toString(),
+        dedup: isDeduped,
       };
     });
 
-    return HttpResponse.json({
+    // Calculate the actual total score based on deduplication
+    const actualScore = Object.values(stampScoresV2).reduce((sum, stampData) => {
+      return sum + parseFloat(stampData.score);
+    }, 0);
+
+    console.log("🔧 Dev Mode: Score API response for", params.address);
+    console.log("🔧 Dev Mode: Stamps with dedup status:", stampScoresV2);
+    console.log("🔧 Dev Mode: Total score:", actualScore);
+
+    const response = {
       address: params.address,
-      score: scenario.score.toString(),
-      status: "DONE",
+      score: actualScore.toString(),
       last_score_timestamp: new Date().toISOString(),
-      evidence: scenario.evidence || {
-        success: true,
-        type: "MOCK",
-      },
       error: null,
       // Include both legacy and v2 formats for compatibility
       stamp_scores,
       stamps: stampScoresV2,
-      passing_score: scenario.score >= 20,
+      passing_score: actualScore >= 20,
       threshold: "20.0",
+      // Add points_data for the header display
+      points_data: {
+        total_points: actualScore,
+        breakdown: {
+          PMT: 0, // Passport Minting Token points
+          stamps: actualScore, // Points from stamps
+        },
+      },
+    };
+
+    console.log("🔧 Dev Mode: Scorer API response with dedup info:", {
+      address: params.address,
+      stamps: stampScoresV2,
+      hasDedup: Object.values(stampScoresV2).some((s: any) => s.dedup === true),
     });
+
+    return HttpResponse.json(response);
   }),
 
   // Mock score retrieval without scorer_id (used by scorerContext)
   http.get(`${SCORER_ENDPOINT}/ceramic-cache/score/:address`, ({ params }) => {
     const scenarioName = getCurrentScenario();
     const scenario = scenarios[scenarioName as keyof typeof scenarios];
+
+    if (!scenario) {
+      console.error(`Scenario "${scenarioName}" not found in scenarios.json`);
+      return HttpResponse.json({
+        address: params.address,
+        score: "0",
+        last_score_timestamp: new Date().toISOString(),
+        error: null,
+        stamp_scores: {},
+        stamps: {},
+        passing_score: false,
+        threshold: "20.0",
+        points_data: {
+          total_points: 0,
+          breakdown: {
+            PMT: 0,
+            stamps: 0,
+          },
+        },
+      });
+    }
+
     const stamps = generateStampsForScenario(scenarioName, params.address as string);
 
     // Generate stamp_scores based on the stamps in the scenario
@@ -184,8 +240,12 @@ export const handlers = [
     const stampScoresV2: Record<string, { score: string; dedup: boolean }> = {};
 
     // Calculate individual stamp scores using the actual weights
-    stamps.forEach((stamp) => {
+    stamps.forEach((stamp, index) => {
       const provider = stamp.credential.credentialSubject.provider as string;
+      // Check if this stamp is marked as deduplicated in the scenario
+      const scenarioStamp = scenario.stamps[index];
+      const isDeduped = typeof scenarioStamp === "object" && scenarioStamp.dedup === true;
+
       // Get the actual weight for this provider from the weights endpoint
       const providerWeights: Record<string, number> = {
         // Social platforms
@@ -252,29 +312,50 @@ export const handlers = [
         AllowListVerified: 1.0,
       };
       const baseScore = providerWeights[provider] || 1.0;
-      stamp_scores[provider] = baseScore.toString();
+      const finalScore = isDeduped ? 0 : baseScore;
+      stamp_scores[provider] = finalScore.toString();
       stampScoresV2[provider] = {
-        score: baseScore.toString(),
-        dedup: false,
+        score: finalScore.toString(),
+        dedup: isDeduped,
       };
     });
 
-    return HttpResponse.json({
+    // Calculate the actual total score based on deduplication
+    const actualScore = Object.values(stampScoresV2).reduce((sum, stampData) => {
+      return sum + parseFloat(stampData.score);
+    }, 0);
+
+    console.log("🔧 Dev Mode: Score API response for", params.address);
+    console.log("🔧 Dev Mode: Stamps with dedup status:", stampScoresV2);
+    console.log("🔧 Dev Mode: Total score:", actualScore);
+
+    const response = {
       address: params.address,
-      score: scenario.score.toString(),
-      status: "DONE",
+      score: actualScore.toString(),
       last_score_timestamp: new Date().toISOString(),
-      evidence: scenario.evidence || {
-        success: true,
-        type: "MOCK",
-      },
       error: null,
       // Include both legacy and v2 formats for compatibility
       stamp_scores,
       stamps: stampScoresV2,
-      passing_score: scenario.score >= 20,
+      passing_score: actualScore >= 20,
       threshold: "20.0",
+      // Add points_data for the header display
+      points_data: {
+        total_points: actualScore,
+        breakdown: {
+          PMT: 0, // Passport Minting Token points
+          stamps: actualScore, // Points from stamps
+        },
+      },
+    };
+
+    console.log("🔧 Dev Mode: Scorer API response with dedup info:", {
+      address: params.address,
+      stamps: stampScoresV2,
+      hasDedup: Object.values(stampScoresV2).some((s: any) => s.dedup === true),
     });
+
+    return HttpResponse.json(response);
   }),
 
   // Mock stamp submission
@@ -447,6 +528,14 @@ export const handlers = [
     const scenarioName = getCurrentScenario();
     const scenario = scenarios[scenarioName as keyof typeof scenarios];
 
+    if (!scenario) {
+      console.error(`Scenario "${scenarioName}" not found in scenarios.json`);
+      return HttpResponse.json({
+        success: true,
+        score: 0,
+      });
+    }
+
     return HttpResponse.json({
       success: true,
       score: scenario.score,
@@ -557,16 +646,40 @@ export const handlers = [
     const scenarioName = getCurrentScenario();
     const scenario = scenarios[scenarioName as keyof typeof scenarios];
 
+    if (!scenario) {
+      console.error(`Scenario "${scenarioName}" not found in scenarios.json`);
+      return HttpResponse.json({
+        address: params.address,
+        score: "0",
+        last_score_timestamp: new Date().toISOString(),
+        error: null,
+        passing_score: false,
+        threshold: "20.0",
+        points_data: {
+          total_points: 0,
+          breakdown: {
+            PMT: 0,
+            stamps: 0,
+          },
+        },
+      });
+    }
+
     return HttpResponse.json({
       address: params.address,
       score: scenario.score.toString(),
-      status: "DONE",
       last_score_timestamp: new Date().toISOString(),
-      evidence: scenario.evidence || {
-        success: true,
-        type: "MOCK",
-      },
       error: null,
+      passing_score: scenario.score >= 20,
+      threshold: "20.0",
+      // Add points_data for the header display
+      points_data: {
+        total_points: scenario.score,
+        breakdown: {
+          PMT: 0, // Passport Minting Token points
+          stamps: scenario.score, // Points from stamps
+        },
+      },
     });
   }),
 ];

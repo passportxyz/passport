@@ -126,16 +126,34 @@ export function getCurrentScenario(): keyof typeof scenarios {
   if (typeof window !== "undefined") {
     // Check localStorage first
     const stored = localStorage.getItem("mockScenario");
-    if (stored && scenarios[stored as keyof typeof scenarios]) {
-      window.__mockScenario = stored;
-      return stored as keyof typeof scenarios;
+    console.log("[Dev Mode] Stored scenario from localStorage:", stored);
+
+    if (stored) {
+      // Check if the stored scenario actually exists
+      if (scenarios[stored as keyof typeof scenarios]) {
+        window.__mockScenario = stored;
+        return stored as keyof typeof scenarios;
+      } else {
+        console.warn(`[Dev Mode] Invalid scenario "${stored}" in localStorage, clearing...`);
+        localStorage.removeItem("mockScenario");
+      }
     }
+
     // Fall back to window variable
     if (window.__mockScenario) {
-      return window.__mockScenario as keyof typeof scenarios;
+      const windowScenario = window.__mockScenario;
+      console.log("[Dev Mode] Window scenario:", windowScenario);
+
+      if (scenarios[windowScenario as keyof typeof scenarios]) {
+        return windowScenario as keyof typeof scenarios;
+      } else {
+        console.warn(`[Dev Mode] Invalid scenario "${windowScenario}" in window, resetting...`);
+        window.__mockScenario = undefined;
+      }
     }
   }
   // Default to basic-user to avoid empty passport issues
+  console.log("[Dev Mode] Using default scenario: basic-user");
   return "basic-user";
 }
 
