@@ -73,6 +73,7 @@ export type Customization = {
   scorer?: {
     id?: number;
     weights?: Record<PROVIDER_ID, string>;
+    threshold?: number;
   };
   scorerPanel?: {
     title?: string;

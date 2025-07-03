@@ -83,7 +83,7 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
             </div>
           </div>
         ) : (
-          <span className="text-5xl font-alt">{+displayScore.toFixed(2)}</span>
+          <span className="text-5xl font-alt font-semibold">{+displayScore.toFixed(2)}</span>
         )}
       </div>
     </PanelDiv>
@@ -123,6 +123,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
   const { someChainUpToDate, onChainAttestationProviders } = useAllOnChainStatus();
   const customization = useCustomization();
   const { pointsData } = React.useContext(ScorerContext);
+  const isEligible = !!pointsData?.is_eligible;
 
   const aboveThreshold = rawScore >= threshold;
   const customText = customization?.scorerPanel?.text;
@@ -140,7 +141,9 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
         <div className="flex flex-col md:flex-row items-start justify-between flex-wrap">
           <div className="flex justify-start">
             <h2 className={`text-2xl text-black font-semibold pr-4 text-nowrap ${!description && "mb-4"}`}>{title}</h2>
-            {mintPointsGained !== undefined && <HumanPointsLabel points={123} prefix="+" />}
+            {mintPointsGained !== undefined && (
+              <HumanPointsLabel points={mintPointsGained} prefix="+" isEligible={isEligible} />
+            )}
           </div>
         </div>
         <p className="py-2 self-center md:self-start">{description}</p>
@@ -174,7 +177,9 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
           <div className="flex flex-col md:flex-row items-start justify-between flex-wrap">
             <div className="flex justify-start">
               <h2 className="text-2xl text-black font-semibold pr-4 text-nowrap">Passport minted!</h2>
-              {mintPointsGained !== undefined && <HumanPointsLabel points={123} prefix="+" />}
+              {mintPointsGained !== undefined && (
+                <HumanPointsLabel points={mintPointsGained} prefix="+" isEligible={isEligible} />
+              )}
             </div>
             <div className="flex w-full md:w-auto justify-center gap-0">
               {onChainAttestationProviders?.map(({ attestationProvider, status }, idx) => {

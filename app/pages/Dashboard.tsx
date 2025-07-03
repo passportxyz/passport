@@ -33,9 +33,10 @@ import { useDatastoreConnectionContext } from "../context/datastoreConnectionCon
 import Script from "next/script";
 import { Confetti } from "../components/Confetti";
 import { useMessage } from "../hooks/useMessage";
-import { Customization, requestCustomizationConfig } from "../utils/customizationUtils";
+import { Customization } from "../utils/customizationUtils";
 import { useAccount } from "wagmi";
 import { useRadialBackgroundColorForHeader } from "../components/Header";
+import { HumanPointsMultiplierPanel } from "../components/humanPoints";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
@@ -45,11 +46,19 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
 
   const backgroundColor = useRadialBackgroundColorForHeader();
 
+  const { pointsData } = useContext(ScorerContext);
+  const multiplier = pointsData?.multiplier;
+  const isEligible = !!pointsData?.is_eligible;
+  const showMultiplierPanel = multiplier && multiplier > 1;
+
   return (
     <div className="relative col-span-full">
       <div className="col-span-full mt-2 flex flex-col xl:flex-row gap-8 relative left-0 top-0 z-10">
         <div className="col-span-full flex flex-col grow lg:flex-row gap-8 mt-0.5">
           <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
+          {showMultiplierPanel && (
+            <HumanPointsMultiplierPanel multiplier={multiplier} isEligible={isEligible} className="xl:w-1/2" />
+          )}
           {explanationPanel && <DashboardScoreExplanationPanel />}
         </div>
         {useCustomDashboardPanel && <DynamicCustomDashboardPanel className="max-w-full xl:w-2/3" />}
