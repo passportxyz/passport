@@ -17,6 +17,7 @@ const mockAddress = "0x0000000000000000000000000000000000000001";
 const mockDid = {
   parent: `did:pkh:eip155:1:${mockAddress}`,
   id: `did:pkh:eip155:1:${mockAddress}`,
+  hasParent: false,
 } as unknown as DID;
 
 const mockDatastoreState: DatastoreConnectionContextState = {

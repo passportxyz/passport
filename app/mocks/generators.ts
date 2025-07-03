@@ -121,12 +121,22 @@ export function generateStampsForScenario(
   });
 }
 
-// Get the current mock scenario from window
+// Get the current mock scenario from window or localStorage
 export function getCurrentScenario(): keyof typeof scenarios {
-  if (typeof window !== "undefined" && window.__mockScenario) {
-    return window.__mockScenario as keyof typeof scenarios;
+  if (typeof window !== "undefined") {
+    // Check localStorage first
+    const stored = localStorage.getItem("mockScenario");
+    if (stored && scenarios[stored as keyof typeof scenarios]) {
+      window.__mockScenario = stored;
+      return stored as keyof typeof scenarios;
+    }
+    // Fall back to window variable
+    if (window.__mockScenario) {
+      return window.__mockScenario as keyof typeof scenarios;
+    }
   }
-  return "new-user";
+  // Default to basic-user to avoid empty passport issues
+  return "basic-user";
 }
 
 // Extend window interface

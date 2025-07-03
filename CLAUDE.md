@@ -309,6 +309,8 @@ NEXT_PUBLIC_DEV_MODE=true yarn dev
 
 Navigate to http://localhost:3000/#/dashboard - you're automatically "logged in"!
 
+**Note**: For interacting with the dev server in Claude Code, you can use the Playwright MCP tools since the server runs on :3000.
+
 ### Features
 - **Automatic Authentication**: Mock wallet address `0x0000000000000000000000000000000000000001`
 - **Pre-built Scenarios**: Switch between different user states via DevPanel

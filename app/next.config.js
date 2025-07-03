@@ -14,11 +14,15 @@ module.exports = {
 
     // In dev mode, replace wagmi imports with mocks
     if (process.env.NEXT_PUBLIC_DEV_MODE === "true") {
+      const path = require("path");
       config.resolve.alias = {
         ...config.resolve.alias,
         wagmi: require.resolve("./mocks/wagmi.tsx"),
         "@reown/appkit/networks": require.resolve("./mocks/appkit-networks.ts"),
-        "../context/datastoreConnectionContext": require.resolve("./mocks/datastoreConnectionContext.tsx"),
+        // Match the exact import path used in ceramicContext.tsx
+        [path.resolve(__dirname, "./context/datastoreConnectionContext")]: require.resolve(
+          "./mocks/datastoreConnectionContext.tsx"
+        ),
       };
     }
 

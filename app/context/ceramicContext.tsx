@@ -203,13 +203,11 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       if (dbAccessToken && address && !database && did) {
         setUserDid((did.hasParent ? did.parent : did.id).toLowerCase());
         // Ceramic cache db
-        const databaseInstance = new PassportDatabase(
-          CERAMIC_CACHE_ENDPOINT || "",
-          address,
-          dbAccessToken,
-          datadogLogs.logger,
-          did
-        );
+        const ceramicEndpoint =
+          process.env.NEXT_PUBLIC_DEV_MODE === "true"
+            ? "http://localhost:8002/ceramic-cache"
+            : CERAMIC_CACHE_ENDPOINT || "";
+        const databaseInstance = new PassportDatabase(ceramicEndpoint, address, dbAccessToken, datadogLogs.logger, did);
 
         setDatabase(databaseInstance);
       } else {

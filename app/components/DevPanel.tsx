@@ -8,8 +8,13 @@ export const DevPanel: React.FC = () => {
   }
 
   const [currentScenario, setCurrentScenario] = useState<string>(() => {
-    // Get initial scenario from window or default
+    // Get initial scenario from localStorage, window, or default
     if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("mockScenario");
+      if (stored) {
+        window.__mockScenario = stored;
+        return stored;
+      }
       return window.__mockScenario || "new-user";
     }
     return "new-user";
@@ -21,6 +26,8 @@ export const DevPanel: React.FC = () => {
     setCurrentScenario(scenarioName);
     // Set on window for MSW handlers to read
     window.__mockScenario = scenarioName;
+    // Save to localStorage for persistence
+    localStorage.setItem("mockScenario", scenarioName);
     // Force reload to fetch new mock data
     window.location.reload();
   };

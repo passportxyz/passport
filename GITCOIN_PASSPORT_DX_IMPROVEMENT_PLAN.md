@@ -12,16 +12,18 @@ This document outlines a plan to dramatically improve the developer experience f
 - Dev mode authentication bypass implemented
 - Environment variable configuration working
 
-### 🚧 Phase 2: Mock Data System - IN PROGRESS
+### ✅ Phase 2: Mock Data System - COMPLETE
 - ✅ Stamp generator functions built
 - ✅ Scenario management system created
 - ✅ Nullifier generation implemented
-- ⏳ EIP712 mock signatures (basic implementation)
+- ✅ EIP712 mock signatures (basic implementation)
+- ✅ Mock score endpoint returns proper stamp_scores data
 
 ### 🚧 Phase 3: Developer Tools - IN PROGRESS
 - ✅ DevPanel component built
 - ✅ Scenario dropdown functional
-- ⏳ Scenario switching needs refinement
+- ✅ Scenario persistence with localStorage
+- ⏳ Dynamic scenario switching needs refinement
 - ⏳ Playwright helpers pending
 
 ### 📅 Phase 4: Documentation & Rollout - PENDING
@@ -424,3 +426,111 @@ NEXT_PUBLIC_DEV_MODE=true yarn dev
 8. 📅 Integrate with existing test suite
 
 This approach will transform the Gitcoin Passport development experience while maintaining the stability required for 100k+ daily users.
+
+## Claude Code Session Progress (2025-07-02 & 2025-07-03)
+
+### Issues Identified and Fixed
+
+#### 1. Loading Overlay Persistence Issue ✅
+**Problem**: The "One moment while we load your Stamps..." overlay was blocking the UI indefinitely in dev mode.
+
+**Root Causes**:
+- `CERAMIC_CACHE_ENDPOINT` environment variable was undefined in dev mode
+- PassportDatabase was being initialized with an empty URL
+- No MSW handler existed for the actual endpoint URL pattern
+- The ceramic context wasn't making the passport fetch request
+
+**Fixes Applied**:
+1. **Updated `ceramicContext.tsx`** (line 206-208):
+   ```typescript
+   const ceramicEndpoint = process.env.NEXT_PUBLIC_DEV_MODE === "true" 
+     ? "http://localhost:8002/ceramic-cache"
+     : CERAMIC_CACHE_ENDPOINT || "";
+   ```
+
+2. **Updated MSW handlers** to intercept the correct URL:
+   - Changed from `/ceramic-cache/passport` to `/ceramic-cache/stamp`
+   - Added proper response format matching `PassportLoadResponse` expectations
+
+3. **Updated CLAUDE.md** with note about using Playwright MCP tools for dev server interaction
+
+#### 2. Stamp Display Issue ✅ (2025-07-03)
+**Problem**: Individual stamps not showing in UI even when data is being fetched.
+
+**Root Causes**:
+- Mock score endpoint wasn't returning `stamp_scores` field needed by ScorerContext
+- DatastoreConnectionContext wasn't being properly mocked, causing authentication issues
+- Stamp IDs in mock handlers were undefined due to optional `id` field in Stamp type
+- DevPanel scenario selection wasn't persisting across page reloads
+
+**Fixes Applied**:
+1. **Updated mock score endpoint** to include stamp_scores:
+   ```typescript
+   // Added to score endpoint response
+   stamp_scores: { "Google": "1.5", "Discord": "1.5", ... },
+   stamps: { "Google": { score: "1.5", dedup: false }, ... }
+   ```
+
+2. **Fixed stamp ID issue** in handlers:
+   - Changed from using `stamp.id` to `stamp.provider` as the ID
+   - This matches how the PassportDatabase processes stamps
+
+3. **Added scenario persistence** to DevPanel:
+   - Now saves selected scenario to localStorage
+   - Restores on page reload for better DX
+
+4. **Fixed webpack alias** for DatastoreConnectionContext:
+   - Corrected the path to match exact import in ceramicContext.tsx
+
+5. **Updated weights endpoint** to include all providers used in scenarios
+
+### Remaining Tasks
+
+#### Medium Priority
+1. **Implement dynamic scenario switching** 📅
+   - Currently requires page refresh when changing scenarios
+   - Need to implement hot-swapping of mock data without reload
+
+2. **Fix mock score updates** 📅
+   - Score doesn't update when changing scenarios
+   - May be related to the scenario switching issue
+
+#### Low Priority
+3. **Add Playwright test helpers** 📅
+   - Create utilities for common dev mode testing patterns
+   - Document testing workflows
+
+4. **Create comprehensive developer documentation** 📅
+   - Expand dev mode usage guide
+   - Add troubleshooting section
+   - Document all available scenarios
+
+5. **Integrate with existing test suite** 📅
+   - Ensure dev mode works with existing tests
+   - Add dev mode-specific tests
+
+### Technical Debt to Address
+- MSW handlers could be more comprehensive (missing some edge cases)
+- Dev panel UI could be more feature-rich (add refresh button, show current data)
+- Consider adding a "reset" functionality to clear all stamps
+- Add better error handling for failed mock requests
+- Consider adding more realistic scoring based on actual platform weights
+
+### What's Working Now
+1. **Dev Mode Authentication** - Automatic wallet connection with mock address
+2. **Stamp Display** - Stamps properly show in the UI with correct scores
+3. **Scenario Selection** - DevPanel allows switching between different user states
+4. **Data Persistence** - Selected scenario persists across page reloads
+5. **Mock API Responses** - All major endpoints return realistic data
+6. **Loading States** - No more persistent loading overlays blocking the UI
+
+### Usage Instructions
+```bash
+# Start the app in dev mode
+cd app/
+NEXT_PUBLIC_DEV_MODE=true yarn start
+
+# Navigate to http://localhost:3000/#/dashboard
+# You'll be automatically "logged in" with stamps based on the selected scenario
+# Use the DevPanel in the bottom-right to switch between scenarios
+```
