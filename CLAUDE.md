@@ -302,9 +302,10 @@ The codebase uses a clean separation between platforms (frontend) and providers 
 Dev mode allows rapid UI development without needing wallet connection or external services. It uses Mock Service Worker (MSW) to intercept API calls and webpack aliases to mock blockchain libraries.
 
 ### Quick Start
+(Note this should be run be the user before telling Claude to iterate with Playwright)
 ```bash
 cd app/
-NEXT_PUBLIC_DEV_MODE=true yarn dev
+NEXT_PUBLIC_DEV_MODE=true yarn start
 ```
 
 Navigate to http://localhost:3000/#/dashboard - you're automatically "logged in"!

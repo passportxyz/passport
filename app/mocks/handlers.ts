@@ -3,7 +3,7 @@ import { generateMockCredential, generateStampsForScenario, getCurrentScenario }
 import scenarios from "./scenarios.json";
 
 // Get base URLs from environment or use defaults
-const SCORER_ENDPOINT = process.env.NEXT_PUBLIC_SCORER_ENDPOINT || "http://localhost:8002";
+const SCORER_ENDPOINT = "http://localhost:8002";
 const IAM_URL = process.env.NEXT_PUBLIC_PASSPORT_IAM_URL || "http://localhost:8003";
 
 export const handlers = [

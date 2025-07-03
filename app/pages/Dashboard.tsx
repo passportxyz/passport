@@ -147,12 +147,7 @@ export default function Dashboard() {
 
   // Route user to home when wallet is disconnected
   useEffect(() => {
-    console.log("🔧 Dashboard auth check:", { address, dbAccessTokenStatus });
     if (!address || dbAccessTokenStatus !== "connected") {
-      console.log("🔧 Redirecting to home - missing:", {
-        address: !address,
-        dbNotConnected: dbAccessTokenStatus !== "connected",
-      });
       navigateToPage("home");
     }
   }, [address, dbAccessTokenStatus]);

@@ -6,7 +6,7 @@ Dev Mode allows frontend developers to work on Gitcoin Passport UI without needi
 
 ```bash
 # Start the app in dev mode
-NEXT_PUBLIC_DEV_MODE=true yarn dev
+NEXT_PUBLIC_DEV_MODE=true yarn start
 
 # The app will start with:
 # ✅ No wallet connection needed
@@ -84,7 +84,6 @@ app/
 - Changes to scenarios.json require page reload
 - MSW logs all intercepted requests in console
 - Look for "🔧 Dev Mode:" prefixed logs
-- The mock address is always `0xDEV123456789ABCDEF123456789ABCDEF123456`
 
 ## Troubleshooting
 
