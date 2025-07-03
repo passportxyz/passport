@@ -81,7 +81,7 @@ export const handlers = [
 
     // Calculate individual stamp scores using the actual weights
     stamps.forEach((stamp) => {
-      const provider = stamp.credential.credentialSubject.provider;
+      const provider = stamp.credential.credentialSubject.provider as string;
       // Get the actual weight for this provider from the weights endpoint
       const providerWeights: Record<string, number> = {
         // Social platforms
@@ -185,7 +185,7 @@ export const handlers = [
 
     // Calculate individual stamp scores using the actual weights
     stamps.forEach((stamp) => {
-      const provider = stamp.credential.credentialSubject.provider;
+      const provider = stamp.credential.credentialSubject.provider as string;
       // Get the actual weight for this provider from the weights endpoint
       const providerWeights: Record<string, number> = {
         // Social platforms

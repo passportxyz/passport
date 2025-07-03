@@ -2,11 +2,6 @@ import React, { useState, useEffect } from "react";
 import scenarios from "../mocks/scenarios.json";
 
 export const DevPanel: React.FC = () => {
-  // Only show in dev mode
-  if (process.env.NEXT_PUBLIC_DEV_MODE !== "true") {
-    return null;
-  }
-
   const [currentScenario, setCurrentScenario] = useState<string>(() => {
     // Get initial scenario from localStorage, window, or default
     if (typeof window !== "undefined") {
@@ -21,6 +16,11 @@ export const DevPanel: React.FC = () => {
   });
 
   const [isMinimized, setIsMinimized] = useState(false);
+
+  // Only show in dev mode
+  if (process.env.NEXT_PUBLIC_DEV_MODE !== "true") {
+    return null;
+  }
 
   const loadScenario = (scenarioName: string) => {
     setCurrentScenario(scenarioName);

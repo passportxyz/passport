@@ -18,27 +18,29 @@ NEXT_PUBLIC_DEV_MODE=true yarn start
 ## Features
 
 ### 1. **Mock Service Worker (MSW)**
+
 - Intercepts all API calls and returns mock data
 - No external dependencies needed
 - Consistent, reproducible data
 
 ### 2. **Scenario Switcher**
+
 - Simple dropdown in bottom-right corner
 - Switch between pre-configured user states
 - Instant reload with new data
 
 ### 3. **Available Scenarios**
 
-| Scenario | Description | Stamps | Score |
-|----------|-------------|--------|-------|
-| `new-user` | Empty passport | 0 | 0 |
-| `basic-user` | Few stamps | 3 | 15.5 |
-| `power-user` | 50+ stamps | 50+ | 85.5 |
-| `expired-stamps` | Mixed expiration states | 3 | 12.5 |
-| `low-score` | Below threshold | 1 | 2.5 |
-| `onchain-focus` | On-chain stamps only | 13 | 45.0 |
-| `social-media-focus` | Social stamps only | 13 | 38.5 |
-| `defi-user` | DeFi power user | 12 | 52.0 |
+| Scenario             | Description             | Stamps | Score |
+| -------------------- | ----------------------- | ------ | ----- |
+| `new-user`           | Empty passport          | 0      | 0     |
+| `basic-user`         | Few stamps              | 3      | 15.5  |
+| `power-user`         | 50+ stamps              | 50+    | 85.5  |
+| `expired-stamps`     | Mixed expiration states | 3      | 12.5  |
+| `low-score`          | Below threshold         | 1      | 2.5   |
+| `onchain-focus`      | On-chain stamps only    | 13     | 45.0  |
+| `social-media-focus` | Social stamps only      | 13     | 38.5  |
+| `defi-user`          | DeFi power user         | 12     | 52.0  |
 
 ## How It Works
 
