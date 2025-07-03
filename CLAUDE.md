@@ -302,3 +302,13 @@ The codebase uses a clean separation between platforms (frontend) and providers 
 - **Type errors**: Rebuild packages with `yarn build`
 - **Test failures**: Check if services are running (Redis, APIs)
 - **Port conflicts**: Default ports are 3000 (app), 65535 (IAM), 80 (embed)
+
+## Commit and Branch Conventions
+
+- **Commit Messages**: Follow conventional commits spec loosely
+  - Format: `feat/chore/etc(subpackage): message...`
+- **Branch Names**: Start with issue number from passportxyz/passport
+  - Example: `3526-bla-bla`
+- **Pull Requests**:
+  - Reference issue like "fixes #3526"
+  - PR title should match the primary commit message

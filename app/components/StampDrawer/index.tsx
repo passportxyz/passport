@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useContext } from "react";
 import { Drawer, DrawerOverlay, DrawerContent, DrawerBody } from "@chakra-ui/react";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { DrawerHeader } from "./components/DrawerHeader";
@@ -9,6 +9,9 @@ import { CredentialGrid } from "./components/CredentialGrid";
 import { PlatformGuide } from "./components/PlatformGuide";
 import { StampDrawerProps, CredentialGroup, VerificationState } from "./types";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
+import { JsonOutputModal } from "../JsonOutputModal";
+import { RemovePlatformModal } from "../RemovePlatformModal";
+import { CeramicContext } from "../../context/ceramicContext";
 
 const useStampGridCols = ({
   hasSteps,
@@ -68,6 +71,11 @@ const StampDrawer = ({
   isLoading = false,
 }: StampDrawerProps) => {
   const isLg = useBreakpoint("lg");
+  const { allProvidersState } = useContext(CeramicContext);
+
+  // Modal states
+  const [jsonModalIsOpen, setJsonModalIsOpen] = useState(false);
+  const [removeModalIsOpen, setRemoveModalIsOpen] = useState(false);
   // Process credential groups with runtime data
   const processedData = useMemo(() => {
     // Process and group credentials
@@ -128,6 +136,67 @@ const StampDrawer = ({
 
   const { verificationState, allStampsVerified } = processedData;
 
+  // Compute platform JSON data
+  const platformJsonData = useMemo(() => {
+    const platformProviderIds = credentialGroups.flatMap((group) => group.providers.map((provider) => provider.name));
+
+    const platformStamps = platformProviderIds
+      .map((providerId) => {
+        const providerState = allProvidersState?.[providerId];
+        const stamp = providerState?.stamp;
+
+        if (!stamp) return null;
+
+        // Find provider metadata
+        const providerInfo = credentialGroups.flatMap((group) => group.providers).find((p) => p.name === providerId);
+
+        return {
+          provider: providerId,
+          credential: stamp.credential,
+          name: providerInfo?.title || providerId,
+          description: providerInfo?.description || "",
+          points: stampWeights?.[providerId] || 0,
+          verified: verifiedProviders.includes(providerId),
+          expired: expiredProviders.includes(providerId),
+          deduplicated: stampDedupStatus?.[providerId] === true,
+        };
+      })
+      .filter(Boolean);
+
+    return {
+      platform: platformSpec.name,
+      icon: platformSpec.icon,
+      description: platformSpec.description,
+      stamps: platformStamps,
+      totalPossiblePoints: verificationState.totalPossiblePoints,
+      pointsGained: verificationState.pointsGained,
+    };
+  }, [
+    credentialGroups,
+    allProvidersState,
+    stampWeights,
+    verifiedProviders,
+    expiredProviders,
+    stampDedupStatus,
+    platformSpec,
+    verificationState,
+  ]);
+
+  // Get all provider IDs for this platform (for removal)
+  const platformProviderIds = useMemo(() => {
+    return credentialGroups.flatMap((group) => group.providers.map((provider) => provider.name)) as PROVIDER_ID[];
+  }, [credentialGroups]);
+
+  // Handler for viewing platform JSON
+  const handleViewPlatformJSON = () => {
+    setJsonModalIsOpen(true);
+  };
+
+  // Handler for removing all platform stamps
+  const handleRemoveAllStamps = () => {
+    setRemoveModalIsOpen(true);
+  };
+
   const hasGuide = Boolean(platformSpec.guide && platformSpec.guide.length > 0);
   const stampGridCols = useStampGridCols({
     hasSteps: hasGuide,
@@ -140,64 +209,123 @@ const StampDrawer = ({
   const shouldStack = stampGridCols === 1;
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} placement="right" size={drawerSize}>
-      <DrawerOverlay />
-      <DrawerContent
-        style={{
-          background: "rgb(var(--color-foreground))",
-          border: "1px solid rgb(var(--color-foreground-5))",
-          borderRadius: drawerSize === "full" ? "0" : "16px 0 0 16px",
-        }}
-      >
-        <DrawerBody padding="0" display="flex" flexDirection="column" height="100vh" overflow="hidden">
-          {["full", "md"].includes(drawerSize) || (hasGuide && !isLg) ? (
-            <>
-              <div className="flex-1 flex flex-col overflow-hidden">
-                <div className="flex-1 overflow-y-auto">
-                  <div className="p-4">
-                    <DrawerHeader
-                      icon={platformSpec.icon || ""}
-                      name={platformSpec.name}
-                      website={platformSpec.website}
-                      onClose={onClose}
-                    />
-
-                    <div className="mt-4">
-                      <PointsModule {...verificationState} />
-
-                      <p className="text-sm text-color-4 mt-6">{platformSpec.description}</p>
-
-                      <CTAButtons
-                        platformSpec={platformSpec}
-                        verificationState={verificationState}
-                        onVerify={onVerify}
+    <>
+      <Drawer isOpen={isOpen} onClose={onClose} placement="right" size={drawerSize}>
+        <DrawerOverlay />
+        <DrawerContent
+          style={{
+            background: "rgb(var(--color-foreground))",
+            border: "1px solid rgb(var(--color-foreground-5))",
+            borderRadius: drawerSize === "full" ? "0" : "16px 0 0 16px",
+          }}
+        >
+          <DrawerBody padding="0" display="flex" flexDirection="column" height="100vh" overflow="hidden">
+            {["full", "md"].includes(drawerSize) || (hasGuide && !isLg) ? (
+              <>
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  <div className="flex-1 overflow-y-auto">
+                    <div className="p-4">
+                      <DrawerHeader
+                        icon={platformSpec.icon || ""}
+                        name={platformSpec.name}
+                        website={platformSpec.website}
                         onClose={onClose}
+                        showMenu={verifiedProviders.length > 0}
+                        onViewJSON={handleViewPlatformJSON}
+                        onRemoveAll={handleRemoveAllStamps}
                       />
 
-                      {hasGuide && platformSpec.guide && (
-                        <PlatformGuide sections={platformSpec.guide} isMobile={true} />
-                      )}
+                      <div className="mt-4">
+                        <PointsModule {...verificationState} />
 
-                      <h3 className="text-lg font-semibold text-gray-700 mb-4 mt-8">Stamps</h3>
-                      <CredentialGrid credentialGroups={processedData.credentialGroups} columns={1} />
+                        <p className="text-sm text-color-4 mt-6">{platformSpec.description}</p>
+
+                        <CTAButtons
+                          platformSpec={platformSpec}
+                          verificationState={verificationState}
+                          onVerify={onVerify}
+                          onClose={onClose}
+                        />
+
+                        {hasGuide && platformSpec.guide && (
+                          <PlatformGuide sections={platformSpec.guide} isMobile={true} />
+                        )}
+
+                        <h3 className="text-lg font-semibold text-gray-700 mb-4 mt-8">Stamps</h3>
+                        <CredentialGrid credentialGroups={processedData.credentialGroups} columns={1} />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <DrawerFooter
-                onVerify={onVerify}
-                onClose={onClose}
-                isLoading={verificationState.isLoading}
-                isVerified={allStampsVerified}
-              />
-            </>
-          ) : hasGuide ? (
-            // Desktop with guide - two/three column layout
-            <>
-              <div className="flex-1 overflow-hidden flex">
-                {/* Left Section - Stamps */}
-                <div className={`${stampGridCols === 3 ? "w-2/3" : "w-1/2"} flex flex-col h-full`}>
+                <DrawerFooter
+                  onVerify={onVerify}
+                  onClose={onClose}
+                  isLoading={verificationState.isLoading}
+                  isVerified={allStampsVerified}
+                />
+              </>
+            ) : hasGuide ? (
+              // Desktop with guide - two/three column layout
+              <>
+                <div className="flex-1 overflow-hidden flex">
+                  {/* Left Section - Stamps */}
+                  <div className={`${stampGridCols === 3 ? "w-2/3" : "w-1/2"} flex flex-col h-full`}>
+                    <div className="flex-1 overflow-y-auto">
+                      <div className="p-4 md:p-6">
+                        <DrawerHeader
+                          icon={platformSpec.icon || ""}
+                          name={platformSpec.name}
+                          website={platformSpec.website}
+                          onClose={onClose}
+                          showMenu={verifiedProviders.length > 0}
+                          onViewJSON={handleViewPlatformJSON}
+                          onRemoveAll={handleRemoveAllStamps}
+                        />
+
+                        <div className="mt-4 md:mt-6">
+                          {/* Description/CTA and Points layout */}
+                          <div className={`${shouldStack ? "space-y-6" : "flex gap-8 justify-between"} mb-6`}>
+                            {/* Description and CTA section */}
+                            <div className={`${shouldStack ? "" : "flex-1 min-w-0 max-w-2xl"}`}>
+                              <p className="text-base text-color-4 leading-relaxed">{platformSpec.description}</p>
+                              <CTAButtons
+                                platformSpec={platformSpec}
+                                verificationState={verificationState}
+                                onVerify={onVerify}
+                                onClose={onClose}
+                              />
+                            </div>
+
+                            {/* Points module section */}
+                            <div className={`${shouldStack ? "" : "flex-shrink-0 w-1/2 max-w-80"}`}>
+                              <PointsModule {...verificationState} />
+                            </div>
+                          </div>
+
+                          {/* Stamps */}
+                          <CredentialGrid credentialGroups={processedData.credentialGroups} columns={stampGridCols} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Section - Guide */}
+                  <div className={`${stampGridCols === 3 ? "w-1/3" : "w-1/2"} p-8 overflow-y-auto bg-background`}>
+                    <PlatformGuide sections={platformSpec.guide!} />
+                  </div>
+                </div>
+
+                <DrawerFooter
+                  onVerify={onVerify}
+                  onClose={onClose}
+                  isLoading={verificationState.isLoading}
+                  isVerified={allStampsVerified}
+                />
+              </>
+            ) : (
+              <>
+                <div className="flex-1 flex flex-col overflow-hidden">
                   <div className="flex-1 overflow-y-auto">
                     <div className="p-4 md:p-6">
                       <DrawerHeader
@@ -205,6 +333,9 @@ const StampDrawer = ({
                         name={platformSpec.name}
                         website={platformSpec.website}
                         onClose={onClose}
+                        showMenu={verifiedProviders.length > 0}
+                        onViewJSON={handleViewPlatformJSON}
+                        onRemoveAll={handleRemoveAllStamps}
                       />
 
                       <div className="mt-4 md:mt-6">
@@ -234,69 +365,34 @@ const StampDrawer = ({
                   </div>
                 </div>
 
-                {/* Right Section - Guide */}
-                <div className={`${stampGridCols === 3 ? "w-1/3" : "w-1/2"} p-8 overflow-y-auto bg-background`}>
-                  <PlatformGuide sections={platformSpec.guide!} />
-                </div>
-              </div>
+                <DrawerFooter
+                  onVerify={onVerify}
+                  onClose={onClose}
+                  isLoading={verificationState.isLoading}
+                  isVerified={allStampsVerified}
+                />
+              </>
+            )}
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
 
-              <DrawerFooter
-                onVerify={onVerify}
-                onClose={onClose}
-                isLoading={verificationState.isLoading}
-                isVerified={allStampsVerified}
-              />
-            </>
-          ) : (
-            <>
-              <div className="flex-1 flex flex-col overflow-hidden">
-                <div className="flex-1 overflow-y-auto">
-                  <div className="p-4 md:p-6">
-                    <DrawerHeader
-                      icon={platformSpec.icon || ""}
-                      name={platformSpec.name}
-                      website={platformSpec.website}
-                      onClose={onClose}
-                    />
+      <JsonOutputModal
+        isOpen={jsonModalIsOpen}
+        onClose={() => setJsonModalIsOpen(false)}
+        title="Platform Details"
+        subheading="Platform and stamp verification data"
+        jsonOutput={platformJsonData}
+      />
 
-                    <div className="mt-4 md:mt-6">
-                      {/* Description/CTA and Points layout */}
-                      <div className={`${shouldStack ? "space-y-6" : "flex gap-8 justify-between"} mb-6`}>
-                        {/* Description and CTA section */}
-                        <div className={`${shouldStack ? "" : "flex-1 min-w-0 max-w-2xl"}`}>
-                          <p className="text-base text-color-4 leading-relaxed">{platformSpec.description}</p>
-                          <CTAButtons
-                            platformSpec={platformSpec}
-                            verificationState={verificationState}
-                            onVerify={onVerify}
-                            onClose={onClose}
-                          />
-                        </div>
-
-                        {/* Points module section */}
-                        <div className={`${shouldStack ? "" : "flex-shrink-0 w-1/2 max-w-80"}`}>
-                          <PointsModule {...verificationState} />
-                        </div>
-                      </div>
-
-                      {/* Stamps */}
-                      <CredentialGrid credentialGroups={processedData.credentialGroups} columns={stampGridCols} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <DrawerFooter
-                onVerify={onVerify}
-                onClose={onClose}
-                isLoading={verificationState.isLoading}
-                isVerified={allStampsVerified}
-              />
-            </>
-          )}
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+      <RemovePlatformModal
+        isOpen={removeModalIsOpen}
+        onClose={() => setRemoveModalIsOpen(false)}
+        providerIds={platformProviderIds}
+        platformName={platformSpec.name}
+        onComplete={onClose}
+      />
+    </>
   );
 };
 
