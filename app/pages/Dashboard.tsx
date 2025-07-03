@@ -47,8 +47,8 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
   const backgroundColor = useRadialBackgroundColorForHeader();
 
   const { pointsData } = useContext(ScorerContext);
-  const multiplier = 2;
-  // const multiplier = pointsData?.multiplier;
+  const multiplier = pointsData?.multiplier;
+  const isEligible = !!pointsData?.is_eligible;
   const showMultiplierPanel = multiplier && multiplier > 1;
 
   return (
@@ -56,7 +56,9 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
       <div className="col-span-full mt-2 flex flex-col xl:flex-row gap-8 relative left-0 top-0 z-10">
         <div className="col-span-full flex flex-col grow lg:flex-row gap-8 mt-0.5">
           <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
-          {showMultiplierPanel && <HumanPointsMultiplierPanel multiplier={multiplier} className="xl:w-1/2" />}
+          {showMultiplierPanel && (
+            <HumanPointsMultiplierPanel multiplier={multiplier} isEligible={isEligible} className="xl:w-1/2" />
+          )}
           {explanationPanel && <DashboardScoreExplanationPanel />}
         </div>
         {useCustomDashboardPanel && <DynamicCustomDashboardPanel className="max-w-full xl:w-2/3" />}

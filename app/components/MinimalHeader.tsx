@@ -196,6 +196,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   const [showSidebar, setShowSidebar] = React.useState(false);
   const { verificationComplete } = useOneClickVerification();
   const { scoreState, pointsData } = React.useContext(ScorerContext);
+  const isEligible = !!pointsData?.is_eligible;
 
   return (
     <>
@@ -215,7 +216,9 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
           <a href="https://humansignon.com/" target="_blank">
             <BridgeIcon />
           </a>
-          {scoreState.status !== "initial" && <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} />}
+          {scoreState.status !== "initial" && (
+            <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isEligible={isEligible} />
+          )}
           <AccountCenter />
           {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
         </div>
@@ -223,7 +226,9 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
 
       <div className={`flex md:hidden gap-4 items-center justify-between h-16 px-2 ${className}`}>
         <AccountCenter />
-        {scoreState.status !== "initial" && <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} />}
+        {scoreState.status !== "initial" && (
+          <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isEligible={isEligible} />
+        )}
 
         <Popover className=" text-gray-800">
           <Popover.Button className="ml-auto" data-testid="app-bar-selector">

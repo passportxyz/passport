@@ -31,11 +31,13 @@ type HumanPointsLabelProps = {
   prefix?: string;
   points: number;
   colorSchemeDark?: Boolean;
+  isEligible: boolean;
 };
 export const HumanPointsLabel: FC<HumanPointsLabelProps> = ({
   prefix,
   points,
   colorSchemeDark,
+  isEligible,
 }: HumanPointsLabelProps) => {
   const { backgroundColor } = colorSchemeDark
     ? {
@@ -44,7 +46,7 @@ export const HumanPointsLabel: FC<HumanPointsLabelProps> = ({
     : {
         backgroundColor: "bg-emerald-100",
       };
-  return (
+  return isEligible ? (
     <div className={`flex items-center ${backgroundColor} rounded-full px-2 py-1`}>
       <Icon width={18} height={19} />
       <span className="px-1 pt-0.5 text-color-4">
@@ -52,11 +54,15 @@ export const HumanPointsLabel: FC<HumanPointsLabelProps> = ({
         {points.toFixed(0)}
       </span>
     </div>
-  );
+  ) : null;
 };
 
-export const HumanPointsLabelSMDark: FC<HumanPointsLabelProps> = ({ prefix, points }: HumanPointsLabelProps) => {
-  return (
+export const HumanPointsLabelSMDark: FC<HumanPointsLabelProps> = ({
+  prefix,
+  points,
+  isEligible,
+}: HumanPointsLabelProps) => {
+  return isEligible ? (
     <div className={`flex text-sm items-center bg-emerald-500 rounded-full px-1 py-0`}>
       <Icon width={18} height={19} strokeColor="#7BF9C9" />
       <span className="pl-0.5 pr-1 pt-0.5 text-white">
@@ -64,15 +70,20 @@ export const HumanPointsLabelSMDark: FC<HumanPointsLabelProps> = ({ prefix, poin
         {points.toFixed(0)}
       </span>
     </div>
-  );
+  ) : null;
 };
 
 export type HumanPointsMultiplierPanelProps = {
   multiplier: number;
   className: string;
+  isEligible: boolean;
 };
-export const HumanPointsMultiplierPanel: FC<HumanPointsMultiplierPanelProps> = ({ multiplier, className = "" }) => {
-  return (
+export const HumanPointsMultiplierPanel: FC<HumanPointsMultiplierPanelProps> = ({
+  multiplier,
+  className = "",
+  isEligible,
+}) => {
+  return isEligible ? (
     <div className={`relative flex flex-col rounded-3xl p-8 ${className}`}>
       <div
         style={{ background: `radial-gradient(ellipse 75% 50% at 20% 25%, oklch(0.905 0.093 164.15), #00B88A)` }}
@@ -95,5 +106,5 @@ export const HumanPointsMultiplierPanel: FC<HumanPointsMultiplierPanelProps> = (
         Thank you for being the early bird! Here’s your doubled points as a reward ~
       </p>
     </div>
-  );
+  ) : null;
 };
