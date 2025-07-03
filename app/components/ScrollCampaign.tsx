@@ -91,7 +91,7 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
       console.log("Access token or did are not present. Going back to login step!");
       goToLoginStep();
     }
-  }, [dbAccessToken, did, step, goToLoginStep, database]);
+  }, [dbAccessToken, did, step, goToLoginStep, database, isConnected]);
 
   if (step === 0) {
     return <ScrollLogin />;

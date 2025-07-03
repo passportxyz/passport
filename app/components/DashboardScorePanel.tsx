@@ -182,7 +182,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
                 return (
                   <div key={idx} className="flex flex-col items-center">
                     <div className="relative flex flex-col items-center w-[70px] h-[80px] bg-center bg-[url(/assets/onchain-shield.svg)]">
-                      <img src={attestationProvider?.icon} className="m-auto"></img>
+                      <img src={attestationProvider?.icon} alt="attestation-provider" className="m-auto"></img>
                       <div
                         className={`${isExpired ? "" : "hidden"} bg-white bg-opacity-50 absolute h-full w-full`}
                       ></div>
@@ -197,7 +197,9 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
               })}
             </div>
           </div>
-          <p className="py-2 self-center md:self-start">Message for minting onchain</p>
+          <p className="py-2 self-center md:self-start">
+            Success! Mint on other networks to maximize your onchain presence.
+          </p>
         </div>
         <div className="w-full flex flex-col md:flex-row justify-between items-center">
           <span className="text-nowrap">

@@ -20,8 +20,8 @@ const ceramicWithPassport = {
   passport: { stamps: [{} as Stamp] },
 } as unknown as CeramicContextState;
 
-vi.mock("../../components/InitialWelcome.tsx", () => ({
-  InitialWelcome: () => <div data-testid="initial-welcome" />,
+vi.mock("../../components/InitialScreenLayout.tsx", () => ({
+  InitialScreenWelcome: () => <div data-testid="initial-welcome" />,
 }));
 
 beforeEach(() => {

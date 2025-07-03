@@ -221,8 +221,10 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
         </div>
       </div>
 
-      <div className={`flex md:hidden gap-4 items-center justify-between h-16 ${className}`}>
+      <div className={`flex md:hidden gap-4 items-center justify-between h-16 px-2 ${className}`}>
         <AccountCenter />
+        {scoreState.status !== "initial" && <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} />}
+
         <Popover className=" text-gray-800">
           <Popover.Button className="ml-auto" data-testid="app-bar-selector">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -246,12 +248,12 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
                   </a>
                 </li>
                 <li>
-                  <a href="https://human.tech/" target="_blank" className="flex h-8 m-2">
-                    <ZeronymIcon /> <span className="ml-3">Zeronym</span>
+                  <a href="https://app.passport.xyz/" target="_blank" className="flex h-8 m-2">
+                    <ZeronymIcon /> <span className="ml-3">Human Passport</span>
                   </a>
                 </li>
                 <li>
-                  <a href="https://human.tech/" target="_blank" className="flex h-8 m-2">
+                  <a href="https://bridge.human.tech/" target="_blank" className="flex h-8 m-2">
                     <BridgeIcon /> <span className="ml-3">Human Tech</span>
                   </a>
                 </li>
