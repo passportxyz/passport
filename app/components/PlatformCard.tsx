@@ -312,7 +312,7 @@ const ExpiredStamp = ({
             </p>
           </div>
           <div className="text-sm font-bold text-color-9">
-            <span className="text-xl text-color-4">{+platform.earnedPoints.toFixed(1)} </span> /{" "}
+            <span className="text-xl text-color-4">{+platform.earnedPoints.toFixed(1)}</span>/
             {platform.displayPossiblePoints.toFixed(1)} points gained
           </div>{" "}
           <ProgressBar
