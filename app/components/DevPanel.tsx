@@ -37,7 +37,7 @@ export const DevPanel: React.FC = () => {
       <div className="fixed bottom-4 right-4 z-50">
         <button
           onClick={() => setIsMinimized(false)}
-          className="bg-background-2 text-color-1 px-3 py-1 rounded shadow-lg hover:bg-background-3 transition-colors"
+          className="bg-background text-color-4 px-3 py-1 rounded shadow-lg hover:bg-foreground-2 hover:text-color-1 transition-colors border border-foreground-3"
           title="Show Dev Panel"
         >
           🔧
@@ -47,12 +47,12 @@ export const DevPanel: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 bg-background-2 p-4 rounded-lg shadow-lg z-50 min-w-[250px]">
+    <div className="fixed bottom-4 right-4 bg-background p-4 rounded-lg shadow-lg z-50 min-w-[250px] border border-foreground-3">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-color-1 font-bold">Dev Mode</h3>
+        <h3 className="text-color-4 font-bold">Dev Mode</h3>
         <button
           onClick={() => setIsMinimized(true)}
-          className="text-color-3 hover:text-color-1 text-sm"
+          className="text-color-9 hover:text-color-4 text-sm"
           title="Minimize"
         >
           ─
@@ -60,11 +60,11 @@ export const DevPanel: React.FC = () => {
       </div>
 
       <div className="space-y-2">
-        <label className="text-color-3 text-xs block">Scenario:</label>
+        <label className="text-color-9 text-xs block">Scenario:</label>
         <select
           value={currentScenario}
           onChange={(e) => loadScenario(e.target.value)}
-          className="w-full px-3 py-2 bg-background text-color-1 rounded border border-foreground-6 focus:border-focus focus:outline-none"
+          className="w-full px-3 py-2 bg-foreground text-color-4 rounded border border-foreground-3 focus:border-focus focus:outline-none"
         >
           {Object.entries(scenarios).map(([key, scenario]) => (
             <option key={key} value={key}>
@@ -74,8 +74,8 @@ export const DevPanel: React.FC = () => {
         </select>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-foreground-6">
-        <div className="text-xs text-color-3 space-y-1">
+      <div className="mt-3 pt-3 border-t border-foreground-3">
+        <div className="text-xs text-color-9 space-y-1">
           <div>
             Current: <span className="text-color-2">{currentScenario}</span>
           </div>
@@ -89,7 +89,7 @@ export const DevPanel: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-3 text-xs text-color-3">
+      <div className="mt-3 text-xs text-color-9">
         <div className="opacity-70">💡 Change scenario to test different UI states</div>
       </div>
     </div>
