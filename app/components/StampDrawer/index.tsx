@@ -359,11 +359,7 @@ const StampDrawer = ({
                         </div>
 
                         {/* Stamps */}
-                        <CredentialGrid
-                          credentialGroups={processedData.credentialGroups}
-                          columns={stampGridCols}
-                          onViewStampJSON={handleViewStampJSON}
-                        />
+                        <CredentialGrid credentialGroups={processedData.credentialGroups} columns={stampGridCols} />
                       </div>
                     </div>
                   </div>
