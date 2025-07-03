@@ -137,8 +137,9 @@ const VerifiedStamp = ({
 }: StampProps) => {
   const { activeChainProviders } = useOnChainData();
   const [isAnyOnchain, setIsAnyOnchain] = useState(false);
-  const { pointsDataForStamps } = useContext(ScorerContext);
+  const { pointsDataForStamps, pointsData } = useContext(ScorerContext);
   const [humanPoints, setHumanPoints] = useState<number>();
+  const isEligible = !!pointsData?.is_eligible;
 
   useEffect(() => {
     const onchainProviderSet = new Set(activeChainProviders.map((p) => p.providerName));
@@ -202,7 +203,7 @@ const VerifiedStamp = ({
 
             <div className="flex items-center">
               <div className="relative -right-1">
-                {humanPoints && <HumanPointsLabelSMDark points={humanPoints} prefix="+" />}
+                {humanPoints && <HumanPointsLabelSMDark points={humanPoints} prefix="+" isEligible={isEligible} />}
               </div>
 
               <PassportPoints points={platform.earnedPoints} prefix="+" className="text-right" />
