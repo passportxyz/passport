@@ -48,6 +48,9 @@ export interface DrawerHeaderProps {
   name: string;
   onClose: () => void;
   website?: string;
+  onViewJSON?: () => void;
+  onRemoveAll?: () => void;
+  showMenu?: boolean;
 }
 
 export interface CTAButtonsProps {

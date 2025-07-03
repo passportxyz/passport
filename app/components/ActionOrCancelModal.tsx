@@ -27,8 +27,15 @@ export const ActionOrCancelModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay width="100%" height="100%" />
-      <ModalContent rounded={"8px"} padding={"28px"} paddingBottom={"12px"} maxW={"380px"}>
-        <ModalHeader padding={0} fontWeight={"normal"} className="text-xl font-heading leading-tight text-focus my-4">
+      <ModalContent
+        rounded={"8px"}
+        padding={"28px"}
+        paddingBottom={"12px"}
+        maxW={"380px"}
+        bg="rgb(var(--color-foreground))"
+        border="1px solid rgb(var(--color-foreground-5))"
+      >
+        <ModalHeader padding={0} fontWeight={"normal"} className="text-xl font-heading leading-tight text-color-7 my-4">
           {title}
         </ModalHeader>
         <ModalBody padding={0}>{children}</ModalBody>
