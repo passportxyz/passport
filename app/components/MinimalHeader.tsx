@@ -211,7 +211,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
       label: "Human Wallet",
     },
     {
-      link: "https://humansignon.com/",
+      link: "https://bridge.human.tech/",
       icon: <BridgeIcon />,
       label: "Aztec Bridge",
     },
