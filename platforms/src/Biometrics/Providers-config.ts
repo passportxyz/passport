@@ -1,7 +1,7 @@
 import { PlatformGroupSpec, PlatformSpec } from "../types.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/humanIdStampIcon.svg",
+  icon: "./assets/humanTechIcon.svg",
   platform: "Biometrics",
   name: "Biometrics",
   description: "Verify your uniqueness using facial biometrics, powered by human.tech",
