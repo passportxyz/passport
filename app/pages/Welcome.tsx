@@ -42,7 +42,7 @@ export default function Welcome() {
           across the human.tech tools and will unlock exclusive benefits and rewards in upcoming programs.
         </p>
         <div className="pt-6 underline text-color-9">
-          <a href="https://human.tech/">Learn more about Points</a>
+          <a href="https://passport.human.tech/blog/points">Learn more about Points</a>
         </div>
       </div>
 
