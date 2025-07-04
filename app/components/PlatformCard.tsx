@@ -190,12 +190,12 @@ const VerifiedStamp = ({
               )}
               {/* <StampLabels primaryLabel="Verified" primaryBgColor="bg-foreground-4" isDeduplicated={isDeduplicated} /> */}
               {isDeduplicated || (
-                <div className="pr-2 py-1 text-md font-medium text-left text-emerald-600">
+                <div className="pl-3 pr-2 py-1 text-md font-medium text-left text-emerald-600">
                   <p data-testid="verified-label">{isAnyOnchain ? "Minted" : "Verified"}</p>
                 </div>
               )}
               {isDeduplicated && (
-                <div className="px-2 py-1 text-l font-bold text-left text-emerald-600">
+                <div className="pl-3 pr-2 py-1 text-l font-medium text-left text-emerald-600">
                   <p data-testid="verified-label">Deduplicated</p>
                 </div>
               )}
