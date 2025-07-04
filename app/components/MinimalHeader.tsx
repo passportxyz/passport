@@ -283,8 +283,8 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
               <ul>
                 {icons.map((e, idx) => {
                   return (
-                    <li>
-                      <a key={idx} href={e.link} target="_blank" className="flex h-8 m-2">
+                    <li key={idx}>
+                      <a href={e.link} target="_blank" className="flex h-8 m-2">
                         {e.icon} <span className="ml-3">{e.label}</span>
                       </a>
                     </li>
