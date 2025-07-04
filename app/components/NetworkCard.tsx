@@ -1,19 +1,26 @@
-import React from "react";
+import React, { useContext } from "react";
 import { SyncToChainButton } from "./SyncToChainButton";
 import { Chain } from "../utils/chains";
 import { useOnChainStatus } from "../hooks/useOnChainStatus";
-import { OnChainStatus } from "../utils/onChainStatus";
+import { OnChainStatus, onChainStatusString } from "../utils/onChainStatus";
 import { getDaysToExpiration } from "../utils/duration";
 
 import { useOnChainData } from "../hooks/useOnChainData";
 import { Hyperlink } from "@gitcoin/passport-platforms";
 import { useAccount } from "wagmi";
 import { ExpiredLabel } from "./LabelExpired";
+import { POINTS_BREAKDOWN_KEY, ScorerContext } from "../context/scorerContext";
+import { HumanPointsLabelSMDark } from "./humanPoints";
 
 export function NetworkCard({ chain }: { chain: Chain }) {
   const { status, isPending } = useOnChainStatus({ chain });
   const { expirationDate } = useOnChainData().data[chain.id] || {};
   const { address } = useAccount();
+  const { pointsData } = useContext(ScorerContext);
+  const keyForChainPoints = `PMT_${Number.parseInt(chain.id, 16)}` as POINTS_BREAKDOWN_KEY;
+  const humanPoints = pointsData?.breakdown[keyForChainPoints];
+  const showHumanPoints = !!humanPoints;
+  const isEligible = !!pointsData?.is_eligible;
 
   const isOnChain = [
     OnChainStatus.MOVED_OUT_OF_DATE,
@@ -22,7 +29,12 @@ export function NetworkCard({ chain }: { chain: Chain }) {
   ].includes(status);
 
   const expired = status === OnChainStatus.MOVED_EXPIRED;
-  const showButton = status === OnChainStatus.MOVED_EXPIRED || status === OnChainStatus.NOT_MOVED;
+  const showButton = true; // We always show the button atm ... status === OnChainStatus.MOVED_EXPIRED || status === OnChainStatus.NOT_MOVED;
+  const hasAttestation =
+    status === OnChainStatus.MOVED_EXPIRED ||
+    status === OnChainStatus.MOVED_OUT_OF_DATE ||
+    status === OnChainStatus.MOVED_UP_TO_DATE;
+
   let background = "bg-background";
 
   if (isOnChain) {
@@ -41,8 +53,9 @@ export function NetworkCard({ chain }: { chain: Chain }) {
     <div className={`mb-6 rounded-lg border p-2 align-middle ${background}`}>
       <div className="mx-2 my-2 h-full">
         <div className="grid grid-rows-3 content-between h-full">
-          <div className="flex justify-between">
+          <div className="flex justify-between items-start">
             <img className="h-8" src={chain.icon} alt={`${chain.label} logo`} />
+            {showHumanPoints && <HumanPointsLabelSMDark points={humanPoints || 0} isEligible={isEligible} />}
             {!expired || <ExpiredLabel className="" />}
           </div>
           <div className="">
@@ -54,7 +67,7 @@ export function NetworkCard({ chain }: { chain: Chain }) {
             isLoading={isPending}
             className={`mb-2 ${!showButton ? "hidden" : ""}`}
           />
-          <div className={`mb-2 flex w-full justify-between ${showButton ? "hidden" : ""}`}>
+          <div className={`mb-2 flex w-full justify-between ${hasAttestation ? "" : "hidden"}`}>
             {address && chain.attestationProvider?.hasWebViewer && (
               <Hyperlink
                 href={chain.attestationProvider?.viewerUrl(address) || ""}
