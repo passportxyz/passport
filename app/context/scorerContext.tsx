@@ -169,7 +169,7 @@ export type POINTED_STAMP_ROVIDER =
   | "TrustedCitizen";
 
 export type POINTS_FOR_STAMPS_BREAKDOWN_KEY = "ISB" | "ISS" | "ISG" | "CSB" | "CSE" | "CST";
-export type POINTS_BREAKDOWN_KEY = POINTS_FOR_STAMPS_BREAKDOWN_KEY | "SCB" | "HKY" | "PMT" | "HIM";
+export type POINTS_BREAKDOWN_KEY = POINTS_FOR_STAMPS_BREAKDOWN_KEY | "SCB" | "HKY" | "PMT" | "HIM" | `PMT_${number}`;
 
 const STAMP_PROVIDER_TO_ACTION: [POINTED_STAMP_ROVIDER, POINTS_BREAKDOWN_KEY][] = [
   ["gtcStakingBronze", "ISB"],
