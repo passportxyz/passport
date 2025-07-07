@@ -3,13 +3,40 @@ const pino = pinoImport.default;
 // https://github.com/pinojs/pino
 import type { LogFn } from "pino";
 
+const isError = (value: unknown): value is Error =>
+  value instanceof Error ||
+  (typeof value === "object" &&
+    value !== null &&
+    typeof (value as Record<string, unknown>).name === "string" &&
+    typeof (value as Record<string, unknown>).message === "string");
+
+const serializeError = (error: Error): string => {
+  const obj: Record<string, unknown> = {
+    name: error.name,
+    message: error.message,
+    stack: error.stack,
+  };
+
+  // Include any additional enumerable properties
+  for (const key in error) {
+    if (Object.prototype.hasOwnProperty.call(error, key)) {
+      obj[key] = (error as unknown as Record<string, unknown>)[key];
+    }
+  }
+
+  return JSON.stringify(obj, (_, value) => (typeof value === "bigint" ? value.toString() : value));
+};
+
 const convertArgsToString = (args: unknown[]): string =>
   args
-    .map((arg) =>
-      typeof arg === "object"
+    .map((arg) => {
+      if (isError(arg)) {
+        return serializeError(arg);
+      }
+      return typeof arg === "object"
         ? JSON.stringify(arg, (_, value) => (typeof value === "bigint" ? value.toString() : value))
-        : String(arg)
-    )
+        : String(arg);
+    })
     .join(" ");
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>

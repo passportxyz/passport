@@ -63,8 +63,6 @@ export const HashNullifierGenerator =
   };
 
 type HumanNetworkNullifierGeneratorOptions = {
-  clientPrivateKey: string;
-  relayUrl: string;
   localSecret: string;
   version: NullifierVersion;
 };
@@ -95,13 +93,11 @@ const createHumanNetworkNullifier = async ({
   localSecret,
   version,
   record,
-  ...humanNetworkOps
 }: HumanNetworkNullifierGeneratorOptions & { record: ProofRecord }) => {
   const value = JSON.stringify(objToSortedArray(record));
 
   const humanNetworkEncrypted = await humanNetworkOprf({
     value,
-    ...humanNetworkOps,
   });
 
   const hashedValue = hashValueWithSecret({
