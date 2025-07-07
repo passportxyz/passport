@@ -200,11 +200,11 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   const isEligible = !!pointsData?.is_eligible;
 
   const icons = [
-    {
-      link: "https://app.passport.xyz/",
-      icon: <ZeronymIcon />,
-      label: "Human Passport",
-    },
+    // {
+    //   link: "https://app.passport.xyz/",
+    //   icon: <ZeronymIcon />,
+    //   label: "Human Passport",
+    // },
     {
       link: "https://wallet.human.tech/",
       icon: <WalletIcon />,
