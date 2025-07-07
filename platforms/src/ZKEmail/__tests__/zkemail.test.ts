@@ -69,7 +69,7 @@ describe("ZKEmail Providers", () => {
       const result = await provider.verify(payload);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain("Not enough valid amazon proofs found");
+      expect(result.errors).toContain("No valid amazon proofs found");
     });
 
     it("should fail if no proofs are provided", async () => {
