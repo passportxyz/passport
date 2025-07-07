@@ -1,7 +1,7 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
+import * as op from "@1password/op-js";
 
-import { secretsManager } from "@gitcoin/passport-infra-libs";
 import { cluster } from "./cluster";
 import { stack, defaultTags } from "../lib/tags";
 
@@ -14,21 +14,7 @@ import {
   snsAlertsTopicArn,
 } from "./stacks";
 
-import { op } from "@1password/op-js";
-
-const current = aws.getCallerIdentity({});
-const regionData = aws.getRegion({});
-const DOCKER_IMAGE_TAG = `${process.env.DOCKER_IMAGE_TAG || ""}`;
-
 const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
-
-// Get HN Signer environment variables from 1Password
-const hnSignerEnvironment = secretsManager.getEnvironmentVars({
-  vault: "DevOps",
-  repo: "passport-xyz",
-  env: stack,
-  section: "hn-signer",
-});
 
 const logsRetention = Object({
   review: 1,
@@ -59,13 +45,11 @@ const hnSignerResources: Record<string, any> = {
 };
 
 // Docker image reference
-export const dockerHnSignerImage = pulumi
-  .all([current, regionData])
-  .apply(([acc, region]) => `mishtinetwork/signer:latest`);
+export const dockerHnSignerImage = `mishtinetwork/signer:latest`;
 
 // Create IAM role for ECS task
 const hnSignerRole = new aws.iam.Role("hn-signer-ecs-role", {
-  name: `hn-signer-ecs-role-${stack}`,
+  name: `hn-signer-ecs-role`,
   assumeRolePolicy: JSON.stringify({
     Version: "2012-10-17",
     Statement: [
@@ -78,8 +62,10 @@ const hnSignerRole = new aws.iam.Role("hn-signer-ecs-role", {
       },
     ],
   }),
-  inlinePolicies: {
-    PassportVCSecretsPolicy: pulumi.interpolate`{
+  inlinePolicies: [
+    {
+      name: "hn_signer_secrets_policy",
+      policy: pulumi.interpolate`{
       "Version": "2012-10-17",
       "Statement": [
         {
@@ -91,14 +77,15 @@ const hnSignerRole = new aws.iam.Role("hn-signer-ecs-role", {
         }
       ]
     }`,
-  },
+    },
+  ],
   managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"],
   tags: defaultTags,
 });
 
 // Create security group for HN Signer
 const hnSignerSG = new aws.ec2.SecurityGroup("hn-signer", {
-  name: `passport-hn-signer-${stack}`,
+  name: `passport-hn-signer`,
   vpcId: vpcId,
   ingress: [
     {
@@ -123,83 +110,85 @@ const hnSignerSG = new aws.ec2.SecurityGroup("hn-signer", {
 
 // CloudWatch log group
 const hnSignerLogGroup = new aws.cloudwatch.LogGroup("hn-signer", {
-  name: `/passport/${stack}/hn-signer`,
+  name: `/passport/hn-signer`,
   retentionInDays: logsRetention[stack],
   tags: defaultTags,
 });
 
 // ECS Task Definition
 const hnSignerTaskDefinition = new aws.ecs.TaskDefinition("hn-signer", {
-  family: `passport-hn-signer-${stack}`,
+  family: `passport-hn-signer`,
   requiresCompatibilities: ["FARGATE"],
   networkMode: "awsvpc",
   cpu: hnSignerResources[stack]["cpu"],
   memory: hnSignerResources[stack]["memory"],
   executionRoleArn: hnSignerRole.arn,
   taskRoleArn: hnSignerRole.arn,
-  containerDefinitions: pulumi
-    .all([dockerHnSignerImage, hnSignerLogGroup.name, hnSignerEnvironment])
-    .apply(([imageUri, logGroupName, envVars]) =>
-      JSON.stringify([
-        {
-          name: "hn-signer",
-          image: imageUri,
-          essential: true,
-          portMappings: [
-            {
-              containerPort: 3000,
-              protocol: "tcp",
-            },
-          ],
-          environment: [
-            ...envVars,
-            {
-              name: "SIGNER_ENV",
-              value: stack === "review" ? "dev" : "prod",
-            },
-            {
-              name: "SIGNER_PORT",
-              value: "3000",
-            },
-            {
-              name: "RATE_LIMIT_ENABLED",
-              value: "false",
-            },
-            {
-              name: "ALLOWED_METHODS",
-              value: "OPRFSecp256k1",
-            },
-          ],
-          secrets: [
-            {
-              name: "MISHTI_SIGNER_PRIVATE_KEY",
-              valueFrom: `${PASSPORT_VC_SECRETS_ARN}:HUMAN_NETWORK_CLIENT_PRIVATE_KEY::`,
-            },
-          ],
-          logConfiguration: {
-            logDriver: "awslogs",
-            options: {
-              "awslogs-group": logGroupName,
-              "awslogs-region": regionData.name,
-              "awslogs-stream-prefix": "ecs",
-            },
+  containerDefinitions: pulumi.all([dockerHnSignerImage, hnSignerLogGroup.name]).apply(([imageUri, logGroupName]) =>
+    JSON.stringify([
+      {
+        name: "hn-signer",
+        image: imageUri,
+        essential: true,
+        portMappings: [
+          {
+            containerPort: 3000,
+            protocol: "tcp",
           },
-          healthCheck: {
-            command: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"],
-            interval: 30,
-            timeout: 5,
-            retries: 3,
-            startPeriod: 60,
+        ],
+        environment: [
+          {
+            name: "SIGNER_ENV",
+            value: stack === "review" ? "dev" : "prod",
+          },
+          {
+            name: "SIGNER_PORT",
+            value: "3000",
+          },
+          {
+            name: "RATE_LIMIT_ENABLED",
+            value: "false",
+          },
+          {
+            name: "ALLOWED_METHODS",
+            value: "OPRFSecp256k1",
+          },
+          {
+            name: "MISHTI_RPC_URL",
+            value: "http://44.217.242.218:8081/",
+          },
+        ],
+        secrets: [
+          {
+            name: "MISHTI_SIGNER_PRIVATE_KEY",
+            valueFrom: `${PASSPORT_VC_SECRETS_ARN}:HUMAN_NETWORK_CLIENT_PRIVATE_KEY::`,
+          },
+        ],
+        logConfiguration: {
+          logDriver: "awslogs",
+          options: {
+            "awslogs-group": "/passport/hn-signer",
+            "awslogs-region": "us-west-2",
+            "awslogs-create-group": "true",
+            "awslogs-stream-prefix": "ecs",
           },
         },
-      ])
-    ),
+        healthCheck: {
+          command: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"],
+          interval: 30,
+          timeout: 5,
+          retries: 3,
+          startPeriod: 60,
+        },
+      },
+    ])
+  ),
   tags: defaultTags,
 });
 
 // Target Group for Private ALB
 const hnSignerTargetGroup = new aws.lb.TargetGroup("hn-signer", {
-  name: `passport-hn-signer-${stack}`,
+  name: `passport-hn-signer`,
   vpcId: vpcId,
   port: 3000,
   protocol: "HTTP",
@@ -234,7 +223,7 @@ const hnSignerListener = new aws.lb.Listener("hn-signer-port-86", {
 
 // ECS Service
 const hnSignerService = new aws.ecs.Service("hn-signer", {
-  name: `passport-hn-signer-${stack}`,
+  name: `passport-hn-signer`,
   cluster: cluster.arn,
   taskDefinition: hnSignerTaskDefinition.arn,
   launchType: "FARGATE",
@@ -266,7 +255,7 @@ const hnSignerAutoScalingTarget = new aws.appautoscaling.Target("hn-signer", {
 
 // Auto Scaling Policy
 const hnSignerAutoScalingPolicy = new aws.appautoscaling.Policy("hn-signer", {
-  name: `passport-hn-signer-${stack}`,
+  name: `passport-hn-signer`,
   policyType: "TargetTrackingScaling",
   resourceId: hnSignerAutoScalingTarget.resourceId,
   scalableDimension: hnSignerAutoScalingTarget.scalableDimension,
@@ -283,7 +272,7 @@ const hnSignerAutoScalingPolicy = new aws.appautoscaling.Policy("hn-signer", {
 
 // CloudWatch Alarms for monitoring
 const hnSignerErrorAlarm = new aws.cloudwatch.MetricAlarm("hn-signer-errors", {
-  name: `passport-hn-signer-${stack}-errors`,
+  name: `passport-hn-signer-errors`,
   comparisonOperator: "GreaterThanThreshold",
   evaluationPeriods: 2,
   metricName: "HTTPCode_Target_5XX_Count",
