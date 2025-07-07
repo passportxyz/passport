@@ -364,10 +364,9 @@ export type PLATFORM_ID =
   | "CleanHands"
   | "HumanIdPhone"
   | "HumanIdKyc"
-  | "Biometrics";
+  | "Biometrics"
   | "ZKEmail";
 
-  
 export type PLATFORM_CATEGORY = {
   name: string;
   icon?: React.ReactElement;
