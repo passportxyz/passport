@@ -200,11 +200,11 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   const isEligible = !!pointsData?.is_eligible;
 
   const icons = [
-    {
-      link: "https://app.passport.xyz/",
-      icon: <ZeronymIcon />,
-      label: "Human Passport",
-    },
+    // {
+    //   link: "https://app.passport.xyz/",
+    //   icon: <ZeronymIcon />,
+    //   label: "Human Passport",
+    // },
     {
       link: "https://wallet.human.tech/",
       icon: <WalletIcon />,
@@ -247,9 +247,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
           })}
 
           {scoreState.status !== "initial" && (
-            <a href="https://passport.human.tech/blog/points" target="_blank">
-              <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isEligible={isEligible} />
-            </a>
+            <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isEligible={isEligible} />
           )}
           <AccountCenter />
           {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
@@ -259,9 +257,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
       <div className={`flex md:hidden gap-4 items-center justify-between h-16 px-2 ${className}`}>
         <AccountCenter />
         {scoreState.status !== "initial" && (
-          <a href="https://passport.human.tech/blog/points" target="_blank">
-            <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isEligible={isEligible} />
-          </a>
+          <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isEligible={isEligible} />
         )}
 
         <Popover className=" text-gray-800">
