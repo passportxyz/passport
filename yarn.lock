@@ -25475,10 +25475,10 @@ vite-node@2.1.4:
     pathe "^1.1.2"
     vite "^5.0.0"
 
-vite-plugin-node-polyfills@^0.23.0:
-  version "0.23.1"
-  resolved "https://registry.yarnpkg.com/vite-plugin-node-polyfills/-/vite-plugin-node-polyfills-0.23.1.tgz#35d9bb7a3f4f4743a48a33ba0a09076432c3186a"
-  integrity sha512-hR2YlaMqVo2f/0w6V9YgaeKsIy8z5gEsMFHX8MQlh8ATEAbfI4EWjE6qnCvkZ9lyaXKoJD2rAwL/up8/Rzsjkg==
+vite-plugin-node-polyfills@0.22.0:
+  version "0.22.0"
+  resolved "https://registry.yarnpkg.com/vite-plugin-node-polyfills/-/vite-plugin-node-polyfills-0.22.0.tgz#d0afcf82eb985fc02244620d7cec1ddd1c6e0864"
+  integrity sha512-F+G3LjiGbG8QpbH9bZ//GSBr9i1InSTkaulfUHFa9jkLqVGORFBoqc2A/Yu5Mmh1kNAbiAeKeK+6aaQUf3x0JA==
   dependencies:
     "@rollup/plugin-inject" "^5.0.5"
     node-stdlib-browser "^1.2.0"
