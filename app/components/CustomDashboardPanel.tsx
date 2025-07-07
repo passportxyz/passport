@@ -129,7 +129,7 @@ const StandardCustomDashboardPanel = ({
   const { logo, body, customDashboardPanelTitle } = customization.dashboardPanel;
 
   return (
-    <div className={`${className} flex flex-col rounded-3xl text-color-4 bg-[#ffffff99] p-4 justify-between`}>
+    <div className={`${className} flex flex-col rounded-3xl text-color-4 bg-[#ffffff99] p-6 justify-between`}>
       <div className="flex flex-row items-center justify-end h-16">
         <div className="grow font-medium text-lg">{customDashboardPanelTitle}</div>
         <div className="flex bg-white p-2 rounded-md">
@@ -146,7 +146,7 @@ const StandardCustomDashboardPanel = ({
           </Tooltip>
         ) : null}
       </div>
-      {mainText}
+      <div className="py-4">{mainText}</div>
       <div className="flex items-center">
         <Button
           variant="custom"

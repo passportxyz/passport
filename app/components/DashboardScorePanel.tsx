@@ -136,7 +136,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
     linkHref?: string,
     button?: React.ReactNode
   ) => (
-    <div className="w-full h-full p-4 flex flex-col">
+    <div className="w-full h-full p-2 flex flex-col">
       <div className="flex flex-col h-full w-full">
         <div className="flex flex-col md:flex-row items-start justify-between flex-wrap">
           <div className="flex justify-start">
@@ -172,7 +172,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
 
   if (aboveThreshold && someChainUpToDate) {
     return (
-      <div className="w-full h-full p-4 flex flex-col">
+      <div className="w-full h-full p-2 flex flex-col">
         <div className="flex flex-col h-full w-full">
           <div className="flex flex-col md:flex-row items-start justify-between flex-wrap">
             <div className="flex justify-start">
