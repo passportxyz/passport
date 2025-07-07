@@ -5,9 +5,9 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/humanIdStampIcon.svg",
   platform: "HumanIdKyc",
   name: "Government ID",
-  description: "Verify your identity with government ID, powered by human.tech",
+  description: "Verify your identity with government ID",
   connectMessage: "Connect Account",
-  website: "https://human-id.org",
+  website: "https://human.tech",
   timeToGet: "10 minutes",
   price: "$5 + gas",
   guide: [

@@ -15,7 +15,7 @@ export const PlatformGuide = ({ sections, isMobile = false }: PlatformGuideProps
         <div key={sectionIndex} className={sectionIndex > 0 ? "mt-8" : ""}>
           {section.type === "steps" ? (
             <>
-              {section.title && <h3 className="text-xl font-semibold text-black mb-6">{section.title}</h3>}
+              <h3 className="text-xl font-semibold text-black mb-6">{section.title || "Step-by-step guide"}</h3>
               <div className="space-y-8">
                 {section.items.map((step, index) => (
                   <div key={index} className="flex gap-4">

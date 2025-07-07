@@ -433,7 +433,7 @@ export const GenericPlatform = ({
         isOpen={payloadModalIsOpen}
         onClose={() => setPayloadModalIsOpen(false)}
         title="Verification Response"
-        subheading="To preserve your privacy, error information is not stored; please share with Gitcoin support at your discretion."
+        subheading="To preserve your privacy, error information is not stored; please share with Human Passport support at your discretion."
         jsonOutput={verificationResponse}
       />
     </>

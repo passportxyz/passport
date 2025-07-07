@@ -22,7 +22,7 @@ export class HumanIdPhonePlatform extends BaseHumanIDPlatform {
       ),
       cta: {
         label: "Learn more",
-        url: "https://human-id.org",
+        url: "https://human.tech",
       },
     };
   }

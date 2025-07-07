@@ -60,7 +60,7 @@ export const PointsModule = ({ timeToGet, price, pointsGained = 0, totalPossible
                   <TimeIcon />
                 </div>
                 <div>
-                  <div className="text-xs text-color-9">Time to get</div>
+                  <div className="text-xs text-color-9">Time</div>
                   <div className="text-sm font-semibold text-color-4">{timeToGet}</div>
                 </div>
               </div>

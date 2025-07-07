@@ -97,7 +97,7 @@ export const DrawerHeader = ({
                   py={3}
                   px={4}
                 >
-                  View platform JSON
+                  View Stamp JSON
                 </MenuItem>
               )}
               {onRemoveAll && (
@@ -114,7 +114,7 @@ export const DrawerHeader = ({
                   py={3}
                   px={4}
                 >
-                  Remove all stamps
+                  Remove all credentials
                 </MenuItem>
               )}
             </MenuList>
