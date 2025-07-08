@@ -68,9 +68,6 @@ const useShouldDisplayPlatform = () => {
       // Feature Flag PHI Stamp
       if (process.env.NEXT_PUBLIC_FF_PHI_STAMP !== "on" && platform.platform === "PHI") return false;
 
-      // Feature Flag Holonym Stamp
-      if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP !== "on" && platform.platform === "Holonym") return false;
-
       if (process.env.NEXT_PUBLIC_FF_TRUSTALABS_STAMPS !== "on" && platform.platform === "TrustaLabs") return false;
 
       if (process.env.NEXT_PUBLIC_FF_OUTDID_STAMP !== "on" && platform.platform === "Outdid") return false;

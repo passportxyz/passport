@@ -15,8 +15,6 @@ import * as Google from "./Google/index.js";
 import * as Brightid from "./Brightid/index.js";
 import * as Coinbase from "./Coinbase/index.js";
 import * as GuildXYZ from "./GuildXYZ/index.js";
-import * as Holonym from "./Holonym/index.js";
-import * as PhoneVerification from "./PhoneVerification/index.js";
 import * as Idena from "./Idena/index.js";
 import * as Civic from "./Civic/index.js";
 import * as TrustaLabs from "./TrustaLabs/index.js";
@@ -57,8 +55,6 @@ const platforms: Record<string, PlatformConfig> = {
   GnosisSafe,
   Coinbase,
   GuildXYZ,
-  Holonym,
-  PhoneVerification,
   Idena,
   Civic,
   TrustaLabs,
@@ -67,8 +63,8 @@ const platforms: Record<string, PlatformConfig> = {
   Binance,
   CustomGithub,
   CleanHands,
-  HumanIdPhone,
   HumanIdKyc,
+  HumanIdPhone,
   Biometrics,
   ZKEmail,
 };

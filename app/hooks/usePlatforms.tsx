@@ -53,7 +53,7 @@ const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
       "Brightid",
       "TrustaLabs",
       "Ens",
-      "PhoneVerification",
+      "HumanIdPhone",
     ],
   },
   {
@@ -71,7 +71,7 @@ const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
       </svg>
     ),
     description: "Use your government-issued IDs or complete a KYC process with our partners to verify your identity.",
-    platforms: ["Coinbase", "Holonym", "Outdid", "Binance", "CleanHands", "HumanIdPhone", "HumanIdKyc"],
+    platforms: ["Coinbase", "HumanIdKyc", "Outdid", "Binance", "CleanHands", "HumanIdPhone"],
   },
   {
     name: "Social & Professional Platforms",

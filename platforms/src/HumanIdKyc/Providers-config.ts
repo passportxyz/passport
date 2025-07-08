@@ -2,7 +2,7 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { HumanIdKycProvider } from "./Providers/humanIdKyc.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/humanIdStampIcon.svg",
+  icon: "./assets/humanTechIcon.svg",
   platform: "HumanIdKyc",
   name: "Government ID",
   description: "Verify your identity with government ID, powered by human.tech",
@@ -56,7 +56,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     providers: [
       {
         title: "Government ID Holder",
-        name: "HumanIdKyc",
+        name: "HolonymGovIdProvider",
         description:
           "Complete identity verification using government-issued ID to prove uniqueness while maintaining privacy",
       },
