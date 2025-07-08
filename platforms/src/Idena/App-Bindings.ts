@@ -13,7 +13,7 @@ export class IdenaPlatform extends Platform {
 
   banner = {
     heading:
-      "Connect Idena to Passport XYZ for enhanced identity verification, confirming your human presence without sharing personal details. This guide simplifies the connection process.",
+      "Connect Idena to Human Passport for enhanced identity verification, confirming your human presence without sharing personal details. This guide simplifies the connection process.",
     cta: {
       label: "Help Guide",
       url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/idena-stamp",
