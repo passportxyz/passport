@@ -20,8 +20,6 @@ const {
   Brightid,
   Coinbase,
   GuildXYZ,
-  Holonym,
-  PhoneVerification,
   Idena,
   Civic,
   TrustaLabs,
@@ -164,17 +162,15 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
   });
 }
 
-if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP === "on") {
-  defaultPlatformMap.set("Holonym", {
-    platform: new Holonym.HolonymPlatform(),
-    platFormGroupSpec: Holonym.ProviderConfig,
-  });
+defaultPlatformMap.set("HumanIdKyc", {
+  platform: new HumanIdKyc.HumanIdKycPlatform(),
+  platFormGroupSpec: HumanIdKyc.ProviderConfig,
+});
 
-  defaultPlatformMap.set("PhoneVerification", {
-    platform: new PhoneVerification.PhoneVerificationPlatform(),
-    platFormGroupSpec: PhoneVerification.ProviderConfig,
-  });
-}
+defaultPlatformMap.set("HumanIdPhone", {
+  platform: new HumanIdPhone.HumanIdPhonePlatform(),
+  platFormGroupSpec: HumanIdPhone.ProviderConfig,
+});
 
 if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP === "on") {
   defaultPlatformMap.set("Idena", {
@@ -219,18 +215,6 @@ if (process.env.NEXT_PUBLIC_FF_CLEAN_HANDS_STAMP === "on") {
   defaultPlatformMap.set("CleanHands", {
     platform: new CleanHands.CleanHandsPlatform(),
     platFormGroupSpec: CleanHands.ProviderConfig,
-  });
-}
-
-if (process.env.NEXT_PUBLIC_FF_HUMAN_ID_STAMP === "on") {
-  defaultPlatformMap.set("HumanIdPhone", {
-    platform: new HumanIdPhone.HumanIdPhonePlatform(),
-    platFormGroupSpec: HumanIdPhone.ProviderConfig,
-  });
-
-  defaultPlatformMap.set("HumanIdKyc", {
-    platform: new HumanIdKyc.HumanIdKycPlatform(),
-    platFormGroupSpec: HumanIdKyc.ProviderConfig,
   });
 }
 

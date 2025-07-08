@@ -2,7 +2,7 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { HumanIdPhoneProvider } from "./Providers/humanIdPhone.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/humanIdStampIcon.svg",
+  icon: "./assets/humanTechIcon.svg",
   platform: "HumanIdPhone",
   name: "Phone Verification",
   description: "Verify your phone number, powered by human.tech",
@@ -51,7 +51,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
     providers: [
       {
         title: "Verified Phone Number",
-        name: "HumanIdPhone",
+        name: "HolonymPhone",
         description: "Confirm ownership of a unique phone number to prove human identity",
       },
     ],

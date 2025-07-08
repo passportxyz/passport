@@ -51,7 +51,12 @@ const variantClasses: Record<CardVariant, string> = {
     "bg-gradient-to-t from-background-2 to-background-3 border-background-3 shadow-[0px_0px_24px_0px] shadow-background-3",
 };
 
-const humanTechPlatforms = new Set<string>(["Proof of Clean Hands", "Holonym", "Biometrics"]);
+const humanTechPlatforms = new Set<string>([
+  "Proof of Clean Hands",
+  "Government ID",
+  "Phone Verification",
+  "Biometrics",
+]);
 const SecureDByHumanTech: React.FC = () => {
   return (
     <div className="flex flex-nowrap items-center rounded-full bg-white px-2 py-0.5 w-fit text-color-9 text-xs my-2">

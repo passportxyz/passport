@@ -21,14 +21,14 @@ const {
   Brightid,
   Coinbase,
   GuildXYZ,
-  Holonym,
-  PhoneVerification,
   Idena,
   Civic,
   TrustaLabs,
   Outdid,
   Binance,
   CustomGithub,
+  HumanIdPhone,
+  HumanIdKyc,
 } = platforms;
 
 type CustomPlatformTypeInfo = {
@@ -162,17 +162,15 @@ if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP === "on") {
   });
 }
 
-if (process.env.NEXT_PUBLIC_FF_HOLONYM_STAMP === "on") {
-  defaultPlatformMap.set("Holonym", {
-    platform: new Holonym.HolonymPlatform(),
-    platFormGroupSpec: Holonym.ProviderConfig,
-  });
+defaultPlatformMap.set("HumanIdKyc", {
+  platform: new HumanIdKyc.HumanIdKycPlatform(),
+  platFormGroupSpec: HumanIdKyc.ProviderConfig,
+});
 
-  defaultPlatformMap.set("PhoneVerification", {
-    platform: new PhoneVerification.PhoneVerificationPlatform(),
-    platFormGroupSpec: PhoneVerification.ProviderConfig,
-  });
-}
+defaultPlatformMap.set("HumanIdPhone", {
+  platform: new HumanIdPhone.HumanIdPhonePlatform(),
+  platFormGroupSpec: HumanIdPhone.ProviderConfig,
+});
 
 if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP === "on") {
   defaultPlatformMap.set("Idena", {

@@ -40,8 +40,8 @@ export const STAMP_PAGES: StampPage[] = [
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-binance-stamp",
       },
       {
-        name: "Holonym",
-        description: "Proven uniqueness using Holonym KYC with government ID or ePassport",
+        name: "HumanIdKyc",
+        description: "Proven uniqueness using HumanID KYC with government ID or ePassport",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-holonym-stamp",
       },
