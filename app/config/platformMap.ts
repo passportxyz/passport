@@ -32,6 +32,8 @@ const {
   HumanIdPhone,
   HumanIdKyc,
   Biometrics,
+
+  ZKEmail,
 } = platforms;
 
 type CustomPlatformTypeInfo = {
@@ -236,3 +238,13 @@ defaultPlatformMap.set("Biometrics", {
   platform: new Biometrics.BiometricsPlatform(),
   platFormGroupSpec: Biometrics.ProviderConfig,
 });
+
+if (process.env.NEXT_PUBLIC_FF_ZKEMAIL_STAMP === "on") {
+  defaultPlatformMap.set("ZKEmail", {
+    platform: new ZKEmail.ZKEmailPlatform({
+      clientId: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID,
+      redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CALLBACK,
+    }),
+    platFormGroupSpec: ZKEmail.ProviderConfig,
+  });
+}

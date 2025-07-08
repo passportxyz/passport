@@ -364,7 +364,8 @@ export type PLATFORM_ID =
   | "CleanHands"
   | "HumanIdPhone"
   | "HumanIdKyc"
-  | "Biometrics";
+  | "Biometrics"
+  | "ZKEmail";
 
 export type PLATFORM_CATEGORY = {
   name: string;
@@ -457,7 +458,13 @@ export type PROVIDER_ID =
   | "BinanceBABT2"
   | `DeveloperList#${string}#${string}`
   | "CleanHands"
-  | "Biometrics";
+  | "Biometrics"
+  | "ZKEmail#AmazonCasualPurchaser"
+  | "ZKEmail#AmazonRegularCustomer"
+  | "ZKEmail#AmazonHeavyUser"
+  | "ZKEmail#UberOccasionalRider"
+  | "ZKEmail#UberRegularRider"
+  | "ZKEmail#UberPowerUser";
 
 export type StampBit = {
   bit: number;

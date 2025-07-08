@@ -88,7 +88,7 @@ const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
       </svg>
     ),
     description: "Link your profiles from established social media and professional networking sites for verification.",
-    platforms: ["Github", "Linkedin", "Google", "Discord"],
+    platforms: ["Github", "Linkedin", "Google", "Discord", "ZKEmail"],
   },
   {
     name: "Biometric Verification",

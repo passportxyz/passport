@@ -18,7 +18,7 @@ Gitcoin Passport is a monorepo using Lerna and Yarn workspaces. It provides iden
 
 ## Prerequisites
 
-- Node.js v16 LTS
+- Node.js v20 LTS
 - Yarn (managed by corepack)
 
 ## Global Commands
@@ -60,15 +60,13 @@ yarn workspace @gitcoin/passport-embed build
 cd app/
 
 # Development
-yarn dev         # Start dev server on port 3000
+yarn start         # Start dev server on port 3000
 yarn build       # Production build
-yarn start:prod  # Run production build
+yarn prod-start  # Run production build
 
 # Testing (Vitest)
 yarn test               # Run all tests
 yarn test:watch         # Watch mode
-yarn test:coverage      # Coverage report
-yarn test:ci            # CI mode
 
 # Run specific test file
 yarn test components/Header.test.tsx
@@ -76,8 +74,7 @@ yarn test --run components/Header.test.tsx  # Single run
 
 # Linting
 yarn lint
-yarn lint:fix
-yarn format
+yarn prettier
 ```
 
 ### IAM Service
@@ -85,14 +82,11 @@ yarn format
 cd iam/
 
 # Development
-yarn dev     # Start on port 65535 with nodemon
+yarn debug     # Start on port 65535 with nodemon and inspect
 yarn start   # Production start
 
 # Testing (Jest)
 yarn test                          # All tests
-yarn test:watch                    # Watch mode
-yarn test:coverage                 # Coverage
-yarn test src/handlers/verify.test.ts  # Specific file
 
 # Build
 yarn build
@@ -104,13 +98,11 @@ yarn clean
 cd embed/
 
 # Development
-yarn dev     # Start with nodemon
+yarn debug     # Start with nodemon
 yarn start   # Production start
 
 # Testing (Jest)
 yarn test                     # All tests
-yarn test:watch               # Watch mode
-yarn test src/server.test.ts  # Specific file
 
 # Build
 yarn build
@@ -131,16 +123,13 @@ yarn test components/
 yarn test --reporter=verbose
 ```
 
-### Jest (IAM, Embed, etc.)
+### Jest (IAM, Embed, Platforms, etc.)
 ```bash
 # Run single test file
 yarn test path/to/test.ts
 
 # Run tests matching pattern
 yarn test --testNamePattern="should verify credential"
-
-# Run tests in watch mode for specific file
-yarn test:watch path/to/test.ts
 
 # Update snapshots
 yarn test -u
@@ -156,7 +145,7 @@ yarn build
 
 # 2. Test changes in app/
 cd ../app/
-yarn dev
+yarn start
 
 # 3. Run affected tests
 yarn test components/PlatformCard
@@ -168,7 +157,7 @@ yarn test components/PlatformCard
 yarn test
 
 # Or test specific packages
-yarn workspace @gitcoin/passport-app test:ci
+yarn workspace @gitcoin/passport-app test
 yarn workspace @gitcoin/passport-iam test
 ```
 
@@ -176,10 +165,10 @@ yarn workspace @gitcoin/passport-iam test
 ```bash
 # Run IAM with debugging
 cd iam/
-node --inspect yarn dev
+yarn debug
 
 # Check service logs
-yarn dev 2>&1 | tee debug.log
+yarn debug 2>&1 | tee debug.log
 ```
 
 ## Environment Setup

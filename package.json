@@ -76,13 +76,12 @@
   },
   "engines": {
     "yarn": ">=1.22.10",
-    "node": ">=16.0.0"
+    "node": ">=20.0.0"
   },
   "resolutions": {
     "csstype": "3.0.10",
     "lit": "^3.1.0",
-    "leveldown": "6.1.1",
-    "node-gyp": "^9.0.0",
+    "node-gyp": "^10.1.0",
     "did-session/uint8arrays": "^5.1.0",
     "dids/uint8arrays": "^5.1.0",
     "@didtools/**/uint8arrays": "^5.1.0"
