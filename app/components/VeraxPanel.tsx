@@ -15,14 +15,8 @@ import { OnchainSidebar } from "./OnchainSidebar";
 
 const VeraxLogo = () => (
   <svg width="64" height="56" viewBox="0 0 64 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M17.1082 0H0L15.8409 37.0131L24.395 17.7418L17.1082 0Z"
-      fill="rgb(var(--color-customization-background-1))"
-    />
-    <path
-      d="M46.5404 0H63.0907L40.7172 55.5197H23.5539L46.5404 0Z"
-      fill="rgb(var(--color-customization-background-1))"
-    />
+    <path d="M17.1082 0H0L15.8409 37.0131L24.395 17.7418L17.1082 0Z" fill="rgb(var(--color-text-4))" />
+    <path d="M46.5404 0H63.0907L40.7172 55.5197H23.5539L46.5404 0Z" fill="rgb(var(--color-text-4))" />
   </svg>
 );
 
