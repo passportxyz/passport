@@ -77,6 +77,20 @@ export function _checkShowOnboard(currentOnboardResetIndex: string) {
 }
 
 export function checkShowOnboard(): boolean {
+  const now = Date.now();
+  // This logic will make sure to return false if we are before the human points release date
+  if (process.env.NEXT_PUBLIC_HUMAN_POINTS_START_TIMESTAMP) {
+    const now = new Date();
+    const releaseDate = Number.parseInt(process.env.NEXT_PUBLIC_HUMAN_POINTS_START_TIMESTAMP.trim());
+
+    if (Number.isInteger(releaseDate)) {
+      const humanPointsReleaseDate = new Date(releaseDate * 1000);
+
+      if (now < humanPointsReleaseDate) {
+        return false;
+      }
+    }
+  }
   const currentOnboardResetIndex = process.env.NEXT_PUBLIC_ONBOARD_RESET_INDEX || "";
   return _checkShowOnboard(currentOnboardResetIndex);
 }
