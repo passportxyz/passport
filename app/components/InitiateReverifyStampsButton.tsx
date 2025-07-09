@@ -35,14 +35,14 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
   const successToast = () => {
     success({
       title: "Success",
-      message: "Your expired stamps have been reverified.",
+      message: "Your expired Stamps have been reverified.",
     });
   };
 
   const errorToast = (platform: string) => {
     failure({
       title: "Error",
-      message: `Failed to reverify stamps for ${platform}. Please double check eligibility and try again.`,
+      message: `Failed to reverify Stamps for ${platform}. Please double check eligibility and try again.`,
     });
   };
 

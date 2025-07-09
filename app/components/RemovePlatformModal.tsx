@@ -30,15 +30,16 @@ export const RemovePlatformModal = ({
 
   return (
     <ActionOrCancelModal
-      title="Remove Platform Stamps"
+      title="Remove Credentials"
       isOpen={isOpen}
       onClose={onClose}
       onButtonClick={handleRemove}
       buttonText="Remove All"
     >
       <p className="text-color-4">
-        Are you sure you want to remove all stamps from{" "}
-        <span className="font-semibold text-color-2">{platformName}</span>? This will remove {providerIds.length} stamp
+        Are you sure you want to remove all credentials from{" "}
+        <span className="font-semibold text-color-2">{platformName}</span>? This will remove {providerIds.length}{" "}
+        credentials
         {providerIds.length !== 1 ? "s" : ""} and cannot be undone.
       </p>
     </ActionOrCancelModal>

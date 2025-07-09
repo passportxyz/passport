@@ -5,7 +5,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/humanTechIcon.svg",
   platform: "CleanHands",
   name: "Proof of Clean Hands",
-  description: "Prove you're not on sanctions lists, powered by human.tech",
+  description: "Prove you're not on sanctions lists",
   connectMessage: "Verify Account",
   isEVM: true,
   timeToGet: "10 minutes",

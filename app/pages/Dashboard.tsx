@@ -173,7 +173,7 @@ export default function Dashboard() {
     if (oneClickRefresh && oneClickRefresh === "true") {
       success({
         title: "Success",
-        message: "Your stamps are verified!",
+        message: "Your Stamps are verified!",
       });
     } else if (oneClickRefresh && oneClickRefresh === "false") {
       failure({

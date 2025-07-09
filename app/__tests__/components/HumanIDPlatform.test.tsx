@@ -70,7 +70,7 @@ class MockHumanIDPlatform {
     content: React.createElement("div", {}, "Connect your wallet and verify your phone number through Human ID"),
     cta: {
       label: "Learn more",
-      url: "https://human-id.org",
+      url: "https://human.tech",
     },
   };
 
@@ -283,7 +283,7 @@ describe("HumanID Platform Integration", () => {
       expect(platform.banner.heading).toContain("Human ID Phone Verification");
       expect(platform.banner.cta).toEqual({
         label: "Learn more",
-        url: "https://human-id.org",
+        url: "https://human.tech",
       });
     });
 

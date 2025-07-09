@@ -5,9 +5,9 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/humanTechIcon.svg",
   platform: "HumanIdPhone",
   name: "Phone Verification",
-  description: "Verify your phone number, powered by human.tech",
+  description: "Verify your phone number",
   connectMessage: "Connect Account",
-  website: "https://human-id.org",
+  website: "https://human.tech",
   timeToGet: "5 minutes",
   price: "$5",
   guide: [

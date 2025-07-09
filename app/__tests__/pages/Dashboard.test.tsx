@@ -90,7 +90,7 @@ describe("dashboard notifications", () => {
         </ChakraProvider>
       </QueryClientProvider>
     );
-    expect(screen.getByText("Your stamps are verified!")).toBeInTheDocument();
+    expect(screen.getByText("Your Stamps are verified!")).toBeInTheDocument();
   });
   it("should show error toast when stamps aren't verified", async () => {
     localStorage.setItem("successfulRefresh", "false");

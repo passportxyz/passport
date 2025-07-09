@@ -62,8 +62,8 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
       <div className="flex items-center w-full">
         <span className="grow font-medium">{customTitle || "Unique Humanity Score"}</span>
         <Tooltip className="px-0 self-start">
-          Your Unique Humanity Score is based out of 100 and measures your uniqueness. The current passing threshold is{" "}
-          {threshold}. Scores may vary across different apps, especially due to abuse or attacks on the service.
+          Your Unique Humanity Score measures your uniqueness. The current passing threshold is {threshold}. Scores may
+          vary across different apps, as partners can weight Stamps differently.
         </Tooltip>
       </div>
       <div className="flex grow items-center align-middle text-xl mt-6 mb-10">
@@ -212,7 +212,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
           </span>
           <Hyperlink href="https://www.passport.xyz/ecosystem" className="font-normal text-gray-500 pl-4">
             <span className="text-nowrap">Here&apos;s what you can</span>{" "}
-            <span className="text-nowrap">do with your passport.</span>
+            <span className="text-nowrap">do with your Passport.</span>
           </Hyperlink>
         </div>
       </div>
