@@ -187,6 +187,17 @@ const hnSignerTargetGroup = new aws.lb.TargetGroup("hn-signer", {
   port: 3000,
   protocol: "HTTP",
   targetType: "ip",
+  healthCheck: {
+    enabled: true,
+    path: "/",
+    port: "3000",
+    protocol: "HTTP",
+    interval: 30,
+    timeout: 5,
+    healthyThreshold: 2,
+    unhealthyThreshold: 5,
+    matcher: "200-499",
+  },
   tags: defaultTags,
 });
 
