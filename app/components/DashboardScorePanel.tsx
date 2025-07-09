@@ -62,8 +62,8 @@ export const DashboardScorePanel = ({ className }: { className?: string }) => {
       <div className="flex items-center w-full">
         <span className="grow font-medium">{customTitle || "Unique Humanity Score"}</span>
         <Tooltip className="px-0 self-start">
-          Your Unique Humanity Score measures your uniqueness. The current passing threshold is{" "}
-          {threshold}. Scores may vary across different apps, as partners can weight Stamps differently.
+          Your Unique Humanity Score measures your uniqueness. The current passing threshold is {threshold}. Scores may
+          vary across different apps, as partners can weight Stamps differently.
         </Tooltip>
       </div>
       <div className="flex grow items-center align-middle text-xl mt-6 mb-10">
