@@ -93,7 +93,7 @@ function App({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <link rel="shortcut icon" href="/favicon.png" />
-        <title>Passport XYZ</title>
+        <title>Human Passport</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
       </Head>
       <Web3Context>

@@ -102,7 +102,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (customization.key !== DEFAULT_CUSTOMIZATION_KEY) {
-      document.title = `Passport XYZ | ${
+      document.title = `Human Passport | ${
         customization.key.charAt(0).toUpperCase() + customization.key.slice(1)
       } Dashboard`;
       TagManager.dataLayer({
@@ -111,7 +111,7 @@ export default function Dashboard() {
         },
       });
     } else {
-      document.title = `Passport XYZ | Dashboard`;
+      document.title = `Human Passport | Dashboard`;
       TagManager.dataLayer({
         dataLayer: {
           event: "default-dashboard-view",
