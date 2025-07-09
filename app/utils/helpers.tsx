@@ -76,7 +76,35 @@ export function _checkShowOnboard(currentOnboardResetIndex: string) {
   return onBoardOlderThanThreeMonths;
 }
 
+/**
+ *
+ * @returns true if we are before the release date or false if not . or if no release date was configured
+ */
+export function beforeHumanPointsRelease() {
+  // This logic will make sure to return false if we are before the human points release date
+  if (process.env.NEXT_PUBLIC_HUMAN_POINTS_START_TIMESTAMP) {
+    const now = Date.now();
+    const releaseDate = Number.parseInt(process.env.NEXT_PUBLIC_HUMAN_POINTS_START_TIMESTAMP.trim());
+
+    if (Number.isInteger(releaseDate)) {
+      const humanPointsReleaseDateInMillis = releaseDate * 1000;
+      console.log("geri", {
+        rel: humanPointsReleaseDateInMillis,
+        now,
+      });
+      if (now < humanPointsReleaseDateInMillis) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 export function checkShowOnboard(): boolean {
+  const now = Date.now();
+  if (beforeHumanPointsRelease()) {
+    return false;
+  }
   const currentOnboardResetIndex = process.env.NEXT_PUBLIC_ONBOARD_RESET_INDEX || "";
   return _checkShowOnboard(currentOnboardResetIndex);
 }
