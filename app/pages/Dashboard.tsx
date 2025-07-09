@@ -11,7 +11,6 @@ import BodyWrapper from "../components/BodyWrapper";
 import PageWidthGrid from "../components/PageWidthGrid";
 import HeaderContentFooterGrid from "../components/HeaderContentFooterGrid";
 import { DashboardScorePanel, DashboardScoreExplanationPanel } from "../components/DashboardScorePanel";
-import { OnchainSidebar } from "../components/OnchainSidebar";
 import { useSupportBanners } from "../hooks/useSupportBanners";
 
 // --Chakra UI Elements
@@ -78,7 +77,6 @@ export default function Dashboard() {
   const { address } = useAccount();
   const { initiateVerification } = useOneClickVerification();
   const { success, failure } = useMessage();
-  const [showOnchainSidebar, setShowOnchainSidebar] = React.useState(false);
   const { banners } = useSupportBanners();
 
   // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
@@ -286,17 +284,6 @@ export default function Dashboard() {
                 isLoadingPassport == IsLoadingPassportState.FailedToConnect
               }
             />
-            {/* <span className="col-start-1 col-end-5 font-heading text-3xl">Collected Stamps</span> */}
-            {/* <DashboardValidStampsPanel className="col-span-full" /> */}
-            {/* <ExpiredStampsPanel className="col-span-full" /> */}
-
-            {/* Dev button for onchain sidebar */}
-            <div className="col-span-full mt-8 mb-8">
-              <button onClick={() => setShowOnchainSidebar(true)} className="bg-blue-500 text-white px-4 py-2 rounded">
-                Open Onchain Sidebar (Dev)
-              </button>
-            </div>
-            <OnchainSidebar isOpen={showOnchainSidebar} onClose={() => setShowOnchainSidebar(false)} />
           </PageWidthGrid>
         </BodyWrapper>
         {/* This footer contains dark colored text and dark images */}
