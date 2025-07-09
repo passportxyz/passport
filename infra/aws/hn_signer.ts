@@ -133,22 +133,11 @@ const hnSignerTaskDefinition = new aws.ecs.TaskDefinition("hn-signer", {
         portMappings: [
           {
             containerPort: 3000,
+            hostPort: 3000,
             protocol: "tcp",
           },
         ],
         environment: [
-          {
-            name: "SIGNER_ENV",
-            value: stack === "review" ? "dev" : "prod",
-          },
-          {
-            name: "SIGNER_PORT",
-            value: "3000",
-          },
-          {
-            name: "RATE_LIMIT_ENABLED",
-            value: "false",
-          },
           {
             name: "ALLOWED_METHODS",
             value: "OPRFSecp256k1",
@@ -156,6 +145,18 @@ const hnSignerTaskDefinition = new aws.ecs.TaskDefinition("hn-signer", {
           {
             name: "MISHTI_RPC_URL",
             value: "http://44.217.242.218:8081/",
+          },
+          {
+            name: "RATE_LIMIT_ENABLED",
+            value: "false",
+          },
+          {
+            name: "SIGNER_ENV",
+            value: stack === "review" ? "dev" : "prod",
+          },
+          {
+            name: "SIGNER_PORT",
+            value: "3000",
           },
         ],
         secrets: [
@@ -173,13 +174,6 @@ const hnSignerTaskDefinition = new aws.ecs.TaskDefinition("hn-signer", {
             "awslogs-stream-prefix": "ecs",
           },
         },
-        healthCheck: {
-          command: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"],
-          interval: 30,
-          timeout: 5,
-          retries: 3,
-          startPeriod: 60,
-        },
       },
     ])
   ),
@@ -193,17 +187,6 @@ const hnSignerTargetGroup = new aws.lb.TargetGroup("hn-signer", {
   port: 3000,
   protocol: "HTTP",
   targetType: "ip",
-  healthCheck: {
-    enabled: true,
-    path: "/health",
-    port: "3000",
-    protocol: "HTTP",
-    interval: 30,
-    timeout: 5,
-    healthyThreshold: 2,
-    unhealthyThreshold: 5,
-    matcher: "200",
-  },
   tags: defaultTags,
 });
 
