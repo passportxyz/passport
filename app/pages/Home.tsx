@@ -2,22 +2,19 @@
 import React, { useEffect, useState } from "react";
 
 // --- Components
-import PageRoot from "../components/PageRoot";
 import SIWEButton from "../components/SIWEButton";
 import { beforeHumanPointsRelease, isServerOnMaintenance } from "../utils/helpers";
-import Header from "../components/Header";
 
 import { DEFAULT_CUSTOMIZATION_KEY, useCustomization } from "../hooks/useCustomization";
-import WelcomeFooter from "../components/WelcomeFooter";
 
 import { useLoginFlow } from "../hooks/useLoginFlow";
-import { useAccount } from "wagmi";
 import { InitialScreenWelcome } from "../components/InitialScreenLayout";
 
 export default function Home() {
   const { isLoggingIn, signIn, loginStep } = useLoginFlow();
   const [enableEthBranding, setEnableEthBranding] = useState(false);
   const customization = useCustomization();
+  const threshold = customization.scorer?.threshold;
 
   useEffect(() => {
     const usingCustomization = customization.key !== DEFAULT_CUSTOMIZATION_KEY;
@@ -36,7 +33,8 @@ export default function Home() {
       />
       <div className="mb-4 text-2xl leading-none md:text-6xl font-bold font-alt">Verify Your Humanity, Your Way</div>
       <div className="max-w-md text-lg">
-        Collect Stamps, build your Unique Humanity Score of 20+, and access the internet built for humans.
+        Collect Stamps, build your Unique Humanity Score of {!!threshold ? threshold : "20+"}, and access the internet
+        built for humans.
       </div>
 
       <div className="flex justify-center md:justify-start items-center w-full mb-8">

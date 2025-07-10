@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 
 // --- Utils
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
-import { useNavigateToPage } from "../hooks/useCustomization";
+import { useCustomization, useNavigateToPage } from "../hooks/useCustomization";
 import { useAccount } from "wagmi";
 import { InitialScreenWelcome } from "../components/InitialScreenLayout";
 import { Button } from "../components/Button";
@@ -15,6 +15,8 @@ export default function Welcome() {
 
   const { dbAccessTokenStatus } = useDatastoreConnectionContext();
   const { address } = useAccount();
+  const { scorer } = useCustomization();
+  const threshold = scorer?.threshold;
 
   const navigateToPage = useNavigateToPage();
 
@@ -35,7 +37,8 @@ export default function Welcome() {
         </p>
         <p className="pt-4">
           <span className="font-bold">Unique Humanity Points</span> prove you&apos;re human and unlock access to web3
-          programs. You need a score of 20+ to get verified and start accessing web3 opportunities.
+          programs. You need a score of {!!threshold ? threshold : "20+"} to get verified and start accessing web3
+          opportunities.
         </p>
         <p className="pt-4">
           <span className="font-bold">HUMN Points</span> are your rewards balance. These accumulate in your account
