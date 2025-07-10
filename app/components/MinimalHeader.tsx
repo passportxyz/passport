@@ -206,15 +206,15 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
     //   label: "Human Passport",
     // },
     {
-      link: "https://wallet.human.tech/",
+      link: "https://humansignon.com/",
       icon: <WalletIcon />,
       label: "Human Wallet",
     },
-    {
-      link: "https://bridge.human.tech/",
-      icon: <BridgeIcon />,
-      label: "Aztec Bridge",
-    },
+    // {
+    //   link: "https://bridge.human.tech/",
+    //   icon: <BridgeIcon />,
+    //   label: "Aztec Bridge",
+    // },
   ];
 
   return (
