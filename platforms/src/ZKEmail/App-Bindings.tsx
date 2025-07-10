@@ -2,6 +2,7 @@ import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
 import { Platform } from "../utils/platform.js";
 import { AMAZON_GROUP, UBER_GROUP } from "./types.js";
+import { Blueprint, Gmail, Proof } from "@zk-email/sdk";
 
 export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
@@ -48,6 +49,61 @@ export class ZKEmailPlatform extends Platform {
     };
   }
 
+  private async fetchAndProveEmails(gmail: Gmail, blueprints: Blueprint[]): Promise<string[]> {
+    try {
+      // Add null check for blueprints
+      if (!blueprints || blueprints.length === 0) {
+        return [];
+      }
+
+      const emailResponses = await gmail.fetchEmails(blueprints);
+
+      // Add null check and ensure emailResponses is an array
+      if (!emailResponses || !Array.isArray(emailResponses)) {
+        return [];
+      }
+
+      // Safely fetch additional emails
+      try {
+        let moreEmails = await gmail.fetchMore();
+        while (moreEmails && Array.isArray(moreEmails) && moreEmails.length > 0) {
+          emailResponses.push(...moreEmails);
+          moreEmails = await gmail.fetchMore();
+        }
+      } catch {
+        // Continue with the emails we have if fetchMore fails
+      }
+
+      const filteredEmails = emailResponses.filter((email) =>
+        blueprints.some((blueprint) => email.decodedContents.includes(blueprint.props.senderDomain))
+      );
+
+      const proofs = await Promise.all(
+        filteredEmails.map(async (rawEmail) => {
+          try {
+            const blueprint = blueprints.find((blueprint) =>
+              rawEmail.decodedContents.includes(blueprint.props.senderDomain)
+            );
+            if (!blueprint) {
+              return undefined;
+            }
+            await blueprint.validateEmail(rawEmail.decodedContents);
+            const proof = await blueprint.createProver().generateProof(rawEmail.decodedContents);
+            return proof;
+          } catch {
+            // Silently skip failed proof generations
+            return undefined;
+          }
+        })
+      );
+
+      return proofs.filter((p) => p !== undefined).map((p: Proof) => p.packProof());
+    } catch {
+      // Return empty array if entire operation fails
+      return [];
+    }
+  }
+
   private async getZkEmailSdk(): Promise<typeof import("@zk-email/sdk")> {
     if (!this.zkEmailSdk) {
       // Dynamic import to avoid build-time slowness
@@ -59,7 +115,8 @@ export class ZKEmailPlatform extends Platform {
   async handleLoginAndProve(): Promise<void> {
     const { initZkEmailSdk, Gmail, LoginWithGoogle } = await this.getZkEmailSdk();
 
-    const loginWithGoogle = new LoginWithGoogle({ clientId: this.clientId });
+    // const loginWithGoogle = new LoginWithGoogle({ clientId: this.clientId });
+    const loginWithGoogle = new LoginWithGoogle();
     const gmail = new Gmail(loginWithGoogle);
     if (!loginWithGoogle.accessToken) {
       await loginWithGoogle.authorize({
@@ -68,76 +125,27 @@ export class ZKEmailPlatform extends Platform {
       });
     }
 
-    const sdk = initZkEmailSdk({});
+    const sdk = initZkEmailSdk({ logging: { enabled: true, level: "debug" } });
 
-    const amazonGroup = await sdk.getBlueprintGroupById(AMAZON_GROUP);
-    const amazonBlueprints = await amazonGroup.fetchBlueptrints();
-
-    const uberGroup = await sdk.getBlueprintGroupById(UBER_GROUP);
-    const uberBlueprints = await uberGroup.fetchBlueptrints();
-
-    // fetch uber emails
-    const uberEmailResponses = await gmail.fetchEmails(uberBlueprints);
-    let moreUberEmails = await gmail.fetchMore();
-    while (moreUberEmails.length > 0) {
-      uberEmailResponses.push(...moreUberEmails);
-      moreUberEmails = await gmail.fetchMore();
+    // Process Amazon emails with graceful error handling
+    try {
+      const amazonGroup = await sdk.getBlueprintGroupById(AMAZON_GROUP);
+      const amazonBlueprints = await amazonGroup.fetchBlueptrints();
+      this.amazonProofs = await this.fetchAndProveEmails(gmail, amazonBlueprints);
+    } catch {
+      // Silently fail and continue with empty Amazon proofs
+      this.amazonProofs = [];
     }
-    const filteredUberEmails = uberEmailResponses.filter((email) =>
-      uberBlueprints.some((blueprint) => email.decodedContents.includes(blueprint.props.senderDomain))
-    );
 
-    // fetch amazon emails
-    const amazonEmailResponses = await gmail.fetchEmails(amazonBlueprints);
-    let moreAmazonEmails = await gmail.fetchMore();
-    while (moreAmazonEmails.length > 0) {
-      amazonEmailResponses.push(...moreAmazonEmails);
-      moreAmazonEmails = await gmail.fetchMore();
+    // Process Uber emails with graceful error handling
+    try {
+      const uberGroup = await sdk.getBlueprintGroupById(UBER_GROUP);
+      const uberBlueprints = await uberGroup.fetchBlueptrints();
+      this.uberProofs = await this.fetchAndProveEmails(gmail, uberBlueprints);
+    } catch {
+      // Silently fail and continue with empty Uber proofs
+      this.uberProofs = [];
     }
-    const filteredAmazonEmails = amazonEmailResponses.filter((email) =>
-      amazonBlueprints.some((blueprint) => email.decodedContents.includes(blueprint.props.senderDomain))
-    );
-
-    // validate uber emails and proof valid emails
-    const uberProofs = await Promise.all(
-      filteredUberEmails.map(async (rawEmail) => {
-        try {
-          const uberBlueprint = uberBlueprints.find((blueprint) =>
-            rawEmail.decodedContents.includes(blueprint.props.senderDomain)
-          );
-          if (!uberBlueprint) {
-            return undefined;
-          }
-          await uberBlueprint.validateEmail(rawEmail.decodedContents);
-          const proof = await uberBlueprint.createProver().generateProof(rawEmail.decodedContents);
-          return proof;
-        } catch (err: unknown) {
-          return undefined;
-        }
-      })
-    );
-
-    // validate amazon emails and proof valid emails
-    const amazonProofs = await Promise.all(
-      filteredAmazonEmails.map(async (rawEmail) => {
-        try {
-          const amazonBlueprint = amazonBlueprints.find((blueprint) =>
-            rawEmail.decodedContents.includes(blueprint.props.senderDomain)
-          );
-          if (!amazonBlueprint) {
-            return undefined;
-          }
-          await amazonBlueprint.validateEmail(rawEmail.decodedContents);
-          const proof = await amazonBlueprint.createProver().generateProof(rawEmail.decodedContents);
-          return proof;
-        } catch (err: unknown) {
-          return undefined;
-        }
-      })
-    );
-
-    this.uberProofs = uberProofs.filter((p) => p !== undefined).map((p) => p.packProof());
-    this.amazonProofs = amazonProofs.filter((p) => p !== undefined).map((p) => p.packProof());
   }
 
   async getProviderPayload(_appContext: AppContext): Promise<ProviderPayload> {

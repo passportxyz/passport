@@ -23,7 +23,7 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect to your email to verify you took Uber trips and Amazon orders.",
   connectMessage: "Connect Account",
   website: "https://www.zk.email/",
-  timeToGet: "2-5 min",
+  timeToGet: "2-10 min",
   price: "Free",
   guide: [
     {
