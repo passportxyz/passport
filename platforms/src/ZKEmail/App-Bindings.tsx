@@ -6,6 +6,7 @@ import { AMAZON_GROUP, UBER_GROUP } from "./types.js";
 export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
   path = "ZKEmail";
+  clientId: string = null;
 
   private zkEmailSdk: typeof import("@zk-email/sdk") | null = null;
 
@@ -14,6 +15,7 @@ export class ZKEmailPlatform extends Platform {
 
   constructor(options: PlatformOptions = {}) {
     super();
+    this.clientId = options.clientId as string;
     this.banner = {
       heading: "To add the ZKEmail Stamp to your Passport...",
       content: (
@@ -57,7 +59,7 @@ export class ZKEmailPlatform extends Platform {
   async handleLoginAndProve(): Promise<void> {
     const { initZkEmailSdk, Gmail, LoginWithGoogle } = await this.getZkEmailSdk();
 
-    const loginWithGoogle = new LoginWithGoogle();
+    const loginWithGoogle = new LoginWithGoogle({ clientId: this.clientId });
     const gmail = new Gmail(loginWithGoogle);
     if (!loginWithGoogle.accessToken) {
       await loginWithGoogle.authorize({
