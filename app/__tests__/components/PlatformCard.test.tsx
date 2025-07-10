@@ -4,7 +4,7 @@ import { screen, render } from "@testing-library/react";
 import { PlatformCard } from "../../components/PlatformCard";
 import { CeramicContext, CeramicContextState } from "../../context/ceramicContext";
 import { ScorerContext, ScorerContextState } from "../../context/scorerContext";
-import { makeTestCeramicContext } from "../../__test-fixtures__/contextTestHelpers";
+import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { PLATFORM_ID } from "@gitcoin/passport-types";
 import { usePlatforms } from "../../hooks/usePlatforms";
 
@@ -59,9 +59,9 @@ describe("<PlatformCard />", () => {
     vi.mocked(usePlatforms).mockReturnValue(mockUsePlatforms as any);
   });
 
-  describe("Deduplication Label Display", () => {
+  describe.only("Deduplication Label Display", () => {
     // TODO #3502: unskip once designs are clear
-    it.skip("should display deduplication label when stamp is verified but has 0 points due to deduplication", () => {
+    it.only("should display deduplication label when stamp is verified but has 0 points due to deduplication", () => {
       // Mock a verified stamp (has credential) but with 0 earned points
       const ceramicContextWithDedupStamp = {
         ...mockCeramicContext,
@@ -101,17 +101,11 @@ describe("<PlatformCard />", () => {
       const mockOnOpen = vi.fn();
       const mockSetCurrentPlatform = vi.fn();
 
-      render(
-        <CeramicContext.Provider value={ceramicContextWithDedupStamp}>
-          <ScorerContext.Provider value={scorerContextWithDedup as ScorerContextState}>
-            <PlatformCard
-              i={0}
-              platform={dedupPlatform}
-              onOpen={mockOnOpen}
-              setCurrentPlatform={mockSetCurrentPlatform}
-            />
-          </ScorerContext.Provider>
-        </CeramicContext.Provider>
+      renderWithContext(
+        ceramicContextWithDedupStamp,
+        <PlatformCard i={0} platform={dedupPlatform} onOpen={mockOnOpen} setCurrentPlatform={mockSetCurrentPlatform} />,
+        {},
+        scorerContextWithDedup
       );
 
       // Test that deduplication badge is clickable link to support docs
@@ -128,25 +122,24 @@ describe("<PlatformCard />", () => {
     });
 
     it("should not display deduplication label for unverified stamps", () => {
-      render(
-        <CeramicContext.Provider value={mockCeramicContext}>
-          <ScorerContext.Provider value={mockScorerContext as ScorerContextState}>
-            <PlatformCard
-              i={0}
-              platform={defaultPlatform}
-              onOpen={mockOnOpen}
-              setCurrentPlatform={mockSetCurrentPlatform}
-            />
-          </ScorerContext.Provider>
-        </CeramicContext.Provider>
+      renderWithContext(
+        mockCeramicContext,
+
+        <PlatformCard
+          i={0}
+          platform={defaultPlatform}
+          onOpen={mockOnOpen}
+          setCurrentPlatform={mockSetCurrentPlatform}
+        />,
+        {},
+        mockScorerContext
       );
 
       expect(screen.queryByTestId("deduped-label")).not.toBeInTheDocument();
       expect(screen.getByTestId("connect-button")).toBeInTheDocument();
     });
 
-    // TODO #3502: unskip when designs are clear
-    it.skip("should not display deduplication label for verified stamps with earned points", () => {
+    it("should not display deduplication label for verified stamps with earned points", () => {
       const ceramicContextWithVerifiedStamp = {
         ...mockCeramicContext,
         allProvidersState: {
@@ -169,25 +162,23 @@ describe("<PlatformCard />", () => {
 
       vi.mocked(usePlatforms).mockReturnValue(createMockUsePlatforms() as any);
 
-      render(
-        <CeramicContext.Provider value={ceramicContextWithVerifiedStamp}>
-          <ScorerContext.Provider value={mockScorerContext as ScorerContextState}>
-            <PlatformCard
-              i={0}
-              platform={verifiedPlatform}
-              onOpen={mockOnOpen}
-              setCurrentPlatform={mockSetCurrentPlatform}
-            />
-          </ScorerContext.Provider>
-        </CeramicContext.Provider>
+      renderWithContext(
+        ceramicContextWithVerifiedStamp,
+        <PlatformCard
+          i={0}
+          platform={verifiedPlatform}
+          onOpen={mockOnOpen}
+          setCurrentPlatform={mockSetCurrentPlatform}
+        />,
+        {},
+        mockScorerContext
       );
 
       expect(screen.queryByTestId("deduped-label")).not.toBeInTheDocument();
       expect(screen.getByTestId("verified-label")).toBeInTheDocument();
     });
 
-    // TODO #3502: unskip when designs are clear
-    it.skip("should handle multiple providers where some are deduplicated", () => {
+    it("should handle multiple providers where some are deduplicated", () => {
       const ceramicContextWithMixedStamps = {
         ...mockCeramicContext,
         allProvidersState: {
@@ -231,17 +222,11 @@ describe("<PlatformCard />", () => {
 
       vi.mocked(usePlatforms).mockReturnValue(createMockUsePlatforms(["GithubContributor", "GithubFollower"]) as any);
 
-      render(
-        <CeramicContext.Provider value={ceramicContextWithMixedStamps}>
-          <ScorerContext.Provider value={scorerContextWithMixedScores as ScorerContextState}>
-            <PlatformCard
-              i={0}
-              platform={mixedPlatform}
-              onOpen={mockOnOpen}
-              setCurrentPlatform={mockSetCurrentPlatform}
-            />
-          </ScorerContext.Provider>
-        </CeramicContext.Provider>
+      renderWithContext(
+        ceramicContextWithMixedStamps,
+        <PlatformCard i={0} platform={mixedPlatform} onOpen={mockOnOpen} setCurrentPlatform={mockSetCurrentPlatform} />,
+        {},
+        scorerContextWithMixedScores
       );
 
       // Should show as verified since some stamps have points
@@ -249,8 +234,7 @@ describe("<PlatformCard />", () => {
       expect(screen.queryByTestId("deduped-label")).not.toBeInTheDocument();
     });
 
-    // TODO #3502: unskip when designs are clear
-    it.skip("should display deduplication label when all verified stamps are deduplicated", () => {
+    it("should display deduplication label when all verified stamps are deduplicated", () => {
       const ceramicContextWithAllDedup = {
         ...mockCeramicContext,
         allProvidersState: {
@@ -301,17 +285,16 @@ describe("<PlatformCard />", () => {
       const mockOnOpen = vi.fn();
       const mockSetCurrentPlatform = vi.fn();
 
-      render(
-        <CeramicContext.Provider value={ceramicContextWithAllDedup}>
-          <ScorerContext.Provider value={scorerContextAllDedup as ScorerContextState}>
-            <PlatformCard
-              i={0}
-              platform={allDedupPlatform}
-              onOpen={mockOnOpen}
-              setCurrentPlatform={mockSetCurrentPlatform}
-            />
-          </ScorerContext.Provider>
-        </CeramicContext.Provider>
+      renderWithContext(
+        ceramicContextWithAllDedup,
+        <PlatformCard
+          i={0}
+          platform={allDedupPlatform}
+          onOpen={mockOnOpen}
+          setCurrentPlatform={mockSetCurrentPlatform}
+        />,
+        {},
+        scorerContextAllDedup
       );
 
       // Test that deduplication badge is clickable link to support docs

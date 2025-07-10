@@ -201,7 +201,7 @@ const VerifiedStamp = ({
               )}
               {isDeduplicated && (
                 <div className="pl-3 pr-2 py-1 text-l font-medium text-left text-emerald-600">
-                  <p data-testid="verified-label">Deduplicated</p>
+                  <p data-testid="deduped-label">Deduplicated</p>
                 </div>
               )}
             </div>
