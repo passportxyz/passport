@@ -88,10 +88,6 @@ export function beforeHumanPointsRelease() {
 
     if (Number.isInteger(releaseDate)) {
       const humanPointsReleaseDateInMillis = releaseDate * 1000;
-      console.log("geri", {
-        rel: humanPointsReleaseDateInMillis,
-        now,
-      });
       if (now < humanPointsReleaseDateInMillis) {
         return true;
       }

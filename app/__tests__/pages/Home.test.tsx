@@ -18,6 +18,7 @@ vi.mock("wagmi", async () => ({
 vi.mock("../../utils/helpers", () => ({
   checkShowOnboard: vi.fn(),
   getProviderSpec: vi.fn(),
+  beforeHumanPointsRelease: () => false,
   isServerOnMaintenance: () => false,
 }));
 
@@ -48,8 +49,7 @@ vi.mock("../../context/walletStore", () => ({
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
-// TODO #3502 - fix after design
-test.skip("renders connect wallet button", () => {
+test("renders connect wallet button", () => {
   renderWithContext(
     mockCeramicContext,
     <Router>
@@ -60,8 +60,7 @@ test.skip("renders connect wallet button", () => {
   expect(screen.getByTestId("connectWalletButton"));
 });
 
-// TODO #3502 - fix after design
-test.skip("clicking connect wallet button calls connect", async () => {
+test("clicking connect wallet button calls connect", async () => {
   renderWithContext(
     mockCeramicContext,
     <Router>
@@ -78,8 +77,7 @@ test.skip("clicking connect wallet button calls connect", async () => {
 });
 
 describe("Welcome navigation", () => {
-  // TODO #3502 - fix after design
-  it.skip("calls navigate with /dashboard when wallet is connected but checkShowOnboard is false", async () => {
+  it("calls navigate with /dashboard when wallet is connected but checkShowOnboard is false", async () => {
     (checkShowOnboard as Mock).mockReturnValue(false);
     renderWithContext(
       { ...mockCeramicContext, passport: undefined },
@@ -97,8 +95,7 @@ describe("Welcome navigation", () => {
     });
   });
 
-  // TODO #3502 - fix after design
-  it.skip("calls navigate with /welcome when checkShowOnboard is true", async () => {
+  it("calls navigate with /welcome when checkShowOnboard is true", async () => {
     (checkShowOnboard as Mock).mockReturnValue(true);
     renderWithContext(
       { ...mockCeramicContext, passport: undefined },

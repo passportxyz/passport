@@ -249,6 +249,7 @@ describe.skip("when app fails to load ceramic stream", () => {
 
 it.skip("reset passport button should open refresh modal when clicked", async () => {
   // TODO #3502: Skipping for now because the entire "Collected Stamps" section is removed for now ...
+  // and this action was not added back
   renderWithContext(
     {
       ...mockCeramicContext,

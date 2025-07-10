@@ -47,7 +47,6 @@ type StampProps = {
 const variantClasses: Record<CardVariant, string> = {
   default: "bg-background",
   partner:
-    // TODO #3513 fix the partner stamps
     "bg-gradient-to-t from-background-2 to-background-3 border-background-3 shadow-[0px_0px_24px_0px] shadow-background-3",
 };
 
@@ -160,8 +159,6 @@ const VerifiedStamp = ({
 
     const intersection = onchainProviderSet.intersection(providerSet);
     setIsAnyOnchain(intersection.size > 0);
-    // TODO: #3502: We have no separate representation for `MOVED_OUT_OF_DATE` state,also no representation if onchain expiration is different than db-expiration date
-    // const isAllOnchain = intersection.size === providerSet.size;
   }, [activeChainProviders, platformProviders, pointsDataForStamps]);
 
   const style = {
@@ -201,7 +198,13 @@ const VerifiedStamp = ({
               )}
               {isDeduplicated && (
                 <div className="pl-3 pr-2 py-1 text-l font-medium text-left text-emerald-600">
-                  <p data-testid="verified-label">Deduplicated</p>
+                  <a
+                    href="https://support.passport.xyz/passport-knowledge-base/common-questions/why-am-i-receiving-zero-points-for-a-verified-stamp"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <p data-testid="deduped-label">Deduplicated</p>
+                  </a>
                 </div>
               )}
             </div>

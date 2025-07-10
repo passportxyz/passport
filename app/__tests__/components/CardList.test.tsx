@@ -139,8 +139,7 @@ describe("<CardList />", () => {
     expect(possiblePoints).toEqual(["Gitcoin", "GTC Staking", "CleanHands", "Discord", "Google"]);
   });
 
-  // TODO #3502: unskip once designs are clear
-  it.skip("should indicate on card whether or not it has been verified", () => {
+  it("should indicate on card whether or not it has been verified", () => {
     render(<Category category={categoryProps["category"]} />);
     const verifiedBtnCnt = screen
       .getAllByTestId("connect-button")
@@ -328,8 +327,7 @@ describe("deduplication label tests", () => {
     expect(dedupLink).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  // TODO #3502: unskip once designs are clear
-  it.skip("should not show deduplication label for normal verified stamps", () => {
+  it("should not show deduplication label for normal verified stamps", () => {
     const mockSetCurrentPlatform = vi.fn();
     const mockOnOpen = vi.fn();
 
