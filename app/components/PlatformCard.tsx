@@ -198,7 +198,13 @@ const VerifiedStamp = ({
               )}
               {isDeduplicated && (
                 <div className="pl-3 pr-2 py-1 text-l font-medium text-left text-emerald-600">
-                  <p data-testid="deduped-label">Deduplicated</p>
+                  <a
+                    href="https://support.passport.xyz/passport-knowledge-base/common-questions/why-am-i-receiving-zero-points-for-a-verified-stamp"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <p data-testid="deduped-label">Deduplicated</p>
+                  </a>
                 </div>
               )}
             </div>

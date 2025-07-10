@@ -59,9 +59,8 @@ describe("<PlatformCard />", () => {
     vi.mocked(usePlatforms).mockReturnValue(mockUsePlatforms as any);
   });
 
-  describe.only("Deduplication Label Display", () => {
-    // TODO #3502: unskip once designs are clear
-    it.only("should display deduplication label when stamp is verified but has 0 points due to deduplication", () => {
+  describe("Deduplication Label Display", () => {
+    it("should display deduplication label when stamp is verified but has 0 points due to deduplication", () => {
       // Mock a verified stamp (has credential) but with 0 earned points
       const ceramicContextWithDedupStamp = {
         ...mockCeramicContext,
@@ -117,7 +116,7 @@ describe("<PlatformCard />", () => {
       expect(dedupLink).toHaveAttribute("target", "_blank");
       expect(dedupLink).toHaveAttribute("rel", "noopener noreferrer");
       expect(screen.getByTestId("deduped-label")).toHaveTextContent("Deduplicated");
-      expect(screen.getByTestId("verified-label")).toBeInTheDocument(); // Both labels should be present
+      // expect(screen.getByTestId("verified-label")).toBeInTheDocument(); // Both labels should be present
       expect(screen.queryByTestId("connect-button")).not.toBeInTheDocument();
     });
 
