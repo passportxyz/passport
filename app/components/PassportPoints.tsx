@@ -41,6 +41,12 @@ export const PassportPoints: React.FC<PassportPointsProps> = ({ points, size = "
     lg: "px-2.5 py-1.5",
   };
 
+  const labelPadding = {
+    sm: "pt-1",
+    md: "",
+    lg: "",
+  };
+
   const formattedPoints = typeof points === "number" ? String(+points.toFixed(1)) : points;
 
   return (
@@ -48,7 +54,7 @@ export const PassportPoints: React.FC<PassportPointsProps> = ({ points, size = "
       <div className={`${sizeClasses[size]} text-color-4`}>
         <div className="flex items-center justify-end">
           <PassportPointsIcon className={iconSizes[size]} />
-          <div className="pl-1">
+          <div className={`pl-1 ${labelPadding[size]}`}>
             {prefix}
             {formattedPoints}
           </div>

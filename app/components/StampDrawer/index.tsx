@@ -12,6 +12,7 @@ import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { JsonOutputModal } from "../JsonOutputModal";
 import { RemovePlatformModal } from "../RemovePlatformModal";
 import { CeramicContext } from "../../context/ceramicContext";
+import { POINTED_STAMP_ROVIDER, ScorerContext } from "../../context/scorerContext";
 
 const useStampGridCols = ({
   hasSteps,
@@ -72,6 +73,7 @@ const StampDrawer = ({
 }: StampDrawerProps) => {
   const isLg = useBreakpoint("lg");
   const { allProvidersState } = useContext(CeramicContext);
+  const { possiblePointsDataForStamps, pointsDataForStamps, pointsData } = useContext(ScorerContext);
 
   // Modal states
   const [jsonModalIsOpen, setJsonModalIsOpen] = useState(false);
@@ -100,6 +102,13 @@ const StampDrawer = ({
           verified: isVerified,
           flags,
           points,
+          isEligible: !!pointsData?.is_eligible,
+          humanPointsAvailable:
+            providerId in possiblePointsDataForStamps
+              ? possiblePointsDataForStamps[providerId as POINTED_STAMP_ROVIDER]
+              : 0,
+          humanPointsEarned:
+            providerId in pointsDataForStamps ? pointsDataForStamps[providerId as POINTED_STAMP_ROVIDER] : 0,
         };
       }),
     }));

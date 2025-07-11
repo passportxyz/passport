@@ -10,10 +10,9 @@ import { LoadButton } from "./LoadButton";
 import { Hyperlink } from "@gitcoin/passport-platforms";
 import { OnchainSidebar } from "./OnchainSidebar";
 import { LoadingBar } from "./LoadingBar";
-import { PassportPoints } from "./PassportPoints";
 import { HumanPointsLabel } from "./humanPoints";
-import { useOnChainData } from "../hooks/useOnChainData";
 import { OnChainStatus } from "../utils/onChainStatus";
+import { beforeHumanPointsRelease } from "../utils/helpers";
 
 const PanelDiv = ({ className, children }: { className: string; children: React.ReactNode }) => {
   return (
@@ -123,11 +122,12 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
   const { someChainUpToDate, onChainAttestationProviders } = useAllOnChainStatus();
   const customization = useCustomization();
   const { pointsData } = React.useContext(ScorerContext);
-  const isEligible = !!pointsData?.is_eligible;
 
   const aboveThreshold = rawScore >= threshold;
   const customText = customization?.scorerPanel?.text;
   const mintPointsGained = pointsData?.breakdown.PMT;
+  const humanPoints = mintPointsGained || 1800;
+  const prefix = !!mintPointsGained ? "+" : "";
 
   const renderContent = (
     title: string,
@@ -141,9 +141,11 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
         <div className="flex flex-col md:flex-row items-start justify-between flex-wrap">
           <div className="flex justify-start">
             <h2 className={`text-2xl text-black font-semibold pr-4 text-nowrap ${!description && "mb-4"}`}>{title}</h2>
-            {mintPointsGained !== undefined && (
-              <HumanPointsLabel points={mintPointsGained} prefix="+" isEligible={isEligible} />
-            )}
+            <HumanPointsLabel
+              points={humanPoints}
+              prefix={prefix}
+              isVisible={!!humanPoints && !beforeHumanPointsRelease()}
+            />
           </div>
         </div>
         <p className="py-2 self-center md:self-start">{description}</p>
@@ -177,9 +179,11 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
           <div className="flex flex-col md:flex-row items-start justify-between flex-wrap">
             <div className="flex justify-start">
               <h2 className="text-2xl text-black font-semibold pr-4 text-nowrap">Passport minted!</h2>
-              {mintPointsGained !== undefined && (
-                <HumanPointsLabel points={mintPointsGained} prefix="+" isEligible={isEligible} />
-              )}
+              <HumanPointsLabel
+                points={humanPoints}
+                prefix={prefix}
+                isVisible={!!humanPoints && !beforeHumanPointsRelease()}
+              />
             </div>
             <div className="flex w-full md:w-auto justify-center gap-0">
               {onChainAttestationProviders?.map(({ attestationProvider, status }, idx) => {

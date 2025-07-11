@@ -166,9 +166,23 @@ export type POINTED_STAMP_ROVIDER =
   | "gtcStakingGold"
   | "BeginnerCommunityStaker"
   | "ExperiencedCommunityStaker"
-  | "TrustedCitizen";
+  | "TrustedCitizen"
+  | "HolonymGovIdProvider"
+  | "HolonymPhone"
+  | "CleanHands"
+  | "Biometrics";
 
-export type POINTS_FOR_STAMPS_BREAKDOWN_KEY = "ISB" | "ISS" | "ISG" | "CSB" | "CSE" | "CST";
+export type POINTS_FOR_STAMPS_BREAKDOWN_KEY =
+  | "ISB"
+  | "ISS"
+  | "ISG"
+  | "CSB"
+  | "CSE"
+  | "CST"
+  | "HGO"
+  | "HPH"
+  | "HCH"
+  | "HBI";
 export type POINTS_BREAKDOWN_KEY = POINTS_FOR_STAMPS_BREAKDOWN_KEY | "SCB" | "HKY" | "PMT" | "HIM" | `PMT_${number}`;
 
 const STAMP_PROVIDER_TO_ACTION: [POINTED_STAMP_ROVIDER, POINTS_BREAKDOWN_KEY][] = [
@@ -178,6 +192,10 @@ const STAMP_PROVIDER_TO_ACTION: [POINTED_STAMP_ROVIDER, POINTS_BREAKDOWN_KEY][] 
   ["BeginnerCommunityStaker", "CSB"],
   ["ExperiencedCommunityStaker", "CSE"],
   ["TrustedCitizen", "CST"],
+  ["HolonymGovIdProvider", "HGO"],
+  ["HolonymPhone", "HPH"],
+  ["CleanHands", "HCH"],
+  ["Biometrics", "HBI"],
 ];
 export const providersForPoints = new Set(STAMP_PROVIDER_TO_ACTION.map(([provider, ...rest]) => provider));
 
@@ -204,7 +222,9 @@ export interface ScorerContextState {
   stampDedupStatus: Partial<StampDedupStatus>;
   passingScore: boolean;
   pointsData?: PointsData;
+  possiblePointsData?: PointsData;
   pointsDataForStamps: PointsDataForStamps;
+  possiblePointsDataForStamps: PointsDataForStamps;
 }
 
 const startingState: ScorerContextState = {
@@ -225,6 +245,7 @@ const startingState: ScorerContextState = {
   stampDedupStatus: {},
   passingScore: false,
   pointsDataForStamps: {},
+  possiblePointsDataForStamps: {},
 };
 
 // create our app context
@@ -241,7 +262,9 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
   const [stampWeights, setStampWeights] = useState<Partial<Weights>>({});
   const [scoredPlatforms, setScoredPlatforms] = useState<PlatformScoreSpec[]>([]);
   const [pointsData, setPointsData] = useState<PointsData>();
+  const [possiblePointsData, setPossiblePointsData] = useState<PointsData>();
   const [pointsDataForStamps, setPointsDataForStamps] = useState<PointsDataForStamps>({});
+  const [possiblePointsDataForStamps, setPossiblePointsDataForStamps] = useState<PointsDataForStamps>({});
 
   const [passingScore, setPassingScore] = useState(false);
   const customization = useCustomization();
@@ -287,17 +310,27 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     }
 
     const pointsData = response.data.points_data as PointsData;
+    const possiblePointsData = response.data.possible_points_data as PointsData;
 
     setRawScore(processed.rawScore);
     setThreshold(processed.threshold);
     setScore(processed.score);
     setScoreDescription(processed.scoreDescription);
     setPassingScore(processed.passingScore);
-    setPointsData(response.data.points_data);
+    setPointsData(pointsData);
+    setPossiblePointsData(possiblePointsData);
     if (pointsData) {
       setPointsDataForStamps(
         STAMP_PROVIDER_TO_ACTION.reduce((acc, [provider, key]) => {
           acc[provider] = pointsData.breakdown[key];
+          return acc;
+        }, {} as PointsDataForStamps)
+      );
+    }
+    if (possiblePointsData) {
+      setPossiblePointsDataForStamps(
+        STAMP_PROVIDER_TO_ACTION.reduce((acc, [provider, key]) => {
+          acc[provider] = possiblePointsData.breakdown[key];
           return acc;
         }, {} as PointsDataForStamps)
       );
@@ -385,7 +418,9 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     fetchStampWeights,
     passingScore,
     pointsData,
+    possiblePointsData,
     pointsDataForStamps,
+    possiblePointsDataForStamps,
   };
 
   return <ScorerContext.Provider value={providerProps}>{children}</ScorerContext.Provider>;
