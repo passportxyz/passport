@@ -105,9 +105,9 @@ export const HumanPointsMultiplierPanel: FC<HumanPointsMultiplierPanelProps> = (
           />
         </svg>
       </div>
-      <p className="pl-0.5 pr-1 pt-0.5 text-white text-2xl font-medium pt-4">Double Points!</p>
+      <p className="pl-0.5 pr-1 pt-0.5 text-white text-2xl font-medium pt-4">Double HUMN Points!</p>
       <p className="pl-0.5 pr-1 pt-0.5 text-white text-xl font-normal">
-        Thank you for being the early bird! Here’s your doubled points as a reward ~
+        Thank you for being an early bird! Here’s your doubled points as a reward!
       </p>
     </div>
   ) : null;

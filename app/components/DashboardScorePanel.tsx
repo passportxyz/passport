@@ -227,7 +227,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
     return (
       <>
         {renderContent(
-          "Congrats! You have a passing score!",
+          "Congrats! You have a passing Unique Humanity Score!",
           "Next up, mint your Passport onchain!",
           "Here’s what you can do with your Passport!",
           "https://www.passport.xyz/ecosystem",
@@ -240,9 +240,9 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
   return (
     <>
       {renderContent(
-        "Let's increase that score",
-        "You will need at least 20 points to verify your humanity",
-        "Here’s some tips on how to raise your score",
+        "Let's increase that Unique Humanity Score",
+        "You will need at least 20 points to verify your humanity and qualify for HUMN Points",
+        "Here’s some tips on how to raise your Unique Humanity Score",
         "https://support.passport.xyz/passport-knowledge-base/stamps/scoring-20-for-humans",
         renderButton(
           "Verify Stamps",

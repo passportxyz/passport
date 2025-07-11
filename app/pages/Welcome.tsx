@@ -44,8 +44,11 @@ export default function Welcome() {
           <span className="font-bold">HUMN Points</span> are your rewards balance. These accumulate in your account
           across the human.tech tools and will unlock exclusive benefits and rewards in upcoming programs.
         </p>
+        <p className="pt-4">
+          <span className="font-bold">To earn HUMN Points,</span> you must build up a Unique Humanity Score of 20+.
+        </p>
         <div className="pt-6 underline text-color-9">
-          <a href="https://passport.human.tech/blog/points">Learn more about Points</a>
+          <a href="https://passport.human.tech/blog/points">Learn more about HUMN Points</a>
         </div>
       </div>
 
