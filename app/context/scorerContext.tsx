@@ -161,9 +161,9 @@ export type PlatformScoreSpec = PlatformSpec & {
 };
 
 export type POINTED_STAMP_ROVIDER =
-  | "gtcStakingBronze"
-  | "gtcStakingSilver"
-  | "gtcStakingGold"
+  | "SelfStakingBronze"
+  | "SelfStakingSilver"
+  | "SelfStakingGold"
   | "BeginnerCommunityStaker"
   | "ExperiencedCommunityStaker"
   | "TrustedCitizen"
@@ -186,9 +186,9 @@ export type POINTS_FOR_STAMPS_BREAKDOWN_KEY =
 export type POINTS_BREAKDOWN_KEY = POINTS_FOR_STAMPS_BREAKDOWN_KEY | "SCB" | "HKY" | "PMT" | "HIM" | `PMT_${number}`;
 
 const STAMP_PROVIDER_TO_ACTION: [POINTED_STAMP_ROVIDER, POINTS_BREAKDOWN_KEY][] = [
-  ["gtcStakingBronze", "ISB"],
-  ["gtcStakingSilver", "ISS"],
-  ["gtcStakingGold", "ISG"],
+  ["SelfStakingBronze", "ISB"],
+  ["SelfStakingSilver", "ISS"],
+  ["SelfStakingGold", "ISG"],
   ["BeginnerCommunityStaker", "CSB"],
   ["ExperiencedCommunityStaker", "CSE"],
   ["TrustedCitizen", "CST"],
