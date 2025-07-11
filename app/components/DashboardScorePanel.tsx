@@ -110,9 +110,9 @@ const IconArrowDown: React.FC = () => (
     <path
       d="M7.5 6L12.5 11L17.5 6M7.5 13L12.5 18L17.5 13"
       stroke="white"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
@@ -144,7 +144,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
             <HumanPointsLabel
               points={humanPoints}
               prefix={prefix}
-              isVisible={!!humanPoints && !beforeHumanPointsRelease()}
+              isVisible={aboveThreshold && !!humanPoints && !beforeHumanPointsRelease()}
             />
           </div>
         </div>

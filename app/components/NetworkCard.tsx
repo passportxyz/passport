@@ -80,9 +80,9 @@ export function NetworkCard({ chain }: { chain: Chain }) {
                   <path
                     d="M7.66699 7H17.667M17.667 7V17M17.667 7L7.66699 17"
                     stroke="black"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                 </svg>
               </Hyperlink>
