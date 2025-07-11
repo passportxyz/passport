@@ -34,9 +34,9 @@ export function getButtonMsg(onChainStatus: OnChainStatus): React.ReactElement {
             <path
               d="M3.33301 12C3.33301 9.61305 4.28122 7.32387 5.96905 5.63604C7.65687 3.94821 9.94606 3 12.333 3C14.8491 3.00947 17.264 3.99122 19.073 5.74L21.333 8M21.333 8V3M21.333 8H16.333M21.333 12C21.333 14.3869 20.3848 16.6761 18.697 18.364C17.0091 20.0518 14.72 21 12.333 21C9.81696 20.9905 7.40198 20.0088 5.59301 18.26L3.33301 16M3.33301 16H8.33301M3.33301 16V21"
               stroke="#0A0A0A"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </svg>
 
