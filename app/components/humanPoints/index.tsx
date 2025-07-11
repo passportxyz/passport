@@ -31,13 +31,13 @@ type HumanPointsLabelProps = {
   prefix?: string;
   points: number;
   colorSchemeDark?: Boolean;
-  isEligible: boolean;
+  isVisible: boolean;
 };
 export const HumanPointsLabel: FC<HumanPointsLabelProps> = ({
   prefix,
   points,
   colorSchemeDark,
-  isEligible,
+  isVisible,
 }: HumanPointsLabelProps) => {
   const { backgroundColor } = colorSchemeDark
     ? {
@@ -46,7 +46,7 @@ export const HumanPointsLabel: FC<HumanPointsLabelProps> = ({
     : {
         backgroundColor: "bg-emerald-100",
       };
-  return isEligible ? (
+  return isVisible ? (
     <a href="https://passport.human.tech/blog/points" target="_blank">
       <div className={`flex items-center ${backgroundColor} rounded-full px-2 py-1`}>
         <Icon width={18} height={19} />
@@ -62,9 +62,9 @@ export const HumanPointsLabel: FC<HumanPointsLabelProps> = ({
 export const HumanPointsLabelSMDark: FC<HumanPointsLabelProps> = ({
   prefix,
   points,
-  isEligible,
+  isVisible,
 }: HumanPointsLabelProps) => {
-  return isEligible ? (
+  return isVisible ? (
     <a href="https://passport.human.tech/blog/points" target="_blank">
       <div className={`flex text-sm items-center bg-emerald-500 rounded-full px-1 py-0`}>
         <Icon width={18} height={19} strokeColor="#7BF9C9" />
@@ -80,14 +80,14 @@ export const HumanPointsLabelSMDark: FC<HumanPointsLabelProps> = ({
 export type HumanPointsMultiplierPanelProps = {
   multiplier: number;
   className: string;
-  isEligible: boolean;
+  isVisible: boolean;
 };
 export const HumanPointsMultiplierPanel: FC<HumanPointsMultiplierPanelProps> = ({
   multiplier,
   className = "",
-  isEligible,
+  isVisible,
 }) => {
-  return isEligible ? (
+  return isVisible ? (
     <div className={`relative flex flex-col rounded-3xl p-8 ${className}`}>
       <div
         style={{ background: `radial-gradient(ellipse 75% 50% at 20% 25%, oklch(0.905 0.093 164.15), #00B88A)` }}

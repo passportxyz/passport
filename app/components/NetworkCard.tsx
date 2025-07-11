@@ -11,6 +11,7 @@ import { useAccount } from "wagmi";
 import { ExpiredLabel } from "./LabelExpired";
 import { POINTS_BREAKDOWN_KEY, ScorerContext } from "../context/scorerContext";
 import { HumanPointsLabelSMDark } from "./humanPoints";
+import { beforeHumanPointsRelease } from "../utils/helpers";
 
 export function NetworkCard({ chain }: { chain: Chain }) {
   const { status, isPending } = useOnChainStatus({ chain });
@@ -18,9 +19,10 @@ export function NetworkCard({ chain }: { chain: Chain }) {
   const { address } = useAccount();
   const { pointsData } = useContext(ScorerContext);
   const keyForChainPoints = `PMT_${Number.parseInt(chain.id, 16)}` as POINTS_BREAKDOWN_KEY;
-  const humanPoints = pointsData?.breakdown[keyForChainPoints];
-  const showHumanPoints = !!humanPoints;
-  const isEligible = !!pointsData?.is_eligible;
+  const gainedHumanPoints = pointsData?.breakdown[keyForChainPoints];
+  const prefix = !!gainedHumanPoints ? "" : "+";
+  const humanPoints = gainedHumanPoints || 300;
+  const showHumanPoints = !!humanPoints && !beforeHumanPointsRelease();
 
   const isOnChain = [
     OnChainStatus.MOVED_OUT_OF_DATE,
@@ -55,7 +57,7 @@ export function NetworkCard({ chain }: { chain: Chain }) {
         <div className="grid grid-rows-3 content-between h-full">
           <div className="flex justify-between items-start">
             <img className="h-8" src={chain.icon} alt={`${chain.label} logo`} />
-            {showHumanPoints && <HumanPointsLabelSMDark points={humanPoints || 0} isEligible={isEligible} />}
+            <HumanPointsLabelSMDark points={humanPoints || 0} prefix={prefix} isVisible={showHumanPoints} />
             {!expired || <ExpiredLabel className="" />}
           </div>
           <div className="">

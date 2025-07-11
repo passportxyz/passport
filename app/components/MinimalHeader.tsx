@@ -247,7 +247,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
           })}
 
           {scoreState.status !== "initial" && (
-            <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isEligible={isEligible} />
+            <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isVisible={isEligible} />
           )}
           <AccountCenter />
           {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
@@ -257,7 +257,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
       <div className={`flex md:hidden gap-4 items-center justify-between h-16 px-2 ${className}`}>
         <AccountCenter />
         {scoreState.status !== "initial" && (
-          <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isEligible={isEligible} />
+          <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isVisible={isEligible} />
         )}
 
         <Popover className=" text-gray-800">

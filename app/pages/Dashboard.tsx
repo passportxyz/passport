@@ -36,6 +36,7 @@ import { Customization } from "../utils/customizationUtils";
 import { useAccount } from "wagmi";
 import { useRadialBackgroundColorForHeader } from "../components/Header";
 import { HumanPointsMultiplierPanel } from "../components/humanPoints";
+import { beforeHumanPointsRelease } from "../utils/helpers";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
@@ -56,7 +57,11 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
         <div className="col-span-full flex flex-col grow lg:flex-row gap-8 mt-0.5">
           <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
           {showMultiplierPanel && (
-            <HumanPointsMultiplierPanel multiplier={multiplier} isEligible={isEligible} className="xl:w-1/2" />
+            <HumanPointsMultiplierPanel
+              multiplier={multiplier}
+              isVisible={isEligible && !beforeHumanPointsRelease()}
+              className="xl:w-1/2"
+            />
           )}
           {explanationPanel && <DashboardScoreExplanationPanel />}
         </div>

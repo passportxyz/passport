@@ -23,6 +23,9 @@ export const CredentialGrid = ({ credentialGroups, columns }: CredentialGridProp
                 verified={credential.verified}
                 points={credential.points}
                 flags={credential.flags}
+                isEligible={credential.isEligible}
+                humanPointsAvailable={credential.humanPointsAvailable}
+                humanPointsEarned={credential.humanPointsEarned}
               />
             ))}
           </div>

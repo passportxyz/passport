@@ -15,9 +15,9 @@ import { useStampDeduplication } from "../hooks/useStampDeduplication";
 import { useOnChainData } from "../hooks/useOnChainData";
 import { ExpiredLabel } from "./LabelExpired";
 import { PassportPoints } from "./PassportPoints";
-import { HumanPointsLabel } from "./humanPoints";
 import { HumanPointsLabelSMDark } from "./humanPoints";
 import { providersForPoints, ScorerContext } from "../context/scorerContext";
+import { beforeHumanPointsRelease } from "../utils/helpers";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -70,7 +70,25 @@ const SecureDByHumanTech: React.FC = () => {
   );
 };
 
-const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech }: StampProps) => {
+const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech, platformProviders }: StampProps) => {
+  const { possiblePointsDataForStamps, pointsData } = useContext(ScorerContext);
+  const [possibleHumanPoints, setPossibleHumanPoints] = useState<number>();
+  const isHumanPointsVisible = !!possibleHumanPoints && !beforeHumanPointsRelease();
+
+  useEffect(() => {
+    const providerSet = new Set(platformProviders);
+    const pointedProviders = providersForPoints.intersection(providerSet);
+
+    if (pointedProviders.size > 0) {
+      let platformPoints = 0;
+      pointedProviders.forEach((k) => {
+        platformPoints += possiblePointsDataForStamps[k] || 0;
+      });
+
+      setPossibleHumanPoints(platformPoints);
+    }
+  }, [platformProviders, possiblePointsDataForStamps]);
+
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
       <div
@@ -92,10 +110,19 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech 
                 />
               </svg>
             )}
-            <PassportPoints
-              points={Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0)}
-              className="text-right"
-            />
+
+            <div className="flex items-center">
+              <div className="relative -right-1">
+                {possibleHumanPoints && (
+                  <HumanPointsLabelSMDark points={possibleHumanPoints} prefix="" isVisible={isHumanPointsVisible} />
+                )}
+              </div>
+
+              <PassportPoints
+                points={Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0)}
+                className="text-right"
+              />
+            </div>
           </div>
 
           <div className="mt-4 h-full md:mt-6 inline-block justify-start text-color-4">
@@ -151,10 +178,12 @@ const VerifiedStamp = ({
     const pointedProviders = providersForPoints.intersection(providerSet);
 
     if (pointedProviders.size > 0) {
-      const providerWithHumanPoints = pointedProviders.values().next().value;
-      if (providerWithHumanPoints) {
-        setHumanPoints(pointsDataForStamps[providerWithHumanPoints]);
-      }
+      let platformPoints = 0;
+      pointedProviders.forEach((k) => {
+        platformPoints += pointsDataForStamps[k] || 0;
+      });
+
+      setHumanPoints(platformPoints);
     }
 
     const intersection = onchainProviderSet.intersection(providerSet);
@@ -211,7 +240,13 @@ const VerifiedStamp = ({
 
             <div className="flex items-center">
               <div className="relative -right-1">
-                {humanPoints && <HumanPointsLabelSMDark points={humanPoints} prefix="+" isEligible={isEligible} />}
+                {humanPoints && (
+                  <HumanPointsLabelSMDark
+                    points={humanPoints}
+                    prefix="+"
+                    isVisible={!!humanPoints && !beforeHumanPointsRelease()}
+                  />
+                )}
               </div>
 
               <PassportPoints points={platform.earnedPoints} prefix="+" className="text-right" />
@@ -375,6 +410,7 @@ export const PlatformCard = ({
   const verified =
     platform.earnedPoints > 0 ||
     (selectedProviders[platform.platform] && selectedProviders[platform.platform].length > 0);
+
   // returns a single Platform card
   let stamp = null;
   if (verified && isExpired) {
