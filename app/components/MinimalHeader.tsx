@@ -1,12 +1,13 @@
 // --- React methods
 import React, { Fragment } from "react";
-import { ScorerContext } from "../context/scorerContext";
+import { PointsData, ScorerContext } from "../context/scorerContext";
 import { AccountCenter } from "./AccountCenter";
 import { Notifications } from "./Notifications";
 import { OnchainSidebar } from "./OnchainSidebar";
 import { useOneClickVerification } from "../hooks/useOneClickVerification";
 import { Popover, Transition } from "@headlessui/react";
 import { HumanPointsLabel } from "./humanPoints";
+import TooltipOverChildren from "./TooltipOverChildren";
 import { Icon } from "@chakra-ui/react";
 
 type MinimalHeaderProps = {
@@ -193,6 +194,74 @@ const AppSelector = () => {
   );
 };
 
+const PointsTooltipItem = ({ title, text }: { title: string; text: string }) => {
+  return (
+    <li className="flex gap-3">
+      <span className="text-black text-sm leading-relaxed">•</span>
+      <p className="text-sm text-black leading-relaxed">
+        <span className="text-md font-semibold mr-2">{title}</span>
+        {text}
+      </p>
+    </li>
+  );
+};
+
+const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) => {
+  if (!pointsData) return null;
+  return (
+    <>
+      {pointsData?.total_points < 20 ? (
+        <>
+          <p className="my-1 font-medium">This is your HUMN Points balance</p>
+          <p className="my-1">Build up a Unique Humanity Score of 20+ to qualify for HUMN points</p>
+          <p className="my-1">
+            Learn more about the{" "}
+            <a className="underline text-color-9" href="http://passport.human.tech/blog/points" target="_blank">
+              HUMN onchain SUMR
+            </a>
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="my-1 font-medium">This is your HUMN Points balance</p>
+          <p className="my-1">
+            Learn more about the{" "}
+            <a className="underline text-color-9" href="http://passport.human.tech/blog/points">
+              HUMN onchain SUMR
+            </a>
+          </p>
+          <p className="my-1">HUMN points earned:</p>
+          <ul className="space-y-1.5">
+            {/* TODO: How do we calculate points for "returning user"? */}
+            {/* <PointsTooltipItem title="Returning User (2x)" text="[dynamic, changes with the volume of points earned]" /> */}
+            {pointsData.breakdown?.SCB && (
+              <PointsTooltipItem
+                title="Scored > 20 with 3 or more partner campaigns"
+                text={`+${pointsData.breakdown.SCB}`}
+              />
+            )}
+            {pointsData.breakdown?.HKY && (
+              <PointsTooltipItem title="Human Keys Created" text={`+${pointsData.breakdown.HKY}`} />
+            )}
+            {pointsData.breakdown?.HGO && (
+              <PointsTooltipItem title="Government ID Stamp" text={`+${pointsData.breakdown.HGO}`} />
+            )}
+            {pointsData.breakdown?.HPH && (
+              <PointsTooltipItem title="Phone Verification Stamp" text={`+${pointsData.breakdown.HPH}`} />
+            )}
+            {pointsData.breakdown?.HBI && (
+              <PointsTooltipItem title="Biometrics Stamp" text={`+${pointsData.breakdown.HBI}`} />
+            )}
+            {pointsData.breakdown?.HCH && (
+              <PointsTooltipItem title="Proof of Clean Hands Stamp" text={`+${pointsData.breakdown.HCH}`} />
+            )}
+          </ul>
+        </>
+      )}
+    </>
+  );
+};
+
 const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   const [showSidebar, setShowSidebar] = React.useState(false);
   const { verificationComplete } = useOneClickVerification();
@@ -247,7 +316,14 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
           })}
 
           {scoreState.status !== "initial" && (
-            <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isVisible={isEligible} />
+            <>
+              <TooltipOverChildren
+                panelClassName="text-black w-fit"
+                tooltipElement={<PointsTooltip pointsData={pointsData} />}
+              >
+                <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isVisible={isEligible} />
+              </TooltipOverChildren>
+            </>
           )}
           <AccountCenter />
           {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
