@@ -169,8 +169,8 @@ const VerifiedStamp = ({
   const { activeChainProviders } = useOnChainData();
   const [isAnyOnchain, setIsAnyOnchain] = useState(false);
   const { pointsDataForStamps, pointsData } = useContext(ScorerContext);
-  const [humanPoints, setHumanPoints] = useState<number>();
-  const isEligible = !!pointsData?.is_eligible;
+  const [humanPoints, setHumanPoints] = useState<number>(0);
+  const [isVisiblePoints, setVisible] = useState<boolean>(false);
 
   useEffect(() => {
     const onchainProviderSet = new Set(activeChainProviders.map((p) => p.providerName));
@@ -184,6 +184,7 @@ const VerifiedStamp = ({
       });
 
       setHumanPoints(platformPoints);
+      setVisible(!!platformPoints);
     }
 
     const intersection = onchainProviderSet.intersection(providerSet);
@@ -240,13 +241,7 @@ const VerifiedStamp = ({
 
             <div className="flex items-center">
               <div className="relative -right-1">
-                {humanPoints && (
-                  <HumanPointsLabelSMDark
-                    points={humanPoints}
-                    prefix="+"
-                    isVisible={!!humanPoints && !beforeHumanPointsRelease()}
-                  />
-                )}
+                <HumanPointsLabelSMDark points={humanPoints} prefix="+" isVisible={isVisiblePoints} />
               </div>
 
               <PassportPoints points={platform.earnedPoints} prefix="+" className="text-right" />
