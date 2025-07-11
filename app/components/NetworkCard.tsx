@@ -20,7 +20,7 @@ export function NetworkCard({ chain }: { chain: Chain }) {
   const { pointsData } = useContext(ScorerContext);
   const keyForChainPoints = `PMT_${Number.parseInt(chain.id, 16)}` as POINTS_BREAKDOWN_KEY;
   const gainedHumanPoints = pointsData?.breakdown[keyForChainPoints];
-  const prefix = !!gainedHumanPoints ? "" : "+";
+  const prefix = !!gainedHumanPoints ? "+" : "";
   const humanPoints = gainedHumanPoints || 300;
   const showHumanPoints = !!humanPoints && !beforeHumanPointsRelease();
 
