@@ -197,7 +197,6 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   const [showSidebar, setShowSidebar] = React.useState(false);
   const { verificationComplete } = useOneClickVerification();
   const { scoreState, pointsData } = React.useContext(ScorerContext);
-  const isEligible = !!pointsData?.is_eligible;
 
   const icons = [
     // {
@@ -247,7 +246,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
           })}
 
           {scoreState.status !== "initial" && (
-            <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isVisible={isEligible} />
+            <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isVisible={true} />
           )}
           <AccountCenter />
           {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
@@ -257,7 +256,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
       <div className={`flex md:hidden gap-4 items-center justify-between h-16 px-2 ${className}`}>
         <AccountCenter />
         {scoreState.status !== "initial" && (
-          <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isVisible={isEligible} />
+          <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isVisible={true} />
         )}
 
         <Popover className=" text-gray-800">
