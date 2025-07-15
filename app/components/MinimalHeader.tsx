@@ -7,6 +7,7 @@ import { OnchainSidebar } from "./OnchainSidebar";
 import { useOneClickVerification } from "../hooks/useOneClickVerification";
 import { Popover, Transition } from "@headlessui/react";
 import { HumanPointsLabel } from "./humanPoints";
+import { beforeHumanPointsRelease } from "../utils/helpers";
 import { Icon } from "@chakra-ui/react";
 
 type MinimalHeaderProps = {
@@ -246,7 +247,10 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
           })}
 
           {scoreState.status !== "initial" && (
-            <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isVisible={true} />
+            <HumanPointsLabel
+              points={pointsData ? pointsData.total_points : 0}
+              isVisible={!beforeHumanPointsRelease()}
+            />
           )}
           <AccountCenter />
           {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
@@ -256,7 +260,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
       <div className={`flex md:hidden gap-4 items-center justify-between h-16 px-2 ${className}`}>
         <AccountCenter />
         {scoreState.status !== "initial" && (
-          <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isVisible={true} />
+          <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isVisible={!beforeHumanPointsRelease()} />
         )}
 
         <Popover className=" text-gray-800">

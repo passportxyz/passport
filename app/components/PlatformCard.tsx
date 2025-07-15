@@ -241,7 +241,11 @@ const VerifiedStamp = ({
 
             <div className="flex items-center">
               <div className="relative -right-1">
-                <HumanPointsLabelSMDark points={humanPoints} prefix="+" isVisible={isVisiblePoints} />
+                <HumanPointsLabelSMDark
+                  points={humanPoints}
+                  prefix="+"
+                  isVisible={isVisiblePoints && !beforeHumanPointsRelease()}
+                />
               </div>
 
               <PassportPoints points={platform.earnedPoints} prefix="+" className="text-right" />
