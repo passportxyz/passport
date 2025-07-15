@@ -232,8 +232,9 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
           </p>
           <p className="my-1">HUMN points earned:</p>
           <ul className="space-y-1.5">
-            {/* TODO: How do we calculate points for "returning user"? */}
-            {/* <PointsTooltipItem title="Returning User (2x)" text="[dynamic, changes with the volume of points earned]" /> */}
+            {pointsData.multiplier == 2 && (
+              <PointsTooltipItem title="Returning User (2x)" text={`+${pointsData.total_points / 2}`} />
+            )}
             {pointsData.breakdown?.SCB && (
               <PointsTooltipItem
                 title="Scored > 20 with 3 or more partner campaigns"
