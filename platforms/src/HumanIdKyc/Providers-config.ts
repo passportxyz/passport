@@ -44,7 +44,7 @@ export const PlatformDetails: PlatformSpec = {
       items: [
         "Requires a camera and valid government ID (passport, driver's license. Other forms of ID are accepted in certain countries)",
         "Stamp auto-renews after 90 days; full reverification required after 1 year",
-        "Minting the verification token is available on Ethereum, Optimism, Base, Aurora, Avalanche, and Fantom networks",
+        "To be eligible, you must mint your SBT on Optimism",
       ],
     },
   ],
