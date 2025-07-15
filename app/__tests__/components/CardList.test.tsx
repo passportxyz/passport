@@ -136,7 +136,7 @@ describe("<CardList />", () => {
   it("renders cards by verification status and possible points", () => {
     renderWithContext(mockCeramicContext, <CardList {...cardListProps} />);
     const possiblePoints = screen.getAllByTestId("platform-name").map((el) => el.textContent);
-    expect(possiblePoints).toEqual(["Gitcoin", "GTC Staking", "CleanHands", "Discord", "Google"]);
+    expect(possiblePoints).toEqual(["CleanHands", "Gitcoin", "GTC Staking", "Discord", "Google"]);
   });
 
   // TODO #3502: unskip once designs are clear
@@ -698,7 +698,7 @@ describe("show/hide tests", () => {
     expect(screen.queryByText("Identity Staking")).toBeInTheDocument();
 
     // Category should be shown
-    expect(screen.queryByText("Blockchain & Crypto Networks")).toBeInTheDocument();
+    expect(screen.queryByText("Blockchain Networks and Activities")).toBeInTheDocument();
   });
 
   it("exclude platform if no stamps included", () => {
@@ -750,7 +750,7 @@ describe("show/hide tests", () => {
     expect(screen.queryByText("Identity Staking")).toBeInTheDocument();
 
     // Category should be shown
-    expect(screen.queryByText("Blockchain & Crypto Networks")).toBeInTheDocument();
+    expect(screen.queryByText("Blockchain Networks and Activities")).toBeInTheDocument();
   });
 
   it("hide platform if there are no possible points", () => {
