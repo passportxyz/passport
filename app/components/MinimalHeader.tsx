@@ -239,24 +239,91 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
             {pointsData.breakdown?.SCB && (
               <PointsTooltipItem
                 title="Scored > 20 with 3 or more partner campaigns"
-                text={`+${pointsData.breakdown.SCB}`}
+                text={`+${pointsData.breakdown.SCB / pointsData.multiplier}`}
               />
             )}
             {pointsData.breakdown?.HKY && (
-              <PointsTooltipItem title="Human Keys Created" text={`+${pointsData.breakdown.HKY}`} />
+              <PointsTooltipItem
+                title="Human Keys Created"
+                text={`+${pointsData.breakdown.HKY / pointsData.multiplier}`}
+              />
             )}
             {pointsData.breakdown?.HGO && (
-              <PointsTooltipItem title="Government ID Stamp" text={`+${pointsData.breakdown.HGO}`} />
+              <PointsTooltipItem
+                title="Government ID Stamp"
+                text={`+${pointsData.breakdown.HGO / pointsData.multiplier}`}
+              />
             )}
             {pointsData.breakdown?.HPH && (
-              <PointsTooltipItem title="Phone Verification Stamp" text={`+${pointsData.breakdown.HPH}`} />
+              <PointsTooltipItem
+                title="Phone Verification Stamp"
+                text={`+${pointsData.breakdown.HPH / pointsData.multiplier}`}
+              />
             )}
             {pointsData.breakdown?.HBI && (
-              <PointsTooltipItem title="Biometrics Stamp" text={`+${pointsData.breakdown.HBI}`} />
+              <PointsTooltipItem
+                title="Biometrics Stamp"
+                text={`+${pointsData.breakdown.HBI / pointsData.multiplier}`}
+              />
             )}
             {pointsData.breakdown?.HCH && (
-              <PointsTooltipItem title="Proof of Clean Hands Stamp" text={`+${pointsData.breakdown.HCH}`} />
+              <PointsTooltipItem
+                title="Proof of Clean Hands Stamp"
+                text={`+${pointsData.breakdown.HCH / pointsData.multiplier}`}
+              />
             )}
+            {(pointsData.breakdown?.ISB || pointsData.breakdown?.ISG || pointsData.breakdown?.ISS) && (
+              <PointsTooltipItem
+                title="Identity Staking Stamp"
+                text={`+${
+                  ((pointsData.breakdown?.ISB ?? 0) +
+                    (pointsData.breakdown?.ISG ?? 0) +
+                    (pointsData.breakdown?.ISS ?? 0)) /
+                  pointsData.multiplier
+                }`}
+              />
+            )}
+            {(pointsData.breakdown?.CSB || pointsData.breakdown?.CSE || pointsData.breakdown?.CST) && (
+              <PointsTooltipItem
+                title="Community Staking Stamp"
+                text={`+${
+                  ((pointsData.breakdown?.CSB ?? 0) +
+                    (pointsData.breakdown?.CSE ?? 0) +
+                    (pointsData.breakdown?.CST ?? 0)) /
+                  pointsData.multiplier
+                }`}
+              />
+            )}
+            {pointsData.breakdown?.PMT &&
+              (() => {
+                const pmtChainIDs = Object.keys(pointsData.breakdown ?? {})
+                  .filter((key) => key.startsWith("PMT_"))
+                  .map((key) => key.replace("PMT_", ""));
+                return pmtChainIDs.map((chainID) => {
+                  return (
+                    <PointsTooltipItem
+                      key={chainID}
+                      title={`Passport Minted (${chainID})`}
+                      text={`+${(pointsData.breakdown?.[("PMT_" + chainID) as `PMT_${number}`] ?? 0) / pointsData.multiplier}`}
+                    />
+                  );
+                });
+              })()}
+            {pointsData.breakdown?.HIM &&
+              (() => {
+                const himChainIDs = Object.keys(pointsData.breakdown ?? {})
+                  .filter((key) => key.startsWith("HIM_"))
+                  .map((key) => key.replace("HIM_", ""));
+                return himChainIDs.map((chainID) => {
+                  return (
+                    <PointsTooltipItem
+                      key={chainID}
+                      title={`Human ID Minted (${chainID})`}
+                      text={`+${(pointsData.breakdown?.[("HIM_" + chainID) as `HIM_${number}`] ?? 0) / pointsData.multiplier}`}
+                    />
+                  );
+                });
+              })()}
           </ul>
         </>
       )}

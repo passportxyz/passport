@@ -183,7 +183,14 @@ export type POINTS_FOR_STAMPS_BREAKDOWN_KEY =
   | "HPH"
   | "HCH"
   | "HBI";
-export type POINTS_BREAKDOWN_KEY = POINTS_FOR_STAMPS_BREAKDOWN_KEY | "SCB" | "HKY" | "PMT" | "HIM" | `PMT_${number}`;
+export type POINTS_BREAKDOWN_KEY =
+  | POINTS_FOR_STAMPS_BREAKDOWN_KEY
+  | "SCB"
+  | "HKY"
+  | "PMT"
+  | "HIM"
+  | `PMT_${number}`
+  | `HIM_${number}`;
 
 const STAMP_PROVIDER_TO_ACTION: [POINTED_STAMP_ROVIDER, POINTS_BREAKDOWN_KEY][] = [
   ["SelfStakingBronze", "ISB"],
