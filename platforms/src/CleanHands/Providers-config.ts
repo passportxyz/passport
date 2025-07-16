@@ -47,7 +47,7 @@ export const PlatformDetails: PlatformSpec = {
       title: "Important considerations",
       items: [
         "Requires government ID verification",
-        "Available on Ethereum, Optimism, Avalanche, and Base networks",
+        "To be eligible, you must mint your SBT on Optimism",
         "Stamp auto-renews after 90 days; full reverification required after 1 year",
         "Some countries excluded from verification process",
       ],
