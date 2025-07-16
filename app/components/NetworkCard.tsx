@@ -20,7 +20,7 @@ export function NetworkCard({ chain }: { chain: Chain }) {
   const { pointsData } = useContext(ScorerContext);
   const keyForChainPoints = `PMT_${Number.parseInt(chain.id, 16)}` as POINTS_BREAKDOWN_KEY;
   const gainedHumanPoints = pointsData?.breakdown[keyForChainPoints];
-  const prefix = !!gainedHumanPoints ? "" : "+";
+  const prefix = !!gainedHumanPoints ? "+" : "";
   const humanPoints = gainedHumanPoints || 300;
   const showHumanPoints = !!humanPoints && !beforeHumanPointsRelease();
 
@@ -80,9 +80,9 @@ export function NetworkCard({ chain }: { chain: Chain }) {
                   <path
                     d="M7.66699 7H17.667M17.667 7V17M17.667 7L7.66699 17"
                     stroke="black"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                 </svg>
               </Hyperlink>
