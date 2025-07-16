@@ -47,7 +47,7 @@ export const HumanPointsLabel: FC<HumanPointsLabelProps> = ({
         backgroundColor: "bg-emerald-100",
       };
   return isVisible ? (
-    <a href="https://passport.human.tech/blog/points" target="_blank">
+    <a href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live" target="_blank">
       <div className={`flex items-center ${backgroundColor} rounded-full px-2 py-1`}>
         <Icon width={18} height={19} />
         <span className="px-1 pt-0.5 text-color-4">
@@ -65,7 +65,7 @@ export const HumanPointsLabelSMDark: FC<HumanPointsLabelProps> = ({
   isVisible,
 }: HumanPointsLabelProps) => {
   return isVisible ? (
-    <a href="https://passport.human.tech/blog/points" target="_blank">
+    <a href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live" target="_blank">
       <div className={`flex text-sm items-center bg-emerald-500 rounded-full px-1 py-0`}>
         <Icon width={18} height={19} strokeColor="#7BF9C9" />
         <span className="pl-0.5 pr-1 pt-0.5 text-white">
