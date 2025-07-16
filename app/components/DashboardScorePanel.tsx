@@ -134,24 +134,36 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
     description?: string,
     linkText?: string,
     linkHref?: string,
-    button?: React.ReactNode
+    button?: React.ReactNode,
+    pointsLocation: "top" | "bottom" = "top"
   ) => (
     <div className="w-full h-full p-2 flex flex-col">
       <div className="flex flex-col h-full w-full">
         <div className="flex flex-col md:flex-row items-start justify-between flex-wrap">
           <div className="flex justify-start">
             <h2 className={`text-2xl text-black font-semibold pr-4 text-nowrap ${!description && "mb-4"}`}>{title}</h2>
-            <HumanPointsLabel
-              points={humanPoints}
-              prefix={prefix}
-              isVisible={aboveThreshold && !!humanPoints && !beforeHumanPointsRelease()}
-            />
+            {pointsLocation === "top" && (
+              <HumanPointsLabel
+                points={humanPoints}
+                prefix={prefix}
+                isVisible={aboveThreshold && !!humanPoints && !beforeHumanPointsRelease()}
+              />
+            )}
           </div>
         </div>
         <p className="py-2 self-center md:self-start">{description}</p>
       </div>
       <div className="w-full flex flex-col md:flex-row justify-between items-center">
-        {button}
+        <div className="flex flex-row items-center gap-2">
+          {button}
+          {pointsLocation === "bottom" && (
+            <HumanPointsLabel
+              points={humanPoints}
+              prefix={prefix}
+              isVisible={aboveThreshold && !!humanPoints && !beforeHumanPointsRelease()}
+            />
+          )}
+        </div>
         {linkText && linkHref && (
           <Hyperlink href={linkHref} className="font-normal text-gray-500 pl-4">
             {linkText}
@@ -231,7 +243,8 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
           "Next up, mint your Passport onchain!",
           "Here’s what you can do with your Passport!",
           "https://www.passport.xyz/ecosystem",
-          renderButton("Mint onchain", () => setShowSidebar(true), <IconHammer />)
+          renderButton("Mint onchain", () => setShowSidebar(true), <IconHammer />),
+          "bottom"
         )}
       </>
     );
