@@ -6,4 +6,4 @@ export const UBER_REGULAR_RIDER_THRESHOLD = 25;
 export const UBER_POWER_USER_THRESHOLD = 75;
 
 export const UBER_GROUP = "86de72c1-bd22-4f56-b120-eaf18e33eeeb";
-export const AMAZON_GROUP = "0d462a92-8872-4a48-a557-05e20c493408";
+export const AMAZON_GROUP = "02e02508-5675-48d1-b06c-007ac2295df9";
