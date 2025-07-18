@@ -25,38 +25,7 @@ const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
     platforms: ["AllowList"],
   },
   {
-    name: "Blockchain & Crypto Networks",
-    icon: (
-      <svg width="65" height="65" viewBox="0 0 65 65" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0.5" y="0.332031" width="64" height="64" rx="30" fill="#F5F5F5" />
-        <path
-          d="M45.8332 32.3314C45.8332 39.6952 39.8636 45.6647 32.4998 45.6647M45.8332 32.3314C45.8332 24.9676 39.8636 18.998 32.4998 18.998M45.8332 32.3314H19.1665M32.4998 45.6647C25.136 45.6647 19.1665 39.6952 19.1665 32.3314M32.4998 45.6647C29.0762 42.0698 27.1665 37.2957 27.1665 32.3314C27.1665 27.367 29.0762 22.5929 32.4998 18.998M32.4998 45.6647C35.9235 42.0698 37.8332 37.2957 37.8332 32.3314C37.8332 27.367 35.9235 22.5929 32.4998 18.998M19.1665 32.3314C19.1665 24.9676 25.136 18.998 32.4998 18.998"
-          stroke="#737373"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-    description: "Connect your blockchain-based profiles and assets to prove your identity.",
-    platforms: [
-      "ETH",
-      "NFT",
-      "GtcStaking",
-      "Idena",
-      "Gitcoin",
-      "ZkSync",
-      "GuildXYZ",
-      "Lens",
-      "Snapshot",
-      "GnosisSafe",
-      "Brightid",
-      "TrustaLabs",
-      "Ens",
-    ],
-  },
-  {
-    name: "Government IDs",
+    name: "Physical Verification",
     icon: (
       <svg width="65" height="65" viewBox="0 0 65 65" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="0.5" y="0.332031" width="64" height="64" rx="30" fill="#F5F5F5" />
@@ -69,11 +38,42 @@ const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
         />
       </svg>
     ),
-    description: "Use your government-issued IDs or complete a KYC process with our partners to verify your identity.",
-    platforms: ["Coinbase", "HumanIdKyc", "Binance", "CleanHands", "HumanIdPhone"],
+    description: "Includes verification methods that require verifying a real-world object or biometrics",
+    platforms: ["Binance", "Biometrics", "Civic", "CleanHands", "Coinbase", "HumanIdKyc", "HumanIdPhone"],
   },
   {
-    name: "Social & Professional Platforms",
+    name: "Blockchain Networks and Activities",
+    icon: (
+      <svg width="65" height="65" viewBox="0 0 65 65" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0.5" y="0.332031" width="64" height="64" rx="30" fill="#F5F5F5" />
+        <path
+          d="M45.8332 32.3314C45.8332 39.6952 39.8636 45.6647 32.4998 45.6647M45.8332 32.3314C45.8332 24.9676 39.8636 18.998 32.4998 18.998M45.8332 32.3314H19.1665M32.4998 45.6647C25.136 45.6647 19.1665 39.6952 19.1665 32.3314M32.4998 45.6647C29.0762 42.0698 27.1665 37.2957 27.1665 32.3314C27.1665 27.367 29.0762 22.5929 32.4998 18.998M32.4998 45.6647C35.9235 42.0698 37.8332 37.2957 37.8332 32.3314C37.8332 27.367 35.9235 22.5929 32.4998 18.998M19.1665 32.3314C19.1665 24.9676 25.136 18.998 32.4998 18.998"
+          stroke="#737373"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+    description: "Verify onchain activity, token holdings, and participation in blockchain ecosystems",
+    platforms: [
+      "Brightid",
+      "Ens",
+      "ETH",
+      "Gitcoin",
+      "GtcStaking",
+      "GuildXYZ",
+      "Idena",
+      "Lens",
+      "NFT",
+      "GnosisSafe",
+      "Snapshot",
+      "TrustaLabs",
+      "ZkSync",
+    ],
+  },
+  {
+    name: "Web2 Platforms & Services",
     icon: (
       <svg width="65" height="65" viewBox="0 0 65 65" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="0.5" y="0.332031" width="64" height="64" rx="30" fill="#F5F5F5" />
@@ -86,25 +86,8 @@ const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
         />
       </svg>
     ),
-    description: "Link your profiles from established social media and professional networking sites for verification.",
-    platforms: ["Github", "Linkedin", "Google", "Discord", "ZKEmail"],
-  },
-  {
-    name: "Biometric Verification",
-    icon: (
-      <svg width="65" height="65" viewBox="0 0 65 65" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0.5" y="0.332031" width="64" height="64" rx="30" fill="#F5F5F5" />
-        <path
-          d="M20.5 25.6654V22.9987C20.5 22.2915 20.781 21.6132 21.281 21.1131C21.7811 20.613 22.4594 20.332 23.1667 20.332H25.8333M39.1667 20.332H41.8333C42.5406 20.332 43.2189 20.613 43.719 21.1131C44.219 21.6132 44.5 22.2915 44.5 22.9987V25.6654M44.5 38.9987V41.6654C44.5 42.3726 44.219 43.0509 43.719 43.551C43.2189 44.0511 42.5406 44.332 41.8333 44.332H39.1667M25.8333 44.332H23.1667C22.4594 44.332 21.7811 44.0511 21.281 43.551C20.781 43.0509 20.5 42.3726 20.5 41.6654V38.9987M27.1667 34.9987C27.1667 34.9987 29.1667 37.6654 32.5 37.6654C35.8333 37.6654 37.8333 34.9987 37.8333 34.9987M28.5 28.332H28.5133M36.5 28.332H36.5133"
-          stroke="#737373"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-    description: "Connect your blockchain-based profiles and assets to prove your identity.",
-    platforms: ["Civic", "Biometrics"],
+    description: "Connect traditional web platforms and services to demonstrate digital presence",
+    platforms: ["Discord", "Github", "Google", "Linkedin", "ZKEmail"],
   },
 ];
 
