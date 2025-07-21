@@ -182,3 +182,6 @@ export const createSignedPayload = async (did: DID, data: any) => {
 
 // The parseAbi helper only works if we drop the word "tuple" from the human-readable abi
 export const cleanAndParseAbi = (abi: string[]) => parseAbi(abi.map((item) => item.replace(/tuple\(/g, "(")));
+
+// Multiplies value by multiplier only if multiplier > 0, otherwise returns value as is
+export const applyMultiplier = (value: number, multiplier: number) => (multiplier > 0 ? value * multiplier : value);

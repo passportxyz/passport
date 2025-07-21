@@ -8,7 +8,7 @@ import { useOneClickVerification } from "../hooks/useOneClickVerification";
 import { Popover, Transition } from "@headlessui/react";
 import { HumanPointsLabel } from "./humanPoints";
 import TooltipOverChildren from "./TooltipOverChildren";
-import { beforeHumanPointsRelease } from "../utils/helpers";
+import { applyMultiplier, beforeHumanPointsRelease } from "../utils/helpers";
 import { Icon } from "@chakra-ui/react";
 
 type MinimalHeaderProps = {
@@ -234,64 +234,67 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
           <p className="my-1">HUMN points earned:</p>
           <ul className="space-y-1.5">
             {pointsData.multiplier == 2 && (
-              <PointsTooltipItem title="Returning User (2x)" text={`+${pointsData.total_points / 2}`} />
+              <PointsTooltipItem
+                title="Returning User (2x)"
+                text={`+${applyMultiplier(pointsData.total_points, pointsData.multiplier)}`}
+              />
             )}
             {pointsData.breakdown?.SCB && (
               <PointsTooltipItem
                 title="Scored > 20 with 3 or more partner campaigns"
-                text={`+${pointsData.breakdown.SCB / pointsData.multiplier}`}
+                text={`+${applyMultiplier(pointsData.breakdown.SCB, pointsData.multiplier)}`}
               />
             )}
             {pointsData.breakdown?.HKY && (
               <PointsTooltipItem
                 title="Human Keys Created"
-                text={`+${pointsData.breakdown.HKY / pointsData.multiplier}`}
+                text={`+${applyMultiplier(pointsData.breakdown.HKY, pointsData.multiplier)}`}
               />
             )}
             {pointsData.breakdown?.HGO && (
               <PointsTooltipItem
                 title="Government ID Stamp"
-                text={`+${pointsData.breakdown.HGO / pointsData.multiplier}`}
+                text={`+${applyMultiplier(pointsData.breakdown.HGO, pointsData.multiplier)}`}
               />
             )}
             {pointsData.breakdown?.HPH && (
               <PointsTooltipItem
                 title="Phone Verification Stamp"
-                text={`+${pointsData.breakdown.HPH / pointsData.multiplier}`}
+                text={`+${applyMultiplier(pointsData.breakdown.HPH, pointsData.multiplier)}`}
               />
             )}
             {pointsData.breakdown?.HBI && (
               <PointsTooltipItem
                 title="Biometrics Stamp"
-                text={`+${pointsData.breakdown.HBI / pointsData.multiplier}`}
+                text={`+${applyMultiplier(pointsData.breakdown.HBI, pointsData.multiplier)}`}
               />
             )}
             {pointsData.breakdown?.HCH && (
               <PointsTooltipItem
                 title="Proof of Clean Hands Stamp"
-                text={`+${pointsData.breakdown.HCH / pointsData.multiplier}`}
+                text={`+${applyMultiplier(pointsData.breakdown.HCH, pointsData.multiplier)}`}
               />
             )}
             {(pointsData.breakdown?.ISB || pointsData.breakdown?.ISG || pointsData.breakdown?.ISS) && (
               <PointsTooltipItem
                 title="Identity Staking Stamp"
-                text={`+${
-                  ((pointsData.breakdown?.ISB ?? 0) +
+                text={`+${applyMultiplier(
+                  (pointsData.breakdown?.ISB ?? 0) +
                     (pointsData.breakdown?.ISG ?? 0) +
-                    (pointsData.breakdown?.ISS ?? 0)) /
+                    (pointsData.breakdown?.ISS ?? 0),
                   pointsData.multiplier
-                }`}
+                )}`}
               />
             )}
             {(pointsData.breakdown?.CSB || pointsData.breakdown?.CSE || pointsData.breakdown?.CST) && (
               <PointsTooltipItem
                 title="Community Staking Stamp"
-                text={`+${
-                  ((pointsData.breakdown?.CSB ?? 0) +
+                text={`+${applyMultiplier(
+                  (pointsData.breakdown?.CSB ?? 0) +
                     (pointsData.breakdown?.CSE ?? 0) +
-                    (pointsData.breakdown?.CST ?? 0)) /
+                    (pointsData.breakdown?.CST ?? 0),
                   pointsData.multiplier
-                }`}
+                )}`}
               />
             )}
             {pointsData.breakdown?.PMT &&
@@ -304,7 +307,7 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
                     <PointsTooltipItem
                       key={chainID}
                       title={`Passport Minted (${chainID})`}
-                      text={`+${(pointsData.breakdown?.[("PMT_" + chainID) as `PMT_${number}`] ?? 0) / pointsData.multiplier}`}
+                      text={`+${pointsData.breakdown?.[("PMT_" + chainID) as `PMT_${number}`] ?? 0}`}
                     />
                   );
                 });
@@ -319,7 +322,7 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
                     <PointsTooltipItem
                       key={chainID}
                       title={`Human ID Minted (${chainID})`}
-                      text={`+${(pointsData.breakdown?.[("HIM_" + chainID) as `HIM_${number}`] ?? 0) / pointsData.multiplier}`}
+                      text={`+${pointsData.breakdown?.[("HIM_" + chainID) as `HIM_${number}`] ?? 0}`}
                     />
                   );
                 });
@@ -390,7 +393,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
                 tooltipElement={<PointsTooltip pointsData={pointsData} />}
               >
                 <HumanPointsLabel
-                  points={pointsData ? pointsData.total_points : 0}
+                  points={pointsData ? applyMultiplier(pointsData.total_points, pointsData.multiplier) : 0}
                   isVisible={!beforeHumanPointsRelease()}
                 />
               </TooltipOverChildren>
