@@ -86,6 +86,8 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech,
       });
 
       setPossibleHumanPoints(platformPoints);
+    } else {
+      setPossibleHumanPoints(0);
     }
   }, [platformProviders, possiblePointsDataForStamps]);
 
@@ -182,9 +184,11 @@ const VerifiedStamp = ({
       pointedProviders.forEach((k) => {
         platformPoints += pointsDataForStamps[k] || 0;
       });
-
       setHumanPoints(platformPoints);
       setVisible(!!platformPoints);
+    } else {
+      setHumanPoints(0);
+      setVisible(false);
     }
 
     const intersection = onchainProviderSet.intersection(providerSet);
