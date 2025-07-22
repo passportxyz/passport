@@ -242,59 +242,38 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
             {pointsData.breakdown?.SCB && (
               <PointsTooltipItem
                 title="Scored > 20 with 3 or more partner campaigns"
-                text={`+${applyMultiplier(pointsData.breakdown.SCB, pointsData.multiplier)}`}
+                text={`+${pointsData.breakdown.SCB}`}
               />
             )}
             {pointsData.breakdown?.HKY && (
-              <PointsTooltipItem
-                title="Human Keys Created"
-                text={`+${applyMultiplier(pointsData.breakdown.HKY, pointsData.multiplier)}`}
-              />
+              <PointsTooltipItem title="Human Keys Created" text={`+${pointsData.breakdown.HKY}`} />
             )}
             {pointsData.breakdown?.HGO && (
-              <PointsTooltipItem
-                title="Government ID Stamp"
-                text={`+${applyMultiplier(pointsData.breakdown.HGO, pointsData.multiplier)}`}
-              />
+              <PointsTooltipItem title="Government ID Stamp" text={`+${pointsData.breakdown.HGO}`} />
             )}
             {pointsData.breakdown?.HPH && (
-              <PointsTooltipItem
-                title="Phone Verification Stamp"
-                text={`+${applyMultiplier(pointsData.breakdown.HPH, pointsData.multiplier)}`}
-              />
+              <PointsTooltipItem title="Phone Verification Stamp" text={`+${pointsData.breakdown.HPH}`} />
             )}
             {pointsData.breakdown?.HBI && (
-              <PointsTooltipItem
-                title="Biometrics Stamp"
-                text={`+${applyMultiplier(pointsData.breakdown.HBI, pointsData.multiplier)}`}
-              />
+              <PointsTooltipItem title="Biometrics Stamp" text={`+${pointsData.breakdown.HBI}`} />
             )}
             {pointsData.breakdown?.HCH && (
-              <PointsTooltipItem
-                title="Proof of Clean Hands Stamp"
-                text={`+${applyMultiplier(pointsData.breakdown.HCH, pointsData.multiplier)}`}
-              />
+              <PointsTooltipItem title="Proof of Clean Hands Stamp" text={`+${pointsData.breakdown.HCH}`} />
             )}
             {(pointsData.breakdown?.ISB || pointsData.breakdown?.ISG || pointsData.breakdown?.ISS) && (
               <PointsTooltipItem
                 title="Identity Staking Stamp"
-                text={`+${applyMultiplier(
-                  (pointsData.breakdown?.ISB ?? 0) +
-                    (pointsData.breakdown?.ISG ?? 0) +
-                    (pointsData.breakdown?.ISS ?? 0),
-                  pointsData.multiplier
-                )}`}
+                text={`+${
+                  (pointsData.breakdown?.ISB ?? 0) + (pointsData.breakdown?.ISG ?? 0) + (pointsData.breakdown?.ISS ?? 0)
+                }`}
               />
             )}
             {(pointsData.breakdown?.CSB || pointsData.breakdown?.CSE || pointsData.breakdown?.CST) && (
               <PointsTooltipItem
                 title="Community Staking Stamp"
-                text={`+${applyMultiplier(
-                  (pointsData.breakdown?.CSB ?? 0) +
-                    (pointsData.breakdown?.CSE ?? 0) +
-                    (pointsData.breakdown?.CST ?? 0),
-                  pointsData.multiplier
-                )}`}
+                text={`+${
+                  (pointsData.breakdown?.CSB ?? 0) + (pointsData.breakdown?.CSE ?? 0) + (pointsData.breakdown?.CST ?? 0)
+                }`}
               />
             )}
             {pointsData.breakdown?.PMT &&
