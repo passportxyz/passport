@@ -386,7 +386,10 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
       <div className={`flex md:hidden gap-4 items-center justify-between h-16 px-2 ${className}`}>
         <AccountCenter />
         {scoreState.status !== "initial" && (
-          <HumanPointsLabel points={pointsData ? pointsData.total_points : 0} isVisible={!beforeHumanPointsRelease()} />
+          <HumanPointsLabel
+            points={pointsData ? applyMultiplier(pointsData.total_points, pointsData.multiplier) : 0}
+            isVisible={!beforeHumanPointsRelease()}
+          />
         )}
 
         <Popover className=" text-gray-800">
