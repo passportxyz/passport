@@ -94,7 +94,7 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech,
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
       <div
-        className={`group relative flex h-full cursor-pointer flex-col rounded-2xl p-0 transition-all ease-out ${variantClasses[variant || "default"]} bg-red-500`}
+        className={`group relative flex h-full cursor-pointer flex-col rounded-2xl p-0 transition-all ease-out ${variantClasses[variant || "default"]}`}
       >
         <div className="m-4 flex h-full flex-col justify-between">
           <div className="flex w-full items-center justify-between">
