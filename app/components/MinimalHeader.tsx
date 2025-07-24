@@ -236,7 +236,8 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
             {pointsData.multiplier == 2 && (
               <PointsTooltipItem
                 title="Returning User (2x)"
-                text={`+${applyMultiplier(pointsData.total_points, pointsData.multiplier)}`}
+                // text={`+${applyMultiplier(pointsData.total_points, pointsData.multiplier)}`}
+                text={`+${pointsData.total_points}`}
               />
             )}
             {pointsData.breakdown?.SCB && (
