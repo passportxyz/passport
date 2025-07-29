@@ -126,7 +126,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
   const aboveThreshold = rawScore >= threshold;
   const customText = customization?.scorerPanel?.text;
   const mintPointsGained = pointsData?.breakdown.PMT;
-  const humanPoints = mintPointsGained || 1800 * (pointsData?.multiplier ?? 1);
+  const humanPoints = mintPointsGained || 1800;
   const prefix = !!mintPointsGained ? "+" : "";
 
   const renderContent = (
