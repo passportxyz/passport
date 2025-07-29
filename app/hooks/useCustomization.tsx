@@ -10,6 +10,7 @@ export const DEFAULT_CUSTOMIZATION: Customization = {
   key: DEFAULT_CUSTOMIZATION_KEY,
   partnerName: "",
   useCustomDashboardPanel: false,
+  hideHumnBranding: false,
   dashboardPanel: {
     customDashboardPanelTitle: "",
     logo: {
@@ -78,7 +79,7 @@ export const useSetCustomizationKey = (): ((customizationKey: string | undefined
           customizationConfig?.customizationTheme && setCustomizationTheme(customizationConfig.customizationTheme);
         } catch (e) {
           console.error("Failed to load customization config", e);
-          setCustomizationConfig(DEFAULT_CUSTOMIZATION);
+          setCustomizationConfig({ ...DEFAULT_CUSTOMIZATION, hideHumnBranding: true });
         }
       } else {
         setCustomizationConfig(DEFAULT_CUSTOMIZATION);

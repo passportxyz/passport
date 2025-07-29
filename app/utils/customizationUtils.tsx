@@ -48,6 +48,7 @@ export type Customization = {
   key: string;
   partnerName: string;
   useCustomDashboardPanel: boolean;
+  hideHumnBranding?: boolean;
   dashboardPanel: {
     customDashboardPanelTitle?: string;
     logo: {
@@ -91,6 +92,7 @@ type CustomizationResponse = {
   partnerName: string;
   customizationTheme?: CustomizationTheme;
   useCustomDashboardPanel?: boolean;
+  hideHumnBranding?: boolean;
   scorer?: {
     id?: number;
     weights?: Record<PROVIDER_ID, string>;
@@ -164,6 +166,7 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
     partnerName: customizationResponse.partnerName,
     customizationTheme: customizationResponse.customizationTheme,
     useCustomDashboardPanel: customizationResponse.useCustomDashboardPanel || false,
+    hideHumnBranding: customizationResponse.hideHumnBranding || false,
     scorer: {
       id: customizationResponse.scorer?.id,
       weights: customizationResponse.scorer?.weights,

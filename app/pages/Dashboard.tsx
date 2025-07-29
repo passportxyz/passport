@@ -41,7 +41,7 @@ import { beforeHumanPointsRelease } from "../utils/helpers";
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export const DashboardCTAs = ({ customization }: { customization: Customization }) => {
-  const { useCustomDashboardPanel } = customization;
+  const { useCustomDashboardPanel, hideHumnBranding } = customization;
   const explanationPanel = customization.key !== "none" ? customization?.showExplanationPanel : true;
 
   const backgroundColor = useRadialBackgroundColorForHeader();
@@ -49,7 +49,7 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
   const { pointsData } = useContext(ScorerContext);
   const multiplier = pointsData?.multiplier;
   const isEligible = !!pointsData?.is_eligible;
-  const showMultiplierPanel = multiplier && multiplier > 1;
+  const showMultiplierPanel = multiplier && multiplier > 1 && !hideHumnBranding;
 
   return (
     <div className="relative col-span-full">
