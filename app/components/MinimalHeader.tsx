@@ -217,7 +217,11 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
           <p className="my-1">Build up a Unique Humanity Score of 20+ to qualify for HUMN points</p>
           <p className="my-1">
             Learn more about the{" "}
-            <a className="underline text-color-9" href="http://passport.human.tech/blog/points" target="_blank">
+            <a
+              className="underline text-color-9"
+              href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live"
+              target="_blank"
+            >
               HUMN onchain SUMR
             </a>
           </p>
@@ -227,7 +231,11 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
           <p className="my-1 font-medium">This is your HUMN Points balance</p>
           <p className="my-1">
             Learn more about the{" "}
-            <a className="underline text-color-9" href="http://passport.human.tech/blog/points">
+            <a
+              className="underline text-color-9"
+              href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live"
+              target="_blank"
+            >
               HUMN onchain SUMR
             </a>
           </p>

@@ -141,7 +141,18 @@ const StampDrawer = ({
       credentialGroups: processedCredentialGroups,
       allStampsVerified,
     };
-  }, [credentialGroups, verifiedProviders, expiredProviders, stampWeights, stampDedupStatus, platformSpec, isLoading]);
+  }, [
+    credentialGroups,
+    verifiedProviders,
+    expiredProviders,
+    stampWeights,
+    stampDedupStatus,
+    platformSpec,
+    isLoading,
+    pointsData?.is_eligible,
+    pointsDataForStamps,
+    possiblePointsDataForStamps,
+  ]);
 
   const { verificationState, allStampsVerified } = processedData;
 
