@@ -219,7 +219,7 @@ const StampDrawer = ({
 
   return (
     <>
-      <Drawer isOpen={isOpen} onClose={onClose} placement="right" size={drawerSize}>
+      <Drawer isOpen={isOpen} onClose={onClose} placement="right" size={drawerSize} trapFocus={false}>
         <DrawerOverlay />
         <DrawerContent
           style={{
