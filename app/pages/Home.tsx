@@ -72,7 +72,7 @@ export default function Home() {
             <div className="pr-8">
               We are launching HUMN Points rewards program. Earn Points and unlock exclusive rewards.
             </div>
-            <a href="https://human.tech/">
+            <a href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live" target="_blank">
               <p className="font-bold">
                 Learn more
                 <svg
