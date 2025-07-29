@@ -21,7 +21,7 @@ export const PlatformDetails: PlatformSpec = {
           actions: [
             {
               label: "Join Human Passport Guild",
-              href: "https://guild.xyz/gitcoinpassport",
+              href: "https://guild.xyz/humanpassport",
             },
           ],
         },
