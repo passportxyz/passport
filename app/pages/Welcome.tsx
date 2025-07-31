@@ -17,10 +17,6 @@ export default function Welcome() {
   const { address } = useAccount();
   const { scorer, hideHumnBranding } = useCustomization();
   const threshold = scorer?.threshold;
-  console.log({
-    hideHumnBranding,
-  });
-
   const navigateToPage = useNavigateToPage();
 
   // Route user to home page when wallet is disconnected

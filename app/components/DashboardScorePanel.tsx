@@ -122,7 +122,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
   const { someChainUpToDate, onChainAttestationProviders } = useAllOnChainStatus();
   const customization = useCustomization();
   const { pointsData } = React.useContext(ScorerContext);
-  const hideHumnBranding = customization.hideHumnBranding || false;
+  const hideHumnBranding = customization.hideHumnBranding;
 
   const aboveThreshold = rawScore >= threshold;
   const customText = customization?.scorerPanel?.text;
