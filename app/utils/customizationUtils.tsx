@@ -166,7 +166,7 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
     partnerName: customizationResponse.partnerName,
     customizationTheme: customizationResponse.customizationTheme,
     useCustomDashboardPanel: customizationResponse.useCustomDashboardPanel || false,
-    hideHumnBranding: customizationResponse.hideHumnBranding || false,
+    hideHumnBranding: customizationResponse.hideHumnBranding || true,
     scorer: {
       id: customizationResponse.scorer?.id,
       weights: customizationResponse.scorer?.weights,
