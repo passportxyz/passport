@@ -12,17 +12,19 @@ import { ExpiredLabel } from "./LabelExpired";
 import { POINTS_BREAKDOWN_KEY, ScorerContext } from "../context/scorerContext";
 import { HumanPointsLabelSMDark } from "./humanPoints";
 import { beforeHumanPointsRelease } from "../utils/helpers";
+import { useCustomization } from "../hooks/useCustomization";
 
 export function NetworkCard({ chain }: { chain: Chain }) {
   const { status, isPending } = useOnChainStatus({ chain });
   const { expirationDate } = useOnChainData().data[chain.id] || {};
   const { address } = useAccount();
   const { pointsData } = useContext(ScorerContext);
+  const { hideHumnBranding } = useCustomization();
   const keyForChainPoints = `PMT_${Number.parseInt(chain.id, 16)}` as POINTS_BREAKDOWN_KEY;
   const gainedHumanPoints = pointsData?.breakdown[keyForChainPoints];
   const prefix = !!gainedHumanPoints ? "+" : "";
   const humanPoints = gainedHumanPoints || 300;
-  const showHumanPoints = !!humanPoints && !beforeHumanPointsRelease();
+  const showHumanPoints = !!humanPoints && !beforeHumanPointsRelease() && !hideHumnBranding;
 
   const isOnChain = [
     OnChainStatus.MOVED_OUT_OF_DATE,

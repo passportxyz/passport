@@ -122,6 +122,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
   const { someChainUpToDate, onChainAttestationProviders } = useAllOnChainStatus();
   const customization = useCustomization();
   const { pointsData } = React.useContext(ScorerContext);
+  const hideHumnBranding = customization.hideHumnBranding;
 
   const aboveThreshold = rawScore >= threshold;
   const customText = customization?.scorerPanel?.text;
@@ -146,7 +147,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
               <HumanPointsLabel
                 points={humanPoints}
                 prefix={prefix}
-                isVisible={aboveThreshold && !!humanPoints && !beforeHumanPointsRelease()}
+                isVisible={aboveThreshold && !!humanPoints && !beforeHumanPointsRelease() && !hideHumnBranding}
               />
             )}
           </div>
@@ -160,7 +161,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
             <HumanPointsLabel
               points={humanPoints}
               prefix={prefix}
-              isVisible={aboveThreshold && !!humanPoints && !beforeHumanPointsRelease()}
+              isVisible={aboveThreshold && !!humanPoints && !beforeHumanPointsRelease() && !hideHumnBranding}
             />
           )}
         </div>
@@ -194,7 +195,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
               <HumanPointsLabel
                 points={humanPoints}
                 prefix={prefix}
-                isVisible={!!humanPoints && !beforeHumanPointsRelease()}
+                isVisible={!!humanPoints && !beforeHumanPointsRelease() && !hideHumnBranding}
               />
             </div>
             <div className="flex w-full md:w-auto justify-center gap-0">

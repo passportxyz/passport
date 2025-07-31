@@ -7,6 +7,7 @@ import userEvent from "@testing-library/user-event";
 import { DashboardScorePanel, OnchainCTA } from "../../components/DashboardScorePanel";
 import { useAllOnChainStatus } from "../../hooks/useOnChainStatus";
 import { PlatformScoreSpec } from "../../context/scorerContext";
+import { DEFAULT_CUSTOMIZATION, useCustomization } from "../../hooks/useCustomization";
 
 import { renderWithContext, makeTestCeramicContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
@@ -34,9 +35,13 @@ vi.mock("jotai", () => ({
   useAtomValue: vi.fn(),
 }));
 
-vi.mock("../../hooks/useCustomization", () => ({
-  useCustomization: vi.fn(),
-}));
+vi.mock("../../hooks/useCustomization", async () => {
+  const actual = await vi.importActual("../../hooks/useCustomization");
+  return {
+    ...actual,
+    useCustomization: vi.fn(),
+  };
+});
 
 // Mock useAllOnChainStatus
 vi.mock("../../hooks/useOnChainStatus", () => ({
@@ -81,10 +86,18 @@ describe("OnchainCTA", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useCustomization).mockReturnValue({ ...DEFAULT_CUSTOMIZATION });
   });
 
   it("renders content for above threshold and all chains up to date", async () => {
-    mockedUseAllOnChainStatus.mockReturnValue({ someChainUpToDate: true });
+    mockedUseAllOnChainStatus.mockReturnValue({
+      allChainsUpToDate: true,
+      anyChainExpired: false,
+      isPending: false,
+      someChainUpToDate: true,
+      allAttestationProviders: [],
+      onChainAttestationProviders: [],
+    });
 
     renderWithContext(
       mockCeramicContext,
@@ -97,7 +110,14 @@ describe("OnchainCTA", () => {
   });
 
   it("renders content for above threshold but chains not up to date", async () => {
-    mockedUseAllOnChainStatus.mockReturnValue({ someChainUpToDate: false });
+    mockedUseAllOnChainStatus.mockReturnValue({
+      allChainsUpToDate: false,
+      anyChainExpired: false,
+      isPending: false,
+      someChainUpToDate: false,
+      allAttestationProviders: [],
+      onChainAttestationProviders: [],
+    });
 
     renderWithContext(
       mockCeramicContext,
@@ -111,7 +131,14 @@ describe("OnchainCTA", () => {
   });
 
   it("renders content for below threshold", async () => {
-    mockedUseAllOnChainStatus.mockReturnValue({ someChainUpToDate: false });
+    mockedUseAllOnChainStatus.mockReturnValue({
+      allChainsUpToDate: false,
+      anyChainExpired: false,
+      isPending: false,
+      someChainUpToDate: false,
+      allAttestationProviders: [],
+      onChainAttestationProviders: [],
+    });
 
     renderWithContext(
       mockCeramicContext,
@@ -125,7 +152,14 @@ describe("OnchainCTA", () => {
   });
 
   it("calls setShowSidebar when 'See onchain passport' button is clicked", async () => {
-    mockedUseAllOnChainStatus.mockReturnValue({ someChainUpToDate: true });
+    mockedUseAllOnChainStatus.mockReturnValue({
+      allChainsUpToDate: true,
+      anyChainExpired: false,
+      isPending: false,
+      someChainUpToDate: true,
+      allAttestationProviders: [],
+      onChainAttestationProviders: [],
+    });
 
     renderWithContext(
       mockCeramicContext,
@@ -142,7 +176,14 @@ describe("OnchainCTA", () => {
   });
 
   it("scrolls to 'add-stamps' element when 'Verify Stamps' button is clicked", async () => {
-    mockedUseAllOnChainStatus.mockReturnValue({ someChainUpToDate: false });
+    mockedUseAllOnChainStatus.mockReturnValue({
+      allChainsUpToDate: false,
+      anyChainExpired: false,
+      isPending: false,
+      someChainUpToDate: false,
+      allAttestationProviders: [],
+      onChainAttestationProviders: [],
+    });
 
     const mockScrollIntoView = vi.fn();
     document.getElementById = vi.fn().mockReturnValue({ scrollIntoView: mockScrollIntoView });

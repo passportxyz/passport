@@ -10,6 +10,7 @@ import { HumanPointsLabel } from "./humanPoints";
 import TooltipOverChildren from "./TooltipOverChildren";
 import { applyMultiplier, beforeHumanPointsRelease } from "../utils/helpers";
 import { Icon } from "@chakra-ui/react";
+import { useCustomization } from "../hooks/useCustomization";
 
 type MinimalHeaderProps = {
   className?: string;
@@ -326,6 +327,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   const [showSidebar, setShowSidebar] = React.useState(false);
   const { verificationComplete } = useOneClickVerification();
   const { scoreState, pointsData } = React.useContext(ScorerContext);
+  const { hideHumnBranding } = useCustomization();
 
   const icons = [
     // {
@@ -374,7 +376,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
             );
           })}
 
-          {scoreState.status !== "initial" && (
+          {scoreState.status !== "initial" && !hideHumnBranding && (
             <>
               <TooltipOverChildren
                 panelClassName="text-black w-fit"
@@ -394,7 +396,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
 
       <div className={`flex md:hidden gap-4 items-center justify-between h-16 px-2 ${className}`}>
         <AccountCenter />
-        {scoreState.status !== "initial" && (
+        {scoreState.status !== "initial" && !hideHumnBranding && (
           <HumanPointsLabel
             points={pointsData ? applyMultiplier(pointsData.total_points, pointsData.multiplier) : 0}
             isVisible={!beforeHumanPointsRelease()}

@@ -15,9 +15,8 @@ export default function Welcome() {
 
   const { dbAccessTokenStatus } = useDatastoreConnectionContext();
   const { address } = useAccount();
-  const { scorer } = useCustomization();
+  const { scorer, hideHumnBranding } = useCustomization();
   const threshold = scorer?.threshold;
-
   const navigateToPage = useNavigateToPage();
 
   // Route user to home page when wallet is disconnected
@@ -40,18 +39,22 @@ export default function Welcome() {
           programs. You need a score of {!!threshold ? threshold : "20+"} to get verified and start accessing web3
           opportunities.
         </p>
-        <p className="pt-4">
-          <span className="font-bold">HUMN Points</span> are your rewards balance. These accumulate in your account
-          across the human.tech tools and will unlock exclusive benefits and rewards in upcoming programs.
-        </p>
-        <p className="pt-4">
-          <span className="font-bold">To earn HUMN Points,</span> you must build up a Unique Humanity Score of 20+.
-        </p>
-        <div className="pt-6 underline text-color-9">
-          <a href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live" target="_blank">
-            Learn more about HUMN Points
-          </a>
-        </div>
+        {!hideHumnBranding && (
+          <>
+            <p className="pt-4">
+              <span className="font-bold">HUMN Points</span> are your rewards balance. These accumulate in your account
+              across the human.tech tools and will unlock exclusive benefits and rewards in upcoming programs.
+            </p>
+            <p className="pt-4">
+              <span className="font-bold">To earn HUMN Points,</span> you must build up a Unique HumanitLeacore of 20+.
+            </p>
+            <div className="pt-6 underline text-color-9">
+              <a href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live" target="_blank">
+                Learn more about HUMN Points
+              </a>
+            </div>
+          </>
+        )}
       </div>
 
       <Button className="px-16" onClick={() => navigateToPage("dashboard")}>

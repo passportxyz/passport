@@ -15,6 +15,7 @@ export default function Home() {
   const [enableEthBranding, setEnableEthBranding] = useState(false);
   const customization = useCustomization();
   const threshold = customization.scorer?.threshold;
+  const hideHumnBranding = customization?.hideHumnBranding;
 
   useEffect(() => {
     const usingCustomization = customization.key !== DEFAULT_CUSTOMIZATION_KEY;
@@ -55,7 +56,7 @@ export default function Home() {
           className="px-10 mmb-12 md:w-2/3"
         />
       </div>
-      {!beforeHumanPointsRelease() && (
+      {!beforeHumanPointsRelease() && !hideHumnBranding && (
         <div className="flex flex-row  bg-emerald-100 items-center rounded-3xl">
           <div className="p-4">
             <svg width="89" height="88" viewBox="0 0 89 88" fill="none" xmlns="http://www.w3.org/2000/svg">

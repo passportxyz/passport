@@ -18,6 +18,7 @@ import { PassportPoints } from "./PassportPoints";
 import { HumanPointsLabelSMDark } from "./humanPoints";
 import { providersForPoints, ScorerContext } from "../context/scorerContext";
 import { beforeHumanPointsRelease } from "../utils/helpers";
+import { useCustomization } from "../hooks/useCustomization";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -73,7 +74,8 @@ const SecureDByHumanTech: React.FC = () => {
 const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech, platformProviders }: StampProps) => {
   const { possiblePointsDataForStamps, pointsData } = useContext(ScorerContext);
   const [possibleHumanPoints, setPossibleHumanPoints] = useState<number>();
-  const isHumanPointsVisible = !!possibleHumanPoints && !beforeHumanPointsRelease();
+  const { hideHumnBranding } = useCustomization();
+  const isHumanPointsVisible = !!possibleHumanPoints && !beforeHumanPointsRelease() && !hideHumnBranding;
 
   useEffect(() => {
     const providerSet = new Set(platformProviders);
@@ -173,6 +175,7 @@ const VerifiedStamp = ({
   const { pointsDataForStamps, pointsData } = useContext(ScorerContext);
   const [humanPoints, setHumanPoints] = useState<number>(0);
   const [isVisiblePoints, setVisible] = useState<boolean>(false);
+  const { hideHumnBranding } = useCustomization();
 
   useEffect(() => {
     const onchainProviderSet = new Set(activeChainProviders.map((p) => p.providerName));
@@ -248,7 +251,7 @@ const VerifiedStamp = ({
                 <HumanPointsLabelSMDark
                   points={humanPoints}
                   prefix="+"
-                  isVisible={isVisiblePoints && !beforeHumanPointsRelease()}
+                  isVisible={isVisiblePoints && !beforeHumanPointsRelease() && !hideHumnBranding}
                 />
               </div>
 
@@ -277,7 +280,7 @@ const VerifiedStamp = ({
 
           <div className="text-sm font-medium text-color-9">
             <span className="text-xl text-color-4">{+platform.earnedPoints.toFixed(1)}</span>/
-            {platform.displayPossiblePoints.toFixed()} points gained
+            {+platform.displayPossiblePoints.toFixed(1)} points gained
           </div>
           <ProgressBar
             pointsGained={platform.earnedPoints}

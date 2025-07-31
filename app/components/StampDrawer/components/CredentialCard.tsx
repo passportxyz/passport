@@ -3,6 +3,7 @@ import { CredentialCardProps } from "../types";
 import { PassportPoints } from "../../PassportPoints";
 import { HumanPointsLabelSMDark } from "../../humanPoints";
 import { beforeHumanPointsRelease } from "../../../utils/helpers";
+import { useCustomization } from "../../../hooks/useCustomization";
 
 const ExpiredIcon = () => (
   <svg width="16" height="16" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -93,6 +94,8 @@ export const CredentialCard = ({
   humanPointsAvailable,
   humanPointsEarned,
 }: CredentialCardProps) => {
+  const { hideHumnBranding } = useCustomization();
+
   const hasExpiredFlag = flags.includes("expired");
   const hasDeduplicatedFlag = flags.includes("deduplicated");
   const hasFlags = flags.length > 0;
@@ -117,7 +120,7 @@ export const CredentialCard = ({
           <HumanPointsLabelSMDark
             prefix={prefix}
             points={humanPoints}
-            isVisible={!!humanPoints && !beforeHumanPointsRelease()}
+            isVisible={!!humanPoints && !beforeHumanPointsRelease() && !hideHumnBranding}
           />
         </div>
         <PassportPoints
