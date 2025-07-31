@@ -223,6 +223,7 @@ defaultPlatformMap.set("Biometrics", {
   platFormGroupSpec: Biometrics.ProviderConfig,
 });
 
+console.log("process.env.NEXT_PUBLIC_FF_ZKEMAIL_STAMP  ", process.env.NEXT_PUBLIC_FF_ZKEMAIL_STAMP);
 if (process.env.NEXT_PUBLIC_FF_ZKEMAIL_STAMP === "on") {
   defaultPlatformMap.set("ZKEmail", {
     platform: new ZKEmail.ZKEmailPlatform({
