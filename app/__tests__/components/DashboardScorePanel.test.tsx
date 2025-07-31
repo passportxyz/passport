@@ -35,9 +35,13 @@ vi.mock("jotai", () => ({
   useAtomValue: vi.fn(),
 }));
 
-vi.mock("../../hooks/useCustomization", () => ({
-  useCustomization: vi.fn(),
-}));
+vi.mock("../../hooks/useCustomization", async () => {
+  const actual = await vi.importActual("../../hooks/useCustomization");
+  return {
+    ...actual,
+    useCustomization: vi.fn(),
+  };
+});
 
 // Mock useAllOnChainStatus
 vi.mock("../../hooks/useOnChainStatus", () => ({
