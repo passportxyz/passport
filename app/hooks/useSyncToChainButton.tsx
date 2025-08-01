@@ -8,7 +8,15 @@ import { useCustomization } from "./useCustomization";
 import { useIssueAttestation, useAttestationNonce } from "./useIssueAttestation";
 import { useAccount } from "wagmi";
 
-export const useSyncToChainButton = ({ chain, onChainStatus }: { chain?: Chain; onChainStatus: OnChainStatus }) => {
+export const useSyncToChainButton = ({
+  chain,
+  onChainStatus,
+  onSuccess,
+}: {
+  chain?: Chain;
+  onChainStatus: OnChainStatus;
+  onSuccess?: () => void;
+}) => {
   const { failure } = useMessage();
 
   const { passport } = useContext(CeramicContext);
@@ -74,6 +82,11 @@ export const useSyncToChainButton = ({ chain, onChainStatus }: { chain?: Chain; 
           }
 
           await issueAttestation({ data });
+
+          // Call onSuccess callback after successful attestation
+          if (onSuccess) {
+            onSuccess();
+          }
         } catch (e) {
           console.error("error syncing credentials to chain: ", e);
           failure({
@@ -85,7 +98,7 @@ export const useSyncToChainButton = ({ chain, onChainStatus }: { chain?: Chain; 
         }
       }
     },
-    [chain, address, syncingToChain, issueAttestation, failure, customScorerId]
+    [chain, address, syncingToChain, issueAttestation, failure, customScorerId, onSuccess]
   );
 
   const isActive = chain?.attestationProvider?.status === "enabled";
