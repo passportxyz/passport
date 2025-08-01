@@ -223,13 +223,6 @@ defaultPlatformMap.set("Biometrics", {
   platFormGroupSpec: Biometrics.ProviderConfig,
 });
 
-console.log({
-  NEXT_PUBLIC_FF_ZKEMAIL_STAMP: process.env.NEXT_PUBLIC_FF_ZKEMAIL_STAMP,
-  NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID,
-  NEXT_PUBLIC_PASSPORT_GOOGLE_CALLBACK: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CALLBACK,
-  isZKEmailEnabled: process.env.NEXT_PUBLIC_FF_ZKEMAIL_STAMP === "on",
-});
-
 if (process.env.NEXT_PUBLIC_FF_ZKEMAIL_STAMP === "on") {
   defaultPlatformMap.set("ZKEmail", {
     platform: new ZKEmail.ZKEmailPlatform({
