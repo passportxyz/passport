@@ -173,10 +173,10 @@ describe("OnChainSidebar", () => {
       </Drawer>
     );
     renderWithContext(mockCeramicContext, drawer());
-    
+
     // Should show "Expired" label
     waitFor(() => expect(screen.getByText("Expired")).toBeInTheDocument());
-    
+
     // Should NOT show "Valid for" text (expiration date UI should be hidden)
     expect(screen.queryByText("Valid for")).not.toBeInTheDocument();
   });
