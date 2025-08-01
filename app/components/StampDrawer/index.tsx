@@ -13,6 +13,7 @@ import { JsonOutputModal } from "../JsonOutputModal";
 import { RemovePlatformModal } from "../RemovePlatformModal";
 import { CeramicContext } from "../../context/ceramicContext";
 import { POINTED_STAMP_ROVIDER, ScorerContext } from "../../context/scorerContext";
+import { useCustomization } from "../../hooks/useCustomization";
 
 const useStampGridCols = ({
   hasSteps,
@@ -74,6 +75,7 @@ const StampDrawer = ({
   const isLg = useBreakpoint("lg");
   const { allProvidersState } = useContext(CeramicContext);
   const { possiblePointsDataForStamps, pointsDataForStamps, pointsData } = useContext(ScorerContext);
+  const customization = useCustomization();
 
   // Modal states
   const [jsonModalIsOpen, setJsonModalIsOpen] = useState(false);
@@ -104,11 +106,17 @@ const StampDrawer = ({
           points,
           isEligible: !!pointsData?.is_eligible,
           humanPointsAvailable:
-            providerId in possiblePointsDataForStamps
-              ? possiblePointsDataForStamps[providerId as POINTED_STAMP_ROVIDER]
-              : 0,
+            customization.scorer?.weights && stampWeights?.[providerId]
+              ? parseFloat(String(stampWeights[providerId])) || 0
+              : providerId in possiblePointsDataForStamps
+                ? possiblePointsDataForStamps[providerId as POINTED_STAMP_ROVIDER]
+                : 0,
           humanPointsEarned:
-            providerId in pointsDataForStamps ? pointsDataForStamps[providerId as POINTED_STAMP_ROVIDER] : 0,
+            customization.scorer?.weights && stampWeights?.[providerId]
+              ? parseFloat(String(stampWeights[providerId])) || 0
+              : providerId in pointsDataForStamps
+                ? pointsDataForStamps[providerId as POINTED_STAMP_ROVIDER]
+                : 0,
         };
       }),
     }));
@@ -152,6 +160,7 @@ const StampDrawer = ({
     pointsData?.is_eligible,
     pointsDataForStamps,
     possiblePointsDataForStamps,
+    customization.scorer?.weights,
   ]);
 
   const { verificationState, allStampsVerified } = processedData;
