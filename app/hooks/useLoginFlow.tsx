@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 // --- Components
 import { checkShowOnboard } from "../utils/helpers";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
-import { useNavigateToPage } from "../hooks/useCustomization";
+import { useNavigateToPage, useCustomization } from "../hooks/useCustomization";
 
 import { datadogRum } from "@datadog/browser-rum";
 import { useMessage } from "./useMessage";
@@ -36,6 +36,7 @@ export const useLoginFlow = ({
   const isConnectingToDatabaseRef = useRef<boolean>(false);
   const { failure } = useMessage();
   const navigateToPage = useNavigateToPage();
+  const { hideHumnBranding } = useCustomization();
   const web3modalEvent = useAppKitEvents();
 
   const initiateLogin = useCallback(() => {
@@ -92,14 +93,17 @@ export const useLoginFlow = ({
       if (onLoggedIn) {
         onLoggedIn();
       } else {
-        if (checkShowOnboard()) {
+        // If hideHumnBranding is true, skip the welcome page entirely
+        if (hideHumnBranding) {
+          navigateToPage("dashboard");
+        } else if (checkShowOnboard()) {
           navigateToPage("welcome");
         } else {
           navigateToPage("dashboard");
         }
       }
     }
-  }, [loginStep, navigateToPage, onLoggedIn]);
+  }, [loginStep, navigateToPage, onLoggedIn, hideHumnBranding]);
 
   useEffect(() => {
     (async () => {
