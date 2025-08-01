@@ -49,6 +49,8 @@ export const PlatformDetails: PlatformSpec = {
         "This Stamp uses zero-knowledge proofs to analyze emails without exposing personal data",
         "This Stamp only scans for specific purchase confirmation and receipt patterns",
         "No personal information or email content is stored or shared",
+        "If you have trouble proving your emails, you can contribute to the public archive of dkim keys at archive.zk.email/contribute",
+        "For additional support, contact the team at support@zk.email",
       ],
     },
   ],
