@@ -8,6 +8,8 @@ import { ScorerContext } from "../context/scorerContext";
 import { LowScoreAlertModal } from "./LowScoreAlertModal";
 import { atom, useAtom } from "jotai";
 import { datadogLogs } from "@datadog/browser-logs";
+import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
+import { useAccount } from "wagmi";
 
 export function getButtonMsg(onChainStatus: OnChainStatus): React.ReactElement {
   switch (onChainStatus) {
@@ -61,11 +63,24 @@ const userHasApprovedLowScoreMintAtom = atom<boolean>(false);
 
 export function SyncToChainButton({ onChainStatus, chain, className, isLoading }: SyncToChainProps): JSX.Element {
   const [userHasApprovedLowScoreMint, setUserHasApprovedLowScoreMint] = useAtom(userHasApprovedLowScoreMintAtom);
-  const { rawScore, threshold, scoreState } = useContext(ScorerContext);
+  const { rawScore, threshold, scoreState, refreshScore } = useContext(ScorerContext);
+  const { dbAccessToken } = useDatastoreConnectionContext();
+  const { address } = useAccount();
   const [showLowScoreAlert, setShowLowScoreAlert] = useState(false);
+
+  const handleSyncSuccess = useCallback(() => {
+    if (address && dbAccessToken) {
+      // Add a 10-second delay before refreshing the score
+      setTimeout(() => {
+        refreshScore(address.toLowerCase(), dbAccessToken, true);
+      }, 10000);
+    }
+  }, [address, dbAccessToken, refreshScore]);
+
   const { props, syncingToChain, needToSwitchChain } = useSyncToChainButton({
     chain,
     onChainStatus,
+    onSuccess: handleSyncSuccess,
   });
 
   const isActive = chain?.attestationProvider?.status === "enabled";
