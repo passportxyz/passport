@@ -23,6 +23,35 @@ export const PlatformDetails: PlatformSpec = {
   description: "Connect to ZK Email to verify you took Uber trips and Amazon orders.",
   connectMessage: "Connect Account",
   website: "https://www.zk.email/",
+  guide: [
+    {
+      type: "steps",
+      items: [
+        {
+          title: "Step 1",
+          description: "Click the \"Check Eligibility\" button below to kick off the verification process.",
+        },
+        {
+          title: "Step 2",
+          description: "Log in to your Google account, and provide zkEmail the permissions to scan for purchase confirmations and service receipts while keeping your data private.",
+        },
+        {
+          title: "Step 3",
+          description: "zkEmail will scan your inbox, archive, and tagged emails for evidence of your Amazon and Uber activity, and will assign you credentials based on that usage.",
+        },
+      ],
+    },
+    {
+      type: "list",
+      title: "Important considerations",
+      items: [
+        "We only scan your inbox, archive, and tagged emails. Any deleted emails will not count towards this Stamp",
+        "This Stamp uses zero-knowledge proofs to analyze emails without exposing personal data",
+        "This Stamp only scans for specific purchase confirmation and receipt patterns",
+        "No personal information or email content is stored or shared",
+      ],
+    },
+  ],
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
