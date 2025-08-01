@@ -19,36 +19,8 @@ type CustomDashboardPanelProps = {
   className: string;
 };
 
-const DotsBackground = ({ viewBox, className }: { viewBox: string; className: string }) => (
-  <svg viewBox={viewBox} fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    <circle cx="10" cy="10" r="1.5" fill="#D9D9D9" fillOpacity="0.5" />
-    <circle cx="40" cy="8" r="0.5" fill="#D9D9D9" fillOpacity="0.5" />
-    <circle cx="20" cy="20" r="0.5" fill="#D9D9D9" fillOpacity="0.5" />
-    <circle cx="08" cy="30" r="0.8" fill="#D9D9D9" fillOpacity="0.5" />
-    <circle cx="46" cy="28" r="0.8" fill="#D9D9D9" fillOpacity="0.5" />
-    <circle cx="44" cy="64" r="1.5" fill="#D9D9D9" fillOpacity="0.5" />
-    <circle cx="02" cy="68" r="0.8" fill="#D9D9D9" fillOpacity="0.5" />
-    <circle cx="18" cy="80" r="1.5" fill="#D9D9D9" fillOpacity="0.5" />
-    <circle cx="35" cy="84" r="0.5" fill="#D9D9D9" fillOpacity="0.5" />
-    <circle cx="08" cy="92" r="0.8" fill="#D9D9D9" fillOpacity="0.5" />
-    <circle cx="46" cy="96" r="0.8" fill="#D9D9D9" fillOpacity="0.5" />
-  </svg>
-);
-
 // Used as base for both API-defined and static panels
 export const CustomDashboardPanel = ({ logo, className, children }: CustomDashboardPanelProps) => {
-  const logoBackground = useMemo(() => {
-    if (logo.background === "dots") {
-      return (
-        <>
-          <DotsBackground viewBox="0 0 50 100" className="block md:hidden lg:block" />
-          {/* 1:1 aspect ratio works better on medium screen */}
-          <DotsBackground viewBox="0 15 50 65" className="hidden md:block lg:hidden" />
-        </>
-      );
-    }
-  }, [logo.background]);
-
   return (
     <div className={`${className} flex flex-row rounded border border-customization-background-1 text-color-4`}>
       {children}
@@ -132,7 +104,7 @@ const StandardCustomDashboardPanel = ({
     <div className={`${className} flex flex-col rounded-3xl text-color-4 bg-[#ffffff99] p-6 justify-between`}>
       <div className="flex flex-row items-center justify-end h-16">
         <div className="grow font-medium text-lg">{customDashboardPanelTitle}</div>
-        <div className="flex bg-white p-2 rounded-md">
+        <div className={`flex p-2 rounded-md ${logo.background === "white" ? "bg-white" : ""}`}>
           <div className="h-10 [&_svg]:h-full">{logo.image}</div>
           {logo.caption && <span className="mt-1 text-3xl leading-none">{logo.caption}</span>}
         </div>
