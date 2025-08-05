@@ -21,7 +21,7 @@ export const initializeDOMPurify = () => {
   });
 };
 
-export type CustomizationLogoBackground = "dots" | "none";
+export type CustomizationLogoBackground = "white" | "none";
 export type BodyActionType = "Simple Link" | "Onchain Push";
 
 type CustomStamp = {
@@ -182,7 +182,7 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
         caption: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.logo?.caption || ""} />,
         background:
           (customizationResponse.dashboardPanel?.logo?.background?.toLowerCase() as CustomizationLogoBackground) ||
-          "none",
+          "white",
       },
       body: {
         mainText: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.body?.mainText || ""} />,
