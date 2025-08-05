@@ -20,9 +20,54 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/zkemailStampIcon.svg",
   platform: "ZKEmail",
   name: "ZK Email",
-  description: "Connect to ZK Email to verify you took Uber trips and Amazon orders.",
+  description: "Connect to your email to verify you took Uber trips and Amazon orders.",
   connectMessage: "Connect Account",
   website: "https://www.zk.email/",
+  timeToGet: "2-10 min",
+  price: "Free",
+  guide: [
+    {
+      type: "list",
+      title: "Important Considerations",
+      items: [
+        "Currently, this feature only works with Gmail. We're working on supporting other email providers.",
+        "You'll need to log in with your Google account to verify your purchases on Uber and Amazon.",
+        "For a faster experience, ZK Email uses remote proving. This means emails confirming Amazon purchases and Uber rides are sent to our servers temporarily and then deleted after the proof is created. We're actively working on local proving to improve privacy.",
+      ],
+    },
+    {
+      type: "steps",
+      title: "Troubleshooting Email Verification",
+      items: [
+        {
+          title: "Contribute to the DKIM Archive",
+          description:
+            "Help strengthen email verification by contributing missing public keys to the public DKIM Archive.",
+          actions: [
+            {
+              label: "Contribute to the DKIM Archive",
+              href: "https://archive.zk.email/contribute",
+            },
+          ],
+        },
+        {
+          title: "Contact Support",
+          description:
+            "If you're still having issues, our support team is here to help. Providing an email example (.eml file) will help us resolve your issue faster.",
+          actions: [
+            {
+              label: "Learn how to download an .eml file",
+              href: "https://docs.zk.email/zk-email-sdk/get-eml-file",
+            },
+            {
+              label: "Contact Support",
+              href: "mailto:support@zk.email",
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
 
 export const ProviderConfig: PlatformGroupSpec[] = [
