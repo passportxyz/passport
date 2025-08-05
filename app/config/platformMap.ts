@@ -211,6 +211,12 @@ export const CUSTOM_PLATFORM_TYPE_INFO: { [id: string]: CustomPlatformTypeInfo }
   },
 };
 
+console.log("ZKEmail platform configuration:", {
+  clientId: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID,
+  redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CALLBACK,
+  isEnabled: process.env.NEXT_PUBLIC_FF_ZKEMAIL_STAMP === "on",
+});
+
 if (process.env.NEXT_PUBLIC_FF_CLEAN_HANDS_STAMP === "on") {
   defaultPlatformMap.set("CleanHands", {
     platform: new CleanHands.CleanHandsPlatform(),
@@ -227,7 +233,6 @@ if (process.env.NEXT_PUBLIC_FF_ZKEMAIL_STAMP === "on") {
   defaultPlatformMap.set("ZKEmail", {
     platform: new ZKEmail.ZKEmailPlatform({
       clientId: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CLIENT_ID,
-      redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GOOGLE_CALLBACK,
     }),
     platFormGroupSpec: ZKEmail.ProviderConfig,
   });
