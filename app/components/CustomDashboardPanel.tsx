@@ -104,7 +104,7 @@ const StandardCustomDashboardPanel = ({
     <div className={`${className} flex flex-col rounded-3xl text-color-4 bg-[#ffffff99] p-6 justify-between`}>
       <div className="flex flex-row items-center justify-end h-16">
         <div className="grow font-medium text-lg">{customDashboardPanelTitle}</div>
-        <div className={`flex p-2 rounded-md ${logo.background === "white" ? "bg-white" : ""}`}>
+        <div className={`flex p-2 rounded-md ${logo.background === "dots" ? "bg-white" : ""}`}>
           <div className="h-10 [&_svg]:h-full">{logo.image}</div>
           {logo.caption && <span className="mt-1 text-3xl leading-none">{logo.caption}</span>}
         </div>

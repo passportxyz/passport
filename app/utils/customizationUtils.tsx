@@ -21,7 +21,7 @@ export const initializeDOMPurify = () => {
   });
 };
 
-export type CustomizationLogoBackground = "white" | "none";
+export type CustomizationLogoBackground = "dots" | "none";
 export type BodyActionType = "Simple Link" | "Onchain Push";
 
 type CustomStamp = {
