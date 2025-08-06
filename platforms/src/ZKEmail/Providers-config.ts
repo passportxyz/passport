@@ -31,15 +31,17 @@ export const PlatformDetails: PlatformSpec = {
       items: [
         {
           title: "Step 1",
-          description: "Click the \"Check Eligibility\" button below to kick off the verification process.",
+          description: 'Click the "Check Eligibility" button below to kick off the verification process.',
         },
         {
           title: "Step 2",
-          description: "Log in to your Google account, and provide zkEmail the permissions to scan for purchase confirmations and service receipts while keeping your data private.",
+          description:
+            "Log in to your Google account, and provide zkEmail the permissions to scan for purchase confirmations and service receipts while keeping your data private.",
         },
         {
           title: "Step 3",
-          description: "zkEmail will scan your inbox, archive, and tagged emails for evidence of your Amazon and Uber activity, and will assign you credentials based on that usage.",
+          description:
+            "zkEmail will scan your inbox, archive, and tagged emails for evidence of your Amazon and Uber activity, and will assign you credentials based on that usage.",
         },
       ],
     },

@@ -18,7 +18,6 @@ export class ZKEmailPlatform extends Platform {
     super();
     // No banner needed - all guidance is now in the structured guide
     this.clientId = options.clientId as string;
-
   }
 
   private async fetchAndProveEmails(gmail: Gmail, blueprints: Blueprint[]): Promise<string[]> {
