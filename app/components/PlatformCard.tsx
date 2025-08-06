@@ -72,10 +72,12 @@ const SecureDByHumanTech: React.FC = () => {
 };
 
 const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech, platformProviders }: StampProps) => {
-  const { possiblePointsDataForStamps, pointsData } = useContext(ScorerContext);
+  const { possiblePointsDataForStamps, pointsData, stampWeights } = useContext(ScorerContext);
   const [possibleHumanPoints, setPossibleHumanPoints] = useState<number>();
   const { hideHumnBranding } = useCustomization();
-  const isHumanPointsVisible = !!possibleHumanPoints && !beforeHumanPointsRelease() && !hideHumnBranding;
+  const customization = useCustomization();
+  const isHumanPointsVisible =
+    !!(possibleHumanPoints && possibleHumanPoints > 0) && !beforeHumanPointsRelease() && !hideHumnBranding;
 
   useEffect(() => {
     const providerSet = new Set(platformProviders);
@@ -84,14 +86,19 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech,
     if (pointedProviders.size > 0) {
       let platformPoints = 0;
       pointedProviders.forEach((k) => {
-        platformPoints += possiblePointsDataForStamps[k] || 0;
+        // Use custom scorer weights if available, otherwise fall back to standard weights
+        if (customization.scorer?.weights && stampWeights[k]) {
+          platformPoints += parseFloat(String(stampWeights[k])) || 0;
+        } else {
+          platformPoints += possiblePointsDataForStamps[k] || 0;
+        }
       });
 
       setPossibleHumanPoints(platformPoints);
     } else {
-      setPossibleHumanPoints(0);
+      setPossibleHumanPoints(undefined);
     }
-  }, [platformProviders, possiblePointsDataForStamps]);
+  }, [platformProviders, possiblePointsDataForStamps, stampWeights, customization.scorer?.weights]);
 
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
@@ -117,7 +124,7 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech,
 
             <div className="flex items-center">
               <div className="relative -right-1">
-                {possibleHumanPoints && (
+                {possibleHumanPoints && possibleHumanPoints > 0 && (
                   <HumanPointsLabelSMDark points={possibleHumanPoints} prefix="" isVisible={isHumanPointsVisible} />
                 )}
               </div>
@@ -172,10 +179,11 @@ const VerifiedStamp = ({
 }: StampProps) => {
   const { activeChainProviders } = useOnChainData();
   const [isAnyOnchain, setIsAnyOnchain] = useState(false);
-  const { pointsDataForStamps, pointsData } = useContext(ScorerContext);
+  const { pointsDataForStamps, pointsData, stampWeights } = useContext(ScorerContext);
   const [humanPoints, setHumanPoints] = useState<number>(0);
   const [isVisiblePoints, setVisible] = useState<boolean>(false);
   const { hideHumnBranding } = useCustomization();
+  const customization = useCustomization();
 
   useEffect(() => {
     const onchainProviderSet = new Set(activeChainProviders.map((p) => p.providerName));
@@ -185,7 +193,12 @@ const VerifiedStamp = ({
     if (pointedProviders.size > 0) {
       let platformPoints = 0;
       pointedProviders.forEach((k) => {
-        platformPoints += pointsDataForStamps[k] || 0;
+        // Use custom scorer weights if available, otherwise fall back to standard weights
+        if (customization.scorer?.weights && stampWeights[k]) {
+          platformPoints += parseFloat(String(stampWeights[k])) || 0;
+        } else {
+          platformPoints += pointsDataForStamps[k] || 0;
+        }
       });
       setHumanPoints(platformPoints);
       setVisible(!!platformPoints);
@@ -196,7 +209,7 @@ const VerifiedStamp = ({
 
     const intersection = onchainProviderSet.intersection(providerSet);
     setIsAnyOnchain(intersection.size > 0);
-  }, [activeChainProviders, platformProviders, pointsDataForStamps]);
+  }, [activeChainProviders, platformProviders, pointsDataForStamps, stampWeights, customization.scorer?.weights]);
 
   const style = {
     boxShadow: "0px 4px 16px 0px #0E865066",

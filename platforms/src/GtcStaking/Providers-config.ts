@@ -65,6 +65,7 @@ export const PlatformDetails: PlatformSpec = {
         "Lower gas fees available on Optimism and Arbitrum networks",
         "Community credentials require interaction with other users' stakes",
         "All stakes have lockup periods and 90-day validity",
+        "To be eligible for Trusted Community Leader, you must receive 20+ GTC stakes from each of the 5 different users, totalling over 100 GTC",
       ],
     },
   ],
@@ -106,7 +107,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
       },
       {
         title: "Trusted Community Leader",
-        description: "Earn community recognition by receiving 20+ GTC stakes from at least 5 different users",
+        description: "Earn community recognition by receiving 20+ GTC stakes from each of at least 5 different users",
         name: "TrustedCitizen",
       },
     ],

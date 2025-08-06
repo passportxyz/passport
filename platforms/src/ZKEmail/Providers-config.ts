@@ -20,9 +20,11 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/zkemailStampIcon.svg",
   platform: "ZKEmail",
   name: "ZK Email",
-  description: "Connect to ZK Email to verify you took Uber trips and Amazon orders.",
+  description: "Connect to your email to verify you took Uber trips and Amazon orders.",
   connectMessage: "Connect Account",
   website: "https://www.zk.email/",
+  timeToGet: "2-10 min",
+  price: "Free",
   guide: [
     {
       type: "steps",

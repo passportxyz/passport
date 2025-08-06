@@ -24,7 +24,7 @@ vi.mock("axios", () => ({
                     />
                   </svg>
                 ),
-                background: "dots",
+                background: "none",
               },
               body: {
                 mainText: `The Avalanche Community Grant Rounds require you to achieve a score greater than 25 to qualify
@@ -75,7 +75,7 @@ vi.mock("axios", () => ({
                     />
                   </svg>
                 ),
-                background: "dots",
+                background: "none",
               },
               body: {
                 mainText: `The Avalanche Community Grant Rounds require you to achieve a score greater than 25 to qualify

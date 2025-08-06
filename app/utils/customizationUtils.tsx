@@ -182,7 +182,7 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
         caption: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.logo?.caption || ""} />,
         background:
           (customizationResponse.dashboardPanel?.logo?.background?.toLowerCase() as CustomizationLogoBackground) ||
-          "none",
+          "white",
       },
       body: {
         mainText: <SanitizedHTMLComponent html={customizationResponse.dashboardPanel?.body?.mainText || ""} />,
