@@ -36,12 +36,15 @@ const chain = new Chain({
   id: "0xa",
   token: "SEP",
   label: "Sepolia Testnet",
-  rpcUrl: "http://www.sepolia.com",
+  explorerUrl: "http://www.sepolia.com",
+  chainLink: "http://www.sepolia.com",
   icon: "sepolia.svg",
   attestationProviderConfig: {
     name: "Ethereum Attestation Service",
     status: "enabled",
     easScanUrl: "https://optimism-sepolia.easscan.org",
+    skipByDefault: false,
+    monochromeIcon: "sepolia-mono.svg",
   },
 });
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
@@ -140,5 +143,41 @@ describe("OnChainSidebar", () => {
     renderWithContext(mockCeramicContext, drawer());
     waitFor(() => expect(screen.getByText("Expires")).toBeInTheDocument());
     waitFor(() => expect(screen.getByTestId("sync-to-chain-button")).not.toBeVisible());
+  });
+
+  it("hides expiration date UI for expired attestations", () => {
+    mockUseOnChainData.mockReturnValue({
+      ...defaultUseOnChainData,
+      data: {
+        12345: {
+          expirationDate: new Date("2021-01-01"), // Expired date
+          score: 0,
+          providers: [
+            {
+              providerName: "NFT",
+              expirationDate: new Date("2021-01-01"),
+              issuanceDate: new Date("2021-01-01"),
+            },
+          ],
+        },
+      },
+    });
+    mockUseOnChainStatus.mockReturnValue({
+      isPending: false,
+      status: OnChainStatus.MOVED_EXPIRED,
+    });
+    const drawer = () => (
+      <Drawer isOpen={true} placement="right" size="sm" onClose={() => {}}>
+        <DrawerOverlay />
+        <NetworkCard key={4} chain={chain} />
+      </Drawer>
+    );
+    renderWithContext(mockCeramicContext, drawer());
+
+    // Should show "Expired" label
+    waitFor(() => expect(screen.getByText("Expired")).toBeInTheDocument());
+
+    // Should NOT show "Valid for" text (expiration date UI should be hidden)
+    expect(screen.queryByText("Valid for")).not.toBeInTheDocument();
   });
 });

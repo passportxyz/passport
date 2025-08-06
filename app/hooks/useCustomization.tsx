@@ -15,6 +15,7 @@ export const DEFAULT_CUSTOMIZATION: Customization = {
     customDashboardPanelTitle: "",
     logo: {
       image: null,
+      background: "dots",
     },
     body: {
       mainText: null,
