@@ -75,7 +75,8 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech,
   const { possiblePointsDataForStamps, pointsData } = useContext(ScorerContext);
   const [possibleHumanPoints, setPossibleHumanPoints] = useState<number>();
   const { hideHumnBranding } = useCustomization();
-  const isHumanPointsVisible = !!possibleHumanPoints && !beforeHumanPointsRelease() && !hideHumnBranding;
+  const isHumanPointsVisible =
+    !!(possibleHumanPoints && possibleHumanPoints > 0) && !beforeHumanPointsRelease() && !hideHumnBranding;
 
   useEffect(() => {
     const providerSet = new Set(platformProviders);
@@ -89,7 +90,7 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech,
 
       setPossibleHumanPoints(platformPoints);
     } else {
-      setPossibleHumanPoints(0);
+      setPossibleHumanPoints(undefined);
     }
   }, [platformProviders, possiblePointsDataForStamps]);
 
@@ -117,7 +118,7 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech,
 
             <div className="flex items-center">
               <div className="relative -right-1">
-                {possibleHumanPoints && (
+                {possibleHumanPoints && possibleHumanPoints > 0 && (
                   <HumanPointsLabelSMDark points={possibleHumanPoints} prefix="" isVisible={isHumanPointsVisible} />
                 )}
               </div>
