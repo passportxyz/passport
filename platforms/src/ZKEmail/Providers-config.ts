@@ -36,35 +36,11 @@ export const PlatformDetails: PlatformSpec = {
       ],
     },
     {
-      type: "steps",
+      type: "list",
       title: "Troubleshooting Email Verification",
       items: [
-        {
-          title: "Contribute to the DKIM Archive",
-          description:
-            "Help strengthen email verification by contributing missing public keys to the public DKIM Archive.",
-          actions: [
-            {
-              label: "Contribute to the DKIM Archive",
-              href: "https://archive.zk.email/contribute",
-            },
-          ],
-        },
-        {
-          title: "Contact Support",
-          description:
-            "If you're still having issues, our support team is here to help. Providing an email example (.eml file) will help us resolve your issue faster.",
-          actions: [
-            {
-              label: "Learn how to download an .eml file",
-              href: "https://docs.zk.email/zk-email-sdk/get-eml-file",
-            },
-            {
-              label: "Contact Support",
-              href: "mailto:support@zk.email",
-            },
-          ],
-        },
+        "Help strengthen email verification by contributing missing public keys to the public DKIM Archive: https://archive.zk.email/contribute",
+        "If you're still having issues, our support team is here to help. Providing an email example (.eml file) will help us resolve your issue faster: support@zk.email",
       ],
     },
   ],
