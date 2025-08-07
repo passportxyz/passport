@@ -4,7 +4,7 @@ import { PlatformProps } from "../components/GenericPlatform";
 
 const {
   Ens,
-  Lens,
+  // Lens,
   Github,
   Gitcoin,
   NFT,
@@ -79,10 +79,10 @@ defaultPlatformMap.set("ZkSync", {
   platFormGroupSpec: ZkSync.ProviderConfig,
 });
 
-defaultPlatformMap.set("Lens", {
-  platform: new Lens.LensPlatform(),
-  platFormGroupSpec: Lens.ProviderConfig,
-});
+// defaultPlatformMap.set("Lens", {
+//   platform: new Lens.LensPlatform(),
+//   platFormGroupSpec: Lens.ProviderConfig,
+// });
 
 defaultPlatformMap.set("GnosisSafe", {
   platform: new GnosisSafe.GnosisSafePlatform(),
