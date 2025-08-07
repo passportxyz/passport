@@ -13,6 +13,8 @@ const mockBannerResponse = [
     content: "We are selling sweet water bottles",
     link: "https://www.kleankanteen.com/",
     banner_id: 1,
+    application: "passport",
+    display_on_all_dashboards: true,
   },
 ];
 
