@@ -29,7 +29,7 @@ const convertHexToRGB = (color: string | null | undefined) => {
   if (!color) {
     return "";
   }
-  
+
   if (color.startsWith("#")) {
     return hexToRGB(color);
   }
