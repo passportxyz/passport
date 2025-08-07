@@ -8,7 +8,7 @@ import { useCustomization } from "./useCustomization";
 
 export type SupportBannerProps = {
   content: string;
-  link: string | null;
+  link: string | undefined;
   banner_id: number;
   application: string;
   display_on_all_dashboards: boolean;
@@ -40,6 +40,7 @@ const fetchBanners = async (dbAccessToken: string | undefined, fnDismiss: (banne
 
     return banners.data.map((banner: Omit<SupportBannerProps, "dismiss">) => ({
       ...banner,
+      link: banner.link || undefined,
       dismiss: creatDismissSupportBannerCallback(dbAccessToken, banner.banner_id, fnDismiss),
     }));
   }
