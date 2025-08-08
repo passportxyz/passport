@@ -14,6 +14,10 @@ export const setCustomizationTheme = ({ colors }: CustomizationTheme) => {
   // and then we can use it in our components...
   // <p className="text-customization-caption-size">Hello world</p>
 
+  if (!colors) {
+    return;
+  }
+
   r.style.setProperty("--color-customization-background-1", convertHexToRGB(colors.customizationBackground1));
   r.style.setProperty("--color-customization-background-2", convertHexToRGB(colors.customizationBackground2));
   r.style.setProperty("--color-customization-foreground-1", convertHexToRGB(colors.customizationForeground1));
@@ -21,7 +25,11 @@ export const setCustomizationTheme = ({ colors }: CustomizationTheme) => {
   r.style.setProperty("--color-customization-background-3", convertHexToRGB(colors.customizationBackground3));
 };
 
-const convertHexToRGB = (color: string) => {
+const convertHexToRGB = (color: string | null | undefined) => {
+  if (!color) {
+    return "";
+  }
+
   if (color.startsWith("#")) {
     return hexToRGB(color);
   }

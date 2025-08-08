@@ -4,11 +4,14 @@ import { datadogRum } from "@datadog/browser-rum";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { useQuery } from "@tanstack/react-query";
 import { create } from "zustand";
+import { useCustomization } from "./useCustomization";
 
 export type SupportBannerProps = {
   content: string;
-  link: string;
+  link: string | undefined;
   banner_id: number;
+  application: string;
+  display_on_all_dashboards: boolean;
   dismiss: () => Promise<void>;
 };
 
@@ -37,6 +40,7 @@ const fetchBanners = async (dbAccessToken: string | undefined, fnDismiss: (banne
 
     return banners.data.map((banner: Omit<SupportBannerProps, "dismiss">) => ({
       ...banner,
+      link: banner.link || undefined,
       dismiss: creatDismissSupportBannerCallback(dbAccessToken, banner.banner_id, fnDismiss),
     }));
   }
@@ -63,6 +67,7 @@ const creatDismissSupportBannerCallback =
 
 export const useSupportBanners = (): { banners: SupportBannerProps[]; loadBanners: () => Promise<void> } => {
   const { banners, dismiss, update } = useBannerStore();
+  const customization = useCustomization();
 
   const { dbAccessToken, dbAccessTokenStatus } = useDatastoreConnectionContext();
 
@@ -85,5 +90,16 @@ export const useSupportBanners = (): { banners: SupportBannerProps[]; loadBanner
     }
   }, [dbAccessToken, dbAccessTokenStatus]);
 
-  return useMemo(() => ({ banners, loadBanners }), [banners, loadBanners]);
+  // Filter banners based on display_on_all_dashboards and current customization
+  const filteredBanners = useMemo(() => {
+    // For non-custom dashboards (key === "none"), show all banners
+    if (customization.key === "none") {
+      return banners;
+    }
+
+    // For custom dashboards, only show banners that are set to display on all dashboards
+    return banners.filter((banner) => banner.display_on_all_dashboards);
+  }, [banners, customization.key]);
+
+  return useMemo(() => ({ banners: filteredBanners, loadBanners }), [filteredBanners, loadBanners]);
 };
