@@ -21,7 +21,7 @@ export type Content = {
   header: string;
   subHeader?: string;
   subHeaderIconSrc?: string;
-  backgroudIconSrc?: string;
+  backgroundIconSrc?: string;
   stampIcon?: string;
   scoreIcon?: string;
   displayPlatformCard?: boolean;
@@ -61,7 +61,7 @@ export const WelcomeWrapper = ({ content, children }: WelcomeWrapperProps) => {
         <div className="flex h-full w-full auto-rows-min flex-col gap-2 md:grid md:grid-cols-2">
           {/* Extra row span is for spacing */}
           <div className="self-start md:col-start-2 md:row-span-5 relative w-full h-[270px] md:h-[610px]">
-            <img className="absolute inset-0 w-full h-full" src={content.backgroudIconSrc} alt="Background Icon" />
+            <img className="absolute inset-0 w-full h-full" src={content.backgroundIconSrc} alt="Background Icon" />
             {content.stampIcon ? (
               <img className="absolute inset-0 w-[340px] h-[380px] m-auto" src={content.stampIcon} alt="Stamp" />
             ) : null}

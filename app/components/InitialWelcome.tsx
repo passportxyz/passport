@@ -15,7 +15,7 @@ export const InitialWelcome = ({
   const welcomeStepsNewUser = [
     {
       header: "Build Your Passport Score",
-      backgroudIconSrc: "./assets/passportBackgroundLogo.svg",
+      backgroundIconSrc: "./assets/passportBackgroundLogo.svg",
       stampIcon: "./assets/gitcoin-flower.svg",
       scoreIcon: "./assets/passport_score.svg",
       body: "Your Passport Score verifies your Web3 and Web2 presence, opening up a realm of possibilities as you accumulate Stamps and build your score. A higher score equals greater trust, paving the way for you to engage with community programs and governance.",
@@ -34,7 +34,7 @@ export const InitialWelcome = ({
     {
       header: "Accumulate Verified Stamps",
       body: "Stamps affirm your identity and are key to accessing Web3's offerings. They are akin to digital visas, each one from a different verifier, showcasing your active participation. To obtain a Stamp, follow the specific verifier's process. Each Stamp you collect has a 90-day validity, symbolizing your ongoing engagement and ensuring the Passport's integrity.",
-      backgroudIconSrc: "./assets/passportBackgroundLogo.svg",
+      backgroundIconSrc: "./assets/passportBackgroundLogo.svg",
       stampIcon: "./assets/stamp-cards.svg",
       displayPlatformCard: true,
       stepsConfig: {
@@ -49,7 +49,7 @@ export const InitialWelcome = ({
     },
     {
       header: "Get verified with one simple step",
-      backgroudIconSrc: "./assets/passportBackgroundLogo.svg",
+      backgroundIconSrc: "./assets/passportBackgroundLogo.svg",
       stampIcon: "./assets/passport-flash.svg",
       body: (
         <p>
@@ -77,7 +77,7 @@ export const InitialWelcome = ({
   const welcomeStepsReturningUser = [
     {
       header: "Auto refresh",
-      backgroudIconSrc: "./assets/passportBackgroundLogo.svg",
+      backgroundIconSrc: "./assets/passportBackgroundLogo.svg",
       stampIcon: "./assets/passport-flash.svg",
       body: (
         <p>

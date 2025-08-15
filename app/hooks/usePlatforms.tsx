@@ -17,7 +17,7 @@ export type Providers = {
   [platform in PLATFORM_ID]: PlatformGroupSpec[];
 };
 
-const BASE_PLATFORM_CATAGORIES: PLATFORM_CATEGORY[] = [
+const BASE_PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
   {
     name: "Partner Stamps",
     description: "These are special stamps specific to each partner",
@@ -211,8 +211,8 @@ export const usePlatforms = () => {
     );
   }, [allPlatformsMap]);
 
-  const platformCatagories = useMemo(() => {
-    return BASE_PLATFORM_CATAGORIES.map((category) => {
+  const platformCategories = useMemo(() => {
+    return BASE_PLATFORM_CATEGORIES.map((category) => {
       if (category.id === CUSTOM_CATEGORY_ID) {
         return {
           ...category,
@@ -231,7 +231,7 @@ export const usePlatforms = () => {
     platformGroupSpecs,
     platformProviderIds,
     platformProviders,
-    platformCatagories,
+    platformCategories,
     platforms: allPlatformsMap,
   };
 };

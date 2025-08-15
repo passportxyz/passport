@@ -358,7 +358,7 @@ export const getGithubUserData = async (context: GithubContext): Promise<GithubA
  *
  * @param code
  * @param context
- * @param orgLogin - thie is the login of the org to get data for (typically the last segment of the URL to get an orgs data https://api.github.com/orgs/${orgLogin})
+ * @param orgLogin - the is the login of the org to get data for (typically the last segment of the URL to get an orgs data https://api.github.com/orgs/${orgLogin})
  * @returns
  */
 export const getGithubOrgData = async (context: GithubContext, orgLogin: string): Promise<GithubOrgMetaData> => {

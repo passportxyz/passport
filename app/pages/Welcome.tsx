@@ -46,7 +46,7 @@ export default function Welcome() {
               across the human.tech tools and will unlock exclusive benefits and rewards in upcoming programs.
             </p>
             <p className="pt-4">
-              <span className="font-bold">To earn HUMN Points,</span> you must build up a Unique HumanitLeacore of 20+.
+              <span className="font-bold">To earn HUMN Points,</span> you must build up a Unique Humanity score of 20+.
             </p>
             <div className="pt-6 underline text-color-9">
               <a href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live" target="_blank">

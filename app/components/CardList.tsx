@@ -83,7 +83,7 @@ const useShouldDisplayPlatform = () => {
 export const CardList = ({ className, isLoading = false, initialOpen = true }: CardListProps): JSX.Element => {
   const { allProvidersState, expiredProviders } = useContext(CeramicContext);
   const { scoredPlatforms } = useContext(ScorerContext);
-  const { platformProviderIds, platforms, platformCatagories } = usePlatforms();
+  const { platformProviderIds, platforms, platformCategories } = usePlatforms();
   const { isOpen, onClose } = useDisclosure();
   const [currentPlatform, setCurrentPlatform] = useState<PlatformScoreSpec | undefined>();
   const { shouldDisplayPlatform } = useShouldDisplayPlatform();
@@ -134,7 +134,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   } = {};
 
   // Generate grouped stamps
-  platformCatagories.forEach((category) => {
+  platformCategories.forEach((category) => {
     groupedPlatforms[category.name] = {
       name: category.name,
       icon: category.icon,
@@ -145,7 +145,7 @@ export const CardList = ({ className, isLoading = false, initialOpen = true }: C
   });
 
   sortedPlatforms.filter(shouldDisplayPlatform).forEach((stamp) => {
-    platformCatagories.forEach((category) => {
+    platformCategories.forEach((category) => {
       if (category.platforms.includes(stamp.platform)) {
         groupedPlatforms[category.name].sortedPlatforms.push(stamp);
       }

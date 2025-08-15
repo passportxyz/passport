@@ -456,7 +456,7 @@ describe("show/hide tests", () => {
     vi.mocked(usePlatforms).mockReturnValue({
       platformProviderIds: {},
       platforms: mockPlatforms,
-      platformCatagories: [],
+      platformCategories: [],
     } as any);
 
     const scorerContext: Partial<ScorerContextState> = {
@@ -495,7 +495,7 @@ describe("show/hide tests", () => {
     vi.mocked(usePlatforms).mockReturnValue({
       platformProviderIds: {},
       platforms: mockPlatforms,
-      platformCatagories: [
+      platformCategories: [
         {
           name: "Test Category",
           description: "Test Description",
@@ -550,7 +550,7 @@ describe("show/hide tests", () => {
     vi.mocked(usePlatforms).mockReturnValue({
       platformProviderIds: { NFT: ["NFTScore#50", "NFTScore#75"] },
       platforms: mockPlatforms,
-      platformCatagories: [
+      platformCategories: [
         {
           name: "Bla",
           description: "Test Description",
@@ -817,7 +817,7 @@ describe("Platform Ordering", () => {
         Discord: ["Discord"],
       },
       platforms: mockPlatforms,
-      platformCatagories: [
+      platformCategories: [
         {
           name: "Social & Professional Platforms",
           description: "Test",
