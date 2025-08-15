@@ -34,7 +34,7 @@ export const credential: VerifiableCredential = {
   expirationDate: "2022-05-15T21:04:01.708Z",
 };
 
-export const SUCCESFUL_ENS_RESULT: VerifiableCredentialRecord = {
+export const SUCCESSFUL_ENS_RESULT: VerifiableCredentialRecord = {
   record: {
     type: "Ens",
     address: "0xcF323CE817E25b4F784bC1e14c9A99A525fDC50f",
@@ -46,7 +46,7 @@ export const SUCCESFUL_ENS_RESULT: VerifiableCredentialRecord = {
   credential: credential,
 };
 
-export const SUCCESFUL_ENS_RESULTS: CredentialResponseBody = {
+export const SUCCESSFUL_ENS_RESULTS: CredentialResponseBody = {
   record: { type: "Ens", version: "0.0.0", ens: "jimmyjim.eth" },
   credential,
 };
@@ -56,7 +56,7 @@ export const UN_SUCCESSFUL_ENS_RESULT: CredentialResponseBody = {
   error: "You can't claim this stamp",
 };
 
-export const SUCCESFUL_POAP_RESULT: VerifiableCredentialRecord = {
+export const SUCCESSFUL_POAP_RESULT: VerifiableCredentialRecord = {
   record: {
     type: "POAP",
     address: "0xcF323CE817E25b4F784bC1e14c9A99A525fDC50f",
@@ -68,7 +68,7 @@ export const SUCCESFUL_POAP_RESULT: VerifiableCredentialRecord = {
   credential: credential,
 };
 
-export const SUCCESFUL_POH_RESULT: VerifiableCredentialRecord = {
+export const SUCCESSFUL_POH_RESULT: VerifiableCredentialRecord = {
   record: {
     type: "Poh",
     address: "0xcF323CE817E25b4F784bC1e14c9A99A525fDC50f",
@@ -80,7 +80,7 @@ export const SUCCESFUL_POH_RESULT: VerifiableCredentialRecord = {
   credential: credential,
 };
 
-export const SUCCESFUL_BRIGHTID_RESULT: VerifiableCredentialRecord = {
+export const SUCCESSFUL_BRIGHTID_RESULT: VerifiableCredentialRecord = {
   record: {
     type: "Brightid",
     address: "0xcF323CE817E25b4F784bC1e14c9A99A525fDC50f",

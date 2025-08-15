@@ -29,7 +29,7 @@ function setupFetchStub(valid: any) {
   };
 }
 
-describe("when user has not verfied with BrightId Provider", () => {
+describe("when user has not verified with BrightId Provider", () => {
   it("should display a verify button", () => {
     // renderWithContext(mockUserContext, mockCeramicContext, <BrightidCard />);
     // const initialVerifyButton = screen.queryByTestId("button-verify-brightid");
@@ -122,7 +122,7 @@ describe("when user has not verfied with BrightId Provider", () => {
 
 //   describe("and when a successful BrightId result is returned", () => {
 //     beforeEach(() => {
-//       (fetchVerifiableCredential as vi.Mock).mockResolvedValue(SUCCESFUL_BRIGHTID_RESULT);
+//       (fetchVerifiableCredential as vi.Mock).mockResolvedValue(SUCCESSFUL_BRIGHTID_RESULT);
 //     });
 
 //     it("the modal displays the verify button", async () => {
@@ -175,7 +175,7 @@ describe("when user has not verfied with BrightId Provider", () => {
 //     });
 
 //     it("clicking cancel closes the modal and a stamp should not be added", async () => {
-//       (fetchVerifiableCredential as vi.Mock).mockResolvedValue(SUCCESFUL_BRIGHTID_RESULT);
+//       (fetchVerifiableCredential as vi.Mock).mockResolvedValue(SUCCESSFUL_BRIGHTID_RESULT);
 //       renderWithContext(mockUserContext, mockCeramicContext, <BrightidCard />);
 
 //       const initialVerifyButton = screen.queryByTestId("button-verify-brightid");

@@ -10,7 +10,7 @@ import { discordStampFixture } from "../../../__test-fixtures__/databaseStorageF
 
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
-describe("when user has not verfied with DiscordProvider", () => {
+describe("when user has not verified with DiscordProvider", () => {
   it("should display a discord verification button", () => {
     // renderWithContext(mockUserContext, mockCeramicContext, <DiscordCard />);
     // const discordVerifyButton = screen.queryByTestId("button-verify-discord");

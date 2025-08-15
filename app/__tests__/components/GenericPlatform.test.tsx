@@ -7,7 +7,7 @@ import { platforms } from "@gitcoin/passport-platforms";
 const { Ens } = platforms;
 
 import { CeramicContextState } from "../../context/ceramicContext";
-import { UN_SUCCESSFUL_ENS_RESULT, SUCCESFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
+import { UN_SUCCESSFUL_ENS_RESULT, SUCCESSFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
 import { fetchVerifiableCredential } from "../../utils/credentials";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { ChakraProvider } from "@chakra-ui/react";
@@ -55,7 +55,7 @@ describe("when user has not verified with EnsProvider", () => {
   beforeEach(async () => {
     await closeAllToasts();
     vi.mocked(fetchVerifiableCredential).mockResolvedValue({
-      credentials: [SUCCESFUL_ENS_RESULTS],
+      credentials: [SUCCESSFUL_ENS_RESULTS],
     });
   });
   it("should display a verification button", () => {
@@ -241,7 +241,7 @@ describe("when user has previously verified with EnsProvider", () => {
   });
 });
 
-describe("Mulitple EVM plaftorms", () => {
+describe("Multiple EVM platforms", () => {
   it("Should show no stamp modal if the platform isEVM and no stamps were found", async () => {
     vi.mocked(fetchVerifiableCredential).mockResolvedValue({
       credentials: [UN_SUCCESSFUL_ENS_RESULT],
@@ -291,7 +291,7 @@ it("should indicate that there was an error issuing the credential", async () =>
 // describe("when user attempts to re-verify their passport data point(s)", () => {
 //   beforeEach(() => {
 //     (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
-//       credentials: [SUCCESFUL_ENS_RESULTS],
+//       credentials: [SUCCESSFUL_ENS_RESULTS],
 //     });
 //   });
 
