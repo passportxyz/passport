@@ -18,13 +18,11 @@ import { Modal, ModalBody, ModalContent, ModalFooter, ModalOverlay, useDisclosur
 
 import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 import { ScorerContext } from "../context/scorerContext";
-import { useOneClickVerification } from "../hooks/useOneClickVerification";
 
 import ProcessingPopup from "../components/ProcessingPopup";
 import { Button } from "../components/Button";
 import { DEFAULT_CUSTOMIZATION_KEY, useCustomization, useNavigateToPage } from "../hooks/useCustomization";
 import { DynamicCustomDashboardPanel } from "../components/CustomDashboardPanel";
-import hash from "object-hash";
 
 // --- GTM Module
 import TagManager from "react-gtm-module";
@@ -77,31 +75,12 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
 
 export default function Dashboard() {
   const customization = useCustomization();
-  const { isLoadingPassport, allPlatforms, databaseReady } = useContext(CeramicContext);
+  const { isLoadingPassport } = useContext(CeramicContext);
   const { disconnect, dbAccessTokenStatus, dbAccessToken, did } = useDatastoreConnectionContext();
   const { address } = useAccount();
-  const { initiateVerification } = useOneClickVerification();
+
   const { success, failure } = useMessage();
   const { banners } = useSupportBanners();
-
-  // This shouldn't be necessary, but using this to prevent unnecessary re-initialization
-  // until ceramicContext is refactored and memoized
-  const verifiedParamsHash = useRef<string | undefined>(undefined);
-
-  useEffect(() => {
-    if (did && address && databaseReady) {
-      const paramsHash = hash.sha1({
-        did,
-        address,
-        allPlatforms,
-        databaseReady,
-      });
-      if (paramsHash !== verifiedParamsHash.current) {
-        initiateVerification(did, address);
-        verifiedParamsHash.current = paramsHash;
-      }
-    }
-  }, [allPlatforms, did, address, databaseReady]);
 
   useEffect(() => {
     if (customization.key !== DEFAULT_CUSTOMIZATION_KEY) {
@@ -172,7 +151,7 @@ export default function Dashboard() {
     }
   }, [dbAccessTokenStatus, dbAccessToken, address, customization.key]);
 
-  //show toasts from 1click flow
+  // show toasts from 1click flow
   useEffect(() => {
     const oneClickRefresh = localStorage.getItem("successfulRefresh");
     if (oneClickRefresh && oneClickRefresh === "true") {

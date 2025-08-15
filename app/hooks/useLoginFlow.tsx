@@ -54,10 +54,10 @@ export const useLoginFlow = ({
   }, [web3modalEvent, resetLogin, loginStep]);
 
   const showConnectionError = useCallback(
-    (e: any) => {
+    (e: unknown) => {
       failure({
         title: "Connection Error",
-        message: (e as Error).message,
+        message: e instanceof Error ? e.message : String(e),
       });
     },
     [failure]
@@ -70,8 +70,11 @@ export const useLoginFlow = ({
       else if (dbAccessTokenStatus !== "connected") return "PENDING_DATABASE_CONNECTION";
       else return "DONE";
     })();
-    setLoginStep(newLoginStep);
-  }, [enabled, isConnected, dbAccessTokenStatus]);
+
+    if (newLoginStep !== loginStep) {
+      setLoginStep(newLoginStep);
+    }
+  }, [enabled, isConnected, dbAccessTokenStatus, loginStep, address]);
 
   // Workaround for bug where if you disconnect from the modal on
   // the dashboard, the web3ModalIsOpen state is incorrect
@@ -103,7 +106,7 @@ export const useLoginFlow = ({
         }
       }
     }
-  }, [loginStep, navigateToPage, onLoggedIn, hideHumnBranding]);
+  }, [loginStep, navigateToPage, onLoggedIn, hideHumnBranding, address]);
 
   useEffect(() => {
     (async () => {

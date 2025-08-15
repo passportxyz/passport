@@ -20,6 +20,7 @@ import { StampClaimingContextProvider } from "../context/stampClaimingContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useIntercom } from "../hooks/useIntercom";
 import { Web3Context, Web3ErrorContext } from "../hooks/Web3Context";
+import { AutoVerificationProvider } from "../components/AutoVerificationProvider";
 
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 
@@ -105,7 +106,9 @@ function App({ Component, pageProps }: AppProps) {
                   <RenderOnlyOnClient>
                     <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
                       <Web3ErrorContext>
-                        <Component {...pageProps} />
+                        <AutoVerificationProvider>
+                          <Component {...pageProps} />
+                        </AutoVerificationProvider>
                       </Web3ErrorContext>
                     </ThemeWrapper>
                   </RenderOnlyOnClient>

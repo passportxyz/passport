@@ -19,6 +19,7 @@ export const useOneClickVerification = () => {
 
   const initiateVerification = async function (did: DID, address: string) {
     datadogLogs.logger.info("Initiating one click verification", { address });
+
     setUserVerificationState({
       ...verificationState,
       loading: true,
@@ -26,6 +27,7 @@ export const useOneClickVerification = () => {
 
     try {
       const possiblePlatforms = await fetchPossibleEVMStamps(address, allPlatforms, passport, true);
+
       if (possiblePlatforms.length === 0) {
         setUserVerificationState({
           ...verificationState,
@@ -40,6 +42,7 @@ export const useOneClickVerification = () => {
         ...verificationState,
         loading: true,
       });
+
       const validatedProviderIds = possiblePlatforms
         .map((platform) =>
           platform.platformProps.platFormGroupSpec.map((group) => group.providers.map((provider) => provider.name))
@@ -80,13 +83,15 @@ export const useOneClickVerification = () => {
         loading: false,
         success: true,
       });
+
       success({
         title: "Success!",
         message: "Your stamps are verified!",
       });
+
       datadogLogs.logger.info("Successfully completed one click verification", { address });
     } catch (error) {
-      console.error("Error when attempting one click verification", error);
+      console.error("Error when attempting one-click verification", error);
       setUserVerificationState({
         ...verificationState,
         loading: false,
