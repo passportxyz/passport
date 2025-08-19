@@ -316,6 +316,9 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
                   );
                 });
               })()}
+            {pointsData.breakdown?.MTA && (
+              <PointsTooltipItem title="MetaMask OG" text={`+${pointsData.breakdown.MTA}`} />
+            )}
           </ul>
         </>
       )}
