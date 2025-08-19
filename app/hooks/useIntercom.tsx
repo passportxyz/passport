@@ -12,6 +12,11 @@ export const updateIntercomUserData = ({ address }: { address?: string }) => {
   boot({
     app_id: INTERCOM_APP_ID,
     name: address,
+    hide_default_launcher: false, // Keep the bubble/icon visible at all times
+    // Positioning options
+    alignment: "right",
+    horizontal_padding: 20,
+    vertical_padding: 20,
   });
 };
 
