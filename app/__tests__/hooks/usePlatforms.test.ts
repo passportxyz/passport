@@ -82,7 +82,7 @@ describe("usePlatforms", () => {
 
     const { result } = renderHook(() => usePlatforms());
 
-    const categories = result.current.platformCatagories;
+    const categories = result.current.platformCategories;
     expect(categories.length).toBeGreaterThan(0);
     expect(categories.find((c) => c.name === "TestPartner Stamps")).toBeDefined();
   });

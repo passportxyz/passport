@@ -9,7 +9,7 @@ import {
   evaluateAND,
   evaluateOR,
   evaluateOrganisationContributor,
-  evaluateRepositoryCommiter,
+  evaluateRepositoryCommitter,
   evaluateRepositoryContributor,
 } from "./condition.js";
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
@@ -63,7 +63,7 @@ export class CustomGithubProvider implements Provider {
       OR: evaluateOR,
       repository_contributor: evaluateRepositoryContributor,
       organisation_contributor: evaluateOrganisationContributor,
-      repository_commit_count: evaluateRepositoryCommiter,
+      repository_commit_count: evaluateRepositoryCommitter,
     });
 
     valid = await evaluator.evaluate(condition, context);

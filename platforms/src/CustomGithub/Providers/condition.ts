@@ -134,7 +134,7 @@ export const evaluateOrganisationContributor = async (
 
 /// Evaluate the number of commits to a repository by a user
 /// cutoff_date is an optional parameter. If specified, it needs to be an string in ISO format, for example: "2011-10-05T14:48:00.000Z"
-export const evaluateRepositoryCommiter = async (
+export const evaluateRepositoryCommitter = async (
   condition: { threshold: number; repository: string; cutoff_date?: string },
   evaluator: ConditionEvaluator,
   context: any

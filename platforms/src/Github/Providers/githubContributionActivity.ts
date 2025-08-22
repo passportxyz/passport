@@ -22,7 +22,7 @@ export class GithubContributionActivityProvider implements Provider {
   async verify(payload: RequestPayload, context: GithubContext): Promise<VerifiedPayload> {
     const thresholdDays = parseInt(this._options.threshold);
 
-    // Calling requestAccessToken will store the token in the ocntext
+    // Calling requestAccessToken will store the token in the context
     await requestAccessToken(payload.proofs.code, context);
 
     const { contributionDays, userId, hadBadCommits } = await fetchAndCheckContributions(context);

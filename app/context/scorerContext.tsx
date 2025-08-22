@@ -160,7 +160,7 @@ export type PlatformScoreSpec = PlatformSpec & {
   earnedPoints: number;
 };
 
-export type POINTED_STAMP_ROVIDER =
+export type POINTED_STAMP_PROVIDER =
   | "SelfStakingBronze"
   | "SelfStakingSilver"
   | "SelfStakingGold"
@@ -193,7 +193,7 @@ export type POINTS_BREAKDOWN_KEY =
   | `PMT_${number}`
   | `HIM_${number}`;
 
-const STAMP_PROVIDER_TO_ACTION: [POINTED_STAMP_ROVIDER, POINTS_BREAKDOWN_KEY][] = [
+const STAMP_PROVIDER_TO_ACTION: [POINTED_STAMP_PROVIDER, POINTS_BREAKDOWN_KEY][] = [
   ["SelfStakingBronze", "ISB"],
   ["SelfStakingSilver", "ISS"],
   ["SelfStakingGold", "ISG"],
@@ -207,7 +207,7 @@ const STAMP_PROVIDER_TO_ACTION: [POINTED_STAMP_ROVIDER, POINTS_BREAKDOWN_KEY][] 
 ];
 export const providersForPoints = new Set(STAMP_PROVIDER_TO_ACTION.map(([provider, ...rest]) => provider));
 
-export type PointsDataForStamps = Partial<Record<POINTED_STAMP_ROVIDER, number>>;
+export type PointsDataForStamps = Partial<Record<POINTED_STAMP_PROVIDER, number>>;
 
 export type PointsData = {
   total_points: number;
