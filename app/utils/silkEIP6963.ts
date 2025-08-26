@@ -148,10 +148,13 @@ export function requestProviders(callback: (providerDetail: EIP6963ProviderDetai
  */
 export function initSilkWithEIP6963(silkProvider: SilkEthereumProviderInterface): () => void {
   // Announce the provider via EIP-6963
-  const cleanup = announceSilkProvider(silkProvider);
+  // const cleanup = announceSilkProvider(silkProvider);
 
   // Don't assign to window.ethereum - let users connect via EIP-6963 discovery
   // This prevents conflicts with other wallets
 
-  return cleanup;
+  // return cleanup;
+
+  // Return empty cleanup function since we're not announcing the provider
+  return () => {};
 }
