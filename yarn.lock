@@ -5023,17 +5023,17 @@
   resolved "https://registry.yarnpkg.com/@heroicons/react/-/react-2.2.0.tgz#0c05124af50434a800773abec8d3af6a297d904b"
   integrity sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ==
 
-"@holonym-foundation/human-id-interface-core@0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@holonym-foundation/human-id-interface-core/-/human-id-interface-core-0.0.6.tgz#d3f263aae5a826ea6816a60f361860d5dc4d4e0c"
-  integrity sha512-cBkjDOvlbIhBpyDcI+J7LVlYMweZQ3qkHDQ6kcsBvkk1xTNkhZuhoGUx0dt0N4Nw52PZU3uHWkKxXrPrxgmk7w==
+"@holonym-foundation/human-id-interface-core@0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@holonym-foundation/human-id-interface-core/-/human-id-interface-core-0.0.8.tgz#c49725d86eddf15a8bfdfda1a7783ba42a9903c1"
+  integrity sha512-Z7Ug515lxb+m8ITVrhqajC3ngXIqJcD/GtSaY3wCRmhao1BnTfrKEcfLwPoBRIKHggMvbaa0GLjhZd5ivM144Q==
 
-"@holonym-foundation/human-id-sdk@^0.0.12":
-  version "0.0.12"
-  resolved "https://registry.yarnpkg.com/@holonym-foundation/human-id-sdk/-/human-id-sdk-0.0.12.tgz#4cd5c8b935e18004d7120a7894ebd511b9445a20"
-  integrity sha512-hBPa3MJE+v9F/EGBcja+ariw8BJ6UnMbo50jdfhafAoHVpikuUoLxt0P5U7FOs16+4gKVe08N3NFshRFj2a72Q==
+"@holonym-foundation/human-id-sdk@^0.0.16":
+  version "0.0.16"
+  resolved "https://registry.yarnpkg.com/@holonym-foundation/human-id-sdk/-/human-id-sdk-0.0.16.tgz#874aeb12bd6ad2416bd82d79977d61afc79647fc"
+  integrity sha512-34FdNCwxgAyN2kGgK4q011RScEG1SVtu6h3mGAL78eGNegyff7ZqUIeu/NWh6s/+OkhkYS6O5OljygCSPaoC+w==
   dependencies:
-    "@holonym-foundation/human-id-interface-core" "0.0.6"
+    "@holonym-foundation/human-id-interface-core" "0.0.8"
     "@metamask/rpc-errors" "^5.1.1"
     "@walletconnect/ethereum-provider" "^2.20.2"
     events "^3.3.0"

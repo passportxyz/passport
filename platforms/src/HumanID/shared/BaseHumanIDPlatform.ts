@@ -33,9 +33,7 @@ export interface ExtendedHumanIDProvider extends HumanIDProviderInterface {
 export abstract class BaseHumanIDPlatform extends Platform {
   abstract platformName: string;
   abstract credentialType: CredentialType;
-  abstract sbtChecker: (
-    address: string
-  ) => Promise<{ expiry: bigint; publicValues: bigint[]; revoked: boolean } | null>;
+  abstract sbtChecker: (address: string) => Promise<boolean>;
 
   isEVM = true;
 
@@ -58,22 +56,7 @@ export abstract class BaseHumanIDPlatform extends Platform {
 
     setOptimismRpcUrl(rpcUrl);
 
-    let sbt: { expiry: bigint; publicValues: bigint[]; revoked: boolean } | null = null;
-    try {
-      sbt = await this.sbtChecker(address);
-    } catch {
-      /* Throws an error if the address is not found */
-    }
-
-    if (sbt && typeof sbt === "object" && "expiry" in sbt) {
-      // Check if SBT is not expired
-      const currentTime = BigInt(Math.floor(Date.now() / 1000));
-      if (sbt.expiry > currentTime && !sbt.revoked) {
-        return true;
-      }
-    }
-
-    return false;
+    return this.sbtChecker(address);
   }
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
