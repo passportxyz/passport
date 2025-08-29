@@ -11,6 +11,7 @@ import TooltipOverChildren from "./TooltipOverChildren";
 import { applyMultiplier, beforeHumanPointsRelease } from "../utils/helpers";
 import { Icon } from "@chakra-ui/react";
 import { useCustomization } from "../hooks/useCustomization";
+import { getChainName } from "../utils/chains";
 
 type MinimalHeaderProps = {
   className?: string;
@@ -295,7 +296,7 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
                   return (
                     <PointsTooltipItem
                       key={chainID}
-                      title={`Passport Minted (${chainID})`}
+                      title={`Passport Minted (${getChainName(chainID)})`}
                       text={`+${pointsData.breakdown?.[("PMT_" + chainID) as `PMT_${number}`] ?? 0}`}
                     />
                   );
@@ -310,7 +311,7 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
                   return (
                     <PointsTooltipItem
                       key={chainID}
-                      title={`Human ID Minted (${chainID})`}
+                      title={`Human ID Minted (${getChainName(chainID)})`}
                       text={`+${pointsData.breakdown?.[("HIM_" + chainID) as `HIM_${number}`] ?? 0}`}
                     />
                   );
