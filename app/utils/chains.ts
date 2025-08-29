@@ -365,3 +365,31 @@ export const networkMap = wagmiChains
   );
 
 export const chains: Chain[] = chainConfigs.map((config) => new Chain(config));
+
+const ALL_CHAIN_LABELS: Record<string, string> = {
+  // Mainnets
+  "0x1": "Ethereum Mainnet",
+  "0xa": "Optimism",
+  "0x89": "Polygon Mainnet",
+  "0xfa": "Fantom Mainnet",
+  "0x2105": "Base",
+  "0xe708": "Linea",
+  "0xa4b1": "Arbitrum One",
+  "0x144": "zkSync",
+  "0x82750": "Scroll",
+  "0x168": "Shape",
+  "0xa86a": "Avalanche",
+  "0x38": "BSC Mainnet",
+  "0xa4ec": "Celo Mainnet",
+  "0x64": "Gnosis Chain",
+  // Testnets
+  "0xaa36a7": "Sepolia",
+  "0x7a69": "Hardhat",
+  "0xaa37dc": "OP Sepolia Testnet",
+  "0x8274f": "Scroll Sepolia",
+};
+
+export const getChainName = (chainId: string): string => {
+  const hexChainId = chainId.startsWith("0x") ? chainId : `0x${parseInt(chainId, 10).toString(16)}`;
+  return ALL_CHAIN_LABELS[hexChainId] || chainId;
+};
