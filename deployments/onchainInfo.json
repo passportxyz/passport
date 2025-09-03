@@ -14,7 +14,7 @@
       "address": "0xa2c832b63A20C06CCc2Ca31c12b8248452729a4D"
     },
     "GitcoinVerifier": {
-      "address": "0x8D21C3360dcE1a9EBD3Da4373c4dAB7F81dd7233"
+      "address": "0x102f1b991E9B0fEe6d95617B4f1A42208562a9Ff"
     },
     "GitcoinAttester": {
       "address": "0x8B1A76795e3CbadD79C5410d2C4D4827D9C1503a"
@@ -37,82 +37,6 @@
       "address": "0x5e9AA91850Fa444E99dEaA6c521a01639f6e6236"
     }
   },
-  "0x1a4": {
-    "description": "Optimism Goerli",
-    "issuer": {
-      "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
-    },
-    "EAS": {
-      "address": "0x4200000000000000000000000000000000000021"
-    },
-    "EASSchemaRegistry": {
-      "address": "0x4200000000000000000000000000000000000020"
-    },
-    "GitcoinResolver": {
-      "address": "0x0BB1B1539f1535645821b88419E2BcB937F36cA7"
-    },
-    "GitcoinVerifier": {
-      "address": "0x074761E1Dc6E6cF9cdeE67dd180E01E818716Ce0"
-    },
-    "GitcoinAttester": {
-      "address": "0xbCD1f602b87704f071034f206Fb4ed5872DAfd91"
-    },
-    "easSchemas": {
-      "namingSchema": {
-        "uid": ""
-      },
-      "passport": {
-        "uid": "0x6868093985e2c8d5d67d5cfb1785ba1618792361d395db0feffab35c8ba00782"
-      },
-      "score": {
-        "uid": "0x1b3881ffb4a1311e7ffd27db310346d058c7fa435fe9de9426db9daa8de6abf5"
-      },
-      "scoreV2": {
-        "uid": ""
-      }
-    },
-    "GitcoinPassportDecoder": {
-      "address": "0xa9f07557c2AAf8C9b2FeAA82150C24bA094670e0"
-    }
-  },
-  "0x14a33": {
-    "description": "Base Goerli",
-    "issuer": {
-      "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
-    },
-    "EAS": {
-      "address": "0x4200000000000000000000000000000000000021"
-    },
-    "EASSchemaRegistry": {
-      "address": "0x4200000000000000000000000000000000000020"
-    },
-    "GitcoinResolver": {
-      "address": "0xCB9d40015Feade7f06E7F63e79b19a5dc661C254"
-    },
-    "GitcoinVerifier": {
-      "address": "0x6025449584bd403fdcaC241d854FAB8e07Ed55BE"
-    },
-    "GitcoinAttester": {
-      "address": "0x2716d65e8f41C4114182B165Bb0247EEf5F7B1D5"
-    },
-    "easSchemas": {
-      "namingSchema": {
-        "uid": ""
-      },
-      "passport": {
-        "uid": "0x463f7e91cd5a44fe22d4df4b9d6595f0d432c8f6a473eed28b0b8c6bafe4f5a0"
-      },
-      "score": {
-        "uid": "0x9937aea3a59cd2cc008aeaa9ec9dd1d15739d0532809428f755d4d72b94ed916"
-      },
-      "scoreV2": {
-        "uid": ""
-      }
-    },
-    "GitcoinPassportDecoder": {
-      "address": "0xa652BE6A92c7efbBfEEf6b67eEF10A146AAA8ADc"
-    }
-  },
   "0xa": {
     "description": "OP Mainnet",
     "issuer": {
@@ -128,7 +52,7 @@
       "address": "0x843829986e895facd330486a61Ebee9E1f1adB1a"
     },
     "GitcoinVerifier": {
-      "address": "0xa8eD4d2C3f6f98A55cdDEd97C5aE9B932B0633A4"
+      "address": "0x5e3fDCbCEB58104E8547D5810EB2ED0Fb42eADf4"
     },
     "GitcoinResolver": {
       "address": "0xc94aBf0292Ac04AAC18C251d9C8169a8dd2BBbDC"
@@ -166,7 +90,7 @@
       "address": "0xBC778313E52b1184A15D163b5d3a72AEF8d510A2"
     },
     "GitcoinVerifier": {
-      "address": "0xc94aBf0292Ac04AAC18C251d9C8169a8dd2BBbDC"
+      "address": "0xEd551a95f76E96D60e6fE2bD2D845C3b4A6F8cA8"
     },
     "GitcoinResolver": {
       "address": "0x0a774AECE542a1A819107Eb3a06E9D515C67257a"
@@ -223,7 +147,7 @@
       "address": "0x7848a3578Ff2E1F134659a23f64A404a4D710475"
     },
     "GitcoinVerifier": {
-      "address": "0xc4858e4D177Bf0d14571F91401492d62aa608047"
+      "address": "0x62E6BE350d7b7116936EeD5DeB7951ed3AAfC3c4"
     },
     "GitcoinResolver": {
       "address": "0x90E2C4472Df225e8D31f44725B75FFaA244d5D33"
@@ -261,7 +185,7 @@
       "address": "0x2B5D97CBE50eA9bf809CbE18A2003E4Cb4D283cC"
     },
     "GitcoinVerifier": {
-      "address": "0xfCC2d308FD4De098D08f056c424C969d728912bF"
+      "address": "0xcC3eab33A77135A09770AcAF7D911E5FEf6622F2"
     },
     "GitcoinResolver": {
       "address": "0x8789129C5968EdcA5Cb392C4a9A9D7EFB590A838"
@@ -299,7 +223,7 @@
       "address": "0x2B5D97CBE50eA9bf809CbE18A2003E4Cb4D283cC"
     },
     "GitcoinVerifier": {
-      "address": "0xfCC2d308FD4De098D08f056c424C969d728912bF"
+      "address": "0x5332585ef953904e78b38a740Fc026f8bE9B9850"
     },
     "GitcoinResolver": {
       "address": "0x8789129C5968EdcA5Cb392C4a9A9D7EFB590A838"
@@ -322,44 +246,6 @@
       }
     }
   },
-  "0x8274f": {
-    "description": "Scroll Sepolia",
-    "issuer": {
-      "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
-    },
-    "EAS": {
-      "address": "0xaEF4103A04090071165F78D45D83A0C0782c2B2a"
-    },
-    "EASSchemaRegistry": {
-      "address": "0x55D26f9ae0203EF95494AE4C170eD35f4Cf77797"
-    },
-    "GitcoinAttester": {
-      "address": "0xCc90105D4A2aa067ee768120AdA19886021dF422"
-    },
-    "GitcoinVerifier": {
-      "address": "0x16db23c4b99bbC9A6Bf55dF7a787C9AEFD261185"
-    },
-    "GitcoinResolver": {
-      "address": "0x90E2C4472Df225e8D31f44725B75FFaA244d5D33"
-    },
-    "GitcoinPassportDecoder": {
-      "address": "0x2443D22Db6d25D141A1138D80724e3Eee54FD4C2"
-    },
-    "easSchemas": {
-      "namingSchema": {
-        "uid": "0x44d562ac1d7cd77e232978687fea027ace48f719cf1d58c7888e509663bb87fc"
-      },
-      "passport": {
-        "uid": "0x8ae6ee946bf1c936584cacc969bf7e9d0b274631c818df7e45c246051b364341"
-      },
-      "score": {
-        "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
-      },
-      "scoreV2": {
-        "uid": ""
-      }
-    }
-  },
   "0x82750": {
     "description": "Scroll",
     "issuer": {
@@ -375,7 +261,7 @@
       "address": "0xCc90105D4A2aa067ee768120AdA19886021dF422"
     },
     "GitcoinVerifier": {
-      "address": "0x16db23c4b99bbC9A6Bf55dF7a787C9AEFD261185"
+      "address": "0x0EDEBAEaE920a6BFCFe7115566ceF5120ED2ff4C"
     },
     "GitcoinResolver": {
       "address": "0x90E2C4472Df225e8D31f44725B75FFaA244d5D33"
@@ -398,44 +284,6 @@
       }
     }
   },
-  "0x2b03": {
-    "description": "Shape Sepolia",
-    "issuer": {
-      "address": "0x5f603Ed913738d9105bAf3BD981AA4750016B167"
-    },
-    "EAS": {
-      "address": "0x4200000000000000000000000000000000000021"
-    },
-    "EASSchemaRegistry": {
-      "address": "0x4200000000000000000000000000000000000020"
-    },
-    "GitcoinAttester": {
-      "address": "0x39571bBD5a4c5d1a5184004c63F45FE426dB85Ea"
-    },
-    "GitcoinVerifier": {
-      "address": "0x3508ea66D2ccCEcD3aa9215b6471868431CF2AdC"
-    },
-    "GitcoinResolver": {
-      "address": "0x90E2C4472Df225e8D31f44725B75FFaA244d5D33"
-    },
-    "GitcoinPassportDecoder": {
-      "address": "0x2050256A91cbABD7C42465aA0d5325115C1dEB43"
-    },
-    "easSchemas": {
-      "namingSchema": {
-        "uid": ""
-      },
-      "passport": {
-        "uid": "0x8ae6ee946bf1c936584cacc969bf7e9d0b274631c818df7e45c246051b364341"
-      },
-      "score": {
-        "uid": "0x24620f482734b3806102678e4b8bb68baafb1adc1ec29e524bcd69c85f15b915"
-      },
-      "scoreV2": {
-        "uid": ""
-      }
-    }
-  },
   "0x168": {
     "description": "Shape",
     "issuer": {
@@ -451,7 +299,7 @@
       "address": "0xCc90105D4A2aa067ee768120AdA19886021dF422"
     },
     "GitcoinVerifier": {
-      "address": "0x16db23c4b99bbC9A6Bf55dF7a787C9AEFD261185"
+      "address": "0xB2cE7d0470c55be6212e197FF812B8dAE44EFD86"
     },
     "GitcoinResolver": {
       "address": "0x90E2C4472Df225e8D31f44725B75FFaA244d5D33"
@@ -489,7 +337,7 @@
       "address": "0xCc90105D4A2aa067ee768120AdA19886021dF422"
     },
     "GitcoinVerifier": {
-      "address": "0x16db23c4b99bbC9A6Bf55dF7a787C9AEFD261185"
+      "address": "0x45fA2E93d79Fc44d44b697A94330031b8ccbF68e"
     },
     "GitcoinResolver": {
       "address": "0x90E2C4472Df225e8D31f44725B75FFaA244d5D33"

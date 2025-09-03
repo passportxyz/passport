@@ -1,0 +1,29 @@
+{
+  "name": "verifier-sweep",
+  "version": "1.0.0",
+  "description": "Collect Verifier funds",
+  "main": "dist/index.js",
+  "scripts": {
+    "prebuild": "yarn install",
+    "build": "tsc",
+    "dev": "ts-node run.ts",
+    "dev:env": "ts-node run.ts --env",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "dotenv": "^16.5.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.2",
+    "ts-node": "*",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.799.0",
+    "ethers": "^6.13.4",
+    "viem": "^2.28.1"
+  }
+}

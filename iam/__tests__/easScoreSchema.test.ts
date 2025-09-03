@@ -52,7 +52,7 @@ describe("generateScoreAttestationRequest", () => {
   });
 
   it("should return formatted score v2 request", async () => {
-    const chainIdHex = "0x14a33";
+    const chainIdHex = "0xaa37dc";
     const result = await generateScoreAttestationRequest({
       recipient,
       chainIdHex,
@@ -144,7 +144,7 @@ describe("generateScoreAttestationRequest", () => {
   });
 
   it("should return formatted score v2 request for alternate scorer", async () => {
-    const chainIdHex = "0x14a33";
+    const chainIdHex = "0xaa37dc";
     const scorerId = 123;
     const result = await generateScoreAttestationRequest({
       recipient,
