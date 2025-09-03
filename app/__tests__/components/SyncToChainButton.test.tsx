@@ -88,7 +88,7 @@ describe("SyncToChainButton component", () => {
   it("should initiate chain change if on different chain", async () => {
     const anotherChainWithEas = new Chain({
       ...chainConfig,
-      id: "0x14a33",
+      id: "0xaa37dc",
       attestationProviderConfig: {
         skipByDefault: false,
         monochromeIcon: "/images/ethereum-icon.svg",
