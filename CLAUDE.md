@@ -419,3 +419,9 @@ The HN Signer demonstrates the internal service pattern:
 - **Pull Requests**:
   - Reference issue like "fixes #3526"
   - PR title should match the primary commit message
+
+## 📚 Mim Knowledge System
+
+@.claude/knowledge/INSTRUCTIONS.md
+
+@.claude/knowledge/KNOWLEDGE_MAP_CLAUDE.md
