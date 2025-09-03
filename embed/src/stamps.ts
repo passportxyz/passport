@@ -17,8 +17,7 @@ const oAuthPopupUrl = process.env.EMBED_POPUP_OAUTH_URL;
 
 export const STAMP_PAGES: StampPage[] = [
   {
-    header: "KYC verification",
-    // description: "Choose from below to verify",
+    header: "Physical Verification",
     platforms: [
       {
         name: "Binance",
@@ -40,38 +39,44 @@ export const STAMP_PAGES: StampPage[] = [
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-binance-stamp",
       },
       {
-        name: "HumanIdKyc",
-        description: "Proven uniqueness using HumanID KYC with government ID or ePassport",
+        name: "Biometrics",
+        description:
+          "<div>Verify your uniqueness using facial biometrics, powered by human.tech. This enables secure facial verification including 3D liveness and duplicate checks.</div>",
+        documentationLink:
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-biometrics-stamp",
+      },
+      {
+        name: "Coinbase",
+        description: "<div>Confirm Your Coinbase Verified ID (Coming Soon)</div>",
+        documentationLink:
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-coinbase-stamp",
+        requiresSignature: true,
+        requiresPopup: true,
+        popupUrl: oAuthPopupUrl,
+      },
+      {
+        name: "Government ID",
+        description: "<div>Verify your government-issued identification document for identity verification.</div>",
+        documentationLink:
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-holonym-stamp",
+      },
+      {
+        name: "Phone Verification",
+        description: "<div>Verify your phone number for additional identity verification.</div>",
+        documentationLink:
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-holonym-stamp",
+      },
+      {
+        name: "Proof of Clean Hands",
+        description: "<div>Verify your identity through proof of clean hands verification.</div>",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-holonym-stamp",
       },
     ],
   },
   {
-    header: "Biometrics verification",
+    header: "Web2 Platforms",
     platforms: [
-      {
-        name: "Civic",
-        description: "<div>Connect to Civic to verify your identity.</div>",
-        documentationLink:
-          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-civic-stamp",
-      },
-    ],
-  },
-  {
-    header: "Social & Professional Platforms",
-    // description: "Choose from below to verify",
-    platforms: [
-      {
-        name: "Linkedin",
-        description:
-          "<div>This stamp confirms that your LinkedIn account is verified and includes a valid, verified email address.</div>",
-        documentationLink:
-          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-linkedin-stamp",
-        requiresSignature: true,
-        requiresPopup: true,
-        popupUrl: oAuthPopupUrl,
-      },
       {
         name: "Discord",
         description:
@@ -83,7 +88,7 @@ export const STAMP_PAGES: StampPage[] = [
         popupUrl: oAuthPopupUrl,
       },
       {
-        name: "Github",
+        name: "GitHub",
         description: "<div>Connect to GitHub to verify your activity based on days with active commits.</div>",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-github-account-to-passport",
@@ -100,15 +105,16 @@ export const STAMP_PAGES: StampPage[] = [
         requiresPopup: true,
         popupUrl: oAuthPopupUrl,
       },
-      // {
-      //   name: "Coinbase",
-      //   description: "<div>Confirm Your Coinbase Verified ID</div>",
-      //   documentationLink:
-      //     "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-coinbase-stamp",
-      //   requiresSignature: true,
-      //   requiresPopup: true,
-      //   popupUrl: oAuthPopupUrl,
-      // },
+      {
+        name: "LinkedIn",
+        description:
+          "<div>This stamp confirms that your LinkedIn account is verified and includes a valid, verified email address.</div>",
+        documentationLink:
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-linkedin-stamp",
+        requiresSignature: true,
+        requiresPopup: true,
+        popupUrl: oAuthPopupUrl,
+      },
     ],
   },
 ];
