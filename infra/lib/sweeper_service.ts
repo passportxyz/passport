@@ -21,7 +21,6 @@ export const createSweeperService = async ({
   });
 
   // Sync to AWS Secrets Manager, will fetch in lambda
-  // Note: sweeper section needs to be created in 1Password DevOps/passport-xyz-{env}-secrets
   // Secrets: ALCHEMY_API_KEY, PRIVATE_KEY
   secretsManager.syncSecretsAndGetRefs({
     vault: "DevOps",
@@ -37,11 +36,25 @@ export const createSweeperService = async ({
     SECRETS_ARN: sweeperServiceSecret.arn,
     BALANCE_THRESHOLD_ETH: "0.25",
     // These should be chain-specific destination addresses (multisig) for swept funds
-    CHAIN_DEPOSIT_ADDRESSES: JSON.stringify(stack === "production" ? {
-      // TODO
-    } : {
-      "opt-sepolia": "0x96DB2c6D93A8a12089f7a6EdA5464e967308AdEd",
-    }),
+    CHAIN_DEPOSIT_ADDRESSES: JSON.stringify(
+      stack === "production"
+        ? {
+            "opt-mainnet": "0xc5093228529547272bE5E58db15a5d36fb2C0424",
+            "linea-mainnet": "0x9A40A259B441C942A22227D5D22bA86dD2E7BFe0",
+            "arb-mainnet": "0xc5093228529547272bE5E58db15a5d36fb2C0424",
+            "zksync-mainnet": "0xC6D1619564DEC7bB5323D6520bfAbCb1b271D26E",
+            "scroll-mainnet": "0xc5093228529547272bE5E58db15a5d36fb2C0424",
+            "base-mainnet": "0xc5093228529547272bE5E58db15a5d36fb2C0424",
+            "shape-mainnet": "0x765c4a537667E04c9bb05E42Ec41eFadc2B7B5bb",
+          }
+        : stack === "staging"
+          ? {
+              "opt-sepolia": "0x96DB2c6D93A8a12089f7a6EdA5464e967308AdEd",
+            }
+          : {
+              "eth-sepolia": "0x96DB2c6D93A8a12089f7a6EdA5464e967308AdEd",
+            }
+    ),
   };
 
   // Create IAM role for the Lambda
@@ -132,8 +145,7 @@ export const createSweeperService = async ({
 
   // Create CloudWatch event rule (scheduled trigger)
   const eventRule = new aws.cloudwatch.EventRule("sweeper-schedule", {
-    // TODO
-    scheduleExpression: "rate(10 minutes)",
+    scheduleExpression: stack === "production" ? "rate(1 day)" : "rate(1 hour)",
   });
 
   // Connect event rule to Lambda
