@@ -40,8 +40,8 @@ export const metadataHandler = createHandler<MetadataRequestBody, MetadataRespon
   const updatedStampPages = STAMP_PAGES.map((stampPage) => ({
     ...stampPage,
     platforms: stampPage.platforms.map((platform) => {
-      const platformName = platform.name;
-      const platformData = platforms[platformName];
+      const platformId = platform.platformId;
+      const platformData = platforms[platformId];
 
       if (!platformData || !platformData.providers) {
         return {

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "mim": {
+      "type": "stdio",
+      "command": "node",
+      "args": [".claude/servers/mim.cjs"]
+    }
+  }
+}

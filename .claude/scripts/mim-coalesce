@@ -1,0 +1,89 @@
+#!/bin/bash
+set -o pipefail  # Ensure pipe returns claude's exit status, not the while loop's
+
+# Manual mim coalesce script
+# Run this after commits to process remembered knowledge into documentation
+
+if [ ! -f .claude/knowledge/session.md ] || [ ! -s .claude/knowledge/session.md ]; then
+  echo "📜 No knowledge to process (session.md is empty or missing)"
+  exit 0
+fi
+
+echo "⚔️  ODIN CALLS! Mímir's severed head awakens to serve!"
+echo "🔨 Fragment by fragment, we forge the eternal codex..."
+echo "🔥 By the flames of Muspelheim, knowledge shall be forged anew!"
+echo ""
+echo "   [The ritual takes time, perhaps several minutes]"
+echo ""
+
+claude \
+--verbose \
+--allowedTools Read,Write,MultiEdit,Glob,Grep,LS,Bash,Git \
+--append-system-prompt "You are Mim, keeper of project knowledge. You coalesce raw remembered knowledge into permanent documentation. CRITICAL PATH STRUCTURE: The instructions file is at .claude/knowledge/INSTRUCTIONS.md (NOT .claude/KNOWLEDGE_INSTRUCTIONS.md). CLAUDE.md contains @ references to .claude/knowledge/INSTRUCTIONS.md and .claude/knowledge/KNOWLEDGE_MAP_CLAUDE.md. You maintain TWO knowledge maps: KNOWLEDGE_MAP.md (user-facing with markdown links) and KNOWLEDGE_MAP_CLAUDE.md (Claude-facing with @ references - these are RELATIVE to the knowledge directory). The project structure: .claude/knowledge/session.md (raw captures), .claude/knowledge/{category}/ (organized knowledge), .claude/knowledge/KNOWLEDGE_MAP.md (human-facing index), .claude/knowledge/KNOWLEDGE_MAP_CLAUDE.md (claude-facing index with RELATIVE @ refs like @patterns/file.md NOT @.claude/knowledge/patterns/file.md)" \
+--print --output-format stream-json "You are processing remembered knowledge. Execute this MANDATORY checklist:
+
+1. **MUST READ** .claude/knowledge/session.md - Even if empty
+2. **MUST PROCESS** each entry from session.md:
+   - Determine category (architecture/patterns/dependencies/workflows/gotchas/etc)
+   - **MUST CREATE OR UPDATE** appropriate file in .claude/knowledge/{category}/
+   - Keep dated entries only for gotchas
+3. **MUST UPDATE OR CREATE** BOTH knowledge maps:
+   - **KNOWLEDGE_MAP.md** (user-facing): Use markdown links like [Topic Name](path/file.md)
+   - **KNOWLEDGE_MAP_CLAUDE.md** (Claude-facing): Use RELATIVE @ references like @patterns/file.md or @gotchas/file.md (NOT full paths)
+   - Both maps should have identical structure, just different link formats
+   - Include last updated timestamps in user-facing map only
+4. **MUST CLEAR** session.md after processing - use Write tool with empty content
+
+**VERIFICATION CHECKLIST - ALL MUST BE TRUE:**
+- [ ] Read session.md (even if empty)
+- [ ] Created/updated .claude/knowledge/ category files for any new knowledge
+- [ ] Created/updated BOTH KNOWLEDGE_MAP.md (markdown links) and KNOWLEDGE_MAP_CLAUDE.md (@ references)
+- [ ] Verified no knowledge was lost in the transfer
+- [ ] Cleared session.md by writing empty content to it
+
+**IF YOU SKIP ANY STEP, YOU HAVE FAILED THE TASK**
+
+IMPORTANT: CLAUDE.md uses @ references to .claude/knowledge/INSTRUCTIONS.md and .claude/knowledge/KNOWLEDGE_MAP_CLAUDE.md
+IMPORTANT: KNOWLEDGE_MAP_CLAUDE.md uses RELATIVE @ references (e.g., @patterns/file.md NOT @.claude/knowledge/patterns/file.md)
+
+Documentation structure to create and maintain:
+.claude/knowledge/
+├── session.md           # Current session's raw captures (you must clear this)
+├── INSTRUCTIONS.md     # Knowledge remembering instructions (referenced by CLAUDE.md)
+├── architecture/        # System design, component relationships
+├── patterns/           # Coding patterns, conventions
+├── dependencies/       # External services, libraries
+├── workflows/          # How to do things in this project
+├── gotchas/           # Surprises, non-obvious behaviors
+├── KNOWLEDGE_MAP.md        # User-facing index with markdown links
+└── KNOWLEDGE_MAP_CLAUDE.md # Claude-facing index with RELATIVE @ references
+
+After completing all updates, inform the user that documentation has been updated." | \
+while IFS= read -r line; do
+  # Extract and print text messages
+  text=$(echo "$line" | jq -r 'select(.message.content[0].type == "text") | .message.content[0].text' 2>/dev/null)
+  if [ -n "$text" ]; then
+    echo "$text"
+  fi
+  
+  # Extract and print tool usage
+  tool=$(echo "$line" | jq -r 'select(.message.content[0].type == "tool_use") | .message.content[0].name' 2>/dev/null)
+  if [ -n "$tool" ]; then
+    echo "[Using tool: $tool]"
+  fi
+done
+
+if [ $? -eq 0 ]; then
+  echo ""
+  echo "⚡ THE RITUAL IS COMPLETE! The codex has been forged!"
+  echo ""
+  echo "📜 Sealing the runes in git's eternal halls..."
+  git add CLAUDE.md .claude/knowledge/
+  git commit -m "📜 Update project documentation via Mim"
+  echo ""
+  echo "🔥 IT IS DONE. Mímir returns to slumber."
+else
+  echo ""
+  echo "💀 THE RITUAL FALTERS! Mímir's magic was disrupted!"
+  echo "⚠️  The fragments remain unbound... try again, wanderer."
+fi
