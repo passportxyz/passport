@@ -2,13 +2,13 @@ import React from "react";
 import { PlatformOptions } from "../types.js";
 import { BaseHumanIDPlatform } from "../HumanID/shared/BaseHumanIDPlatform.js";
 import { getKycSBTByAddress } from "@holonym-foundation/human-id-sdk";
+import { KYC_CREDENTIAL_TYPE } from "./constants.js";
 
 export class HumanIdKycPlatform extends BaseHumanIDPlatform {
-  platformName = "HumanIdKyc";
   platformId = "HumanIdKyc";
   path = "HumanIdKyc";
-  credentialType = "kyc" as const;
-  sbtChecker = getKycSBTByAddress;
+  credentialType = KYC_CREDENTIAL_TYPE;
+  sbtFetcher = getKycSBTByAddress;
 
   constructor(options: PlatformOptions) {
     super(options);

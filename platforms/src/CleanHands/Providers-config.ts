@@ -1,5 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
-import { ClanHandsProvider } from "./Providers/index.js";
+import { CleanHandsProvider } from "./Providers/index.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/humanTechIcon.svg",
@@ -69,4 +69,4 @@ export const ProviderConfig: PlatformGroupSpec[] = [
   },
 ];
 
-export const providers: Provider[] = [new ClanHandsProvider()];
+export const providers: Provider[] = [new CleanHandsProvider()];

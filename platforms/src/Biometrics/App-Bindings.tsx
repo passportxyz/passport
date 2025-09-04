@@ -1,15 +1,14 @@
 import React from "react";
-import { Platform } from "../utils/platform.js";
-import { AppContext, ProviderPayload } from "../types.js";
+import { PlatformOptions } from "../types.js";
+import { BaseHumanIDPlatform } from "../HumanID/shared/BaseHumanIDPlatform.js";
+import { getBiometricsSBTByAddress } from "@holonym-foundation/human-id-sdk";
+import { BIOMETRICS_CREDENTIAL_TYPE } from "./constants.js";
 
-export class BiometricsPlatform extends Platform {
+export class BiometricsPlatform extends BaseHumanIDPlatform {
   platformId = "Biometrics";
   path = "Biometrics";
-  isEVM = true;
-
-  async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    return {};
-  }
+  credentialType = BIOMETRICS_CREDENTIAL_TYPE;
+  sbtFetcher = getBiometricsSBTByAddress;
 
   banner = {
     content: (

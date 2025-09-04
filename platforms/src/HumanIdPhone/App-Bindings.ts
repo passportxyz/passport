@@ -2,13 +2,13 @@ import React from "react";
 import { PlatformOptions } from "../types.js";
 import { BaseHumanIDPlatform } from "../HumanID/shared/BaseHumanIDPlatform.js";
 import { getPhoneSBTByAddress } from "@holonym-foundation/human-id-sdk";
+import { PHONE_CREDENTIAL_TYPE } from "./constants.js";
 
 export class HumanIdPhonePlatform extends BaseHumanIDPlatform {
-  platformName = "HumanIdPhone";
   platformId = "HumanIdPhone";
   path = "HumanIdPhone";
-  credentialType = "phone" as const;
-  sbtChecker = getPhoneSBTByAddress;
+  credentialType = PHONE_CREDENTIAL_TYPE;
+  sbtFetcher = getPhoneSBTByAddress;
 
   constructor(options: PlatformOptions) {
     super(options);

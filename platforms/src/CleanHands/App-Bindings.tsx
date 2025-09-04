@@ -1,13 +1,17 @@
 /* eslint-disable */
 import React from "react";
-import { AppContext, ProviderPayload } from "../types.js";
-import { Platform } from "../utils/platform.js";
+import { PlatformOptions } from "../types.js";
+import { BaseHumanIDPlatform } from "../HumanID/shared/BaseHumanIDPlatform.js";
+import { getCleanHandsSPAttestationByAddress } from "@holonym-foundation/human-id-sdk";
+import { CLEAN_HANDS_CREDENTIAL_TYPE } from "./constants.js";
 import { Hyperlink } from "../utils/Hyperlink.js";
 
-export class CleanHandsPlatform extends Platform {
+export class CleanHandsPlatform extends BaseHumanIDPlatform {
   platformId = "CleanHands";
   path = "clean_hands";
-  isEVM = true;
+  credentialType = CLEAN_HANDS_CREDENTIAL_TYPE;
+  attestationFetcher = getCleanHandsSPAttestationByAddress; // Note: attestation, not SBT
+
   banner = {
     content: (
       <div>
@@ -43,9 +47,4 @@ export class CleanHandsPlatform extends Platform {
       </div>
     ),
   };
-
-  async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    const result = await Promise.resolve({});
-    return result;
-  }
 }

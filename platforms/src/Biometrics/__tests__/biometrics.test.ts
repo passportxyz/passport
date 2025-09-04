@@ -1,47 +1,68 @@
 // ---- Test subject
 import { RequestPayload } from "@gitcoin/passport-types";
 import { BiometricsProvider } from "../Providers/Biometrics.js";
+import { getBiometricsSBTByAddress, setOptimismRpcUrl } from "@holonym-foundation/human-id-sdk";
 
-// ----- Libs
-import axios from "axios";
+// Mock the SDK
+jest.mock("@holonym-foundation/human-id-sdk", () => ({
+  getBiometricsSBTByAddress: jest.fn(),
+  setOptimismRpcUrl: jest.fn(),
+}));
 
-jest.mock("axios");
-
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockedGetSBT = getBiometricsSBTByAddress as jest.MockedFunction<typeof getBiometricsSBTByAddress>;
+const mockedSetRpcUrl = setOptimismRpcUrl as jest.MockedFunction<typeof setOptimismRpcUrl>;
 
 const MOCK_ADDRESS = "0xb4b6f1c68be31841b52f4015a31d1f38b99cdb71";
 
 describe("Attempt verification", function () {
+  let originalEnv: any;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    originalEnv = process.env;
+    process.env = { ...originalEnv };
+    process.env.OPTIMISM_RPC_URL = "https://test-rpc.optimism.io";
   });
 
-  it("should return true when valid response is received from the Holonym Biometrics API endpoint", async () => {
-    mockedAxios.get.mockResolvedValueOnce({
-      status: 200,
-      data: {
-        result: true,
-      },
-    });
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it("should return true when valid SBT is found", async () => {
+    const mockNullifier = "123456789";
+    mockedGetSBT.mockResolvedValueOnce({
+      expiry: BigInt(Math.floor(Date.now() / 1000) + 3600), // 1 hour from now
+      publicValues: [
+        BigInt(1),
+        BigInt(2),
+        BigInt(3),
+        BigInt(mockNullifier), // nullifier at index 3
+        BigInt(5),
+      ],
+      revoked: false,
+    } as any);
 
     const biometrics = new BiometricsProvider();
     const verifiedPayload = await biometrics.verify({
       address: MOCK_ADDRESS,
     } as RequestPayload);
 
-    expect(verifiedPayload.valid).toBe(true);
-    expect(verifiedPayload.record).toEqual({
-      address: MOCK_ADDRESS.toLowerCase(),
+    expect(mockedSetRpcUrl).toHaveBeenCalledWith("https://test-rpc.optimism.io");
+    expect(mockedGetSBT).toHaveBeenCalledWith(MOCK_ADDRESS);
+    expect(verifiedPayload).toEqual({
+      valid: true,
+      record: {
+        nullifier: mockNullifier,
+      },
     });
   });
 
-  it("should return false when invalid response is received from the Holonym Biometrics API endpoint", async () => {
-    mockedAxios.get.mockResolvedValueOnce({
-      status: 200,
-      data: {
-        result: false,
-      },
-    });
+  it("should return false when SBT is expired", async () => {
+    mockedGetSBT.mockResolvedValueOnce({
+      expiry: BigInt(Math.floor(Date.now() / 1000) - 3600), // 1 hour ago
+      publicValues: [BigInt(1), BigInt(2), BigInt(3), BigInt(4), BigInt(5)],
+      revoked: false,
+    } as any);
 
     const biometrics = new BiometricsProvider();
     const verifiedPayload = await biometrics.verify({
@@ -49,41 +70,90 @@ describe("Attempt verification", function () {
     } as RequestPayload);
 
     expect(verifiedPayload.valid).toBe(false);
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      errors: ["We were unable to verify that your address has completed biometric verification -- isUnique: false."],
-      record: undefined,
-    });
+    expect(verifiedPayload.errors).toEqual(["biometrics SBT has expired"]);
   });
 
-  it("should return error response when API call errors", async () => {
-    mockedAxios.get.mockRejectedValueOnce(new Error("Internal Server Error"));
-    const UNREGISTERED_ADDRESS = "0xunregistered";
+  it("should return false when SBT is revoked", async () => {
+    mockedGetSBT.mockResolvedValueOnce({
+      expiry: BigInt(Math.floor(Date.now() / 1000) + 3600),
+      publicValues: [BigInt(1), BigInt(2), BigInt(3), BigInt(4), BigInt(5)],
+      revoked: true,
+    } as any);
+
+    const biometrics = new BiometricsProvider();
+    const verifiedPayload = await biometrics.verify({
+      address: MOCK_ADDRESS,
+    } as RequestPayload);
+
+    expect(verifiedPayload.valid).toBe(false);
+    expect(verifiedPayload.errors).toEqual(["biometrics SBT has been revoked"]);
+  });
+
+  it("should return false when no SBT is found", async () => {
+    mockedGetSBT.mockResolvedValueOnce(null);
+
+    const biometrics = new BiometricsProvider();
+    const verifiedPayload = await biometrics.verify({
+      address: MOCK_ADDRESS,
+    } as RequestPayload);
+
+    expect(verifiedPayload.valid).toBe(false);
+    expect(verifiedPayload.errors).toEqual(["biometrics SBT not found"]);
+  });
+
+  it("should return false when SBT has insufficient public values", async () => {
+    mockedGetSBT.mockResolvedValueOnce({
+      expiry: BigInt(Math.floor(Date.now() / 1000) + 3600),
+      publicValues: [BigInt(1), BigInt(2)], // Only 2 values instead of minimum 5
+      revoked: false,
+    } as any);
+
+    const biometrics = new BiometricsProvider();
+    const verifiedPayload = await biometrics.verify({
+      address: MOCK_ADDRESS,
+    } as RequestPayload);
+
+    expect(verifiedPayload.valid).toBe(false);
+    expect(verifiedPayload.errors).toEqual(["biometrics Invalid SBT public values"]);
+  });
+
+  it("should throw error when Optimism RPC URL is not configured", async () => {
+    delete process.env.OPTIMISM_RPC_URL;
 
     const biometrics = new BiometricsProvider();
 
     await expect(
       biometrics.verify({
-        address: UNREGISTERED_ADDRESS,
+        address: MOCK_ADDRESS,
       } as RequestPayload)
-    ).rejects.toThrow("Internal Server Error");
+    ).rejects.toThrow("Optimism RPC URL not configured");
+
+    expect(mockedSetRpcUrl).not.toHaveBeenCalled();
+    expect(mockedGetSBT).not.toHaveBeenCalled();
   });
 
-  it("should call the correct API endpoint with the user address", async () => {
-    mockedAxios.get.mockResolvedValueOnce({
-      status: 200,
-      data: {
-        result: true,
-      },
-    });
+  it("should throw error for invalid address format", async () => {
+    const biometrics = new BiometricsProvider();
+
+    await expect(
+      biometrics.verify({
+        address: "not-a-valid-hex-address",
+      } as RequestPayload)
+    ).rejects.toThrow("Invalid address format");
+
+    expect(mockedGetSBT).not.toHaveBeenCalled();
+  });
+
+  it("should handle SDK errors gracefully", async () => {
+    mockedGetSBT.mockRejectedValueOnce(new Error("Network error"));
 
     const biometrics = new BiometricsProvider();
-    await biometrics.verify({
+    const verifiedPayload = await biometrics.verify({
       address: MOCK_ADDRESS,
     } as RequestPayload);
 
-    expect(mockedAxios.get).toHaveBeenCalledWith(
-      `https://api.holonym.io/sybil-resistance/biometrics/optimism?user=${MOCK_ADDRESS.toLowerCase()}&action-id=123456789`
-    );
+    // When getExistingSbt throws, it returns undefined, which then fails validation
+    expect(verifiedPayload.valid).toBe(false);
+    expect(verifiedPayload.errors).toEqual(["biometrics SBT not found"]);
   });
 });

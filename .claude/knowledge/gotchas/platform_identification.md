@@ -25,3 +25,10 @@ The embed service's metadata.ts incorrectly uses display names from stamps.ts to
 
 ## Solution
 The proper pattern is to use platform IDs for lookups and display names only for UI presentation.
+
+## platformName Property is Dead Code [2025-09-04]
+
+The `platformName` property was required by BaseHumanIDPlatform but never actually used anywhere in the codebase. It was redundant with `platformId` and has been removed. Only `platformId`, `path`, and `credentialType` are actually needed.
+
+**Related Files:**
+- platforms/src/HumanID/shared/BaseHumanIDPlatform.ts

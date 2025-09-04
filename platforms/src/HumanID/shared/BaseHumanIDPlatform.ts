@@ -1,8 +1,15 @@
 import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../../types.js";
 import { Platform } from "../../utils/platform.js";
-import { initHumanID, CredentialType, setOptimismRpcUrl } from "@holonym-foundation/human-id-sdk";
+import {
+  initHumanID,
+  CredentialType,
+  setOptimismRpcUrl,
+  HubV3SBT,
+  SignProtocolAttestation,
+} from "@holonym-foundation/human-id-sdk";
 import type { RequestSBTExtraParams, TransactionRequestWithChainId } from "@holonym-foundation/human-id-interface-core";
+import { isHexString, validateSbt, validateAttestation } from "./utils.js";
 
 type RequestSBTResponse = null | {
   sbt: {
@@ -20,10 +27,6 @@ interface HumanIDProviderInterface {
   requestSBT(type: CredentialType, args: RequestSBTExtraParams): Promise<unknown>;
 }
 
-function isHexString(value: string): value is `0x${string}` {
-  return value.startsWith("0x");
-}
-
 // Extended interface with secret methods that exist at runtime but aren't in the public interface
 export interface ExtendedHumanIDProvider extends HumanIDProviderInterface {
   getKeygenMessage(): string;
@@ -31,11 +34,11 @@ export interface ExtendedHumanIDProvider extends HumanIDProviderInterface {
 }
 
 export abstract class BaseHumanIDPlatform extends Platform {
-  abstract platformName: string;
   abstract credentialType: CredentialType;
-  abstract sbtChecker: (
-    address: string
-  ) => Promise<{ expiry: bigint; publicValues: bigint[]; revoked: boolean } | null>;
+
+  // Platforms must implement EITHER sbtFetcher OR attestationFetcher
+  sbtFetcher?: (address: string) => Promise<HubV3SBT | null>;
+  attestationFetcher?: (address: string) => Promise<SignProtocolAttestation | null>;
 
   isEVM = true;
 
@@ -45,45 +48,59 @@ export abstract class BaseHumanIDPlatform extends Platform {
     this.redirectUri = options.redirectUri as string;
   }
 
-  private async hasExistingSBT(address: string): Promise<boolean> {
-    const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL;
-    if (!rpcUrl) {
-      console.warn("Optimism RPC URL not configured for frontend SBT check");
-      return false;
+  async credentialChecker(address: string): Promise<boolean> {
+    if (!isHexString(address)) return false;
+
+    // SBT path (KYC, Phone, Biometrics)
+    if (this.sbtFetcher) {
+      try {
+        const sbt = await this.sbtFetcher(address);
+        const result = validateSbt(sbt);
+        return result.valid;
+      } catch {
+        return false;
+      }
     }
 
-    if (!isHexString(address)) {
+    // Attestation path (CleanHands)
+    if (this.attestationFetcher) {
+      try {
+        const attestation = await this.attestationFetcher(address);
+        const result = validateAttestation(attestation);
+        return result.valid;
+      } catch {
+        return false;
+      }
+    }
+
+    throw new Error("Platform must define either sbtFetcher or attestationFetcher");
+  }
+
+  private async hasExistingCredential(address: string): Promise<boolean> {
+    const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL;
+    if (!rpcUrl) {
+      console.warn("Optimism RPC URL not configured for frontend credential check");
       return false;
     }
 
     setOptimismRpcUrl(rpcUrl);
 
-    let sbt: { expiry: bigint; publicValues: bigint[]; revoked: boolean } | null = null;
-    try {
-      sbt = await this.sbtChecker(address);
-    } catch {
-      /* Throws an error if the address is not found */
-    }
-
-    if (sbt && typeof sbt === "object" && "expiry" in sbt) {
-      // Check if SBT is not expired
-      const currentTime = BigInt(Math.floor(Date.now() / 1000));
-      if (sbt.expiry > currentTime && !sbt.revoked) {
-        return true;
-      }
-    }
-
-    return false;
+    return this.credentialChecker(address);
   }
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    // Require wallet methods for Human ID verification
+    // CleanHands doesn't require HumanID flow - just return empty payload
+    if (this.attestationFetcher && !this.sbtFetcher) {
+      return {};
+    }
+
+    // Require wallet methods for Human ID verification (SBT-based platforms)
     if (!appContext.signMessageAsync || !appContext.sendTransactionAsync || !appContext.address) {
       throw new Error("Human ID verification requires wallet connection and signing capabilities");
     }
 
-    // Check if user already has a valid SBT
-    if (await this.hasExistingSBT(appContext.address)) {
+    // Check if user already has a valid credential (SBT or attestation)
+    if (await this.hasExistingCredential(appContext.address)) {
       // Skip all this, just do the backend check
       return {};
     }
