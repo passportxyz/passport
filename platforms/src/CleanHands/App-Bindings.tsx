@@ -1,41 +1,50 @@
 /* eslint-disable */
 import React from "react";
-import { AppContext, ProviderPayload, PlatformOptions } from "../types.js";
+import { PlatformOptions } from "../types.js";
 import { BaseHumanIDPlatform } from "../HumanID/shared/BaseHumanIDPlatform.js";
-import { Platform } from "../utils/platform.js";
-import { Hyperlink } from "../utils/Hyperlink.js";
 import { getCleanHandsSPAttestationByAddress } from "@holonym-foundation/human-id-sdk";
+import { CLEAN_HANDS_CREDENTIAL_TYPE } from "./constants.js";
+import { Hyperlink } from "../utils/Hyperlink.js";
 
 export class CleanHandsPlatform extends BaseHumanIDPlatform {
-  platformName = "CleanHands";
   platformId = "CleanHands";
   path = "clean_hands";
-  credentialType = "clean-hands" as const;
+  credentialType = CLEAN_HANDS_CREDENTIAL_TYPE;
+  attestationFetcher = getCleanHandsSPAttestationByAddress; // Note: attestation, not SBT
 
-  sbtChecker = async (address: string): Promise<boolean> => {
-    try {
-      const attestation = await getCleanHandsSPAttestationByAddress(address as `0x${string}`);
-      return !!attestation;
-    } catch {
-      /* Throws an error if the address is not found or if the attestation is in any way invalid */
-      return false;
-    }
+  banner = {
+    content: (
+      <div>
+        <Hyperlink href="https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-proof-of-clean-hands-stamp">
+          Clean Hands Stamp Guide
+        </Hyperlink>
+        <br />
+        <br />
+        To add the Clean Hands Stamp to your Passport:
+        <br />
+        <ul style={{ listStyleType: "disc", paddingLeft: "20px" }}>
+          <li>
+            Have a smartphone and an Ethereum wallet with $5 in ETH (mainnet, OP, or Aurora), AVAX, or FTM for Clean
+            Hands
+          </li>
+          <li>
+            Go to{" "}
+            <Hyperlink href="https://silksecure.net/holonym/diff-wallet/clean-hands/issuance/prereqs">
+              Proof of Clean Hands
+            </Hyperlink>
+            , verify your Gov ID by connecting your wallet, and follow prompts to obtain the Clean Hands verification.
+          </li>
+          <li>After verification, mint the SBT to your wallet, then link it to your Passport by verifying it.</li>
+        </ul>
+        <br />
+        <br />
+        Check the Sign attestation protocol to validate:
+        <br />
+        <ul style={{ listStyleType: "disc", paddingLeft: "20px" }}>
+          <li>Default to checking all 3 chains</li>
+          <li>End users will only be able to mint Passport on OP (out of Sui, Near & OP)</li>
+        </ul>
+      </div>
+    ),
   };
-
-  constructor(options: PlatformOptions) {
-    super(options);
-
-    this.banner = {
-      heading: "To add the Human ID Clean Hands Stamp to your Passport...",
-      content: React.createElement(
-        "div",
-        {},
-        "Connect your wallet and verify your clean hands status privately through Human ID"
-      ),
-      cta: {
-        label: "Learn more",
-        url: "https://human.tech",
-      },
-    };
-  }
 }

@@ -1,47 +1,25 @@
 import React from "react";
 import { PlatformOptions } from "../types.js";
 import { BaseHumanIDPlatform } from "../HumanID/shared/BaseHumanIDPlatform.js";
-import { getBiometricsSBTByAddress, HubV3SBT } from "@holonym-foundation/human-id-sdk";
+import { getBiometricsSBTByAddress } from "@holonym-foundation/human-id-sdk";
+import { BIOMETRICS_CREDENTIAL_TYPE } from "./constants.js";
 
 export class BiometricsPlatform extends BaseHumanIDPlatform {
-  platformName = "Biometrics";
   platformId = "Biometrics";
   path = "Biometrics";
-  credentialType = "biometrics" as const;
+  credentialType = BIOMETRICS_CREDENTIAL_TYPE;
+  sbtFetcher = getBiometricsSBTByAddress;
 
-  sbtChecker = async (address: string): Promise<boolean> => {
-    let sbt: HubV3SBT | null = null;
-    try {
-      sbt = await getBiometricsSBTByAddress(address as `0x${string}`);
-    } catch {
-      /* Throws an error if the address is not found */
-    }
-
-    if (sbt) {
-      // Check if SBT is not expired
-      const currentTime = BigInt(Math.floor(Date.now() / 1000));
-      if (sbt.expiry > currentTime && !sbt.revoked && sbt.publicValues.length > 0) {
-        return true;
-      }
-    }
-
-    return false;
+  banner = {
+    content: (
+      <p>
+        Click the button above to complete biometric verification on Human ID. You'll need a front-facing camera to
+        complete 3D facial liveness detection. After completing verification there, return here and verify your stamp.
+      </p>
+    ),
+    cta: {
+      label: "Complete verification on Human ID",
+      url: "https://silksecure.net/holonym/diff-wallet/biometrics",
+    },
   };
-
-  constructor(options: PlatformOptions) {
-    super(options);
-
-    this.banner = {
-      heading: "To add the Human ID Biometrics Stamp to your Passport...",
-      content: React.createElement(
-        "div",
-        {},
-        "Connect your wallet and verify your biometrics privately through Human ID"
-      ),
-      cta: {
-        label: "Learn more",
-        url: "https://human.tech",
-      },
-    };
-  }
 }

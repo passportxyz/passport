@@ -6,10 +6,7 @@ import {
   ProviderInternalVerificationError,
 } from "../../types.js";
 import { setOptimismRpcUrl } from "@holonym-foundation/human-id-sdk";
-
-function isHexAddress(address: string): address is `0x${string}` {
-  return address.startsWith("0x") && address.length === 42;
-}
+import { validateSbt, isHexString } from "./utils.js";
 
 export abstract class BaseHumanIdProvider implements Provider {
   abstract type: string;
@@ -28,43 +25,17 @@ export abstract class BaseHumanIdProvider implements Provider {
     }
   }
 
-  _validateSbt(sbt: {
-    expiry: bigint;
-    publicValues: bigint[];
-    revoked: boolean;
-  }): { valid: true; errors?: undefined } | { valid: false; errors: string[] } {
-    if (!sbt) {
+  _validateSbt(sbt: any) {
+    const result = validateSbt(sbt);
+
+    if (!result.valid) {
       return {
         valid: false,
-        errors: [`No ${this.credentialType} SBT found for this address`],
+        errors: [`${this.credentialType} ${(result as any).error}`],
       };
     }
 
-    // Check expiry
-    const currentTime = BigInt(Math.floor(Date.now() / 1000));
-    if (sbt.expiry <= currentTime) {
-      return {
-        valid: false,
-        errors: [`${this.credentialType} SBT has expired`],
-      };
-    }
-
-    // Check revocation
-    if (sbt.revoked) {
-      return {
-        valid: false,
-        errors: [`${this.credentialType} SBT has been revoked`],
-      };
-    }
-
-    // Extract nullifier from public values
-    if (!sbt.publicValues || !Array.isArray(sbt.publicValues) || sbt.publicValues.length < 5) {
-      throw new ProviderExternalVerificationError("Invalid SBT public values");
-    }
-
-    return {
-      valid: true,
-    };
+    return { valid: true };
   }
 
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
@@ -76,7 +47,7 @@ export abstract class BaseHumanIdProvider implements Provider {
     setOptimismRpcUrl(rpcUrl);
 
     // Validate address format
-    if (!isHexAddress(payload.address)) {
+    if (!isHexString(payload.address)) {
       throw new ProviderInternalVerificationError("Invalid address format");
     }
 
@@ -84,9 +55,15 @@ export abstract class BaseHumanIdProvider implements Provider {
 
     const { valid, errors } = this._validateSbt(sbt);
 
+    if (!valid) {
+      return {
+        valid,
+        errors,
+      };
+    }
+
     return {
       valid,
-      errors,
       record: {
         // Public Values: [expiry, recipientAddress, actionId, nullifier, issuerAddress]
         nullifier: sbt?.publicValues?.[3]?.toString(),
