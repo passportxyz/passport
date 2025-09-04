@@ -160,24 +160,6 @@ if (usingTestEnvironment) {
   });
   wagmiChains.push(optimismSepolia);
   wagmiTransports[optimismSepolia.id] = http("https://sepolia.optimism.io");
-
-  chainConfigs.push({
-    id: "0x8274f",
-    token: "ETH",
-    label: "Scroll Sepolia",
-    explorerUrl: "https://sepolia.scrollscan.com/",
-    icon: "./assets/scroll-logo.svg",
-    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
-    attestationProviderConfig: {
-      name: "Ethereum Attestation Service",
-      status: "enabled",
-      skipByDefault: false,
-      easScanUrl: "https://scroll-sepolia.easscan.org",
-      monochromeIcon: "./assets/scroll-logo-monochrome.svg",
-    },
-  });
-  wagmiChains.push(scrollSepolia);
-  wagmiTransports[scrollSepolia.id] = http(process.env.NEXT_PUBLIC_PASSPORT_SCROLL_SEPOLIA_RPC_URL);
 }
 
 if (!TEST_MODE) {

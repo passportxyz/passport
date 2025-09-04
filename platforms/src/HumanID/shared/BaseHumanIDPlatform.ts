@@ -89,11 +89,6 @@ export abstract class BaseHumanIDPlatform extends Platform {
   }
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    // CleanHands doesn't require HumanID flow - just return empty payload
-    if (this.attestationFetcher && !this.sbtFetcher) {
-      return {};
-    }
-
     // Require wallet methods for Human ID verification (SBT-based platforms)
     if (!appContext.signMessageAsync || !appContext.sendTransactionAsync || !appContext.address) {
       throw new Error("Human ID verification requires wallet connection and signing capabilities");

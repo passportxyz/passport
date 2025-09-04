@@ -197,35 +197,4 @@ describe("BaseHumanIDPlatform", () => {
       });
     });
   });
-
-  describe("getProviderPayload", () => {
-    describe("Attestation-only platform (CleanHands)", () => {
-      let platform: TestAttestationPlatform;
-
-      beforeEach(() => {
-        platform = new TestAttestationPlatform({} as PlatformOptions);
-        // No sbtFetcher, only attestationFetcher
-        platform.attestationFetcher = jest.fn();
-      });
-
-      it("should return empty payload for attestation-only platform", async () => {
-        const appContext = {
-          address: "0x1234567890123456789012345678901234567890",
-        } as any;
-
-        const result = await platform.getProviderPayload(appContext);
-        expect(result).toEqual({});
-      });
-
-      it("should not require wallet methods for attestation-only platform", async () => {
-        const appContext = {
-          address: "0x1234567890123456789012345678901234567890",
-          // No wallet methods
-        } as any;
-
-        const result = await platform.getProviderPayload(appContext);
-        expect(result).toEqual({});
-      });
-    });
-  });
 });

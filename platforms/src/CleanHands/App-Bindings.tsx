@@ -1,6 +1,5 @@
 /* eslint-disable */
 import React from "react";
-import { PlatformOptions } from "../types.js";
 import { BaseHumanIDPlatform } from "../HumanID/shared/BaseHumanIDPlatform.js";
 import { getCleanHandsSPAttestationByAddress } from "@holonym-foundation/human-id-sdk";
 import { CLEAN_HANDS_CREDENTIAL_TYPE } from "./constants.js";
@@ -8,7 +7,7 @@ import { Hyperlink } from "../utils/Hyperlink.js";
 
 export class CleanHandsPlatform extends BaseHumanIDPlatform {
   platformId = "CleanHands";
-  path = "clean_hands";
+  path = "CleanHands";
   credentialType = CLEAN_HANDS_CREDENTIAL_TYPE;
   attestationFetcher = getCleanHandsSPAttestationByAddress; // Note: attestation, not SBT
 

@@ -1,7 +1,6 @@
 import type { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import { Provider, ProviderOptions } from "../../types.js";
+import { Provider, ProviderInternalVerificationError, ProviderOptions } from "../../types.js";
 import { getCleanHandsSPAttestationByAddress } from "@holonym-foundation/human-id-sdk";
-import { CLEAN_HANDS_CREDENTIAL_TYPE } from "../constants.js";
 import { isHexString, validateAttestation } from "../../HumanID/shared/utils.js";
 
 export class CleanHandsProvider implements Provider {
@@ -9,12 +8,20 @@ export class CleanHandsProvider implements Provider {
 
   constructor(_options: ProviderOptions = {}) {}
 
+  async getAttestation(address: `0x${string}`) {
+    try {
+      return await getCleanHandsSPAttestationByAddress(address);
+    } catch (e) {
+      throw new ProviderInternalVerificationError(e.message);
+    }
+  }
+
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
     if (!isHexString(payload.address)) {
       return { valid: false, errors: ["Invalid address format"] };
     }
 
-    const attestation = await getCleanHandsSPAttestationByAddress(payload.address);
+    const attestation = await this.getAttestation(payload.address);
     const result = validateAttestation(attestation);
 
     return {
