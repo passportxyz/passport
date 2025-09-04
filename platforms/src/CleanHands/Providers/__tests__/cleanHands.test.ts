@@ -57,10 +57,8 @@ describe("CleanHandsProvider", function () {
 
     expect(mockedGetAttestation).toHaveBeenCalledTimes(1);
     expect(mockedGetAttestation).toHaveBeenCalledWith(mockPayload.address);
-    expect(result).toEqual({
-      valid: false,
-      errors: ["Clean Hands Invalid attestation - missing indexingValue"],
-    });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toEqual(["Clean Hands Invalid attestation - missing indexingValue"]);
   });
 
   it("handles null attestation", async () => {
@@ -71,10 +69,8 @@ describe("CleanHandsProvider", function () {
 
     expect(mockedGetAttestation).toHaveBeenCalledTimes(1);
     expect(mockedGetAttestation).toHaveBeenCalledWith(mockPayload.address);
-    expect(result).toEqual({
-      valid: false,
-      errors: ["Clean Hands Attestation not found"],
-    });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toEqual(["Clean Hands Attestation not found"]);
   });
 
   it("handles invalid address format", async () => {
@@ -107,10 +103,8 @@ describe("CleanHandsProvider", function () {
 
     expect(mockedGetAttestation).toHaveBeenCalledTimes(1);
     expect(mockedGetAttestation).toHaveBeenCalledWith(mockPayload.address);
-    expect(result).toEqual({
-      valid: false,
-      errors: ["Clean Hands Invalid attestation - missing indexingValue"],
-    });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toEqual(["Clean Hands Invalid attestation - missing indexingValue"]);
   });
 
   it("should bubble up SDK errors", async () => {

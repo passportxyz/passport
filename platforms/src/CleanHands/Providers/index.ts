@@ -17,17 +17,11 @@ export class CleanHandsProvider implements Provider {
     const attestation = await getCleanHandsSPAttestationByAddress(payload.address);
     const result = validateAttestation(attestation);
 
-    if (!result.valid) {
-      return {
-        valid: false,
-        errors: [`Clean Hands ${(result as any).error}`],
-      };
-    }
-
     return {
-      valid: true,
+      valid: result.valid,
+      errors: !result.valid ? [`Clean Hands ${(result as any).error}`] : undefined,
       record: {
-        attestationId: attestation!.indexingValue,
+        attestationId: attestation?.indexingValue,
       },
     };
   }

@@ -55,15 +55,9 @@ export abstract class BaseHumanIdProvider implements Provider {
 
     const { valid, errors } = this._validateSbt(sbt);
 
-    if (!valid) {
-      return {
-        valid,
-        errors,
-      };
-    }
-
     return {
       valid,
+      errors,
       record: {
         // Public Values: [expiry, recipientAddress, actionId, nullifier, issuerAddress]
         nullifier: sbt?.publicValues?.[3]?.toString(),

@@ -69,10 +69,8 @@ describe("Attempt verification", function () {
       address: MOCK_ADDRESS,
     } as RequestPayload);
 
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      errors: ["biometrics SBT has expired"],
-    });
+    expect(verifiedPayload.valid).toBe(false);
+    expect(verifiedPayload.errors).toEqual(["biometrics SBT has expired"]);
   });
 
   it("should return false when SBT is revoked", async () => {
@@ -87,10 +85,8 @@ describe("Attempt verification", function () {
       address: MOCK_ADDRESS,
     } as RequestPayload);
 
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      errors: ["biometrics SBT has been revoked"],
-    });
+    expect(verifiedPayload.valid).toBe(false);
+    expect(verifiedPayload.errors).toEqual(["biometrics SBT has been revoked"]);
   });
 
   it("should return false when no SBT is found", async () => {
@@ -101,10 +97,8 @@ describe("Attempt verification", function () {
       address: MOCK_ADDRESS,
     } as RequestPayload);
 
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      errors: ["biometrics SBT not found"],
-    });
+    expect(verifiedPayload.valid).toBe(false);
+    expect(verifiedPayload.errors).toEqual(["biometrics SBT not found"]);
   });
 
   it("should return false when SBT has insufficient public values", async () => {
@@ -119,10 +113,8 @@ describe("Attempt verification", function () {
       address: MOCK_ADDRESS,
     } as RequestPayload);
 
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      errors: ["biometrics Invalid SBT public values"],
-    });
+    expect(verifiedPayload.valid).toBe(false);
+    expect(verifiedPayload.errors).toEqual(["biometrics Invalid SBT public values"]);
   });
 
   it("should throw error when Optimism RPC URL is not configured", async () => {
@@ -161,9 +153,7 @@ describe("Attempt verification", function () {
     } as RequestPayload);
 
     // When getExistingSbt throws, it returns undefined, which then fails validation
-    expect(verifiedPayload).toEqual({
-      valid: false,
-      errors: ["biometrics SBT not found"],
-    });
+    expect(verifiedPayload.valid).toBe(false);
+    expect(verifiedPayload.errors).toEqual(["biometrics SBT not found"]);
   });
 });
