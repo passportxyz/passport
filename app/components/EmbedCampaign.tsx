@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 import { useAppKit } from "@reown/appkit/react";
-import { CollapseMode, DarkTheme, PassportScoreWidget } from "@passportxyz/passport-embed";
+import { CollapseMode, DarkTheme, PassportScoreWidget } from "@human.tech/passport-embed";
 import { Button } from "./Button";
 import BodyWrapper from "./BodyWrapper";
 import PageRoot from "./PageRoot";
