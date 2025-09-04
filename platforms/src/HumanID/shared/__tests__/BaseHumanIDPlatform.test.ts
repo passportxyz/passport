@@ -1,6 +1,8 @@
 import { BaseHumanIDPlatform } from "../BaseHumanIDPlatform.js";
 import { PlatformOptions } from "../../../types.js";
 
+import { CredentialType } from "@holonym-foundation/human-id-sdk";
+
 // Mock the SDK functions
 jest.mock("@holonym-foundation/human-id-sdk", () => ({
   setOptimismRpcUrl: jest.fn(),
@@ -12,14 +14,14 @@ jest.mock("@holonym-foundation/human-id-sdk", () => ({
 class TestSBTPlatform extends BaseHumanIDPlatform {
   platformId = "TestSBT";
   path = "TestSBT";
-  credentialType = "test-sbt";
+  credentialType: CredentialType = "test-sbt" as CredentialType;
   sbtFetcher = jest.fn();
 }
 
 class TestAttestationPlatform extends BaseHumanIDPlatform {
   platformId = "TestAttestation";
   path = "TestAttestation";
-  credentialType = "test-attestation";
+  credentialType: CredentialType = "test-attestation" as CredentialType;
   attestationFetcher = jest.fn();
 }
 
@@ -183,7 +185,7 @@ describe("BaseHumanIDPlatform", () => {
         class InvalidPlatform extends BaseHumanIDPlatform {
           platformId = "Invalid";
           path = "Invalid";
-          credentialType = "invalid";
+          credentialType: CredentialType = "invalid" as CredentialType;
           // No fetcher defined
         }
 

@@ -41,7 +41,7 @@ describe("CleanHandsProvider", function () {
     expect(mockedGetAttestation).toHaveBeenCalledWith(mockPayload.address);
     expect(result).toEqual({
       valid: true,
-      record: { attestationId: mockIndexingValue },
+      record: { id: mockIndexingValue },
     });
   });
 

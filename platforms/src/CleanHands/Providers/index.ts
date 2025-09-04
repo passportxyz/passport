@@ -21,7 +21,7 @@ export class CleanHandsProvider implements Provider {
       valid: result.valid,
       errors: !result.valid ? [`Clean Hands ${(result as any).error}`] : undefined,
       record: {
-        attestationId: attestation?.indexingValue,
+        id: attestation?.indexingValue,
       },
     };
   }

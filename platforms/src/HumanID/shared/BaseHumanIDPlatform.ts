@@ -34,7 +34,7 @@ export interface ExtendedHumanIDProvider extends HumanIDProviderInterface {
 }
 
 export abstract class BaseHumanIDPlatform extends Platform {
-  abstract credentialType: string;
+  abstract credentialType: CredentialType;
 
   // Platforms must implement EITHER sbtFetcher OR attestationFetcher
   sbtFetcher?: (address: string) => Promise<HubV3SBT | null>;
@@ -144,7 +144,7 @@ export abstract class BaseHumanIDPlatform extends Platform {
     };
 
     // Request SBT
-    const result = await humanID.privateRequestSBT(this.credentialType as CredentialType, requestParams);
+    const result = await humanID.privateRequestSBT(this.credentialType, requestParams);
 
     // Extract result data
     const sbtData = result && typeof result === "object" && "sbt" in result ? result.sbt : null;
@@ -156,7 +156,7 @@ export abstract class BaseHumanIDPlatform extends Platform {
       humanId: {
         sbtRecipient: recipient,
         transactionHash: txHash,
-        sbtType: this.credentialType as CredentialType,
+        sbtType: this.credentialType,
       },
     };
   }
