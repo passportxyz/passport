@@ -316,7 +316,7 @@ export const EmbedCampaign = () => {
               collapseMode={{ None: "off", Shift: "shift", Overlay: "overlay" }[collapseType] as CollapseMode}
               {...passportEmbedParams}
             />
-            <div className={selectedTheme === "Dark" ? "text-color-1" : "text-color-4"}>Text below the widget.</div>
+            <div className={selectedTheme === "Dark" ? "text-color-9" : "text-color-4"}>Text below the widget.</div>
           </div>
           <img
             className="w-full h-auto col-start-1 row-start-4 hidden lg:block"
