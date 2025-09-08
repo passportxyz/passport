@@ -1,0 +1,232 @@
+# Personal Coding Rules for All Projects
+
+You are an AI coding assistant working with a developer who values clean, maintainable, and well-structured code.
+
+## General Coding Philosophy
+
+- **Clarity over cleverness** - Write code that's easy to understand and maintain
+- **TypeScript-first** - Always prefer TypeScript over JavaScript when possible
+- **Functional programming** - Prefer functional patterns, immutability, and pure functions
+- **Test-driven development** - Write tests for new features and critical functionality
+- **Progressive enhancement** - Build features that work without JavaScript, then enhance
+- **Performance-conscious** - Consider performance implications, especially for frontend code
+
+## Code Quality Standards
+
+### TypeScript/JavaScript
+- **No `any` types** - Always use proper typing, create interfaces/types as needed
+- **Strict mode** - Use TypeScript strict mode settings
+- **Meaningful names** - Use descriptive variable and function names
+- **Small functions** - Keep functions focused on a single responsibility
+- **Error handling** - Always handle errors gracefully, don't ignore try/catch blocks
+- **Modern syntax** - Use modern ES6+ features (arrow functions, destructuring, optional chaining)
+
+```typescript
+// Good
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+}
+
+const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
+  try {
+    const response = await api.get(`/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch user profile:', error);
+    return null;
+  }
+};
+
+// Bad
+const getUser = async (id: any) => {
+  const response = await api.get(`/users/${id}`);
+  return response.data;
+};
+```
+
+### React/Frontend
+- **Functional components** - Always use functional components with hooks
+- **Custom hooks** - Extract complex logic into reusable custom hooks
+- **Props interfaces** - Define clear interfaces for all component props
+- **Accessibility** - Include proper ARIA labels, semantic HTML, keyboard navigation
+- **Performance** - Use `useMemo`, `useCallback`, and `React.memo` when appropriate
+- **Error boundaries** - Implement error boundaries for robust UX
+
+```tsx
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick: () => void;
+  variant?: 'primary' | 'secondary';
+  disabled?: boolean;
+  'aria-label'?: string;
+}
+
+const Button: React.FC<ButtonProps> = ({
+  children,
+  onClick,
+  variant = 'primary',
+  disabled = false,
+  'aria-label': ariaLabel
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      className={`btn btn-${variant}`}
+    >
+      {children}
+    </button>
+  );
+};
+```
+
+### Backend/API
+- **RESTful conventions** - Follow REST principles for API design
+- **Input validation** - Validate all inputs at API boundaries
+- **Error responses** - Return consistent error response formats
+- **Logging** - Include proper logging for debugging and monitoring
+- **Security** - Always sanitize inputs, use parameterized queries, validate auth
+
+```typescript
+// Good API endpoint structure
+app.post('/api/users', async (req: Request, res: Response) => {
+  try {
+    const { error } = userSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid input',
+        errors: error.details
+      });
+    }
+
+    const user = await createUser(req.body);
+    res.status(201).json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    logger.error('Failed to create user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+```
+
+## Styling Preferences
+
+### CSS/Styling
+- **Utility-first CSS** - Prefer Tailwind CSS or similar utility frameworks
+- **Design system consistency** - Use design tokens/theme variables instead of hardcoded values
+- **Mobile-first** - Write mobile-first responsive designs
+- **Semantic HTML** - Use proper HTML elements for their intended purpose
+- **CSS custom properties** - Use CSS variables for theming and consistency
+
+```css
+/* Good - using design tokens */
+.button {
+  background: var(--color-primary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+}
+
+/* Bad - hardcoded values */
+.button {
+  background: #3b82f6;
+  padding: 16px;
+  border-radius: 4px;
+}
+```
+
+## Project Structure Preferences
+
+### File Organization
+- **Feature-based structure** - Group files by feature/domain, not by file type
+- **Index files** - Use index files for clean imports
+- **Meaningful directories** - Use descriptive folder names
+- **Separation of concerns** - Keep business logic separate from UI components
+
+```
+src/
+  features/
+    auth/
+      components/
+        LoginForm.tsx
+        SignupForm.tsx
+      hooks/
+        useAuth.ts
+      services/
+        authApi.ts
+      index.ts
+    dashboard/
+      components/
+      hooks/
+      services/
+      index.ts
+  shared/
+    components/
+    hooks/
+    utils/
+    types/
+```
+
+## Testing Philosophy
+
+- **Test behavior, not implementation** - Focus on what the code does, not how it does it
+- **Integration over unit tests** - Prefer tests that cover real user workflows
+- **Descriptive test names** - Use clear, readable test descriptions
+- **Arrange-Act-Assert** - Structure tests with clear setup, action, and verification phases
+
+```typescript
+describe('UserProfile component', () => {
+  it('should display user information when loaded successfully', async () => {
+    // Arrange
+    const mockUser = { id: '1', name: 'John Doe', email: 'john@example.com' };
+    vi.mocked(fetchUser).mockResolvedValue(mockUser);
+
+    // Act
+    render(<UserProfile userId="1" />);
+
+    // Assert
+    expect(await screen.findByText('John Doe')).toBeInTheDocument();
+    expect(screen.getByText('john@example.com')).toBeInTheDocument();
+  });
+});
+```
+
+## Development Workflow
+
+### Git/Version Control
+- **Conventional commits** - Use conventional commit format
+- **Small, focused commits** - Make atomic commits with single responsibilities
+- **Descriptive branch names** - Use feature/fix/chore prefixes with descriptive names
+- **Pull request descriptions** - Include what, why, and how in PR descriptions
+
+### Code Review Standards
+- **Review for readability** - Code should be self-documenting
+- **Check edge cases** - Consider error states and boundary conditions
+- **Performance implications** - Review for potential performance issues
+- **Security considerations** - Look for security vulnerabilities
+
+## When Making Suggestions
+
+1. **Always explain the why** - Don't just show code, explain the reasoning
+2. **Provide alternatives** - When appropriate, show different approaches
+3. **Consider context** - Adapt suggestions to the existing codebase patterns
+4. **Focus on maintainability** - Prioritize code that's easy to understand and modify
+5. **Include error handling** - Always consider and implement proper error handling
+6. **Think about testing** - Suggest how new code should be tested
+
+## Documentation Preferences
+
+- **Code comments for why, not what** - Explain business logic and complex decisions
+- **README files** - Include setup instructions, architecture decisions, and examples
+- **Type definitions** - Use JSDoc for complex types and functions
+- **API documentation** - Document all public APIs and their expected usage
+
+Remember: The goal is to write code that future developers (including future me) will thank us for. 

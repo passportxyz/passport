@@ -7,7 +7,7 @@ import { CeramicContextState } from "../../../context/ceramicContext";
 import { mockAddress } from "../../../__test-fixtures__/onboardHookValues";
 import { STAMP_PROVIDERS } from "../../../config/providers";
 import { ensStampFixture } from "../../../__test-fixtures__/databaseStorageFixtures";
-import { SUCCESFUL_ENS_RESULT } from "../../../__test-fixtures__/verifiableCredentialResults";
+import { SUCCESSFUL_ENS_RESULT } from "../../../__test-fixtures__/verifiableCredentialResults";
 import { makeTestCeramicContext, renderWithContext } from "../../../__test-fixtures__/contextTestHelpers";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { vi, describe, it, expect } from "vitest";
@@ -110,7 +110,7 @@ describe("when user has not verified with EnsProvider", () => {
 
 //   describe("and when a successful ENS result is returned", () => {
 //     beforeEach(() => {
-//       (fetchVerifiableCredential as vi.Mock).mockResolvedValue(SUCCESFUL_ENS_RESULT);
+//       (fetchVerifiableCredential as vi.Mock).mockResolvedValue(SUCCESSFUL_ENS_RESULT);
 //     });
 
 //     it("the modal displays the verify button", async () => {
@@ -176,7 +176,7 @@ describe("when user has not verified with EnsProvider", () => {
 //     });
 
 //     it("clicking cancel closes the modal and a stamp should not be added", async () => {
-//       (fetchVerifiableCredential as vi.Mock).mockResolvedValue(SUCCESFUL_ENS_RESULT);
+//       (fetchVerifiableCredential as vi.Mock).mockResolvedValue(SUCCESSFUL_ENS_RESULT);
 //       renderWithContext(mockUserContext, mockCeramicContext, <EnsCard />);
 
 //       const initialVerifyButton = screen.queryByTestId("button-verify-ens");

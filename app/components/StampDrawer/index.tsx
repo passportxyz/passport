@@ -12,7 +12,7 @@ import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { JsonOutputModal } from "../JsonOutputModal";
 import { RemovePlatformModal } from "../RemovePlatformModal";
 import { CeramicContext } from "../../context/ceramicContext";
-import { POINTED_STAMP_ROVIDER, ScorerContext } from "../../context/scorerContext";
+import { POINTED_STAMP_PROVIDER, ScorerContext } from "../../context/scorerContext";
 import { useCustomization } from "../../hooks/useCustomization";
 
 const useStampGridCols = ({
@@ -109,13 +109,13 @@ const StampDrawer = ({
             customization.scorer?.weights && stampWeights?.[providerId]
               ? parseFloat(String(stampWeights[providerId])) || 0
               : providerId in possiblePointsDataForStamps
-                ? possiblePointsDataForStamps[providerId as POINTED_STAMP_ROVIDER]
+                ? possiblePointsDataForStamps[providerId as POINTED_STAMP_PROVIDER]
                 : 0,
           humanPointsEarned:
             customization.scorer?.weights && stampWeights?.[providerId]
               ? parseFloat(String(stampWeights[providerId])) || 0
               : providerId in pointsDataForStamps
-                ? pointsDataForStamps[providerId as POINTED_STAMP_ROVIDER]
+                ? pointsDataForStamps[providerId as POINTED_STAMP_PROVIDER]
                 : 0,
         };
       }),

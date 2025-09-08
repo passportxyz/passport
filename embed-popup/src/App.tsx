@@ -23,11 +23,11 @@ const getOAuthUrl = async (state: string, platformName: PLATFORM_ID): Promise<st
   throw new Error(`Platform ${platformName} not found`);
 
   // const AUTH_URL = "https://www.linkedin.com/oauth/v2/authorization";
-  // const clinetID = import.meta.env.VITE_APP_LINKEDIN_CLIENT_ID! as string;
+  // const clientID = import.meta.env.VITE_APP_LINKEDIN_CLIENT_ID! as string;
   // const redirectURI = import.meta.env.VITE_REDIRECT_URI! as string;
   // const params = new URLSearchParams({
   //   response_type: "code",
-  //   client_id: clinetID,
+  //   client_id: clientID,
   //   redirect_uri: redirectURI,
   //   scope: "profile email openid",
   //   state: state,

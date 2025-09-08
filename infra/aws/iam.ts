@@ -212,7 +212,7 @@ const serviceRole = new aws.iam.Role("passport-ecs-role", {
 });
 
 //////////////////////////////////////////////////////////////
-// Load Balancer listerner rule & target group
+// Load Balancer listener rule & target group
 //////////////////////////////////////////////////////////////
 
 const albPassportXyzTargetGroup = new aws.lb.TargetGroup(`passport-xyz-iam`, {
@@ -311,7 +311,7 @@ const serviceSG = new aws.ec2.SecurityGroup(`passport-iam`, {
   },
 });
 // do no group the security group definition & rules in the same resource =>
-// it will cause the sg to be destroyed and recreated everytime the rules change
+// it will cause the sg to be destroyed and recreated every time the rules change
 // By managing them separately is easier to update the security group rules even outside of this stack
 const sgIngressRule80 = new aws.ec2.SecurityGroupRule(
   `passport-iam-80`,
