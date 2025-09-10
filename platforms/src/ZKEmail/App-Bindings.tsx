@@ -115,7 +115,7 @@ export class ZKEmailPlatform extends Platform {
   async handleLoginAndProve(): Promise<void> {
     const { initZkEmailSdk, Gmail, LoginWithGoogle } = await this.getZkEmailSdk();
 
-    const loginWithGoogle = new LoginWithGoogle({ clientId: this.clientId });
+    const loginWithGoogle = new LoginWithGoogle();
 
     const gmail = new Gmail(loginWithGoogle);
     if (!loginWithGoogle.accessToken) {
