@@ -17,12 +17,6 @@ export const PlatformDetails: PlatformSpec = {
         {
           title: "Step 1",
           description: "Navigate to phone verification module.",
-          actions: [
-            {
-              label: "Verify phone number",
-              href: "https://silksecure.net/holonym/diff-wallet/phone",
-            },
-          ],
         },
         {
           title: "Step 2",
@@ -38,7 +32,7 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 5",
-          description: `Return to Passport and click "Check Eligibility" below to add your Phone Verification Stamp.`,
+          description: `Click "Check Eligibility" below to add your Phone Verification Stamp.`,
         },
       ],
     },

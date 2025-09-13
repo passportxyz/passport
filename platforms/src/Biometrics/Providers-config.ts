@@ -16,12 +16,6 @@ export const PlatformDetails: PlatformSpec = {
         {
           title: "Step 1",
           description: "Complete biometric verification using your smartphone camera for 3D facial liveness detection.",
-          actions: [
-            {
-              label: "Start Biometric Scan",
-              href: "https://silksecure.net/holonym/diff-wallet/biometrics",
-            },
-          ],
         },
         {
           title: "Step 2",

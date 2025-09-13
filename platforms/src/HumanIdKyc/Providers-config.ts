@@ -17,12 +17,6 @@ export const PlatformDetails: PlatformSpec = {
         {
           title: "Step 1",
           description: "Complete identity verification using your government ID and camera.",
-          actions: [
-            {
-              label: "Verify Identity",
-              href: "https://silksecure.net/holonym/diff-wallet/gov-id/select",
-            },
-          ],
         },
         {
           title: "Step 2",

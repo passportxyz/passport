@@ -17,12 +17,6 @@ export const PlatformDetails: PlatformSpec = {
         {
           title: "Step 1",
           description: "Navigate to Proof of Clean Hands verification module.",
-          actions: [
-            {
-              label: "Verify Clean Hands",
-              href: "https://silksecure.net/holonym/diff-wallet/clean-hands",
-            },
-          ],
         },
         {
           title: "Step 2",
@@ -38,7 +32,7 @@ export const PlatformDetails: PlatformSpec = {
         },
         {
           title: "Step 5",
-          description: `Return to Passport and click "Check Eligibility" below to add your Proof of Clean Hands Stamp.`,
+          description: `Click "Check Eligibility" below to add your Proof of Clean Hands Stamp.`,
         },
       ],
     },
