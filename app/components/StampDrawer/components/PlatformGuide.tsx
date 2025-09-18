@@ -1,4 +1,5 @@
 import React from "react";
+import { useAccount, useSignMessage, useSendTransaction } from "wagmi";
 import { GuideSection } from "../types";
 
 interface PlatformGuideProps {
@@ -7,6 +8,10 @@ interface PlatformGuideProps {
 }
 
 export const PlatformGuide = ({ sections, isMobile = false }: PlatformGuideProps) => {
+  const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+  const { sendTransactionAsync } = useSendTransaction();
+
   const containerClass = isMobile ? "mt-8" : "h-full overflow-y-auto";
 
   return (
@@ -33,7 +38,11 @@ export const PlatformGuide = ({ sections, isMobile = false }: PlatformGuideProps
                               <a
                                 key={actionIndex}
                                 href={isExternal ? action.href : "#"}
-                                onClick={!isExternal ? action.onClick : undefined}
+                                onClick={
+                                  !isExternal && address
+                                    ? () => action.onClick({ address, signMessageAsync, sendTransactionAsync })
+                                    : undefined
+                                }
                                 className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-black hover:bg-gray-50 transition-colors"
                                 target={isExternal && action.href.startsWith("http") ? "_blank" : undefined}
                                 rel={isExternal && action.href.startsWith("http") ? "noopener noreferrer" : undefined}

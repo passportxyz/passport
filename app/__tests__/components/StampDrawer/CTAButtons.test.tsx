@@ -1,7 +1,19 @@
-import { vi, describe, it, expect } from "vitest";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { CTAButtons } from "../../../components/StampDrawer/components/CTAButtons";
+import { useAccount, useSignMessage, useSendTransaction } from "wagmi";
+
+// Mock wagmi hooks
+vi.mock("wagmi", () => ({
+  useAccount: vi.fn(),
+  useSignMessage: vi.fn(),
+  useSendTransaction: vi.fn(),
+}));
+
+const mockSignMessageAsync = vi.fn();
+const mockSendTransactionAsync = vi.fn();
+const mockAddress = "0x1234567890123456789012345678901234567890";
 
 const defaultProps = {
   platformSpec: {
@@ -16,6 +28,13 @@ const defaultProps = {
 };
 
 describe("CTAButtons", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useAccount as any).mockReturnValue({ address: mockAddress });
+    (useSignMessage as any).mockReturnValue({ signMessageAsync: mockSignMessageAsync });
+    (useSendTransaction as any).mockReturnValue({ sendTransactionAsync: mockSendTransactionAsync });
+  });
+
   it("should render verify button when not verified", () => {
     render(<CTAButtons {...defaultProps} />);
     expect(screen.getByText("Check Eligibility")).toBeInTheDocument();
@@ -68,7 +87,7 @@ describe("CTAButtons", () => {
     expect(link).toHaveAttribute("target", "_blank");
   });
 
-  it("should render custom CTA with onClick", () => {
+  it("should render custom CTA with onClick and pass wallet context", () => {
     const onClick = vi.fn();
     render(
       <CTAButtons
@@ -84,7 +103,32 @@ describe("CTAButtons", () => {
     );
 
     fireEvent.click(screen.getByText("Custom Action"));
-    expect(onClick).toHaveBeenCalled();
+    expect(onClick).toHaveBeenCalledWith({
+      address: mockAddress,
+      signMessageAsync: mockSignMessageAsync,
+      sendTransactionAsync: mockSendTransactionAsync,
+    });
+  });
+
+  it("should not call onClick when no address is available", () => {
+    (useAccount as any).mockReturnValue({ address: undefined });
+
+    const onClick = vi.fn();
+    render(
+      <CTAButtons
+        {...defaultProps}
+        platformSpec={{
+          name: "Test",
+          cta: {
+            label: "Custom Action",
+            onClick,
+          },
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByText("Custom Action"));
+    expect(onClick).not.toHaveBeenCalled();
   });
 
   it("should disable button when loading", () => {

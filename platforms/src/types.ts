@@ -1,5 +1,12 @@
 /* eslint-disable */
 import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import type {
+  Address,
+  SignMessageParameters,
+  SignMessageReturnType,
+  SendTransactionParameters,
+  SendTransactionReturnType,
+} from "viem";
 
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { Platform as PlatformClass } from "./utils/platform.js";
@@ -161,7 +168,15 @@ export type StepAction =
     }
   | {
       label: string;
-      onClick: () => void; // For internal actions
+      onClick: ({
+        address,
+        signMessageAsync,
+        sendTransactionAsync,
+      }: {
+        address: Address;
+        signMessageAsync: (params: SignMessageParameters) => Promise<SignMessageReturnType>;
+        sendTransactionAsync: (params: SendTransactionParameters) => Promise<SendTransactionReturnType>;
+      }) => void; // For internal actions
     };
 
 export type PlatformOptions = Record<string, unknown>;

@@ -1,8 +1,12 @@
 import React from "react";
+import { useAccount, useSignMessage, useSendTransaction } from "wagmi";
 import { CTAButtonsProps } from "../types";
 import { Button } from "../../Button";
 
 export const CTAButtons = ({ platformSpec, verificationState, onVerify, onClose }: CTAButtonsProps) => {
+  const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+  const { sendTransactionAsync } = useSendTransaction();
   const { isVerified, isLoading } = verificationState;
 
   // Always show custom CTA if it exists
@@ -28,7 +32,11 @@ export const CTAButtons = ({ platformSpec, verificationState, onVerify, onClose 
     else if ("onClick" in cta) {
       return (
         <div className="mt-4 mx-1">
-          <Button variant="custom" onClick={cta.onClick} className={buttonClassName}>
+          <Button
+            variant="custom"
+            onClick={address ? () => cta.onClick({ address, signMessageAsync, sendTransactionAsync }) : undefined}
+            className={buttonClassName}
+          >
             {cta.label}
           </Button>
         </div>
