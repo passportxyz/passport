@@ -26,15 +26,16 @@ describe("PlatformGuide", () => {
   it("should render guide sections with steps", () => {
     const sections = [
       {
+        type: "steps" as const,
         title: "Getting Started",
-        steps: [
+        items: [
           {
-            number: 1,
-            text: "Connect your wallet",
+            title: "Step 1",
+            description: "Connect your wallet",
           },
           {
-            number: 2,
-            text: "Verify your identity",
+            title: "Step 2",
+            description: "Verify your identity",
           },
         ],
       },
@@ -50,8 +51,9 @@ describe("PlatformGuide", () => {
   it("should render lists in guide sections", () => {
     const sections = [
       {
+        type: "list" as const,
         title: "Requirements",
-        list: ["Valid ID", "Proof of address", "Recent photo"],
+        items: ["Valid ID", "Proof of address", "Recent photo"],
       },
     ];
 
@@ -66,11 +68,12 @@ describe("PlatformGuide", () => {
   it("should render external links with proper attributes", () => {
     const sections = [
       {
+        type: "steps" as const,
         title: "Resources",
-        steps: [
+        items: [
           {
-            number: 1,
-            text: "Visit our website",
+            title: "Step 1",
+            description: "Visit our website",
             actions: [
               {
                 label: "Go to Website",
@@ -94,11 +97,12 @@ describe("PlatformGuide", () => {
     const mockOnClick = vi.fn();
     const sections = [
       {
+        type: "steps" as const,
         title: "Actions",
-        steps: [
+        items: [
           {
-            number: 1,
-            text: "Perform action",
+            title: "Step 1",
+            description: "Perform action",
             actions: [
               {
                 label: "Click Me",
@@ -128,11 +132,12 @@ describe("PlatformGuide", () => {
     const mockOnClick = vi.fn();
     const sections = [
       {
+        type: "steps" as const,
         title: "Actions",
-        steps: [
+        items: [
           {
-            number: 1,
-            text: "Perform action",
+            title: "Step 1",
+            description: "Perform action",
             actions: [
               {
                 label: "Click Me",
@@ -155,11 +160,12 @@ describe("PlatformGuide", () => {
   it("should handle internal links without external attributes", () => {
     const sections = [
       {
+        type: "steps" as const,
         title: "Navigation",
-        steps: [
+        items: [
           {
-            number: 1,
-            text: "Go to page",
+            title: "Step 1",
+            description: "Go to page",
             actions: [
               {
                 label: "Internal Link",
@@ -182,11 +188,12 @@ describe("PlatformGuide", () => {
   it("should render correctly on mobile", () => {
     const sections = [
       {
+        type: "steps" as const,
         title: "Mobile Guide",
-        steps: [
+        items: [
           {
-            number: 1,
-            text: "Mobile step",
+            title: "Step 1",
+            description: "Mobile step",
           },
         ],
       },
@@ -203,11 +210,12 @@ describe("PlatformGuide", () => {
 
     const sections = [
       {
+        type: "steps" as const,
         title: "Multiple Actions",
-        steps: [
+        items: [
           {
-            number: 1,
-            text: "Choose an action",
+            title: "Step 1",
+            description: "Choose an action",
             actions: [
               {
                 label: "Action 1",
