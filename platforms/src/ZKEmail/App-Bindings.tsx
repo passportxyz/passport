@@ -2,7 +2,7 @@ import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
 import { Platform } from "../utils/platform.js";
 import { AMAZON_GROUP, UBER_GROUP } from "./types.js";
-import { Blueprint, Gmail, Proof } from "@zk-email/sdk";
+import { Blueprint, Gmail, Proof, RawEmailResponse } from "@zk-email/sdk";
 
 export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
@@ -49,6 +49,38 @@ export class ZKEmailPlatform extends Platform {
     };
   }
 
+  private async processEmailBatch(
+    emails: RawEmailResponse[],
+    blueprints: Blueprint[],
+    processedProofs: string[]
+  ): Promise<void> {
+    const filteredEmails = emails.filter((email) =>
+      blueprints.some((blueprint) => email.decodedContents.includes(blueprint.props.senderDomain))
+    );
+
+    const proofPromises = filteredEmails.map(async (rawEmail) => {
+      try {
+        const blueprint = blueprints.find((blueprint) =>
+          rawEmail.decodedContents.includes(blueprint.props.senderDomain)
+        );
+        if (!blueprint) {
+          return undefined;
+        }
+        await blueprint.validateEmail(rawEmail.decodedContents);
+        const proof = await blueprint.createProver().generateProof(rawEmail.decodedContents);
+        return proof;
+      } catch {
+        // Silently skip failed proof generations
+        return undefined;
+      }
+    });
+
+    const proofs = await Promise.all(proofPromises);
+    const validProofs = proofs.filter((p) => p !== undefined).map((p: Proof) => p.packProof());
+
+    processedProofs.push(...validProofs);
+  }
+
   private async fetchAndProveEmails(gmail: Gmail, blueprints: Blueprint[]): Promise<string[]> {
     try {
       // Add null check for blueprints
@@ -56,51 +88,54 @@ export class ZKEmailPlatform extends Platform {
         return [];
       }
 
-      const emailResponses = await gmail.fetchEmails(blueprints);
+      // Fetch initial batch of emails
+      const initialEmails = await gmail.fetchEmails(blueprints);
 
       // Add null check and ensure emailResponses is an array
-      if (!emailResponses || !Array.isArray(emailResponses)) {
+      if (!initialEmails || !Array.isArray(initialEmails)) {
         return [];
       }
 
-      // Safely fetch additional emails
-      try {
-        let moreEmails = await gmail.fetchMore();
-        while (moreEmails && Array.isArray(moreEmails) && moreEmails.length > 0) {
-          emailResponses.push(...moreEmails);
-          moreEmails = await gmail.fetchMore();
-        }
-      } catch {
-        // Continue with the emails we have if fetchMore fails
-      }
+      // Array to collect all processed proofs
+      const allProofs: string[] = [];
 
-      const filteredEmails = emailResponses.filter((email) =>
-        blueprints.some((blueprint) => email.decodedContents.includes(blueprint.props.senderDomain))
-      );
+      // Start processing the initial batch immediately
+      const initialProcessingPromise = this.processEmailBatch(initialEmails, blueprints, allProofs);
 
-      const proofs = await Promise.all(
-        filteredEmails.map(async (rawEmail) => {
-          try {
-            const blueprint = blueprints.find((blueprint) =>
-              rawEmail.decodedContents.includes(blueprint.props.senderDomain)
-            );
-            if (!blueprint) {
-              return undefined;
-            }
-            await blueprint.validateEmail(rawEmail.decodedContents);
-            const proof = await blueprint.createProver().generateProof(rawEmail.decodedContents);
-            return proof;
-          } catch {
-            // Silently skip failed proof generations
-            return undefined;
-          }
-        })
-      );
+      // Concurrently fetch and process additional emails
+      const additionalProcessingPromise = this.fetchAndProcessAdditionalEmails(gmail, blueprints, allProofs);
 
-      return proofs.filter((p) => p !== undefined).map((p: Proof) => p.packProof());
+      // Wait for both initial processing and additional fetching to complete
+      await Promise.all([initialProcessingPromise, additionalProcessingPromise]);
+
+      return allProofs;
     } catch {
       // Return empty array if entire operation fails
       return [];
+    }
+  }
+
+  private async fetchAndProcessAdditionalEmails(
+    gmail: Gmail,
+    blueprints: Blueprint[],
+    allProofs: string[]
+  ): Promise<void> {
+    try {
+      let moreEmails = await gmail.fetchMore();
+      const processingPromises: Promise<void>[] = [];
+
+      while (moreEmails && Array.isArray(moreEmails) && moreEmails.length > 0) {
+        // Start processing this batch while fetching the next one
+        processingPromises.push(this.processEmailBatch(moreEmails, blueprints, allProofs));
+
+        // Fetch next batch
+        moreEmails = await gmail.fetchMore();
+      }
+
+      // Wait for all processing to complete
+      await Promise.all(processingPromises);
+    } catch {
+      // Continue with the emails we have if fetchMore fails
     }
   }
 
