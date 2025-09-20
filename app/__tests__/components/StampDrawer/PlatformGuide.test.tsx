@@ -2,17 +2,19 @@ import { vi, describe, it, expect } from "vitest";
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { PlatformGuide } from "../../../components/StampDrawer/components/PlatformGuide";
-import { useAccount, useSignMessage, useSendTransaction } from "wagmi";
+import { useAccount, useSignMessage, useSendTransaction, useSwitchChain } from "wagmi";
 
 // Mock wagmi hooks
 vi.mock("wagmi", () => ({
   useAccount: vi.fn(),
   useSignMessage: vi.fn(),
   useSendTransaction: vi.fn(),
+  useSwitchChain: vi.fn(),
 }));
 
 const mockSignMessageAsync = vi.fn();
 const mockSendTransactionAsync = vi.fn();
+const mockSwitchChainAsync = vi.fn();
 const mockAddress = "0x1234567890123456789012345678901234567890";
 
 describe("PlatformGuide", () => {
@@ -21,6 +23,7 @@ describe("PlatformGuide", () => {
     (useAccount as any).mockReturnValue({ address: mockAddress });
     (useSignMessage as any).mockReturnValue({ signMessageAsync: mockSignMessageAsync });
     (useSendTransaction as any).mockReturnValue({ sendTransactionAsync: mockSendTransactionAsync });
+    (useSwitchChain as any).mockReturnValue({ switchChainAsync: mockSwitchChainAsync });
   });
 
   it("should render guide sections with steps", () => {
@@ -123,6 +126,7 @@ describe("PlatformGuide", () => {
       address: mockAddress,
       signMessageAsync: mockSignMessageAsync,
       sendTransactionAsync: mockSendTransactionAsync,
+      switchChainAsync: mockSwitchChainAsync,
     });
   });
 
@@ -244,6 +248,7 @@ describe("PlatformGuide", () => {
       address: mockAddress,
       signMessageAsync: mockSignMessageAsync,
       sendTransactionAsync: mockSendTransactionAsync,
+      switchChainAsync: mockSwitchChainAsync,
     });
   });
 });

@@ -1,3 +1,4 @@
+import { requestSBT } from "../HumanID/shared/utils.js";
 import { PlatformGroupSpec, PlatformSpec } from "../types.js";
 
 export const PlatformDetails: PlatformSpec = {
@@ -19,7 +20,18 @@ export const PlatformDetails: PlatformSpec = {
           actions: [
             {
               label: "Start Biometric Scan",
-              href: "https://silksecure.net/holonym/diff-wallet/biometrics",
+              async onClick({ address, signMessageAsync, sendTransactionAsync, switchChainAsync }): Promise<void> {
+                await requestSBT({
+                  credentialType: "biometrics",
+                  // We do not pass hasExistingCredential here because if the user already has the SBT,
+                  // we want them to see the Human ID modal that tells them they already have the SBT.
+                  // hasExistingCredential: () => {},
+                  address,
+                  signMessageAsync,
+                  sendTransactionAsync,
+                  switchChainAsync,
+                });
+              },
             },
           ],
         },

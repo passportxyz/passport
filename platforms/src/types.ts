@@ -1,12 +1,6 @@
 /* eslint-disable */
 import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
-import type {
-  Address,
-  SignMessageParameters,
-  SignMessageReturnType,
-  SendTransactionParameters,
-  SendTransactionReturnType,
-} from "viem";
+import type { Address, SignMessageReturnType } from "viem";
 
 import { PLATFORM_ID, PROVIDER_ID } from "@gitcoin/passport-types";
 import { Platform as PlatformClass } from "./utils/platform.js";
@@ -172,11 +166,21 @@ export type StepAction =
         address,
         signMessageAsync,
         sendTransactionAsync,
+        switchChainAsync,
       }: {
         address: Address;
-        signMessageAsync: (params: SignMessageParameters) => Promise<SignMessageReturnType>;
-        sendTransactionAsync: (params: SendTransactionParameters) => Promise<SendTransactionReturnType>;
-      }) => void; // For internal actions
+        signMessageAsync: ({ message }: { message: string }) => Promise<SignMessageReturnType>;
+        sendTransactionAsync: (variables: {
+          to: `0x${string}`;
+          value?: bigint;
+          data?: `0x${string}`;
+          gas?: bigint;
+          gasPrice?: bigint;
+          maxFeePerGas?: bigint;
+          maxPriorityFeePerGas?: bigint;
+        }) => Promise<`0x${string}`>;
+        switchChainAsync: (params: { chainId: number }) => Promise<any>;
+      }) => void | Promise<void>; // For internal actions
     };
 
 export type PlatformOptions = Record<string, unknown>;

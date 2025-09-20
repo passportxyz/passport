@@ -14,6 +14,7 @@ vi.mock("wagmi", () => ({
   useAccount: vi.fn(() => ({ address: "0x1234567890123456789012345678901234567890" })),
   useSignMessage: vi.fn(() => ({ signMessageAsync: vi.fn() })),
   useSendTransaction: vi.fn(() => ({ sendTransactionAsync: vi.fn() })),
+  useSwitchChain: vi.fn(() => ({ switchChainAsync: vi.fn() })),
 }));
 
 const mockPlatformSpec = {

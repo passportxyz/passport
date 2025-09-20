@@ -1,5 +1,5 @@
 import React from "react";
-import { useAccount, useSignMessage, useSendTransaction } from "wagmi";
+import { useAccount, useSignMessage, useSendTransaction, useSwitchChain } from "wagmi";
 import { CTAButtonsProps } from "../types";
 import { Button } from "../../Button";
 
@@ -7,6 +7,7 @@ export const CTAButtons = ({ platformSpec, verificationState, onVerify, onClose 
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const { sendTransactionAsync } = useSendTransaction();
+  const { switchChainAsync } = useSwitchChain();
   const { isVerified, isLoading } = verificationState;
 
   // Always show custom CTA if it exists
@@ -34,7 +35,11 @@ export const CTAButtons = ({ platformSpec, verificationState, onVerify, onClose 
         <div className="mt-4 mx-1">
           <Button
             variant="custom"
-            onClick={address ? () => cta.onClick({ address, signMessageAsync, sendTransactionAsync }) : undefined}
+            onClick={
+              address
+                ? () => cta.onClick({ address, signMessageAsync, sendTransactionAsync, switchChainAsync })
+                : undefined
+            }
             className={buttonClassName}
           >
             {cta.label}

@@ -1,4 +1,8 @@
-import { SignProtocolAttestation } from "@holonym-foundation/human-id-sdk";
+import { initHumanID, CredentialType, SignProtocolAttestation } from "@holonym-foundation/human-id-sdk";
+import type { RequestSBTExtraParams, TransactionRequestWithChainId } from "@holonym-foundation/human-id-interface-core";
+import type { Address } from "viem";
+import { ProviderPayload } from "../../types.js";
+import { ExtendedHumanIDProvider } from "./types.js";
 
 export function isHexString(value: string): value is `0x${string}` {
   return value.startsWith("0x") && value.length === 42;
@@ -45,4 +49,89 @@ export function validateAttestation(
   // Could add more checks here if needed (e.g., validUntil, revoked)
 
   return { valid: true };
+}
+
+export async function requestSBT({
+  credentialType,
+  address,
+  signMessageAsync,
+  sendTransactionAsync,
+  switchChainAsync,
+  hasExistingCredential,
+}: {
+  credentialType: CredentialType;
+  address: Address;
+  signMessageAsync: ({ message }: { message: string }) => Promise<string>;
+  sendTransactionAsync: (variables: {
+    to: `0x${string}`;
+    value?: bigint;
+    data?: `0x${string}`;
+    gas?: bigint;
+    gasPrice?: bigint;
+    maxFeePerGas?: bigint;
+    maxPriorityFeePerGas?: bigint;
+  }) => Promise<`0x${string}`>;
+  switchChainAsync: (params: { chainId: number }) => Promise<any>;
+  hasExistingCredential?: (address: string) => Promise<boolean>;
+}): Promise<ProviderPayload> {
+  // Check if user already has a valid credential (SBT or attestation)
+  if (hasExistingCredential && (await hasExistingCredential(address))) {
+    // Skip all this, just do the backend check
+    return {};
+  }
+
+  // Note: Cast to any first then to ExtendedHumanIDProvider because the secret methods
+  // aren't part of the public interface but exist at runtime
+  const humanID = initHumanID() as any as ExtendedHumanIDProvider;
+
+  // Get message to sign
+  const message = humanID.getKeygenMessage();
+
+  // Request signature from user
+  const signature = await signMessageAsync({ message });
+
+  // Prepare SBT request parameters
+  const requestParams: RequestSBTExtraParams = {
+    signature,
+    address: address,
+    paymentCallback: async (tx: TransactionRequestWithChainId) => {
+      const chainId = parseInt(tx.chainId, 16);
+
+      // Switch to the correct chain if needed
+      await switchChainAsync?.({ chainId });
+
+      // Send the transaction
+      const txHash = await sendTransactionAsync?.({
+        to: tx.to,
+        value: BigInt(tx.value ?? "0x0"),
+        data: tx.data,
+      });
+
+      if (!isHexString(txHash)) {
+        throw new Error("Transaction hash is not a valid hex string");
+      }
+
+      return {
+        txHash,
+        chainId,
+      };
+    },
+  };
+
+  // Request SBT
+  const result = await humanID.privateRequestSBT(credentialType, requestParams);
+
+  // Extract result data
+  const sbtData = result && typeof result === "object" && "sbt" in result ? result.sbt : null;
+  const recipient =
+    sbtData && typeof sbtData === "object" && "recipient" in sbtData ? String(sbtData.recipient) : undefined;
+  const txHash = sbtData && typeof sbtData === "object" && "txHash" in sbtData ? String(sbtData.txHash) : undefined;
+
+  return {
+    humanId: {
+      sbtRecipient: recipient,
+      transactionHash: txHash,
+      sbtType: credentialType,
+    },
+  };
 }
