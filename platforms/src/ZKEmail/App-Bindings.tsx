@@ -1,7 +1,8 @@
 import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
 import { Platform } from "../utils/platform.js";
-import { AMAZON_GROUP, UBER_GROUP } from "./types.js";
+import { AMAZON_GROUP, ProviderGroup, UBER_GROUP } from "./types.js";
+import { shouldContinueFetchingEmails } from "./utils.js";
 import { Blueprint, Gmail, Proof, RawEmailResponse } from "@zk-email/sdk";
 
 export class ZKEmailPlatform extends Platform {
@@ -81,7 +82,11 @@ export class ZKEmailPlatform extends Platform {
     processedProofs.push(...validProofs);
   }
 
-  private async fetchAndProveEmails(gmail: Gmail, blueprints: Blueprint[]): Promise<string[]> {
+  private async fetchAndProveEmails(
+    gmail: Gmail,
+    blueprints: Blueprint[],
+    group: "amazon" | "uber"
+  ): Promise<string[]> {
     try {
       // Add null check for blueprints
       if (!blueprints || blueprints.length === 0) {
@@ -103,7 +108,7 @@ export class ZKEmailPlatform extends Platform {
       const initialProcessingPromise = this.processEmailBatch(initialEmails, blueprints, allProofs);
 
       // Concurrently fetch and process additional emails
-      const additionalProcessingPromise = this.fetchAndProcessAdditionalEmails(gmail, blueprints, allProofs);
+      const additionalProcessingPromise = this.fetchAndProcessAdditionalEmails(gmail, blueprints, allProofs, group);
 
       // Wait for both initial processing and additional fetching to complete
       await Promise.all([initialProcessingPromise, additionalProcessingPromise]);
@@ -118,13 +123,14 @@ export class ZKEmailPlatform extends Platform {
   private async fetchAndProcessAdditionalEmails(
     gmail: Gmail,
     blueprints: Blueprint[],
-    allProofs: string[]
+    allProofs: string[],
+    group: ProviderGroup
   ): Promise<void> {
     try {
       let moreEmails = await gmail.fetchMore();
       const processingPromises: Promise<void>[] = [];
 
-      while (moreEmails && Array.isArray(moreEmails) && moreEmails.length > 0) {
+      while (shouldContinueFetchingEmails(moreEmails, allProofs.length, group)) {
         // Start processing this batch while fetching the next one
         processingPromises.push(this.processEmailBatch(moreEmails, blueprints, allProofs));
 
@@ -166,7 +172,7 @@ export class ZKEmailPlatform extends Platform {
     try {
       const amazonGroup = await sdk.getBlueprintGroupById(AMAZON_GROUP);
       const amazonBlueprints = await amazonGroup.fetchBlueptrints();
-      this.amazonProofs = await this.fetchAndProveEmails(gmail, amazonBlueprints);
+      this.amazonProofs = await this.fetchAndProveEmails(gmail, amazonBlueprints, "amazon");
     } catch {
       // Silently fail and continue with empty Amazon proofs
       this.amazonProofs = [];
@@ -176,7 +182,7 @@ export class ZKEmailPlatform extends Platform {
     try {
       const uberGroup = await sdk.getBlueprintGroupById(UBER_GROUP);
       const uberBlueprints = await uberGroup.fetchBlueptrints();
-      this.uberProofs = await this.fetchAndProveEmails(gmail, uberBlueprints);
+      this.uberProofs = await this.fetchAndProveEmails(gmail, uberBlueprints, "uber");
     } catch {
       // Silently fail and continue with empty Uber proofs
       this.uberProofs = [];

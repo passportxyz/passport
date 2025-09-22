@@ -8,10 +8,19 @@ import {
   UberPowerUserProvider,
 } from "../Providers/zkemail.js";
 import * as zkEmailSdk from "@zk-email/sdk";
+import type { RawEmailResponse } from "@zk-email/sdk";
+import { shouldContinueFetchingEmails } from "../utils.js";
+import { AMAZON_STOP_FETCH_LIMIT, UBER_STOP_FETCH_LIMIT } from "../types.js";
 
-jest.mock("@zk-email/sdk", () => ({
-  initZkEmailSdk: jest.fn(),
-}));
+jest.mock("@zk-email/sdk", () => {
+  const Gmail = jest.fn();
+  const LoginWithGoogle = jest.fn();
+  return {
+    initZkEmailSdk: jest.fn(),
+    Gmail,
+    LoginWithGoogle,
+  };
+});
 
 const MOCK_ADDRESS = "0xcF314CE817E25b4F784bC1f24c9A79A525fEC50f";
 
@@ -36,7 +45,7 @@ describe("ZKEmail Providers", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset the mock implementations to a default state before each test
-    mockUnpackProof.mockImplementation(async (proof) => ({
+    mockUnpackProof.mockImplementation(async (_proof) => ({
       verify: mockProofVerify.mockResolvedValue(true),
     }));
     mockProofVerify.mockResolvedValue(true);
@@ -155,6 +164,38 @@ describe("ZKEmail Providers", () => {
     it("UberPowerUserProvider should have correct type", () => {
       const provider = new UberPowerUserProvider();
       expect(provider.type).toBe("ZKEmail#UberPowerUser");
+    });
+  });
+
+  describe("shouldContinueFetchingEmails helper", () => {
+    it("returns false when emails page is empty", () => {
+      expect(shouldContinueFetchingEmails([], 0, "uber")).toBe(false);
+    });
+
+    it("returns true when under limit and page has emails", () => {
+      expect(shouldContinueFetchingEmails([{ decodedContents: "x" } as unknown as RawEmailResponse], 1, "uber")).toBe(
+        true
+      );
+    });
+
+    it("returns false once Uber stop limit is reached", () => {
+      expect(
+        shouldContinueFetchingEmails(
+          [{ decodedContents: "x" } as unknown as RawEmailResponse],
+          UBER_STOP_FETCH_LIMIT,
+          "uber"
+        )
+      ).toBe(false);
+    });
+
+    it("returns false once Amazon stop limit is reached", () => {
+      expect(
+        shouldContinueFetchingEmails(
+          [{ decodedContents: "x" } as unknown as RawEmailResponse],
+          AMAZON_STOP_FETCH_LIMIT,
+          "amazon"
+        )
+      ).toBe(false);
     });
   });
 });
