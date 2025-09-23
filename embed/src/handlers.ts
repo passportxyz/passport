@@ -107,16 +107,22 @@ export const autoVerificationHandler = createHandler<AutoVerificationRequestBody
       throw new ApiError("Invalid address", "400_BAD_REQUEST");
     }
 
-    const stamps = await autoVerifyStamps({
+    const { credentials, credentialErrors } = await autoVerifyStamps({
       address,
       scorerId,
       credentialIds,
     });
 
-    const score = await addStampsAndGetScore({ address, scorerId, stamps });
+    const score = await addStampsAndGetScore({ address, scorerId, stamps: credentials });
+
+    // Include credentialErrors in the response
+    const response = {
+      ...score,
+      credentialErrors,
+    };
 
     // TODO should we issue a score VC?
-    return void res.json(score);
+    return void res.json(response);
   }
 );
 
@@ -124,9 +130,16 @@ type EmbedVerifyRequestBody = VerifyRequestBody & {
   scorerId: string;
 };
 
+type CredentialError = {
+  provider: string;
+  error: string;
+  code?: number;
+};
+
 type EmbedVerifyResponseBody = {
   score: PassportScore;
   credentials: VerifiableCredential[];
+  credentialErrors?: CredentialError[];
 };
 
 export const verificationHandler = createHandler<EmbedVerifyRequestBody, EmbedVerifyResponseBody>(async (req, res) => {
@@ -158,14 +171,23 @@ export const verificationHandler = createHandler<EmbedVerifyRequestBody, EmbedVe
       payload
     );
 
-    const stamps = credentialsVerificationResponses.reduce((acc, response) => {
+    const stamps: VerifiableCredential[] = [];
+    const credentialErrors: CredentialError[] = [];
+
+    // Separate successful credentials from errors
+    credentialsVerificationResponses.forEach((response, index) => {
       if ("credential" in response && response.credential) {
-        if (response.credential) {
-          acc.push(response.credential);
-        }
+        stamps.push(response.credential);
+      } else if ("error" in response) {
+        // Get the provider name from the original types array
+        const providerName = types[index] || "unknown";
+        credentialErrors.push({
+          provider: providerName,
+          error: response.error || "Verification failed",
+          code: response.code,
+        });
       }
-      return acc;
-    }, [] as VerifiableCredential[]);
+    });
 
     const score = await addStampsAndGetScore({
       address,
@@ -176,6 +198,7 @@ export const verificationHandler = createHandler<EmbedVerifyRequestBody, EmbedVe
     return void res.json({
       score: score,
       credentials: stamps,
+      credentialErrors,
     });
   }
 

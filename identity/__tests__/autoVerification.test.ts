@@ -241,6 +241,7 @@ describe("autoVerificationHandler", () => {
         } else {
           return Promise.resolve({
             valid: false,
+            errors: [`Provider ${type} verification failed`],
           });
         }
       }
@@ -253,11 +254,17 @@ describe("autoVerificationHandler", () => {
       return Promise.resolve(credential);
     });
 
-    const stamps = await autoVerifyStamps({
+    const result = await autoVerifyStamps({
       address: mockAddress,
       scorerId: mockScorerId,
     });
-    expect(stamps).toEqual(issuedCredentials);
+
+    // Should have the expected number of successful credentials
+    expect(result.credentials).toHaveLength(expectedEvmProvidersToSucceed.size);
+    expect(result.credentials).toEqual(issuedCredentials);
+
+    // Should have errors for providers that failed verification
+    expect(result.credentialErrors).toHaveLength(expectedEvmProvidersToFail.size);
 
     expect(verifySpy).toHaveBeenCalledTimes(expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size);
   });
@@ -288,7 +295,7 @@ describe("autoVerificationHandler", () => {
       return Promise.resolve(credential);
     });
 
-    const stamps = await autoVerifyStamps({
+    const result = await autoVerifyStamps({
       address: mockAddress,
       scorerId: mockScorerId,
       credentialIds: [
@@ -299,7 +306,10 @@ describe("autoVerificationHandler", () => {
         "githubContributionActivityGte#30", // not marked as evm
       ],
     });
-    expect(stamps).toEqual(issuedCredentials);
+    // Should have 1 credential (ETHDaysActive#50 succeeds) and 2 errors (HolonymPhone and HolonymGovIdProvider fail)
+    expect(result.credentials).toHaveLength(1);
+    expect(result.credentials).toEqual(issuedCredentials);
+    expect(result.credentialErrors).toHaveLength(2);
     expect(verifySpy).toHaveBeenCalledTimes(3); // We only had 3 selected EVM providers
   });
 
@@ -323,14 +333,100 @@ describe("autoVerificationHandler", () => {
       return Promise.resolve(credential);
     });
 
-    const stamps: VerifiableCredential[] = await autoVerifyStamps({
+    const result = await autoVerifyStamps({
       address: mockAddress,
       scorerId: mockScorerId,
     });
 
-    expect(stamps).toEqual(issuedCredentials);
+    expect(result.credentials).toEqual(issuedCredentials);
+    expect(result.credentialErrors).toEqual([]);
 
     expect(verifySpy).toHaveBeenCalledTimes(expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size);
+  });
+
+  it("should return credential errors along with successful credentials", async () => {
+    const mockAddress = "0x123";
+    const mockScorerId = "test-scorer";
+
+    const verifySpy = (providers.verify as jest.Mock).mockImplementation(
+      async (type: string, _payload: RequestPayload, _context: ProviderContext) => {
+        if (expectedEvmProvidersToSucceed.has(type as PROVIDER_ID)) {
+          return Promise.resolve({
+            valid: true,
+            record: { key: "verified-condition" },
+          });
+        } else {
+          return Promise.resolve({
+            valid: false,
+            errors: [`Provider ${type} verification failed`],
+          });
+        }
+      }
+    );
+
+    const issuedCredentials: VerifiableCredential[] = [];
+    (issueNullifiableCredential as jest.Mock).mockImplementation(async ({ record }) => {
+      const credential = getMockedIssuedCredential(record.type, mockAddress);
+      issuedCredentials.push(credential.credential);
+      return Promise.resolve(credential);
+    });
+
+    const result = await autoVerifyStamps({
+      address: mockAddress,
+      scorerId: mockScorerId,
+    });
+
+    // Should return both credentials and errors
+    expect(result.credentials).toHaveLength(expectedEvmProvidersToSucceed.size);
+    expect(result.credentials).toEqual(issuedCredentials);
+    expect(result.credentialErrors).toHaveLength(expectedEvmProvidersToFail.size);
+
+    // Check that all errors have the expected structure
+    result.credentialErrors.forEach((error) => {
+      expect(error).toHaveProperty("provider");
+      expect(error).toHaveProperty("error");
+      expect(error).toHaveProperty("code");
+      expect(error.code).toBe(403);
+    });
+
+    expect(verifySpy).toHaveBeenCalledTimes(expectedEvmProvidersToSucceed.size + expectedEvmProvidersToFail.size);
+  });
+
+  it("should handle provider exceptions as credential errors", async () => {
+    const mockAddress = "0x123";
+    const mockScorerId = "test-scorer";
+
+    const verifySpy = (providers.verify as jest.Mock).mockImplementation(
+      async (type: string, _payload: RequestPayload, _context: ProviderContext) => {
+        if (type === "ETHDaysActive#50") {
+          throw new Error("Provider threw an exception");
+        }
+        return Promise.resolve({
+          valid: true,
+          record: { key: "verified-condition" },
+        });
+      }
+    );
+
+    (issueNullifiableCredential as jest.Mock).mockImplementation(async ({ record }) => {
+      const credential = getMockedIssuedCredential(record.type, mockAddress);
+      return Promise.resolve(credential);
+    });
+
+    const result = await autoVerifyStamps({
+      address: mockAddress,
+      scorerId: mockScorerId,
+      credentialIds: ["ETHDaysActive#50", "ETHGasSpent#0.25"],
+    });
+
+    // Should have one error and one successful credential
+    expect(result.credentials).toHaveLength(1);
+    expect(result.credentialErrors).toHaveLength(1);
+    expect(result.credentialErrors[0]).toEqual({
+      provider: "ETHDaysActive#50",
+      error: "Unable to verify provider",
+      code: 400,
+    });
   });
 });
 

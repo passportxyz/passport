@@ -37,9 +37,12 @@ describe("autoVerificationHandler", function () {
       });
     });
 
-    mockedAutoVerifyStamps.mockImplementation(async (autoVerificationFields: any): Promise<VerifiableCredential[]> => {
+    mockedAutoVerifyStamps.mockImplementation(async (autoVerificationFields: any): Promise<any> => {
       return new Promise((resolve, reject) => {
-        resolve([] as VerifiableCredential[]);
+        resolve({
+          credentials: [] as VerifiableCredential[],
+          credentialErrors: [],
+        });
       });
     });
   });
@@ -59,7 +62,10 @@ describe("autoVerificationHandler", function () {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body).toEqual(mockScore);
+    expect(response.body).toEqual({
+      ...mockScore,
+      credentialErrors: [],
+    });
 
     expect(autoVerifyStamps).toHaveBeenCalledTimes(1);
     expect(autoVerifyStamps).toHaveBeenCalledWith(body);
@@ -95,7 +101,10 @@ describe("autoVerificationHandler", function () {
       .expect(200)
       .expect("Content-Type", /json/);
 
-    expect(response.body).toEqual(mockScore);
+    expect(response.body).toEqual({
+      ...mockScore,
+      credentialErrors: [],
+    });
 
     expect(autoVerifyStamps).toHaveBeenCalledTimes(1);
     expect(autoVerifyStamps).toHaveBeenCalledWith(body);
@@ -113,5 +122,80 @@ describe("autoVerificationHandler", function () {
         },
       }
     );
+  });
+
+  it("should return credentialErrors when some verifications fail", async () => {
+    const body = {
+      address: "0x0000000000000000000000000000000000000000",
+      scorerId: "123",
+      credentialIds: ["provider-1", "provider-2", "provider-3"],
+    };
+
+    const mockCredentialErrors = [
+      { provider: "provider-2", error: "Verification failed", code: 403 },
+      { provider: "provider-3", error: "Provider error", code: 400 },
+    ];
+
+    mockedAutoVerifyStamps.mockImplementation(async () => ({
+      credentials: [
+        {
+          "@context": ["https://www.w3.org/2018/credentials/v1"],
+          type: ["VerifiableCredential"],
+          credentialSubject: { id: "test", provider: "provider-1" },
+          issuer: "test",
+          issuanceDate: new Date().toISOString(),
+          expirationDate: new Date().toISOString(),
+          proof: {} as any,
+        },
+      ],
+      credentialErrors: mockCredentialErrors,
+    }));
+
+    const response = await request(app)
+      .post(`/embed/auto-verify`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .send(body)
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    expect(response.body).toEqual({
+      ...mockScore,
+      credentialErrors: mockCredentialErrors,
+    });
+
+    expect(autoVerifyStamps).toHaveBeenCalledTimes(1);
+    expect(autoVerifyStamps).toHaveBeenCalledWith(body);
+  });
+
+  it("should handle when all verifications fail", async () => {
+    const body = {
+      address: "0x0000000000000000000000000000000000000000",
+      scorerId: "123",
+      credentialIds: ["provider-1", "provider-2"],
+    };
+
+    const mockCredentialErrors = [
+      { provider: "provider-1", error: "Verification failed", code: 403 },
+      { provider: "provider-2", error: "Provider error", code: 400 },
+    ];
+
+    mockedAutoVerifyStamps.mockImplementation(async () => ({
+      credentials: [],
+      credentialErrors: mockCredentialErrors,
+    }));
+
+    const response = await request(app)
+      .post(`/embed/auto-verify`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .send(body)
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    expect(response.body).toEqual({
+      ...mockScore,
+      credentialErrors: mockCredentialErrors,
+    });
   });
 });
