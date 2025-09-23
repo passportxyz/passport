@@ -9,6 +9,38 @@ import {
   UBER_POWER_USER_THRESHOLD,
 } from "../types.js";
 import { Proof } from "@zk-email/sdk";
+import { AMAZON_SUBJECT_KEYWORDS, UBER_SUBJECT_KEYWORDS } from "../keywords.js";
+import { subjectContainsKeyword, extractSubjectFromPublicData } from "../utils/subject.js";
+
+function getSubjectFromProof(proof: Proof): string | undefined {
+  try {
+    const { publicData } = proof.getProofData();
+    return extractSubjectFromPublicData(publicData);
+  } catch {
+    return undefined;
+  }
+}
+
+function filterProofsBySubject(proofs: Proof[], keywords: string[]): Proof[] {
+  return proofs.filter((proof) => {
+    const subject = getSubjectFromProof(proof);
+    console.log("subject", subject);
+    return Boolean(subject) && subjectContainsKeyword(subject as string, keywords);
+  });
+}
+
+async function countVerifiedProofs(proofs: Proof[]): Promise<number> {
+  const results = await Promise.all(
+    proofs.map(async (proof) => {
+      try {
+        return await proof.verify();
+      } catch {
+        return false;
+      }
+    })
+  );
+  return results.filter(Boolean).length;
+}
 
 // Base ZKEmail Provider
 abstract class ZKEmailBaseProvider implements Provider {
@@ -61,18 +93,11 @@ abstract class ZKEmailBaseProvider implements Provider {
 
       const unpackedProofs = await Promise.all(proofs.map((p: string) => sdk.unPackProof(p)));
 
-      // count how many proofs are valid
-      const validProofs = await Promise.all(
-        unpackedProofs.map(async (proof: Proof) => {
-          try {
-            const verified = await proof.verify();
-            return verified;
-          } catch (err) {
-            return false;
-          }
-        })
-      );
-      const validProofCount = validProofs.filter((verified) => verified).length;
+      // Filter proofs by subject keywords depending on proof type
+      const subjectKeywords = proofType === "amazon" ? AMAZON_SUBJECT_KEYWORDS : UBER_SUBJECT_KEYWORDS;
+      const subjectFilteredProofs = filterProofsBySubject(unpackedProofs, subjectKeywords);
+
+      const validProofCount = await countVerifiedProofs(subjectFilteredProofs);
 
       if (validProofCount === 0) {
         return {
