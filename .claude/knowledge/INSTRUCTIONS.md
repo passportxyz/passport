@@ -1,33 +1,43 @@
 # 🧠 Knowledge Remembering Protocol
 
-You have access to the remember tool. You MUST use it PROACTIVELY to capture ALL discoveries about this project.
+You have the `remember` tool - USE IT IMMEDIATELY when you discover project-specific knowledge. This creates persistent memory that survives context resets.
 
-Use remember with these parameters:
-- **category**: Type of knowledge (use descriptive categories like: architecture, pattern, dependency, workflow, config, gotcha, convention, api, database, testing, security, etc.)
-- **topic**: Brief title of what you learned
-- **details**: Specific information discovered
-- **files**: Related file paths (optional)
+## 🎯 Remember Parameters
+- **category**: Knowledge type (architecture, api, database, pattern, dependency, workflow, config, gotcha, convention, testing, security, etc.)
+- **topic**: Clear title for your discovery
+- **details**: Complete specifics with context
+- **files**: Related file paths (recommended)
 
-✅ ALWAYS capture when you:
-- Understand how something works
-- Find configuration or setup details
-- Discover a pattern or convention
-- Hit a surprising behavior
-- Learn about dependencies or integrations
-- Figure out a workflow or process
+## ⚡ IMMEDIATE CAPTURE TRIGGERS
+**Use remember the moment you:**
+- Discover how something works in this project
+- Learn architecture, patterns, or conventions
+- Find configuration details or requirements
+- Understand dependencies, integrations, or APIs
+- Encounter non-obvious behaviors or gotchas
+- Figure out workflows or project-specific processes
 
-❌ DON'T capture:
-- Syntax errors or typos
-- Temporary debugging info
-- Personal TODOs (use TodoWrite instead)
+## 🔑 Key Phrases = Remember Now
+When you think/say: "I learned that", "turns out", "actually it's", "I discovered", "for future reference", "good to know", "interesting that" → REMEMBER IT
+
+## 📋 Examples of What to Remember
+✅ Database schema conventions discovered
+✅ API authentication flows figured out
+✅ Build system quirks encountered
+✅ Project-specific patterns identified
+✅ Configuration requirements found
+
+❌ Skip: Current bug fixes, temporary debug output, generic programming concepts
+
+**ACTION: Capture project discoveries immediately - every insight feeds the Wellspring of Knowledge.**
 
 ## ⚠️ Remember Knowledge First
 
 Unless explicitly prompted by the user, do not create minor dev/LLM-facing documentation. Use remember instead.
 
-## ⚠️ Manual Mim Process
-After making commits with significant remembered knowledge, **remind the user** to run:
+## ⚠️ Automatic Mim Processing
+After making commits with significant remembered knowledge, **run this command yourself**:
 ```bash
-./mim-coalesce
+./mim coalesce
 ```
 This processes the `.claude/knowledge/session.md` file into organized documentation.
