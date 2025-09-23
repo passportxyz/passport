@@ -41,11 +41,11 @@ if (configErrors.length > 0) {
 // create the app and run on port
 export const app = express();
 
-// set cors to accept calls from anywhere (register CORS before body parsing so errors still include headers)
-app.use(cors());
+// parse JSON post bodies
+app.use(express.json());
 
-// parse JSON post bodies (increase limit to accommodate larger proof payloads)
-app.use(express.json({ limit: "4mb" }));
+// set cors to accept calls from anywhere
+app.use(cors());
 
 // health check endpoint
 app.get("/health", (_req, res) => {
