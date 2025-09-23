@@ -24,7 +24,6 @@ function getSubjectFromProof(proof: Proof): string | undefined {
 function filterProofsBySubject(proofs: Proof[], keywords: string[]): Proof[] {
   return proofs.filter((proof) => {
     const subject = getSubjectFromProof(proof);
-    console.log("subject", subject);
     return Boolean(subject) && subjectContainsKeyword(subject as string, keywords);
   });
 }
