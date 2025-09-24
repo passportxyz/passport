@@ -1,6 +1,6 @@
 // ---- Types
 import { STAMP_PAGES, displayNumber } from "./stamps.js";
-import { platforms } from "@gitcoin/passport-platforms";
+import { platforms, Provider } from "@gitcoin/passport-platforms";
 import { serverUtils } from "./utils/identityHelper.js";
 import axios from "axios";
 
@@ -18,6 +18,7 @@ type MetadataResponseBody = {
       weight: string;
     }[];
     displayWeight: string;
+    icon: string;
     requiresSignature?: boolean;
     requiresPopup?: boolean;
   }[];
@@ -43,21 +44,36 @@ export const metadataHandler = createHandler<MetadataRequestBody, MetadataRespon
       const platformId = platform.platformId;
       const platformData = platforms[platformId];
 
+      // Helper function to transform icon path to production URL
+      const getIconUrl = (iconPath?: string): string => {
+        if (!iconPath) return "";
+        // Transform relative path to production URL
+        // "./assets/githubStampIcon.svg" -> "https://app.passport.xyz/assets/githubStampIcon.svg"
+        const fileName = iconPath.replace("./assets/", "");
+        return `https://app.passport.xyz/assets/${fileName}`;
+      };
+
       if (!platformData || !platformData.providers) {
         return {
           ...platform,
+          icon: "",
           credentials: [],
           displayWeight: displayNumber(0),
         };
       }
+
+      // Get icon URL from platform details
+      const iconUrl = getIconUrl(platformData.PlatformDetails?.icon);
+
       // Extract provider types
-      const providers = platformData.providers;
-      const credentials = Object.values(providers).map((provider: { type: string }) => ({
+      const providers: Provider[] = platformData.providers;
+      const credentials = providers.map((provider) => ({
         id: provider.type,
         weight: weightsResponseData[provider.type] ? weightsResponseData[provider.type].toString() : "0",
       }));
       return {
         ...platform,
+        icon: iconUrl,
         credentials,
         displayWeight: displayNumber(credentials.reduce((acc, credential) => acc + parseFloat(credential.weight), 0)),
       };
