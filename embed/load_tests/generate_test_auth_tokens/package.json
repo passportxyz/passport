@@ -1,0 +1,24 @@
+{
+  "name": "embed-load-test-auth-tokens",
+  "version": "1.0.0",
+  "description": "Generate authentication tokens for embed service load testing",
+  "main": "generate_tokens.js",
+  "scripts": {
+    "start": "node generate_tokens.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "ethers": "^6.0.0",
+    "axios": "^1.6.0"
+  },
+  "keywords": [
+    "passport",
+    "embed",
+    "load-testing",
+    "authentication"
+  ],
+  "author": "Gitcoin Passport Team",
+  "license": "MIT"
+}
+
+
