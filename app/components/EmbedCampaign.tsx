@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 import { useAppKit } from "@reown/appkit/react";
-import { CollapseMode, DarkTheme, PassportScoreWidget } from "@human.tech/passport-embed";
+import { CollapseMode, DarkTheme, LightTheme, PassportScoreWidget } from "@human.tech/passport-embed";
 import { Button } from "./Button";
 import BodyWrapper from "./BodyWrapper";
 import PageRoot from "./PageRoot";
@@ -297,19 +297,7 @@ export const EmbedCampaign = () => {
           </div>
           <div className="col-start-1 col-end-2 row-start-4 lg:col-start-2 lg:col-end-3 lg:row-start-3 lg:justify-self-start self-start mt-40 lg:mt-[20%] lg:ml-[10%] flex flex-col items-center gap-6 w-full max-w-[320px] z-10">
             <PassportScoreWidget
-              theme={
-                selectedTheme === "Dark"
-                  ? DarkTheme
-                  : {
-                      colors: {
-                        primary: "55, 55, 55",
-                        secondary: "201, 201, 201",
-                        background: "255, 255, 255",
-                        success: "164, 255, 169",
-                        failure: "55, 55, 55",
-                      },
-                    }
-              }
+              theme={selectedTheme === "Dark" ? DarkTheme : LightTheme}
               address={address}
               connectWalletCallback={openWeb3Modal}
               generateSignatureCallback={generateSignature}
