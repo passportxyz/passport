@@ -3,7 +3,9 @@ import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
 import { Platform } from "../utils/platform.js";
 import { AMAZON_GROUP, ProviderGroup, UBER_GROUP } from "./types.js";
 import { shouldContinueFetchingEmails } from "./utils.js";
-import { Blueprint, Gmail, Proof, RawEmailResponse } from "@zk-email/sdk";
+import { Blueprint, Gmail, Proof, RawEmailResponse, FetchEmailOptions } from "@zk-email/sdk";
+import { buildSubjectQuery } from "./utils/queryBuilder.js";
+import { AMAZON_SUBJECT_KEYWORDS, UBER_SUBJECT_KEYWORDS } from "./keywords.js";
 
 export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
@@ -93,8 +95,13 @@ export class ZKEmailPlatform extends Platform {
         return [];
       }
 
-      // Fetch initial batch of emails
-      const initialEmails = await gmail.fetchEmails(blueprints);
+      // Build subject query based on the group
+      const subjectKeywords = group === "amazon" ? AMAZON_SUBJECT_KEYWORDS : UBER_SUBJECT_KEYWORDS;
+      const subjectQuery = buildSubjectQuery(subjectKeywords);
+      const fetchOptions: FetchEmailOptions = subjectQuery ? { OR: subjectQuery } : {};
+
+      // Fetch initial batch of emails with subject filtering
+      const initialEmails = await gmail.fetchEmails(blueprints, fetchOptions);
 
       // Add null check and ensure emailResponses is an array
       if (!initialEmails || !Array.isArray(initialEmails)) {
