@@ -27,12 +27,6 @@ const PriceIcon = () => (
 );
 
 export const PointsModule = ({ timeToGet, price, pointsGained = 0, totalPossiblePoints = 0 }: PointsModuleProps) => {
-  console.log("PointsModule rendered with:", {
-    timeToGet,
-    price,
-    pointsGained,
-    totalPossiblePoints,
-  });
   return (
     <div className="space-y-4">
       {/* Points progress section */}

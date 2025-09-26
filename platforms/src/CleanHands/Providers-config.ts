@@ -1,5 +1,6 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { CleanHandsProvider } from "./Providers/index.js";
+import { requestSBT } from "../HumanID/shared/utils.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/humanTechIcon.svg",
@@ -20,7 +21,18 @@ export const PlatformDetails: PlatformSpec = {
           actions: [
             {
               label: "Verify Clean Hands",
-              href: "https://silksecure.net/holonym/diff-wallet/clean-hands",
+              async onClick({ address, signMessageAsync, sendTransactionAsync, switchChainAsync }): Promise<void> {
+                await requestSBT({
+                  credentialType: "clean-hands",
+                  // We do not pass hasExistingCredential here because if the user already has the SBT,
+                  // we want them to see the Human ID modal that tells them they already have the SBT.
+                  // hasExistingCredential: () => {},
+                  address,
+                  signMessageAsync,
+                  sendTransactionAsync,
+                  switchChainAsync,
+                });
+              },
             },
           ],
         },

@@ -2,17 +2,19 @@ import { vi, describe, it, expect, beforeEach } from "vitest";
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { CTAButtons } from "../../../components/StampDrawer/components/CTAButtons";
-import { useAccount, useSignMessage, useSendTransaction } from "wagmi";
+import { useAccount, useSignMessage, useSendTransaction, useSwitchChain } from "wagmi";
 
 // Mock wagmi hooks
 vi.mock("wagmi", () => ({
   useAccount: vi.fn(),
   useSignMessage: vi.fn(),
   useSendTransaction: vi.fn(),
+  useSwitchChain: vi.fn(),
 }));
 
 const mockSignMessageAsync = vi.fn();
 const mockSendTransactionAsync = vi.fn();
+const mockSwitchChainAsync = vi.fn();
 const mockAddress = "0x1234567890123456789012345678901234567890";
 
 const defaultProps = {
@@ -33,6 +35,7 @@ describe("CTAButtons", () => {
     (useAccount as any).mockReturnValue({ address: mockAddress });
     (useSignMessage as any).mockReturnValue({ signMessageAsync: mockSignMessageAsync });
     (useSendTransaction as any).mockReturnValue({ sendTransactionAsync: mockSendTransactionAsync });
+    (useSwitchChain as any).mockReturnValue({ switchChainAsync: mockSwitchChainAsync });
   });
 
   it("should render verify button when not verified", () => {
@@ -107,6 +110,7 @@ describe("CTAButtons", () => {
       address: mockAddress,
       signMessageAsync: mockSignMessageAsync,
       sendTransactionAsync: mockSendTransactionAsync,
+      switchChainAsync: mockSwitchChainAsync,
     });
   });
 

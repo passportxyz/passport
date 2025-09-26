@@ -1,5 +1,5 @@
 import React from "react";
-import { useAccount, useSignMessage, useSendTransaction } from "wagmi";
+import { useAccount, useSignMessage, useSendTransaction, useSwitchChain } from "wagmi";
 import { GuideSection } from "../types";
 
 interface PlatformGuideProps {
@@ -11,6 +11,7 @@ export const PlatformGuide = ({ sections, isMobile = false }: PlatformGuideProps
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const { sendTransactionAsync } = useSendTransaction();
+  const { switchChainAsync } = useSwitchChain();
 
   const containerClass = isMobile ? "mt-8" : "h-full overflow-y-auto";
 
@@ -40,7 +41,15 @@ export const PlatformGuide = ({ sections, isMobile = false }: PlatformGuideProps
                                 href={isExternal ? action.href : "#"}
                                 onClick={
                                   !isExternal && address
-                                    ? () => action.onClick({ address, signMessageAsync, sendTransactionAsync })
+                                    ? (e) => {
+                                        e.preventDefault();
+                                        action.onClick({
+                                          address,
+                                          signMessageAsync,
+                                          sendTransactionAsync,
+                                          switchChainAsync,
+                                        });
+                                      }
                                     : undefined
                                 }
                                 className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-black hover:bg-gray-50 transition-colors"
