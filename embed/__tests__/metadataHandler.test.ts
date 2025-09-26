@@ -87,6 +87,35 @@ describe("GET /embed/stamps/metadata", () => {
     );
   });
 
+  it("should filter out platforms with 0 displayWeight", async () => {
+    // Mock the axios GET request with all weights set to 0
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        BinanceBABT: 0,
+        HolonymPhone: 0,
+        Google: 0,
+        // Add more providers with 0 weights
+        Discord: 0,
+        Github: 0,
+        Linkedin: 0,
+      },
+    });
+
+    const response = await request(app)
+      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    // With all weights set to 0, all platforms should be filtered out
+    // So we should have pages but no platforms
+    response.body.forEach((page: any) => {
+      expect(page.platforms).toHaveLength(0);
+    });
+  });
+
   describe("unexpected errors", () => {
     it("should handle errors from the embedWeightsUrl API correctly", async () => {
       mockedAxios.get.mockImplementationOnce(() => {
