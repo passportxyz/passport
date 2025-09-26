@@ -1,8 +1,11 @@
 import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
 import { Platform } from "../utils/platform.js";
-import { AMAZON_GROUP, UBER_GROUP } from "./types.js";
-import { Blueprint, Gmail, Proof } from "@zk-email/sdk";
+import { AMAZON_GROUP, ProviderGroup, UBER_GROUP } from "./types.js";
+import { shouldContinueFetchingEmails } from "./utils.js";
+import { Blueprint, Gmail, Proof, RawEmailResponse, FetchEmailOptions } from "@zk-email/sdk";
+import { buildSubjectQuery } from "./utils/queryBuilder.js";
+import { AMAZON_SUBJECT_KEYWORDS, UBER_SUBJECT_KEYWORDS } from "./keywords.js";
 
 export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
@@ -49,58 +52,103 @@ export class ZKEmailPlatform extends Platform {
     };
   }
 
-  private async fetchAndProveEmails(gmail: Gmail, blueprints: Blueprint[]): Promise<string[]> {
+  private async processEmailBatch(
+    emails: RawEmailResponse[],
+    blueprints: Blueprint[],
+    processedProofs: string[]
+  ): Promise<void> {
+    const filteredEmails = emails.filter((email) =>
+      blueprints.some((blueprint) => email.decodedContents.includes(blueprint.props.senderDomain))
+    );
+
+    const proofPromises = filteredEmails.map(async (rawEmail) => {
+      try {
+        const blueprint = blueprints.find((blueprint) =>
+          rawEmail.decodedContents.includes(blueprint.props.senderDomain)
+        );
+        if (!blueprint) {
+          return undefined;
+        }
+        await blueprint.validateEmail(rawEmail.decodedContents);
+        const proof = await blueprint.createProver().generateProof(rawEmail.decodedContents);
+        return proof;
+      } catch {
+        // Silently skip failed proof generations
+        return undefined;
+      }
+    });
+
+    const proofs = await Promise.all(proofPromises);
+    const validProofs = proofs.filter((p) => p !== undefined).map((p: Proof) => p.packProof());
+
+    processedProofs.push(...validProofs);
+  }
+
+  private async fetchAndProveEmails(
+    gmail: Gmail,
+    blueprints: Blueprint[],
+    group: "amazon" | "uber"
+  ): Promise<string[]> {
     try {
       // Add null check for blueprints
       if (!blueprints || blueprints.length === 0) {
         return [];
       }
 
-      const emailResponses = await gmail.fetchEmails(blueprints);
+      // Build subject query based on the group
+      const subjectKeywords = group === "amazon" ? AMAZON_SUBJECT_KEYWORDS : UBER_SUBJECT_KEYWORDS;
+      const subjectQuery = buildSubjectQuery(subjectKeywords);
+      const fetchOptions: FetchEmailOptions = subjectQuery ? { OR: subjectQuery } : {};
+
+      // Fetch initial batch of emails with subject filtering
+      const initialEmails = await gmail.fetchEmails(blueprints, fetchOptions);
 
       // Add null check and ensure emailResponses is an array
-      if (!emailResponses || !Array.isArray(emailResponses)) {
+      if (!initialEmails || !Array.isArray(initialEmails)) {
         return [];
       }
 
-      // Safely fetch additional emails
-      try {
-        let moreEmails = await gmail.fetchMore();
-        while (moreEmails && Array.isArray(moreEmails) && moreEmails.length > 0) {
-          emailResponses.push(...moreEmails);
-          moreEmails = await gmail.fetchMore();
-        }
-      } catch {
-        // Continue with the emails we have if fetchMore fails
-      }
+      // Array to collect all processed proofs
+      const allProofs: string[] = [];
 
-      const filteredEmails = emailResponses.filter((email) =>
-        blueprints.some((blueprint) => email.decodedContents.includes(blueprint.props.senderDomain))
-      );
+      // Start processing the initial batch immediately
+      const initialProcessingPromise = this.processEmailBatch(initialEmails, blueprints, allProofs);
 
-      const proofs = await Promise.all(
-        filteredEmails.map(async (rawEmail) => {
-          try {
-            const blueprint = blueprints.find((blueprint) =>
-              rawEmail.decodedContents.includes(blueprint.props.senderDomain)
-            );
-            if (!blueprint) {
-              return undefined;
-            }
-            await blueprint.validateEmail(rawEmail.decodedContents);
-            const proof = await blueprint.createProver().generateProof(rawEmail.decodedContents);
-            return proof;
-          } catch {
-            // Silently skip failed proof generations
-            return undefined;
-          }
-        })
-      );
+      // Concurrently fetch and process additional emails
+      const additionalProcessingPromise = this.fetchAndProcessAdditionalEmails(gmail, blueprints, allProofs, group);
 
-      return proofs.filter((p) => p !== undefined).map((p: Proof) => p.packProof());
+      // Wait for both initial processing and additional fetching to complete
+      await Promise.all([initialProcessingPromise, additionalProcessingPromise]);
+
+      return allProofs;
     } catch {
       // Return empty array if entire operation fails
       return [];
+    }
+  }
+
+  private async fetchAndProcessAdditionalEmails(
+    gmail: Gmail,
+    blueprints: Blueprint[],
+    allProofs: string[],
+    group: ProviderGroup
+  ): Promise<void> {
+    try {
+      let moreEmails = await gmail.fetchMore();
+      const processingPromises: Promise<void>[] = [];
+
+      while (shouldContinueFetchingEmails(moreEmails, allProofs.length, group)) {
+        // Start processing this batch while fetching the next one
+        processingPromises.push(this.processEmailBatch(moreEmails, blueprints, allProofs));
+
+        // Fetch next batch
+        moreEmails = await gmail.fetchMore();
+      }
+
+      // Wait for all processing to complete
+      await Promise.all(processingPromises);
+    } catch {
+      // Continue with the emails we have if fetchMore fails
     }
   }
 
@@ -125,13 +173,13 @@ export class ZKEmailPlatform extends Platform {
       });
     }
 
-    const sdk = initZkEmailSdk({ logging: { enabled: true, level: "debug" } });
+    const sdk = initZkEmailSdk();
 
     // Process Amazon emails with graceful error handling
     try {
       const amazonGroup = await sdk.getBlueprintGroupById(AMAZON_GROUP);
       const amazonBlueprints = await amazonGroup.fetchBlueptrints();
-      this.amazonProofs = await this.fetchAndProveEmails(gmail, amazonBlueprints);
+      this.amazonProofs = await this.fetchAndProveEmails(gmail, amazonBlueprints, "amazon");
     } catch {
       // Silently fail and continue with empty Amazon proofs
       this.amazonProofs = [];
@@ -141,7 +189,7 @@ export class ZKEmailPlatform extends Platform {
     try {
       const uberGroup = await sdk.getBlueprintGroupById(UBER_GROUP);
       const uberBlueprints = await uberGroup.fetchBlueptrints();
-      this.uberProofs = await this.fetchAndProveEmails(gmail, uberBlueprints);
+      this.uberProofs = await this.fetchAndProveEmails(gmail, uberBlueprints, "uber");
     } catch {
       // Silently fail and continue with empty Uber proofs
       this.uberProofs = [];

@@ -41,8 +41,8 @@ if (configErrors.length > 0) {
 // create the app and run on port
 export const app = express();
 
-// parse JSON post bodies
-app.use(express.json());
+// parse JSON post bodies (increase limit to accommodate larger payloads)
+app.use(express.json({ limit: "4mb" }));
 
 // set cors to accept calls from anywhere
 app.use(cors());

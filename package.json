@@ -49,6 +49,7 @@
     "test:iam": "yarn workspace @gitcoin/passport-iam test",
     "test:app": "yarn workspace @gitcoin/passport-app test",
     "test:identity": "yarn workspace @gitcoin/passport-identity test",
+    "test:platforms": "yarn workspace @gitcoin/passport-platforms test",
     "prettier": "lerna run prettier",
     "build": "yarn build:platforms && yarn build:identity && yarn build:database-client && yarn build:iam && yarn build:embed && yarn build:app && yarn build:embed-popup && yarn build:infra-scripts",
     "build:database-client": "yarn workspace @gitcoin/passport-database-client build",
