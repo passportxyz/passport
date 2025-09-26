@@ -173,7 +173,7 @@ export class ZKEmailPlatform extends Platform {
       });
     }
 
-    const sdk = initZkEmailSdk({ logging: { enabled: true, level: "debug" } });
+    const sdk = initZkEmailSdk();
 
     // Process Amazon emails with graceful error handling
     try {
