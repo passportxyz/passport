@@ -47,7 +47,7 @@ export abstract class BaseHumanIDPlatform extends Platform {
     throw new Error("Platform must define either sbtFetcher or attestationFetcher");
   }
 
-  private async hasExistingCredential(address: string): Promise<boolean> {
+  async hasExistingCredential(address: string): Promise<boolean> {
     const rpcUrl = process.env.NEXT_PUBLIC_PASSPORT_OP_RPC_URL;
     if (!rpcUrl) {
       console.warn("Optimism RPC URL not configured for frontend credential check");
@@ -67,7 +67,7 @@ export abstract class BaseHumanIDPlatform extends Platform {
 
     return requestSBT({
       credentialType: this.credentialType,
-      hasExistingCredential: this.hasExistingCredential,
+      hasExistingCredential: this.hasExistingCredential.bind(this),
       address: appContext.address as `0x${string}`,
       signMessageAsync: appContext.signMessageAsync,
       sendTransactionAsync: appContext.sendTransactionAsync,
