@@ -34,6 +34,7 @@ const getMockPayload = (proofs: unknown, proofType: "amazon" | "uber"): RequestP
 
 const mockUnpackProof = jest.fn();
 const mockProofVerify = jest.fn();
+const mockGetProofData = jest.fn();
 
 const mockSdk = {
   unPackProof: mockUnpackProof,
@@ -41,19 +42,37 @@ const mockSdk = {
 
 (zkEmailSdk.initZkEmailSdk as jest.Mock).mockReturnValue(mockSdk);
 
+// Helper function to create mock proof with subject
+const createMockProofWithSubject = (subject: string, verifyResult: boolean = true): object => ({
+  verify: jest.fn().mockResolvedValue(verifyResult),
+  getProofData: jest.fn().mockReturnValue({
+    publicData: {
+      subject: [subject],
+    },
+  }),
+});
+
 describe("ZKEmail Providers", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset the mock implementations to a default state before each test
-    mockUnpackProof.mockImplementation(async (_proof) => ({
-      verify: mockProofVerify.mockResolvedValue(true),
-    }));
+    mockUnpackProof.mockImplementation(async (_proof) => createMockProofWithSubject("Your order confirmation", true));
     mockProofVerify.mockResolvedValue(true);
+    mockGetProofData.mockReturnValue({
+      publicData: {
+        subject: ["Your order confirmation"],
+      },
+    });
   });
 
   describe("AmazonCasualPurchaserProvider", () => {
     it("should verify successfully with enough valid proofs", async () => {
       const provider = new AmazonCasualPurchaserProvider();
+
+      // Mock proofs with Amazon-specific subjects
+      mockUnpackProof.mockImplementation(async (_proof) =>
+        createMockProofWithSubject("Your Amazon order confirmation", true)
+      );
 
       const proofs: string[] = [];
       for (let i = 0; i < provider.getThreshold(); i++) {
@@ -72,7 +91,10 @@ describe("ZKEmail Providers", () => {
     });
 
     it("should fail verification if proof count is below threshold", async () => {
-      mockUnpackProof.mockResolvedValue({ verify: jest.fn().mockResolvedValue(false) });
+      // Mock proofs that fail verification but have valid Amazon subjects
+      mockUnpackProof.mockImplementation(async (_proof) =>
+        createMockProofWithSubject("Your Amazon order confirmation", false)
+      );
       const provider = new AmazonCasualPurchaserProvider();
       const payload = getMockPayload(["proof1"], "amazon");
       const result = await provider.verify(payload);
@@ -98,8 +120,16 @@ describe("ZKEmail Providers", () => {
     });
 
     it("should handle errors during proof verification", async () => {
-      mockProofVerify.mockRejectedValue(new Error("Verification failed"));
-      mockUnpackProof.mockResolvedValue({ verify: mockProofVerify });
+      // Mock proofs with valid Amazon subjects but failing verification
+      const mockVerifyFn = jest.fn().mockRejectedValue(new Error("Verification failed"));
+      mockUnpackProof.mockImplementation(async (_proof) => ({
+        verify: mockVerifyFn,
+        getProofData: jest.fn().mockReturnValue({
+          publicData: {
+            subject: ["Your Amazon order confirmation"],
+          },
+        }),
+      }));
 
       const provider = new AmazonCasualPurchaserProvider();
       const payload = getMockPayload(["proof1"], "amazon");
@@ -117,11 +147,31 @@ describe("ZKEmail Providers", () => {
       expect(result.valid).toBe(false);
       expect(result.errors).toContain("Failed to verify email: Unpack failed");
     });
+
+    it("should fail verification when proofs don't contain valid Amazon subjects", async () => {
+      // Mock proofs with non-Amazon subjects (should be filtered out)
+      mockUnpackProof.mockImplementation(async (_proof) =>
+        createMockProofWithSubject("Random newsletter subject", true)
+      );
+
+      const provider = new AmazonCasualPurchaserProvider();
+      const payload = getMockPayload(["proof1", "proof2", "proof3"], "amazon");
+      const result = await provider.verify(payload);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain("No valid amazon proofs found");
+    });
   });
 
   describe("UberOccasionalRiderProvider", () => {
     it("should verify successfully with enough valid proofs", async () => {
       const provider = new UberOccasionalRiderProvider();
+
+      // Mock proofs with Uber-specific subjects
+      mockUnpackProof.mockImplementation(async (_proof) =>
+        createMockProofWithSubject("Your trip receipt from Uber", true)
+      );
+
       const payload = getMockPayload(["proof1", "proof2", "proof3"], "uber");
       const result = await provider.verify(payload);
 
@@ -139,6 +189,20 @@ describe("ZKEmail Providers", () => {
       const result = await provider.verify(payload);
       expect(result.valid).toBe(false);
       expect(result.errors).toContain("No uber proofs provided in payload");
+    });
+
+    it("should fail verification when proofs don't contain valid Uber subjects", async () => {
+      // Mock proofs with non-Uber subjects (should be filtered out)
+      mockUnpackProof.mockImplementation(async (_proof) =>
+        createMockProofWithSubject("Random promotional email", true)
+      );
+
+      const provider = new UberOccasionalRiderProvider();
+      const payload = getMockPayload(["proof1", "proof2", "proof3"], "uber");
+      const result = await provider.verify(payload);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain("No valid uber proofs found");
     });
   });
 
