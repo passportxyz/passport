@@ -3,7 +3,7 @@ import { HumanIdPhoneProvider } from "./Providers/humanIdPhone.js";
 import { requestSBT } from "../HumanID/shared/utils.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/humanTechIcon.svg",
+  icon: "./assets/smartphone.png",
   platform: "HumanIdPhone",
   name: "Phone Verification",
   description: "Verify your phone number",
