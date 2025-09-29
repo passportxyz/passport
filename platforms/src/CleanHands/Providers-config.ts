@@ -3,7 +3,7 @@ import { CleanHandsProvider } from "./Providers/index.js";
 import { requestSBT } from "../HumanID/shared/utils.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/cleanHands.png",
+  icon: "./assets/cleanHands.svg",
   platform: "CleanHands",
   name: "Proof of Clean Hands",
   description: "Prove you're not on sanctions lists",
