@@ -45,5 +45,5 @@ export function buildCombinedQuery(baseQuery: string, subjectKeywords: string[])
   }
 
   // Combine with AND to ensure both conditions are met
-  return `${baseQuery} AND ${subjectQuery}`;
+  return `(${baseQuery}) AND ${subjectQuery}`;
 }

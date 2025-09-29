@@ -4,8 +4,10 @@ import { Platform } from "../utils/platform.js";
 import { AMAZON_GROUP, ProviderGroup, UBER_GROUP } from "./types.js";
 import { shouldContinueFetchingEmails } from "./utils.js";
 import { Blueprint, Gmail, Proof, RawEmailResponse, FetchEmailOptions } from "@zk-email/sdk";
-import { buildSubjectQuery } from "./utils/queryBuilder.js";
+import { buildCombinedQuery } from "./utils/queryBuilder.js";
 import { AMAZON_SUBJECT_KEYWORDS, UBER_SUBJECT_KEYWORDS } from "./keywords.js";
+
+const DKIM_HEADER_REGEX = /^DKIM-Signature:\s*(.+?)(?=\r?\n[^ \t])/gims;
 
 export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
@@ -57,20 +59,22 @@ export class ZKEmailPlatform extends Platform {
     blueprints: Blueprint[],
     processedProofs: string[]
   ): Promise<void> {
-    const filteredEmails = emails.filter((email) =>
-      blueprints.some((blueprint) => email.decodedContents.includes(blueprint.props.senderDomain))
-    );
+    const proofPromises = emails.map(async (email) => {
+      // we need to find the correct blueprint for the email based on the sender domain (present in DKIM header)
+      const blueprint = blueprints.find((blueprint) => {
+        const emailDkimHeader = email.decodedContents.match(DKIM_HEADER_REGEX);
+        const emailSenderDomain = emailDkimHeader?.[0]?.match(/d=([^;]+)/)?.[1] || "";
 
-    const proofPromises = filteredEmails.map(async (rawEmail) => {
+        return emailSenderDomain === blueprint.props.senderDomain;
+      });
+
+      if (!blueprint) {
+        return undefined;
+      }
+
       try {
-        const blueprint = blueprints.find((blueprint) =>
-          rawEmail.decodedContents.includes(blueprint.props.senderDomain)
-        );
-        if (!blueprint) {
-          return undefined;
-        }
-        await blueprint.validateEmail(rawEmail.decodedContents);
-        const proof = await blueprint.createProver().generateProof(rawEmail.decodedContents);
+        await blueprint.validateEmail(email.decodedContents);
+        const proof = await blueprint.createProver().generateProof(email.decodedContents);
         return proof;
       } catch {
         // Silently skip failed proof generations
@@ -97,8 +101,12 @@ export class ZKEmailPlatform extends Platform {
 
       // Build subject query based on the group
       const subjectKeywords = group === "amazon" ? AMAZON_SUBJECT_KEYWORDS : UBER_SUBJECT_KEYWORDS;
-      const subjectQuery = buildSubjectQuery(subjectKeywords);
-      const fetchOptions: FetchEmailOptions = subjectQuery ? { OR: subjectQuery } : {};
+      // const subjectQuery = buildSubjectQuery(subjectKeywords);
+      const subjectQuery = buildCombinedQuery(
+        blueprints.map((blueprint) => blueprint.props.emailQuery).join(" OR "),
+        subjectKeywords
+      );
+      const fetchOptions: FetchEmailOptions = subjectQuery ? { replaceQuery: subjectQuery } : {};
 
       // Fetch initial batch of emails with subject filtering
       const initialEmails = await gmail.fetchEmails(blueprints, fetchOptions);
