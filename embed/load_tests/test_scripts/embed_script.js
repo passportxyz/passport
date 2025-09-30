@@ -29,6 +29,7 @@ export const options = {
 const embedUrl = __ENV.EMBED_URL || "https://embed.staging.passport.gitcoin.co";
 const scorerId = __ENV.SCORER_ID || "24";
 const numAccounts = Number.parseInt(__ENV.NUM_ACCOUNTS) || 100;
+const xApiKey = __ENV.X_API_KEY;
 
 export function setup() {
   // Setup function - can be used to initialize test data
@@ -39,8 +40,13 @@ export function teardown(data) {
   // Teardown function - cleanup if needed
 }
 
-// Load test data
-const addresses = JSON.parse(open(`../test_data/generated_accounts_${numAccounts}.json`));
+// Load test data (supports array of strings or array of { address, private_key })
+const accountsRaw = JSON.parse(open(`../test_data/generated_accounts_${numAccounts}.json`));
+const addresses = Array.isArray(accountsRaw)
+  ? accountsRaw
+      .map((item) => (typeof item === "string" ? item : item && item.address ? item.address : undefined))
+      .filter((addr) => typeof addr === "string" && addr.length > 0)
+  : [];
 
 const userTokens = JSON.parse(open("../generate_test_auth_tokens/user-tokens.json"));
 
@@ -67,6 +73,7 @@ export default function () {
   const requestOptions = {
     headers: {
       "Content-Type": "application/json",
+      ...(xApiKey ? { "X-API-KEY": xApiKey } : {}),
     },
     timeout: "90s",
   };
@@ -75,6 +82,7 @@ export default function () {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
+      ...(xApiKey ? { "X-API-KEY": xApiKey } : {}),
     },
     timeout: "90s",
   };
