@@ -27,44 +27,34 @@ export const PlatformDetails: PlatformSpec = {
   price: "Free",
   guide: [
     {
-      type: "list",
-      title: "Important Considerations",
+      type: "steps",
       items: [
-        "Currently, this feature only works with Gmail. We're working on supporting other email providers.",
-        "You'll need to log in with your Google account to verify your purchases on Uber and Amazon.",
-        "For a faster experience, ZK Email uses remote proving. This means emails confirming Amazon purchases and Uber rides are sent to our servers temporarily and then deleted after the proof is created. We're actively working on local proving to improve privacy.",
+        {
+          title: "Step 1",
+          description: 'Click the "Check Eligibility" button below to kick off the verification process.',
+        },
+        {
+          title: "Step 2",
+          description:
+            "Log in to your Google account, and provide zkEmail the permissions to scan for purchase confirmations and service receipts while keeping your data private.",
+        },
+        {
+          title: "Step 3",
+          description:
+            "zkEmail will scan your inbox, archive, and tagged emails for evidence of your Amazon and Uber activity, and will assign you credentials based on that usage.",
+        },
       ],
     },
     {
-      type: "steps",
-      title: "Troubleshooting Email Verification",
+      type: "list",
+      title: "Important considerations",
       items: [
-        {
-          title: "Contribute to the DKIM Archive",
-          description:
-            "Help strengthen email verification by contributing missing public keys to the public DKIM Archive.",
-          actions: [
-            {
-              label: "Contribute to the DKIM Archive",
-              href: "https://archive.zk.email/contribute",
-            },
-          ],
-        },
-        {
-          title: "Contact Support",
-          description:
-            "If you're still having issues, our support team is here to help. Providing an email example (.eml file) will help us resolve your issue faster.",
-          actions: [
-            {
-              label: "Learn how to download an .eml file",
-              href: "https://docs.zk.email/zk-email-sdk/get-eml-file",
-            },
-            {
-              label: "Contact Support",
-              href: "mailto:support@zk.email",
-            },
-          ],
-        },
+        "We only scan your inbox, archive, and tagged emails. Any deleted emails will not count towards this Stamp",
+        "This Stamp uses zero-knowledge proofs to analyze emails without exposing personal data",
+        "This Stamp only scans for specific purchase confirmation and receipt patterns",
+        "No personal information or email content is stored or shared",
+        "If you have trouble proving your emails, you can contribute to the public archive of dkim keys at archive.zk.email/contribute",
+        "For additional support, contact the team at support@zk.email",
       ],
     },
   ],

@@ -19,37 +19,8 @@ export class ZKEmailPlatform extends Platform {
 
   constructor(options: PlatformOptions = {}) {
     super();
+    // No banner needed - all guidance is now in the structured guide
     this.clientId = options.clientId as string;
-    this.banner = {
-      heading: "To add the ZKEmail Stamp to your Passport...",
-      content: (
-        <div>
-          <p>You need to login with Google and prove your Uber trips and/or Amazon purchases.</p>
-          <p>Click "Verify" below to start the verification process. Please be patient as this can take some time.</p>
-          <br />
-          <p>
-            If you have some trouble proving your emails, you can contribute to our public archive of dkim keys{" "}
-            <a
-              style={{ color: "#4abeff" }}
-              href="https://archive.zk.email/contribute"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              here
-            </a>{" "}
-            or contact us at{" "}
-            <a style={{ color: "#4abeff" }} href="mailto:support@zk.email" target="_blank" rel="noopener noreferrer">
-              support@zk.email
-            </a>
-            .
-          </p>
-        </div>
-      ),
-      // cta: {
-      //   label: "Learn more",
-      //   url: "",
-      // },
-    };
   }
 
   private async processEmailBatch(
