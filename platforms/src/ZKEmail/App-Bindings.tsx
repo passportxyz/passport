@@ -59,14 +59,19 @@ export class ZKEmailPlatform extends Platform {
     blueprints: Blueprint[],
     processedProofs: string[]
   ): Promise<void> {
-    const proofPromises = emails.map(async (email) => {
-      // we need to find the correct blueprint for the email based on the sender domain (present in DKIM header)
-      const blueprint = blueprints.find((blueprint) => {
-        const emailDkimHeader = email.decodedContents.match(DKIM_HEADER_REGEX);
-        const emailSenderDomain = emailDkimHeader?.[0]?.match(/d=([^;]+)/)?.[1] || "";
+    // Extract DKIM sender domain once per email (outside blueprint loop)
+    const emailsWithDomain = emails.map((email) => {
+      const emailDkimHeader = email.decodedContents.match(DKIM_HEADER_REGEX);
+      const senderDomain = emailDkimHeader?.[0]?.match(/d=([^;]+)/)?.[1] || "";
+      return { email, senderDomain };
+    });
 
-        return emailSenderDomain === blueprint.props.senderDomain;
-      });
+    // Build blueprint lookup map for O(1) access by sender domain
+    const blueprintMap = new Map(blueprints.map((bp) => [bp.props.senderDomain, bp]));
+
+    // Process emails using pre-extracted sender domains
+    const proofPromises = emailsWithDomain.map(async ({ email, senderDomain }) => {
+      const blueprint = blueprintMap.get(senderDomain);
 
       if (!blueprint) {
         return undefined;
