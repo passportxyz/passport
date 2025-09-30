@@ -188,25 +188,28 @@ export class ZKEmailPlatform extends Platform {
 
     const sdk = initZkEmailSdk();
 
-    // Process Amazon emails with graceful error handling
-    try {
-      const amazonGroup = await sdk.getBlueprintGroupById(AMAZON_GROUP);
-      const amazonBlueprints = await amazonGroup.fetchBlueptrints();
-      this.amazonProofs = await this.fetchAndProveEmails(gmail, amazonBlueprints, "amazon");
-    } catch {
-      // Silently fail and continue with empty Amazon proofs
-      this.amazonProofs = [];
-    }
+    // Fetch both blueprint groups in parallel
+    const [amazonResult, uberResult] = await Promise.allSettled([
+      sdk.getBlueprintGroupById(AMAZON_GROUP).then((group) => group.fetchBlueptrints()),
+      sdk.getBlueprintGroupById(UBER_GROUP).then((group) => group.fetchBlueptrints()),
+    ]);
 
-    // Process Uber emails with graceful error handling
-    try {
-      const uberGroup = await sdk.getBlueprintGroupById(UBER_GROUP);
-      const uberBlueprints = await uberGroup.fetchBlueptrints();
-      this.uberProofs = await this.fetchAndProveEmails(gmail, uberBlueprints, "uber");
-    } catch {
-      // Silently fail and continue with empty Uber proofs
-      this.uberProofs = [];
-    }
+    // Process both email types in parallel
+    const [amazonProofResult, uberProofResult] = await Promise.allSettled([
+      amazonResult.status === "fulfilled"
+        ? this.fetchAndProveEmails(gmail, amazonResult.value, "amazon")
+        : Promise.resolve([]),
+      uberResult.status === "fulfilled"
+        ? this.fetchAndProveEmails(gmail, uberResult.value, "uber")
+        : Promise.resolve([]),
+    ]);
+
+    // Extract results with graceful fallback
+    const extractProofs = (result: PromiseSettledResult<string[]>): string[] =>
+      result.status === "fulfilled" ? result.value : [];
+
+    this.amazonProofs = extractProofs(amazonProofResult);
+    this.uberProofs = extractProofs(uberProofResult);
   }
 
   async getProviderPayload(_appContext: AppContext): Promise<ProviderPayload> {
