@@ -2,7 +2,7 @@ import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../types.js";
 import { Platform } from "../utils/platform.js";
 import { AMAZON_GROUP, ProviderGroup, UBER_GROUP } from "./types.js";
-import { shouldContinueFetchingEmails } from "./utils.js";
+import { shouldContinueFetchingEmails, normalizeWalletAddress } from "./utils.js";
 import { Blueprint, Gmail, Proof, RawEmailResponse, FetchEmailOptions } from "@zk-email/sdk";
 import { buildCombinedQuery } from "./utils/queryBuilder.js";
 import { AMAZON_SUBJECT_KEYWORDS, UBER_SUBJECT_KEYWORDS } from "./keywords.js";
@@ -13,6 +13,7 @@ export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
   path = "ZKEmail";
   clientId: string = null;
+  isEVM = true;
 
   private zkEmailSdk: typeof import("@zk-email/sdk") | null = null;
 
@@ -57,7 +58,8 @@ export class ZKEmailPlatform extends Platform {
   private async processEmailBatch(
     emails: RawEmailResponse[],
     blueprints: Blueprint[],
-    processedProofs: string[]
+    processedProofs: string[],
+    walletAddress: string
   ): Promise<void> {
     // Extract DKIM sender domain once per email (outside blueprint loop)
     const emailsWithDomain = emails.map((email) => {
@@ -79,7 +81,9 @@ export class ZKEmailPlatform extends Platform {
 
       try {
         await blueprint.validateEmail(email.decodedContents);
-        const proof = await blueprint.createProver().generateProof(email.decodedContents);
+        const proof = await blueprint
+          .createProver()
+          .generateProof(email.decodedContents, [{ name: "wallet_address", value: walletAddress }]);
         return proof;
       } catch {
         // Silently skip failed proof generations
@@ -96,7 +100,8 @@ export class ZKEmailPlatform extends Platform {
   private async fetchAndProveEmails(
     gmail: Gmail,
     blueprints: Blueprint[],
-    group: "amazon" | "uber"
+    group: "amazon" | "uber",
+    walletAddress: string
   ): Promise<string[]> {
     try {
       // Add null check for blueprints
@@ -125,10 +130,16 @@ export class ZKEmailPlatform extends Platform {
       const allProofs: string[] = [];
 
       // Start processing the initial batch immediately
-      const initialProcessingPromise = this.processEmailBatch(initialEmails, blueprints, allProofs);
+      const initialProcessingPromise = this.processEmailBatch(initialEmails, blueprints, allProofs, walletAddress);
 
       // Concurrently fetch and process additional emails
-      const additionalProcessingPromise = this.fetchAndProcessAdditionalEmails(gmail, blueprints, allProofs, group);
+      const additionalProcessingPromise = this.fetchAndProcessAdditionalEmails(
+        gmail,
+        blueprints,
+        allProofs,
+        group,
+        walletAddress
+      );
 
       // Wait for both initial processing and additional fetching to complete
       await Promise.all([initialProcessingPromise, additionalProcessingPromise]);
@@ -144,7 +155,8 @@ export class ZKEmailPlatform extends Platform {
     gmail: Gmail,
     blueprints: Blueprint[],
     allProofs: string[],
-    group: ProviderGroup
+    group: ProviderGroup,
+    walletAddress: string
   ): Promise<void> {
     try {
       let moreEmails = await gmail.fetchMore();
@@ -152,7 +164,7 @@ export class ZKEmailPlatform extends Platform {
 
       while (shouldContinueFetchingEmails(moreEmails, allProofs.length, group)) {
         // Start processing this batch while fetching the next one
-        processingPromises.push(this.processEmailBatch(moreEmails, blueprints, allProofs));
+        processingPromises.push(this.processEmailBatch(moreEmails, blueprints, allProofs, walletAddress));
 
         // Fetch next batch
         moreEmails = await gmail.fetchMore();
@@ -173,8 +185,14 @@ export class ZKEmailPlatform extends Platform {
     return this.zkEmailSdk;
   }
 
-  async handleLoginAndProve(): Promise<void> {
+  async handleLoginAndProve(appContext: AppContext): Promise<void> {
     const { initZkEmailSdk, Gmail, LoginWithGoogle } = await this.getZkEmailSdk();
+
+    // Get and validate wallet address
+    if (!appContext.address) {
+      throw new Error("Wallet address is required for ZKEmail verification");
+    }
+    const walletAddress = normalizeWalletAddress(appContext.address);
 
     const loginWithGoogle = new LoginWithGoogle();
 
@@ -192,7 +210,7 @@ export class ZKEmailPlatform extends Platform {
     try {
       const amazonGroup = await sdk.getBlueprintGroupById(AMAZON_GROUP);
       const amazonBlueprints = await amazonGroup.fetchBlueptrints();
-      this.amazonProofs = await this.fetchAndProveEmails(gmail, amazonBlueprints, "amazon");
+      this.amazonProofs = await this.fetchAndProveEmails(gmail, amazonBlueprints, "amazon", walletAddress);
     } catch {
       // Silently fail and continue with empty Amazon proofs
       this.amazonProofs = [];
@@ -202,16 +220,16 @@ export class ZKEmailPlatform extends Platform {
     try {
       const uberGroup = await sdk.getBlueprintGroupById(UBER_GROUP);
       const uberBlueprints = await uberGroup.fetchBlueptrints();
-      this.uberProofs = await this.fetchAndProveEmails(gmail, uberBlueprints, "uber");
+      this.uberProofs = await this.fetchAndProveEmails(gmail, uberBlueprints, "uber", walletAddress);
     } catch {
       // Silently fail and continue with empty Uber proofs
       this.uberProofs = [];
     }
   }
 
-  async getProviderPayload(_appContext: AppContext): Promise<ProviderPayload> {
+  async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     if (this.uberProofs.length === 0 && this.amazonProofs.length === 0) {
-      await this.handleLoginAndProve();
+      await this.handleLoginAndProve(appContext);
     }
 
     return {

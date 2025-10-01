@@ -11,6 +11,7 @@ import {
 import { Proof } from "@zk-email/sdk";
 import { AMAZON_SUBJECT_KEYWORDS, UBER_SUBJECT_KEYWORDS } from "../keywords.js";
 import { subjectContainsKeyword, extractSubjectFromPublicData } from "../utils/subject.js";
+import { normalizeWalletAddress } from "../utils.js";
 
 function getSubjectFromProof(proof: Proof): string | undefined {
   try {
@@ -65,6 +66,15 @@ abstract class ZKEmailBaseProvider implements Provider {
         };
       }
 
+      // Validate wallet address exists
+      if (!payload.address) {
+        return {
+          valid: false,
+          errors: ["No wallet address provided in payload"],
+          record,
+        };
+      }
+
       // Get the appropriate proof type for this provider
       const proofType = this.getProofType();
       const proofsField = proofType === "amazon" ? "amazonProofs" : "uberProofs";
@@ -90,7 +100,31 @@ abstract class ZKEmailBaseProvider implements Provider {
         };
       }
 
-      const unpackedProofs = await Promise.all(proofs.map((p: string) => sdk.unPackProof(p)));
+      // Normalize the requesting wallet once
+      const normalizedRequestWallet = normalizeWalletAddress(payload.address);
+
+      // Unpack proofs and validate wallet binding
+      const unpackedProofs = await Promise.all(
+        proofs.map(async (p: string) => {
+          const proof = await sdk.unPackProof(p);
+
+          // Extract and verify wallet from public data
+          const { externalInputs } = proof.getProofData();
+          const proofWallet = normalizeWalletAddress(externalInputs.wallet_address);
+
+          if (!proofWallet) {
+            throw new Error("Proof missing wallet_address in public data");
+          }
+
+          if (proofWallet !== normalizedRequestWallet) {
+            throw new Error(
+              `Proof not bound to requesting wallet. Expected ${normalizedRequestWallet}, found ${proofWallet}`
+            );
+          }
+
+          return proof;
+        })
+      );
 
       // Filter proofs by subject keywords depending on proof type
       const subjectKeywords = proofType === "amazon" ? AMAZON_SUBJECT_KEYWORDS : UBER_SUBJECT_KEYWORDS;
