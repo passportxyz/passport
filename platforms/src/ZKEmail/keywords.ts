@@ -1,63 +1,6 @@
 // Keyword lists used to heuristically check email subjects for Amazon and Uber
 // Keep these lists concise and high-signal to reduce false positives.
 
-// Split into focused groups for readability and maintenance
-const AMAZON_ORDER_KEYWORDS: string[] = [
-  // English & core
-  "order",
-  "confirmation",
-  // Germanic
-  "bestellung", // de
-  "bestelling", // nl
-  "bestilling", // no
-  "beställning", // sv
-  "ordre", // da/fr
-  // Romance
-  "pedido", // es/pt
-  "orden", // es
-  "commande", // fr
-  "ordine", // it
-  "comanda", // ro
-  "comandă", // ro (diacritics handled)
-  "encomenda", // pt
-  // Slavic
-  "заказ", // ru
-  "zamówienie", // pl
-  "objednávka", // cs
-  "narudžba", // hr/bs
-  "поръчка", // bg
-  "naročilo", // sl
-  // Asian
-  "注文", // ja
-  "订单", // zh-cn
-  "주문", // ko
-  "आदेश", // hi
-  "ऑर्डर", // hi (loan)
-  "pesanan", // id
-  "คำสั่งซื้อ", // th
-  // Other
-  "sipariş", // tr
-  "παραγγελία", // el
-  "הזמנה", // he
-  "طلب", // ar
-  "tilaus", // fi
-  "rendelés", // hu
-  // Useful purchase synonyms (high-signal)
-  "purchase",
-  "compra",
-  "achat",
-  "kauf",
-  "acquisto",
-  "aankoop",
-  "receipt",
-  "recibo",
-  "reçu",
-  "beleg",
-  "quittung",
-  "ricevuta",
-  "bon",
-];
-
 const AMAZON_SHIPPING_KEYWORDS: string[] = [
   // Delivered
   "delivered",
@@ -93,7 +36,7 @@ const AMAZON_SHIPPING_KEYWORDS: string[] = [
   "bestellt",
 ];
 
-export const AMAZON_SUBJECT_KEYWORDS: string[] = [...AMAZON_ORDER_KEYWORDS, ...AMAZON_SHIPPING_KEYWORDS];
+export const AMAZON_SUBJECT_KEYWORDS: string[] = [...AMAZON_SHIPPING_KEYWORDS];
 
 const UBER_RIDE_KEYWORDS: string[] = [
   // English
