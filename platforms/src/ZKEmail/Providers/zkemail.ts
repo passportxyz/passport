@@ -1,4 +1,4 @@
-import { RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
+import { VerifiedPayload } from "@gitcoin/passport-types";
 import { type Provider, type ProviderOptions } from "../../types.js";
 import {
   AMAZON_CASUAL_PURCHASER_THRESHOLD,
@@ -7,6 +7,8 @@ import {
   UBER_OCCASIONAL_RIDER_THRESHOLD,
   UBER_REGULAR_RIDER_THRESHOLD,
   UBER_POWER_USER_THRESHOLD,
+  PROOF_FIELD_MAP,
+  ZKEmailRequestPayload,
 } from "../types.js";
 import { Proof } from "@zk-email/sdk";
 import { AMAZON_SUBJECT_KEYWORDS, UBER_SUBJECT_KEYWORDS } from "../keywords.js";
@@ -52,7 +54,7 @@ abstract class ZKEmailBaseProvider implements Provider {
     this._options = { ...options };
   }
 
-  async verify(payload: RequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: ZKEmailRequestPayload): Promise<VerifiedPayload> {
     const errors: string[] = [];
     const record: { data?: string } | undefined = undefined;
 
@@ -77,7 +79,7 @@ abstract class ZKEmailBaseProvider implements Provider {
 
       // Get the appropriate proof type for this provider
       const proofType = this.getProofType();
-      const proofsField = proofType === "amazon" ? "amazonProofs" : "uberProofs";
+      const proofsField = PROOF_FIELD_MAP[proofType];
 
       if (!payload.proofs[proofsField]) {
         return {
@@ -90,7 +92,7 @@ abstract class ZKEmailBaseProvider implements Provider {
       const { initZkEmailSdk } = await import("@zk-email/sdk");
       const sdk = initZkEmailSdk();
 
-      const proofs = payload.proofs[proofsField] as unknown as string[];
+      const proofs = payload.proofs[proofsField];
 
       if (!Array.isArray(proofs) || proofs.length === 0) {
         return {

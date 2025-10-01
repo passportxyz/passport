@@ -12,13 +12,14 @@ const DKIM_HEADER_REGEX = /^DKIM-Signature:\s*(.+?)(?=\r?\n[^ \t])/gims;
 export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
   path = "ZKEmail";
-  clientId: string = null;
+  clientId: string | null = null;
   isEVM = true;
 
   private zkEmailSdk: typeof import("@zk-email/sdk") | null = null;
 
   private uberProofs: string[] = [];
   private amazonProofs: string[] = [];
+  private authPromise: Promise<void> | null = null;
 
   constructor(options: PlatformOptions = {}) {
     super();
@@ -58,9 +59,8 @@ export class ZKEmailPlatform extends Platform {
   private async processEmailBatch(
     emails: RawEmailResponse[],
     blueprints: Blueprint[],
-    processedProofs: string[],
     walletAddress: string
-  ): Promise<void> {
+  ): Promise<string[]> {
     // Extract DKIM sender domain once per email (outside blueprint loop)
     const emailsWithDomain = emails.map((email) => {
       const emailDkimHeader = email.decodedContents.match(DKIM_HEADER_REGEX);
@@ -92,9 +92,7 @@ export class ZKEmailPlatform extends Platform {
     });
 
     const proofs = await Promise.all(proofPromises);
-    const validProofs = proofs.filter((p) => p !== undefined).map((p: Proof) => p.packProof());
-
-    processedProofs.push(...validProofs);
+    return proofs.filter((p) => p !== undefined).map((p: Proof) => p.packProof());
   }
 
   private async fetchAndProveEmails(
@@ -126,25 +124,16 @@ export class ZKEmailPlatform extends Platform {
         return [];
       }
 
-      // Array to collect all processed proofs
-      const allProofs: string[] = [];
-
       // Start processing the initial batch immediately
-      const initialProcessingPromise = this.processEmailBatch(initialEmails, blueprints, allProofs, walletAddress);
+      const initialProofsPromise = this.processEmailBatch(initialEmails, blueprints, walletAddress);
 
       // Concurrently fetch and process additional emails
-      const additionalProcessingPromise = this.fetchAndProcessAdditionalEmails(
-        gmail,
-        blueprints,
-        allProofs,
-        group,
-        walletAddress
-      );
+      const additionalProofsPromise = this.fetchAndProcessAdditionalEmails(gmail, blueprints, group, walletAddress);
 
-      // Wait for both initial processing and additional fetching to complete
-      await Promise.all([initialProcessingPromise, additionalProcessingPromise]);
+      // Wait for both to complete and combine results
+      const [initialProofs, additionalProofs] = await Promise.all([initialProofsPromise, additionalProofsPromise]);
 
-      return allProofs;
+      return [...initialProofs, ...additionalProofs];
     } catch {
       // Return empty array if entire operation fails
       return [];
@@ -154,26 +143,32 @@ export class ZKEmailPlatform extends Platform {
   private async fetchAndProcessAdditionalEmails(
     gmail: Gmail,
     blueprints: Blueprint[],
-    allProofs: string[],
     group: ProviderGroup,
     walletAddress: string
-  ): Promise<void> {
+  ): Promise<string[]> {
     try {
       let moreEmails = await gmail.fetchMore();
-      const processingPromises: Promise<void>[] = [];
+      const processingPromises: Promise<string[]>[] = [];
+      let currentProofCount = 0;
 
-      while (shouldContinueFetchingEmails(moreEmails, allProofs.length, group)) {
+      while (shouldContinueFetchingEmails(moreEmails, currentProofCount, group)) {
         // Start processing this batch while fetching the next one
-        processingPromises.push(this.processEmailBatch(moreEmails, blueprints, allProofs, walletAddress));
+        const batchPromise = this.processEmailBatch(moreEmails, blueprints, walletAddress);
+        processingPromises.push(batchPromise);
+
+        // Update count based on current batch size for early exit
+        currentProofCount += moreEmails.length;
 
         // Fetch next batch
         moreEmails = await gmail.fetchMore();
       }
 
-      // Wait for all processing to complete
-      await Promise.all(processingPromises);
+      // Wait for all processing to complete and flatten results
+      const allBatchProofs = await Promise.all(processingPromises);
+      return allBatchProofs.flat();
     } catch {
-      // Continue with the emails we have if fetchMore fails
+      // Return empty array if fetchMore fails
+      return [];
     }
   }
 
@@ -229,7 +224,10 @@ export class ZKEmailPlatform extends Platform {
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     if (this.uberProofs.length === 0 && this.amazonProofs.length === 0) {
-      await this.handleLoginAndProve(appContext);
+      if (!this.authPromise) {
+        this.authPromise = this.handleLoginAndProve(appContext);
+      }
+      await this.authPromise;
     }
 
     return {
