@@ -23,20 +23,7 @@ export const STAMP_PAGES: StampPage[] = [
       {
         platformId: "Binance",
         name: "Binance",
-        description: `<div>
-            If you do not have the Binance Account Bound Token (BABT), obtain it
-            <a
-              href="https://www.binance.com/en/babt"
-              style="color: inherit; font-weight: 700; text-decoration: none;"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              here
-            </a>
-            by verifying your identity and logging into your Binance account.
-            Then return here and click Verify to claim this Stamp.
-          </div>
-          `,
+        description: "Claim your Binance Account Bound Token (BABT) using your Passport wallet.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-binance-stamp",
       },
@@ -44,14 +31,14 @@ export const STAMP_PAGES: StampPage[] = [
         platformId: "Biometrics",
         name: "Biometrics",
         description:
-          "<div>Verify your uniqueness using facial biometrics, powered by human.tech. This enables secure facial verification including 3D liveness and duplicate checks.</div>",
+          "Complete biometric verification using your phone or computer camera for 3D facial liveness detection.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-biometrics-stamp",
       },
       {
         platformId: "Coinbase",
         name: "Coinbase",
-        description: "<div>Confirm Your Coinbase Verified ID (Coming Soon)</div>",
+        description: "Create your Coinbase onchain and ID verification using your Passport wallet. (Coming Soon)",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-coinbase-stamp",
         requiresSignature: true,
@@ -61,23 +48,24 @@ export const STAMP_PAGES: StampPage[] = [
       {
         platformId: "HumanIdKyc",
         name: "Government ID",
-        description: "<div>Verify your government-issued identification document for identity verification.</div>",
+        description: "Verify your government-issued identification document.",
         documentationLink:
-          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-holonym-stamp",
-      },
-      {
-        platformId: "HumanIdPhone",
-        name: "Phone Verification",
-        description: "<div>Verify your phone number for additional identity verification.</div>",
-        documentationLink:
-          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-holonym-stamp",
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-government-id-stamp",
       },
       {
         platformId: "CleanHands",
         name: "Proof of Clean Hands",
-        description: "<div>Verify your identity through proof of clean hands verification.</div>",
+        description:
+          "Verify government ID, liveness check, and that you aren’t on a sanctions list or politically exposed persons list.",
         documentationLink:
-          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-holonym-stamp",
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-proof-of-clean-hands-stamp",
+      },
+      {
+        platformId: "HumanIdPhone",
+        name: "Phone Verification",
+        description: "Complete phone verification.",
+        documentationLink:
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-phone-verification-stamp",
       },
     ],
   },
@@ -87,8 +75,7 @@ export const STAMP_PAGES: StampPage[] = [
       {
         platformId: "Discord",
         name: "Discord",
-        description:
-          "<div>Connect your Discord account to Passport to identity and reputation in Web3 communities.</div>",
+        description: "Verify that you own a Discord account.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-discord-account-to-passport",
         requiresSignature: true,
@@ -98,7 +85,7 @@ export const STAMP_PAGES: StampPage[] = [
       {
         platformId: "Github",
         name: "GitHub",
-        description: "<div>Connect to GitHub to verify your activity based on days with active commits.</div>",
+        description: "Verify your GitHub commit activity.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-github-account-to-passport",
         requiresSignature: true,
@@ -108,7 +95,7 @@ export const STAMP_PAGES: StampPage[] = [
       {
         platformId: "Google",
         name: "Google",
-        description: "<div>Connect to Google to verify your email address.</div>",
+        description: "Verify that you own a Google account.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-google-account-to-passport",
         requiresSignature: true,
@@ -118,8 +105,7 @@ export const STAMP_PAGES: StampPage[] = [
       {
         platformId: "Linkedin",
         name: "LinkedIn",
-        description:
-          "<div>This stamp confirms that your LinkedIn account is verified and includes a valid, verified email address.</div>",
+        description: "Verify that you own a LinkedIn account.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-linkedin-stamp",
         requiresSignature: true,
