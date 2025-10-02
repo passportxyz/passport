@@ -1,11 +1,28 @@
 import { isAddress } from "ethers";
 
 // ---- Types
-import { PROVIDER_ID, ValidResponseBody, SignatureType, VerifiableCredential } from "@gitcoin/passport-types";
+import {
+  PROVIDER_ID,
+  ValidResponseBody,
+  SignatureType,
+  VerifiableCredential,
+  CredentialResponseBody,
+} from "@gitcoin/passport-types";
 
 import { platforms } from "@gitcoin/passport-platforms";
 import { verifyProvidersAndIssueCredentials } from "./verification.js";
 import { ApiError } from "./serverUtils/apiError.js";
+
+export type CredentialError = {
+  provider: string;
+  error: string;
+  code?: number;
+};
+
+export type AutoVerificationResult = {
+  credentials: VerifiableCredential[];
+  credentialErrors: CredentialError[];
+};
 
 export type AutoVerificationFields = {
   address: string;
@@ -50,7 +67,7 @@ export const autoVerifyStamps = async ({
   address,
   scorerId,
   credentialIds,
-}: AutoVerificationFields): Promise<VerifiableCredential[]> => {
+}: AutoVerificationFields): Promise<AutoVerificationResult> => {
   const evmProvidersByPlatform = getEvmProvidersByPlatform({
     scorerId,
     onlyCredentialIds: credentialIds,
@@ -70,12 +87,30 @@ export const autoVerifyStamps = async ({
 
   const results = await verifyProvidersAndIssueCredentials(evmProvidersByPlatform, address, credentialsInfo);
 
-  const ret = results
-    .flat()
-    .filter(
-      (credentialResponse): credentialResponse is ValidResponseBody =>
-        (credentialResponse as ValidResponseBody).credential !== undefined
-    )
-    .map(({ credential }) => credential);
-  return ret;
+  const credentials: VerifiableCredential[] = [];
+  const credentialErrors: CredentialError[] = [];
+
+  // Flatten the provider list to match the results structure
+  const flatProviderList = evmProvidersByPlatform.flat();
+
+  // Process each result and separate successful credentials from errors
+  results.forEach((credentialResponse, index) => {
+    if ("credential" in credentialResponse && credentialResponse.credential) {
+      credentials.push(credentialResponse.credential);
+    } else if ("error" in credentialResponse && credentialResponse.error) {
+      // Map index directly to the flattened provider list
+      const providerName = flatProviderList[index] || "unknown";
+
+      credentialErrors.push({
+        provider: providerName,
+        error: credentialResponse.error,
+        code: credentialResponse.code,
+      });
+    }
+  });
+
+  return {
+    credentials,
+    credentialErrors,
+  };
 };

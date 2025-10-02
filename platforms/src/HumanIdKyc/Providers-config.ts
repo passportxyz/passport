@@ -1,5 +1,6 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { HumanIdKycProvider } from "./Providers/humanIdKyc.js";
+import { requestSBT } from "../HumanID/shared/utils.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/humanTechIcon.svg",
@@ -20,7 +21,18 @@ export const PlatformDetails: PlatformSpec = {
           actions: [
             {
               label: "Verify Identity",
-              href: "https://silksecure.net/holonym/diff-wallet/gov-id/select",
+              async onClick({ address, signMessageAsync, sendTransactionAsync, switchChainAsync }): Promise<void> {
+                await requestSBT({
+                  credentialType: "kyc",
+                  // We do not pass hasExistingCredential here because if the user already has the SBT,
+                  // we want them to see the Human ID modal that tells them they already have the SBT.
+                  // hasExistingCredential: () => {},
+                  address,
+                  signMessageAsync,
+                  sendTransactionAsync,
+                  switchChainAsync,
+                });
+              },
             },
           ],
         },

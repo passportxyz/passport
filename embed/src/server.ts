@@ -53,16 +53,17 @@ if (!process.env.SIGN_PROTOCOL_API_KEY) {
 // create the app and run on port
 export const app = express();
 
-// parse JSON post bodies
-app.use(express.json());
-
 // set cors to accept calls from anywhere and expose X-RateLimit-Limit header
+// Register CORS before body parsing so errors (e.g. payload too large) still include headers
 app.use(
   cors({
     origin: "*",
     exposedHeaders: ["X-RateLimit-Limit"],
   })
 );
+
+// parse JSON post bodies (increase limit to accommodate larger payloads)
+app.use(express.json({ limit: "4mb" }));
 
 // Use the rate limiting middleware
 app.use(

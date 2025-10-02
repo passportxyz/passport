@@ -1,6 +1,6 @@
 // ---- Types
 import { STAMP_PAGES, displayNumber } from "./stamps.js";
-import { platforms } from "@gitcoin/passport-platforms";
+import { platforms, Provider } from "@gitcoin/passport-platforms";
 import { serverUtils } from "./utils/identityHelper.js";
 import axios from "axios";
 
@@ -18,10 +18,19 @@ type MetadataResponseBody = {
       weight: string;
     }[];
     displayWeight: string;
+    icon: string;
     requiresSignature?: boolean;
     requiresPopup?: boolean;
   }[];
 }[];
+
+const getIconUrl = (iconPath?: string): string => {
+  if (!iconPath) return "";
+  // Transform relative path to production URL
+  // "./assets/githubStampIcon.svg" -> "https://app.passport.xyz/assets/githubStampIcon.svg"
+  const fileName = iconPath.replace("./assets/", "");
+  return `https://app.passport.xyz/assets/${fileName}`;
+};
 
 export const metadataHandler = createHandler<MetadataRequestBody, MetadataResponseBody>(async (req, res) => {
   const { scorerId } = req.query;
@@ -39,30 +48,37 @@ export const metadataHandler = createHandler<MetadataRequestBody, MetadataRespon
   // for each provider, get the weight from the weights response
   const updatedStampPages = STAMP_PAGES.map((stampPage) => ({
     ...stampPage,
-    platforms: stampPage.platforms.map((platform) => {
-      const platformId = platform.platformId;
-      const platformData = platforms[platformId];
+    platforms: stampPage.platforms
+      .map((platform) => {
+        const platformId = platform.platformId;
+        const platformData = platforms[platformId];
 
-      if (!platformData || !platformData.providers) {
+        if (!platformData || !platformData.providers) {
+          return {
+            ...platform,
+            icon: "",
+            credentials: [],
+            displayWeight: displayNumber(0),
+          };
+        }
+
+        // Get icon URL from platform details
+        const iconUrl = getIconUrl(platformData.PlatformDetails?.icon);
+
+        // Extract provider types
+        const providers: Provider[] = platformData.providers;
+        const credentials = providers.map((provider) => ({
+          id: provider.type,
+          weight: weightsResponseData[provider.type] ? weightsResponseData[provider.type].toString() : "0",
+        }));
         return {
           ...platform,
-          credentials: [],
-          displayWeight: displayNumber(0),
+          icon: iconUrl,
+          credentials,
+          displayWeight: displayNumber(credentials.reduce((acc, credential) => acc + parseFloat(credential.weight), 0)),
         };
-      }
-      // Extract provider types
-      const providers = platformData.providers;
-      const credentials = Object.values(providers).map((provider: { type: string }) => ({
-        id: provider.type,
-        weight: weightsResponseData[provider.type] ? weightsResponseData[provider.type].toString() : "0",
-      }));
-      return {
-        ...platform,
-        credentials,
-        displayWeight: displayNumber(credentials.reduce((acc, credential) => acc + parseFloat(credential.weight), 0)),
-      };
-    }),
+      })
+      .filter((platform) => parseFloat(platform.displayWeight) > 0),
   }));
-
   return void res.json(updatedStampPages);
 });
