@@ -5144,10 +5144,10 @@
     fastfile "0.0.20"
     ffjavascript "^0.3.0"
 
-"@intercom/messenger-js-sdk@^0.0.13":
-  version "0.0.13"
-  resolved "https://registry.yarnpkg.com/@intercom/messenger-js-sdk/-/messenger-js-sdk-0.0.13.tgz#8fb85c42af4ddbab02715061ea57381d1fff45fc"
-  integrity sha512-htSK24+TywrsPy97yuTruAKsBIZIkzPktauO2aJqLmN4XgeepvUOkL13ryV2Y5H3tE3EuJQzJNcsRSXr+cRfkw==
+"@intercom/messenger-js-sdk@^0.0.18":
+  version "0.0.18"
+  resolved "https://registry.yarnpkg.com/@intercom/messenger-js-sdk/-/messenger-js-sdk-0.0.18.tgz#622fe46da7779bd496306c3e0b3ffae580cd48e2"
+  integrity sha512-OQbhnNh26cdI0ddIVh67JOGnSTFAHrbKF5atXuOeWpDF2Ups3O7Do1Oz42BrvQA/o0AZF+1Wqaxtc3kq70wc6w==
 
 "@ioredis/commands@^1.1.1":
   version "1.2.0"
@@ -10916,7 +10916,7 @@
   resolved "https://registry.yarnpkg.com/@zk-email/relayer-utils/-/relayer-utils-0.4.67-alpha.1.tgz#50749b36a16f5264894533f6a37db9032a4c4617"
   integrity sha512-e3vY9/rLMTiIaw5Rf4QEhbo2It/DeAep166eKAhyyyuKDKN5BeDR7YDYr+2Uz5yUZLPhj57Kkw48E0bvFDuYcQ==
 
-"@zk-email/sdk@^2.0.10":
+"@zk-email/sdk@2.0.10":
   version "2.0.10"
   resolved "https://registry.yarnpkg.com/@zk-email/sdk/-/sdk-2.0.10.tgz#eb7b2615f51abd641dcb0daf2e39076dfd2f1198"
   integrity sha512-cWY6kwyM2+X2WiZirl36K25/qCgPgOdMWydx0nSc7/NBw3CQbAo1kVFrr3CapgwkRX+4yk+viFdP6bFvfGzIvQ==
