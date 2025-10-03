@@ -36,6 +36,20 @@ export const PlatformDetails: PlatformSpec = {
       ],
     },
     {
+      type: "list",
+      title: "Supported Amazon Countries",
+      items: [
+        "🇺🇸 United States",
+        "🇬🇧 United Kingdom",
+        "🇨🇦 Canada",
+        "🇩🇪 Germany",
+        "🇪🇸 Spain",
+        "🇯🇵 Japan",
+        "🇮🇳 India",
+        "Don't see your country? Contact support to request it. Check Unsupported Country or Email Issues below for more information.",
+      ],
+    },
+    {
       type: "steps",
       title: "Troubleshooting Email Verification",
       items: [
@@ -51,17 +65,17 @@ export const PlatformDetails: PlatformSpec = {
           ],
         },
         {
-          title: "Contact Support",
+          title: "Unsupported Country or Email Issues",
           description:
-            "If you're still having issues, our support team is here to help. Providing an email example (.eml file) will help us resolve your issue faster.",
+            "If your Amazon country isn't supported or you're experiencing verification issues, please contact our support team. Providing an email example (.eml file) from your Amazon account will help us add support for your country faster.",
           actions: [
             {
               label: "Learn how to download an .eml file",
               href: "https://docs.zk.email/zk-email-sdk/get-eml-file",
             },
             {
-              label: "Contact Support",
-              href: "mailto:support@zk.email",
+              label: "Request Country Support",
+              href: "mailto:support@zk.email?subject=Amazon Country Support Request&body=Please include an .eml file from your Amazon account.",
             },
           ],
         },

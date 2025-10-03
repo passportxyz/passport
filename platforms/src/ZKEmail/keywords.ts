@@ -1,39 +1,134 @@
 // Keyword lists used to heuristically check email subjects for Amazon and Uber
-// Keep these lists concise and high-signal to reduce false positives.
+// Comprehensive coverage for supported countries and future expansion
 
 const AMAZON_SHIPPING_KEYWORDS: string[] = [
-  // Delivered
+  // English (US, UK, Canada)
   "delivered",
-  "entregado",
-  "entregue",
-  "livré",
-  "consegnato",
-  "geliefert",
-  "доставлено",
-  "配達", // match in 配達済み
-  "送达", // match in 已送达
-  "배송", // match in 배송완료
-  // Shipped/Dispatched
+  "delivery",
   "shipped",
+  "shipping",
+  "dispatch",
+  "dispatched",
+  "transit",
+
+  // Spanish (Spain) / Portuguese
+  "entrega",
+  "entregado",
+  "entregada",
+  "entregue",
   "enviado",
+  "enviada",
+  "envio", // accents removed via normalization
+  "remessa",
+  "despachado",
+
+  // French (Canada)
+  "livraison",
+  "livré",
+  "livree",
   "expédié",
-  "spedito",
+  "expedie",
+
+  // German (Germany) / Dutch
+  "lieferung",
+  "geliefert",
+  "versandt",
   "versendet",
-  "verstuurd",
-  "wysłano",
-  "отправлено",
-  "発送", // match in 発送済み
-  "发货", // match in 已发货
-  // Generic sent
-  "sent",
-  "envoyé",
-  "inviato",
-  "gesandt",
+  "unterwegs",
   "verzonden",
-  "poslano",
+  "geleverd",
+  "bestellt", // common in German order confirmations
+
+  // Nordic / Finnish
+  "leveret",
+  "levert",
+  "levererad",
+  "afsendt",
+  "sendt",
+  "utsand",
+  "toimitettu",
+  "lähetetty",
+  "lahetetty",
+
+  // Italian / Romanian
+  "consegna",
+  "consegnato",
+  "consegnata",
+  "spedito",
+  "spedita",
+  "livrare",
+  "livrat",
+  "expediat",
+
+  // Central & Eastern Europe
+  "dostarczono",
+  "dostarczenie",
+  "wysłano",
+  "wyslano",
+  "doručeno",
+  "doruceno",
+  "odesláno",
+  "odeslano",
+  "dostavljeno",
+  "isporučeno",
+  "isporuceno",
+  "isporuka",
+
+  // Cyrillic (Russian, Ukrainian)
+  "доставлено",
+  "доставка",
+  "отправлено",
+  "впути",
+  "відправлено",
+  "водорозі",
+
+  // Greek / Turkish
+  "παραδόθηκε",
+  "παράδοση",
+  "απεστάλη",
+  "teslim",
   "gönderildi",
-  // Also commonly present in German order confirmations
-  "bestellt",
+  "kargolandı",
+
+  // Arabic / Hebrew
+  "تمالتوصيل",
+  "تسليم",
+  "تمالشحن",
+  "قيدالتوصيل",
+  "סופק",
+  "נשלח",
+
+  // Indic & SE Asia (India support)
+  "वितरण",
+  "वितरित",
+  "डिलीवरी",
+  "भेजागया",
+  "रसतेमें",
+  "ডেলিভারি",
+  "পৌছেগেছে",
+  "পাঠানোহয়েছে",
+  "dikirim",
+  "terkirim",
+  "sedangkirim",
+  "sudhdikirim",
+  "đãngiao",
+  "đanggiao",
+  "đãgửi",
+  "vậnchuyển",
+  "จัดส่งแล้ว",
+  "กำลังจัดส่ง",
+
+  // East Asia (Japan support)
+  "배송완료",
+  "배송중",
+  "발송됨",
+  "配達済み",
+  "配送中",
+  "発送済み",
+  "已送达",
+  "已发货",
+  "配送中",
+  "正在派送",
 ];
 
 export const AMAZON_SUBJECT_KEYWORDS: string[] = [...AMAZON_SHIPPING_KEYWORDS];
