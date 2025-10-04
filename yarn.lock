@@ -10916,10 +10916,10 @@
   resolved "https://registry.yarnpkg.com/@zk-email/relayer-utils/-/relayer-utils-0.4.67-alpha.1.tgz#50749b36a16f5264894533f6a37db9032a4c4617"
   integrity sha512-e3vY9/rLMTiIaw5Rf4QEhbo2It/DeAep166eKAhyyyuKDKN5BeDR7YDYr+2Uz5yUZLPhj57Kkw48E0bvFDuYcQ==
 
-"@zk-email/sdk@2.0.10":
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/@zk-email/sdk/-/sdk-2.0.10.tgz#eb7b2615f51abd641dcb0daf2e39076dfd2f1198"
-  integrity sha512-cWY6kwyM2+X2WiZirl36K25/qCgPgOdMWydx0nSc7/NBw3CQbAo1kVFrr3CapgwkRX+4yk+viFdP6bFvfGzIvQ==
+"@zk-email/sdk@2.0.11":
+  version "2.0.11"
+  resolved "https://registry.yarnpkg.com/@zk-email/sdk/-/sdk-2.0.11.tgz#c6fa1271af13e25503b11b4a4a3a95f5161051e6"
+  integrity sha512-1Hkg8I2fGbrhqjI9LFXQhEFN6jR+zwEiqcaWaym65c7a2GmSut/EIxkE04ubaVvGFC2LwkUUTEkGGd5yxzanlQ==
   dependencies:
     "@azure/msal-browser" "^4.5.1"
     "@mach-34/noir-bignum-paramgen" "^1.1.2"

@@ -16,3 +16,23 @@ export function shouldContinueFetchingEmails(
   const maxProofs = getStopFetchLimit(group);
   return allProofsCount < maxProofs;
 }
+
+/**
+ * Normalizes an Ethereum wallet address to lowercase with 0x prefix
+ * @param address - Wallet address (with or without 0x)
+ * @returns Normalized address (lowercase with 0x)
+ * @throws Error if address is invalid
+ */
+export function normalizeWalletAddress(address: string): string {
+  if (!address) {
+    throw new Error("Wallet address is required");
+  }
+
+  const cleanAddress = address.toLowerCase().replace(/^0x/, "");
+
+  if (!/^[0-9a-f]{40}$/i.test(cleanAddress)) {
+    throw new Error(`Invalid wallet address format: ${address}`);
+  }
+
+  return `0x${cleanAddress}`;
+}

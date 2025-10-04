@@ -16,3 +16,19 @@ export const UBER_STOP_FETCH_LIMIT = 2 * UBER_POWER_USER_THRESHOLD;
 
 export const UBER_GROUP = "86de72c1-bd22-4f56-b120-eaf18e33eeeb";
 export const AMAZON_GROUP = "02e02508-5675-48d1-b06c-007ac2295df9";
+
+export const PROOF_FIELD_MAP = {
+  amazon: "amazonProofs",
+  uber: "uberProofs",
+} as const;
+
+// ZKEmail-specific RequestPayload type with properly-typed proofs arrays
+import type { RequestPayload } from "@gitcoin/passport-types";
+
+export interface ZKEmailRequestPayload extends Omit<RequestPayload, "proofs"> {
+  proofs?: {
+    amazonProofs?: string[];
+    uberProofs?: string[];
+    [k: string]: unknown;
+  };
+}
