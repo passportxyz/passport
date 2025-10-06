@@ -41,7 +41,7 @@ const chain = chains.find(({ id }) => id === LINEA_CHAIN_ID);
 export const VeraxPanel = ({ className, actionClassName }: { className: string; actionClassName?: string }) => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const { score, scoreState } = useContext(ScorerContext);
+  const { rawScore, scoreState, passingScore } = useContext(ScorerContext);
   const { status: onChainStatus } = useOnChainStatus({ chain });
   const buttonText = getButtonMsg(onChainStatus);
 
@@ -85,7 +85,7 @@ export const VeraxPanel = ({ className, actionClassName }: { className: string; 
             actionClassName
           )}
           onClick={() => {
-            if (score < 100) {
+            if (!passingScore) {
               setConfirmModalOpen(true);
             } else {
               setShowSidebar(true);
