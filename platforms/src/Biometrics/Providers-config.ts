@@ -2,7 +2,7 @@ import { requestSBT } from "../HumanID/shared/utils.js";
 import { PlatformGroupSpec, PlatformSpec } from "../types.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/humanTechIcon.svg",
+  icon: "./assets/biometrics.svg",
   platform: "Biometrics",
   name: "Biometrics",
   description: "Verify your uniqueness using facial biometrics",

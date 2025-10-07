@@ -3,7 +3,7 @@ import { HumanIdKycProvider } from "./Providers/humanIdKyc.js";
 import { requestSBT } from "../HumanID/shared/utils.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/humanTechIcon.svg",
+  icon: "./assets/idCard.svg",
   platform: "HumanIdKyc",
   name: "Government ID",
   description: "Verify your identity with government ID",
