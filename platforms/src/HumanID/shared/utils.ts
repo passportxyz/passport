@@ -107,7 +107,7 @@ export async function requestSBT({
         data: tx.data,
       });
 
-      if (!isHexString(txHash)) {
+      if (!txHash.startsWith("0x")) {
         throw new Error(`Transaction hash (${txHash}) is not a valid hex string`);
       }
 
