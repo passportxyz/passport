@@ -5,7 +5,11 @@ import { ProviderPayload } from "../../types.js";
 import { ExtendedHumanIDProvider } from "./types.js";
 
 export function isHexString(value: string): value is `0x${string}` {
-  return value.startsWith("0x") && value.length === 42;
+  return value.startsWith("0x");
+}
+
+export function isAddress(value: string): value is Address {
+  return isHexString(value) && value.length === 42;
 }
 
 export function validateSbt(

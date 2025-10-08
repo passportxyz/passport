@@ -6,7 +6,7 @@ import {
   ProviderInternalVerificationError,
 } from "../../types.js";
 import { setOptimismRpcUrl } from "@holonym-foundation/human-id-sdk";
-import { validateSbt, isHexString } from "./utils.js";
+import { validateSbt, isAddress } from "./utils.js";
 
 export abstract class BaseHumanIdProvider implements Provider {
   abstract type: string;
@@ -47,7 +47,7 @@ export abstract class BaseHumanIdProvider implements Provider {
     setOptimismRpcUrl(rpcUrl);
 
     // Validate address format
-    if (!isHexString(payload.address)) {
+    if (!isAddress(payload.address)) {
       throw new ProviderInternalVerificationError("Invalid address format");
     }
 
