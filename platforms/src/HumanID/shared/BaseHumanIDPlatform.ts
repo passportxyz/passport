@@ -2,7 +2,7 @@ import React from "react";
 import { AppContext, PlatformOptions, ProviderPayload } from "../../types.js";
 import { Platform } from "../../utils/platform.js";
 import { CredentialType, setOptimismRpcUrl, HubV3SBT, SignProtocolAttestation } from "@holonym-foundation/human-id-sdk";
-import { isHexString, validateSbt, validateAttestation, requestSBT } from "./utils.js";
+import { isAddress, validateSbt, validateAttestation, requestSBT } from "./utils.js";
 
 export abstract class BaseHumanIDPlatform extends Platform {
   abstract credentialType: CredentialType;
@@ -20,7 +20,7 @@ export abstract class BaseHumanIDPlatform extends Platform {
   }
 
   async credentialChecker(address: string): Promise<boolean> {
-    if (!isHexString(address)) return false;
+    if (!isAddress(address)) return false;
 
     // SBT path (KYC, Phone, Biometrics)
     if (this.sbtFetcher) {

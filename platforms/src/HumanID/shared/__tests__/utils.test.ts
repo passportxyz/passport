@@ -1,16 +1,32 @@
-import { validateSbt, validateAttestation, isHexString } from "../utils.js";
+import { validateSbt, validateAttestation, isHexString, isAddress } from "../utils.js";
 
 describe("isHexString", () => {
-  it("should return true for valid hex addresses", () => {
+  it("should return true for strings starting with 0x", () => {
     expect(isHexString("0x1234567890123456789012345678901234567890")).toBe(true);
     expect(isHexString("0xaBcDeF1234567890123456789012345678901234")).toBe(true);
+    expect(isHexString("0x123")).toBe(true);
+    expect(isHexString("0x")).toBe(true);
   });
 
-  it("should return false for invalid hex addresses", () => {
+  it("should return false for strings not starting with 0x", () => {
     expect(isHexString("1234567890123456789012345678901234567890")).toBe(false);
-    expect(isHexString("0x123")).toBe(false);
     expect(isHexString("not-a-hex-string")).toBe(false);
     expect(isHexString("")).toBe(false);
+  });
+});
+
+describe("isAddress", () => {
+  it("should return true for valid Ethereum addresses", () => {
+    expect(isAddress("0x1234567890123456789012345678901234567890")).toBe(true);
+    expect(isAddress("0xaBcDeF1234567890123456789012345678901234")).toBe(true);
+  });
+
+  it("should return false for invalid addresses", () => {
+    expect(isAddress("1234567890123456789012345678901234567890")).toBe(false);
+    expect(isAddress("0x123")).toBe(false);
+    expect(isAddress("not-a-hex-string")).toBe(false);
+    expect(isAddress("")).toBe(false);
+    expect(isAddress("0x")).toBe(false);
   });
 });
 
