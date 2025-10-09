@@ -20,18 +20,20 @@ export const PlatformDetails: PlatformSpec = {
           actions: [
             {
               label: "Start Biometric Scan",
-              async onClick({ address, signMessageAsync, sendTransactionAsync, switchChainAsync }): Promise<void> {
-                await requestSBT({
-                  credentialType: "biometrics",
-                  // We do not pass hasExistingCredential here because if the user already has the SBT,
-                  // we want them to see the Human ID modal that tells them they already have the SBT.
-                  // hasExistingCredential: () => {},
-                  address,
-                  signMessageAsync,
-                  sendTransactionAsync,
-                  switchChainAsync,
-                });
-              },
+              // Oct 9, 2025: We are temporarily having users open a new tab because FaceTec initialization is failing in iframe
+              href: "https://id.human.tech/biometrics",
+              // async onClick({ address, signMessageAsync, sendTransactionAsync, switchChainAsync }): Promise<void> {
+              //   await requestSBT({
+              //     credentialType: "biometrics",
+              //     // We do not pass hasExistingCredential here because if the user already has the SBT,
+              //     // we want them to see the Human ID modal that tells them they already have the SBT.
+              //     // hasExistingCredential: () => {},
+              //     address,
+              //     signMessageAsync,
+              //     sendTransactionAsync,
+              //     switchChainAsync,
+              //   });
+              // },
             },
           ],
         },
