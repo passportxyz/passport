@@ -31,17 +31,39 @@ function filterProofsBySubject(proofs: Proof[], keywords: string[]): Proof[] {
   });
 }
 
-async function countVerifiedProofs(proofs: Proof[]): Promise<number> {
-  const results = await Promise.all(
-    proofs.map(async (proof) => {
-      try {
-        return await proof.verify();
-      } catch {
-        return false;
+async function countVerifiedProofs(proofs: Proof[], stopAt?: number, maxConcurrency: number = 8): Promise<number> {
+  const target = typeof stopAt === "number" && stopAt > 0 ? stopAt : Infinity;
+  let validCount = 0;
+  let nextIndex = 0;
+  let aborted = false;
+
+  const runOne = async (idx: number): Promise<void> => {
+    try {
+      if (await proofs[idx].verify()) {
+        validCount += 1;
       }
-    })
-  );
-  return results.filter(Boolean).length;
+    } catch {
+      // ignore errors -> count as invalid
+    }
+  };
+
+  const worker = async (): Promise<void> => {
+    while (!aborted) {
+      const idx = nextIndex++;
+      if (idx >= proofs.length) return;
+      await runOne(idx);
+      if (validCount >= target) {
+        aborted = true;
+        return;
+      }
+    }
+  };
+
+  const workers = Array(Math.min(maxConcurrency, proofs.length))
+    .fill(0)
+    .map(() => worker());
+  await Promise.all(workers);
+  return validCount;
 }
 
 // Base ZKEmail Provider
@@ -54,7 +76,7 @@ abstract class ZKEmailBaseProvider implements Provider {
     this._options = { ...options };
   }
 
-  async verify(payload: ZKEmailRequestPayload): Promise<VerifiedPayload> {
+  async verify(payload: ZKEmailRequestPayload, context: { [k: string]: unknown } = {}): Promise<VerifiedPayload> {
     const errors: string[] = [];
     const record: { data?: string } | undefined = undefined;
 
@@ -89,6 +111,17 @@ abstract class ZKEmailBaseProvider implements Provider {
         };
       }
 
+      // Simple per-request cache keyed by group (amazon/uber) to avoid re-verifying across variants
+      const cacheKey = `zkemail:${this.getProofType()}`;
+      type CacheEntry = {
+        unpackedProofs: Proof[];
+        subjectFilteredProofs: Proof[];
+        // Number of valid proofs found when verifying up to the group's max threshold
+        validCountMaxUpTo?: number;
+        validCountByThreshold: Map<number, number>;
+      };
+      const cached = (context as { [k: string]: unknown })[cacheKey] as CacheEntry | undefined;
+
       const { initZkEmailSdk } = await import("@zk-email/sdk");
       const sdk = initZkEmailSdk();
 
@@ -106,33 +139,58 @@ abstract class ZKEmailBaseProvider implements Provider {
       const normalizedRequestWallet = normalizeWalletAddress(payload.address);
 
       // Unpack proofs and validate wallet binding
-      const unpackedProofs = await Promise.all(
-        proofs.map(async (p: string) => {
-          const proof = await sdk.unPackProof(p);
+      const unpackedProofs =
+        cached?.unpackedProofs ||
+        (await Promise.all(
+          proofs.map(async (p: string) => {
+            const proof = await sdk.unPackProof(p);
 
-          // Extract and verify wallet from public data
-          const { externalInputs } = proof.getProofData();
-          const proofWallet = normalizeWalletAddress(externalInputs.wallet_address);
+            // Extract and verify wallet from public data
+            const { externalInputs } = proof.getProofData();
+            const proofWallet = normalizeWalletAddress(externalInputs.wallet_address);
 
-          if (!proofWallet) {
-            throw new Error("Proof missing wallet_address in public data");
-          }
+            if (!proofWallet) {
+              throw new Error("Proof missing wallet_address in public data");
+            }
 
-          if (proofWallet !== normalizedRequestWallet) {
-            throw new Error(
-              `Proof not bound to requesting wallet. Expected ${normalizedRequestWallet}, found ${proofWallet}`
-            );
-          }
+            if (proofWallet !== normalizedRequestWallet) {
+              throw new Error(
+                `Proof not bound to requesting wallet. Expected ${normalizedRequestWallet}, found ${proofWallet}`
+              );
+            }
 
-          return proof;
-        })
-      );
+            return proof;
+          })
+        ));
 
       // Filter proofs by subject keywords depending on proof type
       const subjectKeywords = proofType === "amazon" ? AMAZON_SUBJECT_KEYWORDS : UBER_SUBJECT_KEYWORDS;
-      const subjectFilteredProofs = filterProofsBySubject(unpackedProofs, subjectKeywords);
+      const subjectFilteredProofs =
+        cached?.subjectFilteredProofs || filterProofsBySubject(unpackedProofs, subjectKeywords);
 
-      const validProofCount = await countVerifiedProofs(subjectFilteredProofs);
+      // Determine thresholds: provider-specific and group max (for compute-once strategy)
+      const threshold = this.getThreshold();
+      const groupMaxThreshold = proofType === "amazon" ? AMAZON_HEAVY_USER_THRESHOLD : UBER_POWER_USER_THRESHOLD;
+
+      let validProofCount: number | undefined;
+
+      // Prefer compute-once up to group max threshold, cache and reuse across variants
+      if (typeof cached?.validCountMaxUpTo === "number") {
+        validProofCount = cached.validCountMaxUpTo;
+      } else {
+        const computedToMax = await countVerifiedProofs(subjectFilteredProofs, groupMaxThreshold);
+        const store: CacheEntry = cached
+          ? cached
+          : {
+              unpackedProofs,
+              subjectFilteredProofs,
+              validCountByThreshold: new Map<number, number>(),
+            };
+        store.validCountMaxUpTo = computedToMax;
+        store.validCountByThreshold.set(groupMaxThreshold, computedToMax);
+        (context as { [k: string]: unknown })[cacheKey] = store;
+        validProofCount = computedToMax;
+      }
 
       if (validProofCount === 0) {
         return {
@@ -143,7 +201,6 @@ abstract class ZKEmailBaseProvider implements Provider {
       }
 
       // Check if the proof count meets the threshold for this specific provider
-      const threshold = this.getThreshold();
       if (validProofCount < threshold) {
         return {
           valid: false,
