@@ -1,4 +1,4 @@
-import { VerifiedPayload } from "@gitcoin/passport-types";
+import { ProviderContext, RequestPayload, VerifiedPayload } from "@gitcoin/passport-types";
 import { type Provider, type ProviderOptions } from "../../types.js";
 import {
   AMAZON_CASUAL_PURCHASER_THRESHOLD,
@@ -9,11 +9,13 @@ import {
   UBER_POWER_USER_THRESHOLD,
   PROOF_FIELD_MAP,
   ZKEmailRequestPayload,
+  type ProviderGroup,
 } from "../types.js";
 import { Proof } from "@zk-email/sdk";
 import { AMAZON_SUBJECT_KEYWORDS, UBER_SUBJECT_KEYWORDS } from "../keywords.js";
 import { subjectContainsKeyword, extractSubjectFromPublicData } from "../utils/subject.js";
 import { normalizeWalletAddress } from "../utils.js";
+import { countVerifiedProofs, getRequestedMaxThreshold, type ZkEmailCacheEntry } from "../utils.js";
 
 function getSubjectFromProof(proof: Proof): string | undefined {
   try {
@@ -31,40 +33,12 @@ function filterProofsBySubject(proofs: Proof[], keywords: string[]): Proof[] {
   });
 }
 
-async function countVerifiedProofs(proofs: Proof[], stopAt?: number, maxConcurrency: number = 8): Promise<number> {
-  const target = typeof stopAt === "number" && stopAt > 0 ? stopAt : Infinity;
-  let validCount = 0;
-  let nextIndex = 0;
-  let aborted = false;
+// moved to ZKEmail/utils.ts
 
-  const runOne = async (idx: number): Promise<void> => {
-    try {
-      if (await proofs[idx].verify()) {
-        validCount += 1;
-      }
-    } catch {
-      // ignore errors -> count as invalid
-    }
-  };
-
-  const worker = async (): Promise<void> => {
-    while (!aborted) {
-      const idx = nextIndex++;
-      if (idx >= proofs.length) return;
-      await runOne(idx);
-      if (validCount >= target) {
-        aborted = true;
-        return;
-      }
-    }
-  };
-
-  const workers = Array(Math.min(maxConcurrency, proofs.length))
-    .fill(0)
-    .map(() => worker());
-  await Promise.all(workers);
-  return validCount;
-}
+type ZkEmailContext = ProviderContext & {
+  zkemail?: Partial<Record<ProviderGroup, ZkEmailCacheEntry>>;
+};
+// group helpers moved to ZKEmail/utils.ts
 
 // Base ZKEmail Provider
 abstract class ZKEmailBaseProvider implements Provider {
@@ -76,13 +50,14 @@ abstract class ZKEmailBaseProvider implements Provider {
     this._options = { ...options };
   }
 
-  async verify(payload: ZKEmailRequestPayload, context: { [k: string]: unknown } = {}): Promise<VerifiedPayload> {
+  async verify(payload: RequestPayload, _context?: ProviderContext): Promise<VerifiedPayload> {
+    const context = (_context as ZkEmailContext) || ({} as ZkEmailContext);
     const errors: string[] = [];
     const record: { data?: string } | undefined = undefined;
 
     try {
       // Validate payload structure
-      if (!payload.proofs) {
+      if (!(payload as ZKEmailRequestPayload).proofs) {
         return {
           valid: false,
           errors: ["No proofs provided in payload"],
@@ -91,7 +66,7 @@ abstract class ZKEmailBaseProvider implements Provider {
       }
 
       // Validate wallet address exists
-      if (!payload.address) {
+      if (!(payload as ZKEmailRequestPayload).address) {
         return {
           valid: false,
           errors: ["No wallet address provided in payload"],
@@ -103,7 +78,7 @@ abstract class ZKEmailBaseProvider implements Provider {
       const proofType = this.getProofType();
       const proofsField = PROOF_FIELD_MAP[proofType];
 
-      if (!payload.proofs[proofsField]) {
+      if (!(payload as ZKEmailRequestPayload).proofs[proofsField]) {
         return {
           valid: false,
           errors: [`No ${proofType} proofs provided in payload`],
@@ -111,21 +86,14 @@ abstract class ZKEmailBaseProvider implements Provider {
         };
       }
 
-      // Simple per-request cache keyed by group (amazon/uber) to avoid re-verifying across variants
-      const cacheKey = `zkemail:${this.getProofType()}`;
-      type CacheEntry = {
-        unpackedProofs: Proof[];
-        subjectFilteredProofs: Proof[];
-        // Number of valid proofs found when verifying up to the group's max threshold
-        validCountMaxUpTo?: number;
-        validCountByThreshold: Map<number, number>;
-      };
-      const cached = (context as { [k: string]: unknown })[cacheKey] as CacheEntry | undefined;
+      // Per-request cache keyed by group (amazon/uber) to avoid re-verifying across variants
+      context.zkemail = context.zkemail || {};
+      const cached = context.zkemail[proofType as ProviderGroup];
 
       const { initZkEmailSdk } = await import("@zk-email/sdk");
       const sdk = initZkEmailSdk();
 
-      const proofs = payload.proofs[proofsField];
+      const proofs = (payload as ZKEmailRequestPayload).proofs![proofsField] as string[];
 
       if (!Array.isArray(proofs) || proofs.length === 0) {
         return {
@@ -136,7 +104,7 @@ abstract class ZKEmailBaseProvider implements Provider {
       }
 
       // Normalize the requesting wallet once
-      const normalizedRequestWallet = normalizeWalletAddress(payload.address);
+      const normalizedRequestWallet = normalizeWalletAddress((payload as ZKEmailRequestPayload).address as string);
 
       // Unpack proofs and validate wallet binding
       const unpackedProofs =
@@ -170,26 +138,27 @@ abstract class ZKEmailBaseProvider implements Provider {
 
       // Determine thresholds: provider-specific and group max (for compute-once strategy)
       const threshold = this.getThreshold();
-      const groupMaxThreshold = proofType === "amazon" ? AMAZON_HEAVY_USER_THRESHOLD : UBER_POWER_USER_THRESHOLD;
+      const requestedMax = getRequestedMaxThreshold(proofType as ProviderGroup, payload.types);
 
       let validProofCount: number | undefined;
 
-      // Prefer compute-once up to group max threshold, cache and reuse across variants
+      // Compute once up to requested max threshold for this group, then reuse across variants
       if (typeof cached?.validCountMaxUpTo === "number") {
         validProofCount = cached.validCountMaxUpTo;
       } else {
-        const computedToMax = await countVerifiedProofs(subjectFilteredProofs, groupMaxThreshold);
-        const store: CacheEntry = cached
-          ? cached
-          : {
-              unpackedProofs,
-              subjectFilteredProofs,
-              validCountByThreshold: new Map<number, number>(),
-            };
-        store.validCountMaxUpTo = computedToMax;
-        store.validCountByThreshold.set(groupMaxThreshold, computedToMax);
-        (context as { [k: string]: unknown })[cacheKey] = store;
-        validProofCount = computedToMax;
+        const computedToRequestedMax = await countVerifiedProofs(subjectFilteredProofs, requestedMax);
+        let store: ZkEmailCacheEntry;
+        if (cached) {
+          store = cached;
+        } else {
+          store = {
+            unpackedProofs,
+            subjectFilteredProofs,
+          };
+        }
+        store.validCountMaxUpTo = computedToRequestedMax;
+        context.zkemail[proofType as ProviderGroup] = store;
+        validProofCount = computedToRequestedMax;
       }
 
       if (validProofCount === 0) {
