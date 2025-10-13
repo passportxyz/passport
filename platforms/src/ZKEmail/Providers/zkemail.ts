@@ -10,12 +10,13 @@ import {
   PROOF_FIELD_MAP,
   ZKEmailRequestPayload,
   type ProviderGroup,
+  type ZkEmailCacheEntry,
 } from "../types.js";
 import { Proof } from "@zk-email/sdk";
 import { AMAZON_SUBJECT_KEYWORDS, UBER_SUBJECT_KEYWORDS } from "../keywords.js";
 import { subjectContainsKeyword, extractSubjectFromPublicData } from "../utils/subject.js";
 import { normalizeWalletAddress } from "../utils.js";
-import { countVerifiedProofs, getRequestedMaxThreshold, type ZkEmailCacheEntry } from "../utils.js";
+import { countVerifiedProofs, getRequestedMaxThreshold } from "../utils.js";
 
 function getSubjectFromProof(proof: Proof): string | undefined {
   try {
@@ -33,12 +34,9 @@ function filterProofsBySubject(proofs: Proof[], keywords: string[]): Proof[] {
   });
 }
 
-// moved to ZKEmail/utils.ts
-
 type ZkEmailContext = ProviderContext & {
   zkemail?: Partial<Record<ProviderGroup, ZkEmailCacheEntry>>;
 };
-// group helpers moved to ZKEmail/utils.ts
 
 // Base ZKEmail Provider
 abstract class ZKEmailBaseProvider implements Provider {
