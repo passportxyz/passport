@@ -6,7 +6,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/cleanHands.svg",
   platform: "CleanHands",
   name: "Proof of Clean Hands",
-  description: "Prove clean compliance record",
+  description: "Verify clean regulatory status",
   connectMessage: "Verify Account",
   isEVM: true,
   timeToGet: "10 minutes",
