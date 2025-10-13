@@ -12,12 +12,6 @@ import {
 } from "./types.js";
 import type { RawEmailResponse } from "@zk-email/sdk";
 
-export type ZkEmailCacheEntry = {
-  unpackedProofs: Proof[];
-  subjectFilteredProofs: Proof[];
-  validCountMaxUpTo?: number;
-};
-
 export async function countVerifiedProofs(
   proofs: Proof[],
   stopAt?: number,
