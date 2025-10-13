@@ -14,7 +14,7 @@ Check out our documentation at https://docs.passport.xyz
 
 We welcome everyone to contribute to Passport and the Scorer API! Please review our [contributing guidelines](./CONTRIBUTING.md) before proceeding.
 
-You can join our [Discord](https://discord.gg/passport) (just be sure to select the builder role when you join) to get help and discuss the project with the rest of the community.
+You can join our [Discord](https://discord.com/invite/S3fdErz4NV) (just be sure to select the builder role when you join) to get help and discuss the project with the rest of the community.
 
 You can also familiarize yourself with our near term project roadmap in the passport [project backlog](https://github.com/orgs/passportxyz/projects/)
 
