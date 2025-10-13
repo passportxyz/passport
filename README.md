@@ -97,7 +97,7 @@ Holds the Pulumi deployment configuration for this repository. [README](infra/RE
 
 ## schemas
 
-Ceramic schemas and model definitions, and scripts for creating and publishing these to the Ceramic Network. [README](schemas/README.md)
+Ceramic schemas and model definitions, and scripts for creating and publishing these to the Ceramic Network. [README](js-ceramic/README.md)
 
 ## types
 
