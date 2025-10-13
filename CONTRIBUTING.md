@@ -18,7 +18,7 @@ application running locally.
 
 Additionally, please take some time to familiarize yourself with the
 [backlog](https://github.com/orgs/gitcoinco/projects/6) and to introduce
-yourself to the team on [Discord](https://discord.gg/w6K2wwHr).
+yourself to the team on [Discord](https://discord.com/invite/S3fdErz4NV).
 
 ## Reporting issues
 
