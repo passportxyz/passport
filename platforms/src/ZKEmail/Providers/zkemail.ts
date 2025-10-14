@@ -38,6 +38,26 @@ type ZkEmailContext = ProviderContext & {
   zkemail?: Partial<Record<ProviderGroup, ZkEmailCacheEntry>>;
 };
 
+/**
+ * Type guard to validate that a payload has the required structure for ZKEmail verification
+ * Note: We can't use a true type predicate (payload is ZKEmailRequestPayload) due to
+ * incompatible index signatures between RequestPayload and ZKEmailRequestPayload.
+ * Instead, we validate the structure at runtime and cast only after validation.
+ * @param payload - The payload to validate
+ * @returns True if payload has required address and proofs structure
+ */
+function hasZKEmailPayloadStructure(payload: RequestPayload): boolean {
+  return (
+    typeof payload === "object" &&
+    payload !== null &&
+    "address" in payload &&
+    typeof payload.address === "string" &&
+    "proofs" in payload &&
+    typeof payload.proofs === "object" &&
+    payload.proofs !== null
+  );
+}
+
 // Base ZKEmail Provider
 abstract class ZKEmailBaseProvider implements Provider {
   type: string;
@@ -54,32 +74,38 @@ abstract class ZKEmailBaseProvider implements Provider {
     const record: { data?: string } | undefined = undefined;
 
     try {
-      // Validate payload structure
-      if (!(payload as ZKEmailRequestPayload).proofs) {
+      // Validate payload structure - ensures we have address and proofs object
+      if (!hasZKEmailPayloadStructure(payload)) {
         return {
           valid: false,
-          errors: ["No proofs provided in payload"],
+          errors: ["Invalid payload structure: missing required fields (address or proofs)"],
           record,
         };
       }
 
-      // Validate wallet address exists
-      if (!(payload as ZKEmailRequestPayload).address) {
-        return {
-          valid: false,
-          errors: ["No wallet address provided in payload"],
-          record,
-        };
-      }
+      // Safe to cast after validation - we've confirmed the structure exists
+      // This is the ONLY cast in the entire verify method
+      const zkEmailPayload = payload as ZKEmailRequestPayload;
 
       // Get the appropriate proof type for this provider
       const proofType = this.getProofType();
       const proofsField = PROOF_FIELD_MAP[proofType];
 
-      if (!(payload as ZKEmailRequestPayload).proofs[proofsField]) {
+      // Validate proof field exists for this specific provider type
+      const proofField = zkEmailPayload.proofs?.[proofsField];
+      if (!proofField) {
         return {
           valid: false,
           errors: [`No ${proofType} proofs provided in payload`],
+          record,
+        };
+      }
+
+      // Validate proof field is a non-empty array
+      if (!Array.isArray(proofField) || proofField.length === 0) {
+        return {
+          valid: false,
+          errors: [`Invalid or empty ${proofType} proofs array`],
           record,
         };
       }
@@ -91,18 +117,11 @@ abstract class ZKEmailBaseProvider implements Provider {
       const { initZkEmailSdk } = await import("@zk-email/sdk");
       const sdk = initZkEmailSdk();
 
-      const proofs = (payload as ZKEmailRequestPayload).proofs![proofsField] as string[];
-
-      if (!Array.isArray(proofs) || proofs.length === 0) {
-        return {
-          valid: false,
-          errors: [`Invalid or empty ${proofType} proofs array`],
-          record,
-        };
-      }
+      // Type is now safely narrowed to string[]
+      const proofs = proofField;
 
       // Normalize the requesting wallet once
-      const normalizedRequestWallet = normalizeWalletAddress((payload as ZKEmailRequestPayload).address as string);
+      const normalizedRequestWallet = normalizeWalletAddress(zkEmailPayload.address);
 
       // Unpack proofs and validate wallet binding
       const unpackedProofs =

@@ -245,7 +245,8 @@ describe("ZKEmail Providers", () => {
       const result = await provider.verify(payload);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain("No wallet address provided in payload");
+      // Updated to match new validation that catches missing fields earlier
+      expect(result.errors).toContain("Invalid payload structure: missing required fields (address or proofs)");
     });
   });
 
