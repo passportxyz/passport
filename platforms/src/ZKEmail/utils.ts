@@ -12,6 +12,18 @@ import {
 } from "./types.js";
 import type { RawEmailResponse } from "@zk-email/sdk";
 
+/**
+ * Verifies proofs in parallel with optional early exit.
+ *
+ * Note: The frontend already limits payload sizes (max 60 Amazon, 85 Uber proofs),
+ * so the early exit provides minimal benefit in practice. This implementation
+ * prioritizes code clarity over micro-optimization.
+ *
+ * @param proofs - Array of proofs to verify
+ * @param stopAt - Optional target count to stop at
+ * @param maxConcurrency - Maximum concurrent verifications (default: 8)
+ * @returns Actual count of verified proofs (may exceed stopAt slightly due to concurrency)
+ */
 export async function countVerifiedProofs(
   proofs: Proof[],
   stopAt?: number,
@@ -20,26 +32,33 @@ export async function countVerifiedProofs(
   const target = typeof stopAt === "number" && stopAt > 0 ? stopAt : Infinity;
   let validCount = 0;
   let nextIndex = 0;
-  let aborted = false;
 
-  const runOne = async (idx: number): Promise<void> => {
-    try {
-      if (await proofs[idx].verify()) {
-        validCount += 1;
-      }
-    } catch {
-      // ignore errors -> count as invalid
+  /**
+   * Gets the next proof index to verify.
+   * Returns null when we've reached the target or end of array.
+   */
+  const getNextIndex = (): number | null => {
+    if (nextIndex >= proofs.length || validCount >= target) {
+      return null;
     }
+    return nextIndex++;
   };
 
   const worker = async (): Promise<void> => {
-    while (!aborted) {
-      const idx = nextIndex++;
-      if (idx >= proofs.length) return;
-      await runOne(idx);
-      if (validCount >= target) {
-        aborted = true;
-        return;
+    while (true) {
+      const idx = getNextIndex();
+      if (idx === null) return;
+
+      try {
+        if (await proofs[idx].verify()) {
+          validCount++;
+          // Early exit if we've reached the target
+          // Note: Other workers may still be in-flight
+          if (validCount >= target) return;
+        }
+      } catch {
+        // Silently treat verification errors as invalid proofs
+        // This maintains backward compatibility with existing behavior
       }
     }
   };
