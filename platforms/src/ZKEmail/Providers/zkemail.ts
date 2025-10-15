@@ -27,6 +27,26 @@ function getSubjectFromProof(proof: Proof): string | undefined {
   }
 }
 
+/**
+ * Extracts the hashed email address from a proof's public data.
+ * The hashed email serves as a unique identifier for deduplication.
+ * @param proof - The proof object to extract the email from
+ * @returns The hashed email address, or undefined if not found
+ */
+function getHashedEmailFromProof(proof: Proof): string | undefined {
+  try {
+    const { publicData } = proof.getProofData();
+    const hashedEmail = publicData.email_recipient;
+
+    // Handle both string and array formats
+    const email = Array.isArray(hashedEmail) ? hashedEmail[0] : hashedEmail;
+
+    return typeof email === "string" && email.trim() ? email.trim() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function filterProofsBySubject(proofs: Proof[], keywords: string[]): Proof[] {
   return proofs.filter((proof) => {
     const subject = getSubjectFromProof(proof);
@@ -83,8 +103,6 @@ abstract class ZKEmailBaseProvider implements Provider {
         };
       }
 
-      // Safe to cast after validation - we've confirmed the structure exists
-      // This is the ONLY cast in the entire verify method
       const zkEmailPayload = payload as ZKEmailRequestPayload;
 
       // Get the appropriate proof type for this provider
@@ -123,7 +141,7 @@ abstract class ZKEmailBaseProvider implements Provider {
       // Normalize the requesting wallet once
       const normalizedRequestWallet = normalizeWalletAddress(zkEmailPayload.address);
 
-      // Unpack proofs and validate wallet binding
+      // Unpack proofs and validate wallet binding + email presence
       const unpackedProofs =
         cached?.unpackedProofs ||
         (await Promise.all(
@@ -144,9 +162,28 @@ abstract class ZKEmailBaseProvider implements Provider {
               );
             }
 
+            // Validate that email exists in the proof
+            const hashedEmail = getHashedEmailFromProof(proof);
+            if (!hashedEmail) {
+              throw new Error("Proof missing email_recipient in public data");
+            }
+
             return proof;
           })
         ));
+
+      // Validate that all proofs come from the same email account
+      // This prevents mixing proofs from different email accounts to inflate counts
+      const firstHashedEmail = getHashedEmailFromProof(unpackedProofs[0]);
+      const allSameEmail = unpackedProofs.every((proof) => getHashedEmailFromProof(proof) === firstHashedEmail);
+
+      if (!allSameEmail) {
+        return {
+          valid: false,
+          errors: ["All proofs must be from the same email account"],
+          record,
+        };
+      }
 
       // Filter proofs by subject keywords depending on proof type
       const subjectKeywords = proofType === "amazon" ? AMAZON_SUBJECT_KEYWORDS : UBER_SUBJECT_KEYWORDS;
@@ -195,10 +232,14 @@ abstract class ZKEmailBaseProvider implements Provider {
         };
       }
 
+      // Get the hashed email - extract on-demand from cached or current proofs
+      const hashedEmailForRecord = cached ? getHashedEmailFromProof(cached.unpackedProofs[0]) : firstHashedEmail;
+
       return {
         valid: true,
         errors,
         record: {
+          hashedEmail: hashedEmailForRecord,
           totalProofs: validProofCount.toString(),
           proofType: proofType,
         },

@@ -39,7 +39,7 @@ type ZkEmailContext = ProviderContext & {
 interface MockProof {
   verify: jest.Mock<Promise<boolean>>;
   getProofData: jest.Mock<{
-    publicData: { subject: string[] };
+    publicData: { subject: string[]; email_recipient: string };
     externalInputs: { wallet_address: string };
   }>;
 }
@@ -80,17 +80,21 @@ const mockSdk = {
 
 (zkEmailSdk.initZkEmailSdk as jest.Mock).mockReturnValue(mockSdk);
 
-// Helper function to create mock proof with subject and wallet
+const MOCK_EMAIL_HASH = "hashed_email_abc123";
+const MOCK_EMAIL_HASH_DIFFERENT = "hashed_email_xyz789";
+
+// Helper function to create mock proof with subject, wallet, and email
 const createMockProofWithSubject = (
   subject: string,
   walletAddress: string = MOCK_ADDRESS_NORMALIZED,
-  verifyResult: boolean = true
+  verifyResult: boolean = true,
+  emailHash: string = MOCK_EMAIL_HASH
 ): MockProof => ({
   verify: jest.fn<Promise<boolean>, []>().mockResolvedValue(verifyResult),
   getProofData: jest
     .fn<
       {
-        publicData: { subject: string[] };
+        publicData: { subject: string[]; email_recipient: string };
         externalInputs: { wallet_address: string };
       },
       []
@@ -98,6 +102,7 @@ const createMockProofWithSubject = (
     .mockReturnValue({
       publicData: {
         subject: [subject],
+        email_recipient: emailHash,
       },
       externalInputs: {
         wallet_address: walletAddress,
@@ -110,12 +115,15 @@ describe("ZKEmail Providers", () => {
     jest.clearAllMocks();
     // Reset the mock implementations to a default state before each test
     mockUnpackProof.mockImplementation(async (_proof) =>
-      createMockProofWithSubject("Your order confirmation", MOCK_ADDRESS_NORMALIZED, true)
+      createMockProofWithSubject("Your order confirmation", MOCK_ADDRESS_NORMALIZED, true, MOCK_EMAIL_HASH)
     );
     mockProofVerify.mockResolvedValue(true);
     mockGetProofData.mockReturnValue({
       publicData: {
         subject: ["Your order confirmation"],
+        email_recipient: MOCK_EMAIL_HASH,
+      },
+      externalInputs: {
         wallet_address: MOCK_ADDRESS_NORMALIZED,
       },
     });
@@ -141,6 +149,7 @@ describe("ZKEmail Providers", () => {
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.record).toEqual({
+        hashedEmail: MOCK_EMAIL_HASH,
         totalProofs: proofs.length.toString(),
         proofType: "amazon",
       });
@@ -176,13 +185,14 @@ describe("ZKEmail Providers", () => {
     });
 
     it("should handle errors during proof verification", async () => {
-      // Mock proofs with valid Amazon subjects and wallet but failing verification
+      // Mock proofs with valid Amazon subjects, wallet, and email but failing verification
       const mockVerifyFn = jest.fn().mockRejectedValue(new Error("Verification failed"));
       mockUnpackProof.mockImplementation(async (_proof) => ({
         verify: mockVerifyFn,
         getProofData: jest.fn().mockReturnValue({
           publicData: {
             subject: ["Your Amazon order has shipped"],
+            email_recipient: MOCK_EMAIL_HASH,
           },
           externalInputs: {
             wallet_address: MOCK_ADDRESS_NORMALIZED,
@@ -305,6 +315,7 @@ describe("ZKEmail Providers", () => {
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.record).toEqual({
+        hashedEmail: MOCK_EMAIL_HASH,
         totalProofs: "3",
         proofType: "uber",
       });
@@ -401,6 +412,182 @@ describe("ZKEmail Providers", () => {
           "amazon"
         )
       ).toBe(false);
+    });
+  });
+
+  describe("Email Validation and Deduplication", () => {
+    it("should reject proofs from different email accounts", async () => {
+      const provider = new AmazonCasualPurchaserProvider();
+
+      // Mock proofs with different email hashes
+      let callCount = 0;
+      mockUnpackProof.mockImplementation(async (_proof) => {
+        callCount++;
+        const emailHash = callCount === 1 ? MOCK_EMAIL_HASH : MOCK_EMAIL_HASH_DIFFERENT;
+        return createMockProofWithSubject("Your Amazon order shipped", MOCK_ADDRESS_NORMALIZED, true, emailHash);
+      });
+
+      const payload = getMockPayload(["proof1", "proof2"], "amazon");
+      const result = await provider.verify(payload);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain("All proofs must be from the same email account");
+    });
+
+    it("should reject proof missing email_recipient field", async () => {
+      const provider = new AmazonCasualPurchaserProvider();
+
+      // Mock proof without email_recipient
+      mockUnpackProof.mockImplementation(async (_proof) => ({
+        verify: jest.fn().mockResolvedValue(true),
+        getProofData: jest.fn().mockReturnValue({
+          publicData: {
+            subject: ["Your Amazon order shipped"],
+            // Missing email_recipient
+          },
+          externalInputs: {
+            wallet_address: MOCK_ADDRESS_NORMALIZED,
+          },
+        }),
+      }));
+
+      const payload = getMockPayload(["proof1"], "amazon");
+      const result = await provider.verify(payload);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors[0]).toContain("Proof missing email_recipient in public data");
+    });
+
+    it("should accept proofs from the same email account", async () => {
+      const provider = new AmazonCasualPurchaserProvider();
+
+      // Mock multiple proofs all with same email hash
+      mockUnpackProof.mockImplementation(async (_proof) =>
+        createMockProofWithSubject("Your Amazon order shipped", MOCK_ADDRESS_NORMALIZED, true, MOCK_EMAIL_HASH)
+      );
+
+      const payload = getMockPayload(["proof1", "proof2", "proof3"], "amazon");
+      const result = await provider.verify(payload);
+
+      expect(result.valid).toBe(true);
+      expect(result.record?.hashedEmail).toBe(MOCK_EMAIL_HASH);
+    });
+
+    it("should include hashedEmail in record for deduplication", async () => {
+      const provider = new UberOccasionalRiderProvider();
+
+      mockUnpackProof.mockImplementation(async (_proof) =>
+        createMockProofWithSubject("Your trip receipt from Uber", MOCK_ADDRESS_NORMALIZED, true, MOCK_EMAIL_HASH)
+      );
+
+      const payload = getMockPayload(["proof1", "proof2", "proof3"], "uber");
+      const result = await provider.verify(payload);
+
+      expect(result.valid).toBe(true);
+      expect(result.record?.hashedEmail).toBe(MOCK_EMAIL_HASH);
+      expect(typeof result.record?.hashedEmail).toBe("string");
+    });
+
+    it("should cache hashedEmail and reuse across variants", async () => {
+      const mockContext: ZkEmailContext = {};
+      // Need at least 10 proofs for Regular Customer Provider
+      const proofArray = Array(10)
+        .fill(0)
+        .map((_, i) => `proof${i}`);
+      const payload = getMockPayload(proofArray, "amazon");
+      payload.types = ["ZKEmail#AmazonCasualPurchaser", "ZKEmail#AmazonRegularCustomer"];
+
+      mockUnpackProof.mockImplementation(async (_proof) =>
+        createMockProofWithSubject("Your Amazon order shipped", MOCK_ADDRESS_NORMALIZED, true, MOCK_EMAIL_HASH)
+      );
+
+      const provider1 = new AmazonCasualPurchaserProvider();
+      const provider2 = new AmazonRegularCustomerProvider();
+
+      const result1 = await provider1.verify(payload, mockContext);
+      const result2 = await provider2.verify(payload, mockContext);
+
+      // Both should return the same hashed email
+      expect(result1.valid).toBe(true);
+      expect(result2.valid).toBe(true);
+      expect(result1.record?.hashedEmail).toBe(MOCK_EMAIL_HASH);
+      expect(result2.record?.hashedEmail).toBe(MOCK_EMAIL_HASH);
+
+      // Verify cache is properly structured (email extracted on-demand from proofs)
+      expect(mockContext.zkemail?.amazon?.unpackedProofs).toBeDefined();
+      expect(mockContext.zkemail?.amazon?.unpackedProofs.length).toBeGreaterThan(0);
+    });
+
+    it("should handle email_recipient as array format", async () => {
+      const provider = new AmazonCasualPurchaserProvider();
+
+      // Mock proof with email_recipient as array
+      mockUnpackProof.mockImplementation(async (_proof) => ({
+        verify: jest.fn().mockResolvedValue(true),
+        getProofData: jest.fn().mockReturnValue({
+          publicData: {
+            subject: ["Your Amazon order shipped"],
+            email_recipient: [MOCK_EMAIL_HASH], // Array format
+          },
+          externalInputs: {
+            wallet_address: MOCK_ADDRESS_NORMALIZED,
+          },
+        }),
+      }));
+
+      const payload = getMockPayload(["proof1"], "amazon");
+      const result = await provider.verify(payload);
+
+      expect(result.valid).toBe(true);
+      expect(result.record?.hashedEmail).toBe(MOCK_EMAIL_HASH);
+    });
+
+    it("should reject empty email_recipient", async () => {
+      const provider = new AmazonCasualPurchaserProvider();
+
+      // Mock proof with empty email_recipient
+      mockUnpackProof.mockImplementation(async (_proof) => ({
+        verify: jest.fn().mockResolvedValue(true),
+        getProofData: jest.fn().mockReturnValue({
+          publicData: {
+            subject: ["Your Amazon order shipped"],
+            email_recipient: "", // Empty string
+          },
+          externalInputs: {
+            wallet_address: MOCK_ADDRESS_NORMALIZED,
+          },
+        }),
+      }));
+
+      const payload = getMockPayload(["proof1"], "amazon");
+      const result = await provider.verify(payload);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors[0]).toContain("Proof missing email_recipient in public data");
+    });
+
+    it("should handle whitespace-only email_recipient", async () => {
+      const provider = new AmazonCasualPurchaserProvider();
+
+      // Mock proof with whitespace-only email_recipient
+      mockUnpackProof.mockImplementation(async (_proof) => ({
+        verify: jest.fn().mockResolvedValue(true),
+        getProofData: jest.fn().mockReturnValue({
+          publicData: {
+            subject: ["Your Amazon order shipped"],
+            email_recipient: "   ", // Whitespace only
+          },
+          externalInputs: {
+            wallet_address: MOCK_ADDRESS_NORMALIZED,
+          },
+        }),
+      }));
+
+      const payload = getMockPayload(["proof1"], "amazon");
+      const result = await provider.verify(payload);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors[0]).toContain("Proof missing email_recipient in public data");
     });
   });
 
