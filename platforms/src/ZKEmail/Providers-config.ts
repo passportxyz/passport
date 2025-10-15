@@ -52,7 +52,7 @@ export const PlatformDetails: PlatformSpec = {
       items: [
         "It might take some time to process, so please be patient as we verify your activities",
         "Currently, this feature only works with Gmail. We're working on supporting other email providers",
-        "For a faster experience, ZK Email uses remote proving. This means emails confirming Amazon purchases and Uber rides are sent to our servers temporarily and then deleted after the proof is created. We're actively working on local proving to improve privacy",
+        "For a faster experience, ZK Email uses remote proving. This means emails confirming Amazon shipments and Uber rides are sent to our servers temporarily and then deleted after the proof is created. We're actively working on local proving to improve privacy",
         "We only scan your inbox, archive, and tagged emails. Any deleted emails will not count towards this Stamp",
         "This Stamp uses zero-knowledge proofs to analyze emails without exposing personal data",
         "This Stamp only scans for specific Amazon shipping notification and Uber receipt patterns",
@@ -60,11 +60,6 @@ export const PlatformDetails: PlatformSpec = {
         "If you have trouble proving your emails, you can contribute to the public archive of dkim keys at archive.zk.email/contribute",
         "For additional support, contact the team at support@zk.email",
       ],
-    },
-    {
-      type: "list",
-      title: "Supported Amazon countries",
-      items: ["🇨🇦 Canada", "🇩🇪 Germany", "🇮🇳 India", "🇯🇵 Japan", "🇪🇸 Spain", "🇬🇧 United Kingdom", "🇺🇸 United States"],
     },
   ],
 };
