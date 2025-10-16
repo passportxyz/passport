@@ -260,19 +260,34 @@ export const EmbedCampaign = () => {
             />
           </div>
           <div className="flex flex-col gap-8">
-            <Heading>Install Component</Heading>
+            <Heading>Passport Embed: Stamps</Heading>
             <div>
-              Verify your identity with just one click. Our system will check your ETH account for activities that match
-              our Stamp criteria. If you still need help verifying your identity, the embed component will walk you
-              through claiming the best stamps for your account.
+              The power of Passport&apos;s humanity verification, now in your dApp. Enable users to verify their
+              humanity and qualify for protected programs without needing to navigate away from your user flows.
             </div>
-            <Button
-              variant="primary"
-              className="w-full md:max-w-64"
-              onClick={() => window.open("https://github.com/passportxyz/passport-embed", "_blank")?.focus()}
-            >
-              Go to documentation
-            </Button>
+            <div className="flex flex-col md:flex-row gap-4 w-full">
+              <Button
+                variant="primary"
+                className="w-full md:max-w-64"
+                onClick={() =>
+                  window
+                    .open(
+                      "https://docs.passport.xyz/building-with-passport/stamps/passport-embed/introduction",
+                      "_blank"
+                    )
+                    ?.focus()
+                }
+              >
+                Go to documentation
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full md:max-w-64"
+                onClick={() => window.open("https://tally.so/r/3X81KL", "_blank")?.focus()}
+              >
+                Partner With Us
+              </Button>
+            </div>
           </div>
           <Heading className="col-span-1 lg:col-span-2">Component Showcase</Heading>
           <ComputerGraphic
@@ -327,8 +342,16 @@ const FAQ_ENTRIES = [
     title: "How does it work?",
     body: (
       <p>
-        Passport Embed allows developers to easily integrate identity verification and unique humanity score directly
-        into their dApp. This enables a seamless experience for end users.
+        Passport Embed allows developers to easily embed human verification and other ID verification flows direclty
+        into their dApp, enabling humans to qualify for protected programs without needing to navigate away from your
+        user flows.
+        <br />
+        <br />
+        As soon as a user loads the page that contains the Passport Embed component and protected elements, Passport
+        Embed will recognize the user&apos;s wallet address and begin to check the user&apos;s onchain history to verify
+        any web3 activities immediately. If the user didn&apos;t build up a high enough score to qualify after this
+        initial check, they can verify additional Stamps to build up their score. Once they hit the minimum score
+        threshold, they will be able to access the protected elements.
       </p>
     ),
   },
@@ -336,9 +359,14 @@ const FAQ_ENTRIES = [
     title: "How do I use Passport Embed in my application?",
     body: (
       <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae ipsum dui. Morbi dictum orci id tempus
-        laoreet. Nulla iaculis sapien et tempus lobortis. Aenean ut enim eu diam venenatis vehicula. Donec eu placerat
-        eros. Vestibulum porttitor maximus ultrices.
+        Passport Embed is a React component that you can easily integrate into any website or dApp. You can customize
+        the theme, select whether the component should collapse or not, and other settings to fit your needs. <br />
+        <br />
+        You can find the documentation{" "}
+        <a href="https://docs.passport.xyz/building-with-passport/stamps/passport-embed/introduction" target="_blank">
+          here
+        </a>
+        .
       </p>
     ),
   },
@@ -346,29 +374,24 @@ const FAQ_ENTRIES = [
     title: "What sort of customizations can I do?",
     body: (
       <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae ipsum dui. Morbi dictum orci id tempus
-        laoreet. Nulla iaculis sapien et tempus lobortis. Aenean ut enim eu diam venenatis vehicula. Donec eu placerat
-        eros. Vestibulum porttitor maximus ultrices.
+        Embed has two default themes (Dark and Light), but you can also customize colors to better match your branding.
+        There are also three different collapse modes which you can select from.
       </p>
     ),
   },
   {
     title: "What programming languages and frameworks are compatible with Passport Embed?",
-    body: (
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae ipsum dui. Morbi dictum orci id tempus
-        laoreet. Nulla iaculis sapien et tempus lobortis. Aenean ut enim eu diam venenatis vehicula. Donec eu placerat
-        eros. Vestibulum porttitor maximus ultrices.
-      </p>
-    ),
+    body: <p>Passport Embed is currently only available in React.</p>,
   },
   {
     title: "Where can I learn more about this functionality?",
     body: (
       <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vitae ipsum dui. Morbi dictum orci id tempus
-        laoreet. Nulla iaculis sapien et tempus lobortis. Aenean ut enim eu diam venenatis vehicula. Donec eu placerat
-        eros. Vestibulum porttitor maximus ultrices.
+        You can find more information about Passport Embed in our{" "}
+        <a href="https://docs.passport.xyz/building-with-passport/stamps/passport-embed/introduction" target="_blank">
+          documentation
+        </a>
+        .
       </p>
     ),
   },
