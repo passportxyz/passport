@@ -1,3 +1,6 @@
+import type { RequestPayload } from "@gitcoin/passport-types";
+import { Proof } from "@zk-email/sdk";
+
 export const AMAZON_CASUAL_PURCHASER_THRESHOLD = 1;
 export const AMAZON_REGULAR_CUSTOMER_THRESHOLD = 10;
 export const AMAZON_HEAVY_USER_THRESHOLD = 50;
@@ -22,9 +25,6 @@ export const PROOF_FIELD_MAP = {
   uber: "uberProofs",
 } as const;
 
-// ZKEmail-specific RequestPayload type with properly-typed proofs arrays
-import type { RequestPayload } from "@gitcoin/passport-types";
-
 export interface ZKEmailRequestPayload extends Omit<RequestPayload, "proofs"> {
   proofs?: {
     amazonProofs?: string[];
@@ -32,3 +32,9 @@ export interface ZKEmailRequestPayload extends Omit<RequestPayload, "proofs"> {
     [k: string]: unknown;
   };
 }
+
+export type ZkEmailCacheEntry = {
+  unpackedProofs: Proof[];
+  subjectFilteredProofs: Proof[];
+  validCountMaxUpTo?: number;
+};
