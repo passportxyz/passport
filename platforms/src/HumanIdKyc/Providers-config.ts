@@ -8,6 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Government ID",
   description: "Verify your identity with government ID",
   connectMessage: "Connect Account",
+  isEVM: true,
   website: "https://human.tech",
   timeToGet: "10 minutes",
   price: "$5 + gas",
