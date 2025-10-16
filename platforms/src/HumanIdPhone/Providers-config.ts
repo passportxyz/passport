@@ -7,6 +7,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Phone Verification",
   description: "Verify your phone number",
   connectMessage: "Connect Account",
+  isEVM: true,
   website: "https://human.tech",
   timeToGet: "5 minutes",
   price: "$5",
