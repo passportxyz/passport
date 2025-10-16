@@ -191,6 +191,8 @@ export type POINTS_BREAKDOWN_KEY =
   | "HIM"
   | "MTA"
   | "MM2"
+  | "SOG"
+  | "TCO"
   | `PMT_${number}`
   | `HIM_${number}`;
 

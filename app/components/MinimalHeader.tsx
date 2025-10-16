@@ -323,6 +323,12 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
             {pointsData.breakdown?.MM2 && (
               <PointsTooltipItem title="MetaMask OG" text={`+${pointsData.breakdown.MM2}`} />
             )}
+            {pointsData.breakdown?.SOG && (
+              <PointsTooltipItem title="Seasoned Passport OG" text={`+${pointsData.breakdown.SOG}`} />
+            )}
+            {pointsData.breakdown?.TCO && (
+              <PointsTooltipItem title="The Chosen One" text={`+${pointsData.breakdown.TCO}`} />
+            )}
           </ul>
         </>
       )}
