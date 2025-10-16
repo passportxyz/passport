@@ -37,12 +37,12 @@ export const PlatformDetails: PlatformSpec = {
         {
           title: "Step 2",
           description:
-            "Login to your Google account and provide ZK Email the permissions to scan for Amazon shipping confirmations and Uber receipts while keeping your data private.",
+            "Login to your Google account and provide ZK Email the permissions to find your Amazon shipping confirmations and Uber receipts while keeping your data private.",
         },
         {
           title: "Step 3",
           description:
-            "ZK Email will scan your inbox, archive, and tagged emails for evidence of your Amazon and Uber activity, and will assign you credentials based on that usage.",
+            "ZK Email will search your inbox, archive, and tagged emails for evidence of your Amazon and Uber activity, and will assign you credentials based on that usage.",
         },
       ],
     },
@@ -53,9 +53,9 @@ export const PlatformDetails: PlatformSpec = {
         "It might take some time to process, so please be patient as we verify your activities",
         "Currently, this feature only works with Gmail. We're working on supporting other email providers",
         "For a faster experience, ZK Email uses remote proving. This means emails confirming Amazon shipments and Uber rides are sent to our servers temporarily and then deleted after the proof is created. We're actively working on local proving to improve privacy",
-        "We only scan your inbox, archive, and tagged emails. Any deleted emails will not count towards this Stamp",
+        "We only search your inbox, archive, and tagged emails. Any deleted emails will not count towards this Stamp",
         "This Stamp uses zero-knowledge proofs to analyze emails without exposing personal data",
-        "This Stamp only scans for specific Amazon shipping notification and Uber receipt patterns",
+        "This Stamp only searches for specific Amazon shipping notification and Uber receipt patterns",
         "No personal information or email content is stored or shared",
         "If you have trouble proving your emails, you can contribute to the public archive of dkim keys at archive.zk.email/contribute",
         "For additional support, contact the team at support@zk.email",
