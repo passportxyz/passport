@@ -282,7 +282,7 @@ export const EmbedCampaign = () => {
               </Button>
               <Button
                 variant="secondary"
-                className="w-full md:max-w-64 bg-foreground-2 hover:bg-foreground-3 text-color-1"
+                className="w-full md:max-w-64"
                 onClick={() => window.open("https://tally.so/r/3X81KL", "_blank")?.focus()}
               >
                 Partner With Us
