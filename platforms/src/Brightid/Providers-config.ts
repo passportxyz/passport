@@ -7,7 +7,6 @@ export const PlatformDetails: PlatformSpec = {
   name: "BrightID",
   description: "Verify identity with BrightID social verification",
   connectMessage: "Connect Account",
-  isEVM: true,
   website: "https://brightid.org/",
   timeToGet: "2-3 hours",
   price: "Free",
