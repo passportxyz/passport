@@ -84,7 +84,10 @@ describe("verificationHandler with error propagation", () => {
       { error: "Provider error", code: 400 },
     ];
 
-    mockedVerifyProvidersAndIssueCredentials.mockResolvedValue(mockCredentialResponses);
+    mockedVerifyProvidersAndIssueCredentials.mockResolvedValue({
+      credentials: mockCredentialResponses,
+      timings: { platforms: {} },
+    } as any);
 
     (axios.post as jest.Mock).mockResolvedValueOnce({
       data: { score: mockScore },
@@ -129,7 +132,10 @@ describe("verificationHandler with error propagation", () => {
       { error: "Provider 2 failed", code: 400 },
     ];
 
-    mockedVerifyProvidersAndIssueCredentials.mockResolvedValue(mockCredentialResponses);
+    mockedVerifyProvidersAndIssueCredentials.mockResolvedValue({
+      credentials: mockCredentialResponses,
+      timings: { platforms: {} },
+    } as any);
 
     (axios.post as jest.Mock).mockResolvedValueOnce({
       data: { score: { ...mockScore, score: "0" } },
@@ -175,7 +181,10 @@ describe("verificationHandler with error propagation", () => {
 
     const mockCredentialResponses = mockCredentials.map((credential) => ({ credential }));
 
-    mockedVerifyProvidersAndIssueCredentials.mockResolvedValue(mockCredentialResponses as any);
+    mockedVerifyProvidersAndIssueCredentials.mockResolvedValue({
+      credentials: mockCredentialResponses,
+      timings: { platforms: {} },
+    } as any);
 
     (axios.post as jest.Mock).mockResolvedValueOnce({
       data: { score: mockScore },
@@ -209,7 +218,10 @@ describe("verificationHandler with error propagation", () => {
       { credential: { type: ["VerifiableCredential"], credentialSubject: { provider: "provider-4" } } as any },
     ];
 
-    mockedVerifyProvidersAndIssueCredentials.mockResolvedValue(mockCredentialResponses);
+    mockedVerifyProvidersAndIssueCredentials.mockResolvedValue({
+      credentials: mockCredentialResponses,
+      timings: { platforms: {} },
+    } as any);
 
     (axios.post as jest.Mock).mockResolvedValueOnce({
       data: { score: mockScore },

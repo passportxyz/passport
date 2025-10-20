@@ -15,7 +15,7 @@ export const checkHandler = createHandler<CheckRequestBody, CheckResponseBody[]>
 
   const typesGroupedByPlatform = groupProviderTypesByPlatform(types);
 
-  const results = await verifyTypes(typesGroupedByPlatform, payload);
+  const { results } = await verifyTypes(typesGroupedByPlatform, payload);
   const responses = results.map(({ verifyResult, type, error, code }) => ({
     valid: verifyResult.valid,
     type,
