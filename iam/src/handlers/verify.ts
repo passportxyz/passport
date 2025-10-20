@@ -48,7 +48,7 @@ export const verifyHandler = createHandler<VerifyRequestBody, CredentialResponse
   const types = payload.types.filter((type) => type);
   const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
-  const credentials = await verifyProvidersAndIssueCredentials(providersGroupedByPlatforms, address, payload);
+  const { credentials } = await verifyProvidersAndIssueCredentials(providersGroupedByPlatforms, address, payload);
 
   return void res.json(credentials);
 });

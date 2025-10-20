@@ -70,11 +70,7 @@ const getMockEIP712Credential = (provider: string, address: string): VerifiableC
 describe("POST /verify", function () {
   beforeEach(() => {
     verifyProvidersAndIssueCredentialsMock.mockImplementation(
-      async (
-        providersByPlatform: string[][],
-        address: string,
-        payload: RequestPayload
-      ): Promise<CredentialResponseBody[]> => {
+      async (providersByPlatform: string[][], address: string, payload: RequestPayload) => {
         const ret: CredentialResponseBody[] = [];
         providersByPlatform.forEach((providers) => {
           providers.forEach((provider) => {
@@ -89,7 +85,7 @@ describe("POST /verify", function () {
             });
           });
         });
-        return ret;
+        return { credentials: ret, timings: { platforms: {} } };
       }
     );
   });

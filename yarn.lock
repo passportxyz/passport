@@ -5080,9 +5080,10 @@
   version "0.3.1"
   resolved "https://codeload.github.com/passportxyz/mishtiwasm-pkg/tar.gz/d3243727fb9d18babc4501e9ee90a399b0345fbe"
 
-"@human.tech/passport-embed@https://github.com/passportxyz/passport-embed.git#v0.3.0-beta6":
+"@human.tech/passport-embed@^0.3.0":
   version "0.3.0"
-  resolved "https://github.com/passportxyz/passport-embed.git#492fae2fa34126bbfc6b0fb60e2305668da7b294"
+  resolved "https://registry.yarnpkg.com/@human.tech/passport-embed/-/passport-embed-0.3.0.tgz#c6e93e5d9a71f8e454dc84a5025e153051c213d8"
+  integrity sha512-zJQSrDCz0b3Af5Ht68PX50i3E5EjmkGyDY3peqznrVqoKmi4mZuQ5nzQ1q8MOoqs0WiIlm19jcbTB4+/X30IUQ==
   dependencies:
     "@floating-ui/dom" "^1.7.4"
     "@holonym-foundation/human-id-sdk" "^0.0.17"

@@ -33,6 +33,17 @@ export type VerifyTypeResult = {
   code?: number;
 };
 
+export type ProviderTimings = {
+  platforms: {
+    [platformName: string]: {
+      total_ms: number;
+      providers: {
+        [providerId: string]: number;
+      };
+    };
+  };
+};
+
 const providerTypePlatformMap = Object.entries(platforms).reduce(
   (acc, [platformName, { ProviderConfig }]) => {
     ProviderConfig.forEach(({ providers }) => {
@@ -65,20 +76,29 @@ export function groupProviderTypesByPlatform(types: string[]): string[][] {
  * Verify if the user identify by the request qualifies for the listed providers
  * @param providersByPlatform - nested map of providers, grouped by platform
  * @param payload - request payload
- * @returns An array of Verification results, with 1 element for each provider
+ * @returns An array of Verification results, with 1 element for each provider, and timings
  */
 export async function verifyTypes(
   providersByPlatform: string[][],
   payload: RequestPayload
-): Promise<VerifyTypeResult[]> {
+): Promise<{ results: VerifyTypeResult[]; timings: ProviderTimings }> {
   // define a context to be shared between providers in the verify request
   // this is intended as a temporary storage for providers to share data
   const context: ProviderContext = {};
   const results: VerifyTypeResult[] = [];
+  const timings: ProviderTimings = { platforms: {} };
 
   await Promise.all(
     // Run all platforms in parallel
     providersByPlatform.map(async (platformProviders) => {
+      // Get platform name for the first provider in this group
+      const platformName =
+        platformProviders.length > 0 ? providerTypePlatformMap[platformProviders[0]] || "unknown" : "unknown";
+
+      // Initialize platform timing structure
+      const platformStartTime = Date.now();
+      const platformTiming: { providers: { [key: string]: number } } = { providers: {} };
+
       // Iterate over the types within a platform in series
       // This enables providers within a platform to reliably share context
       for (const _type of platformProviders) {
@@ -105,6 +125,9 @@ export async function verifyTypes(
           type = "DeveloperList";
         }
 
+        // Start timing
+        const startTime = Date.now();
+
         try {
           // verify the payload against the selected Identity Provider
           verifyResult = await providers.verify(type, payloadForType, context);
@@ -115,6 +138,8 @@ export async function verifyTypes(
             error = resultErrors?.join(", ")?.substring(0, 1000) || "Unable to verify provider";
             if (error.includes(`Request timeout while verifying ${type}.`)) {
               logger.debug(`Request timeout while verifying ${type}`);
+              // Record timing even on timeout
+              platformTiming.providers[realType] = Date.now() - startTime;
               // If a request times out exit loop and return results so additional requests are not made
               break;
             }
@@ -125,12 +150,21 @@ export async function verifyTypes(
           code = 400;
         }
 
+        // End timing
+        platformTiming.providers[realType] = Date.now() - startTime;
+
         results.push({ verifyResult, type, code, error });
       }
+
+      // Store platform timing
+      timings.platforms[platformName] = {
+        total_ms: Date.now() - platformStartTime,
+        providers: platformTiming.providers,
+      };
     })
   );
 
-  return results;
+  return { results, timings };
 }
 
 /**
@@ -149,8 +183,9 @@ export const verifyProvidersAndIssueCredentials = async (
   providersByPlatform: string[][],
   address: string,
   payload: RequestPayload
-): Promise<CredentialResponseBody[]> => {
-  const results = await verifyTypes(providersByPlatform, payload);
+): Promise<{ credentials: CredentialResponseBody[]; timings?: ProviderTimings }> => {
+  const { results, timings } = await verifyTypes(providersByPlatform, payload);
+
   const credentials = await Promise.all(
     results.map(async ({ verifyResult, code: verifyCode, error: verifyError, type }) => {
       let code = verifyCode;
@@ -198,5 +233,5 @@ export const verifyProvidersAndIssueCredentials = async (
   );
 
   const credentialsAfterBan = await checkCredentialBans(credentials);
-  return credentialsAfterBan;
+  return { credentials: credentialsAfterBan, timings };
 };

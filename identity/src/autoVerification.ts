@@ -12,6 +12,7 @@ import {
 import { platforms } from "@gitcoin/passport-platforms";
 import { verifyProvidersAndIssueCredentials } from "./verification.js";
 import { ApiError } from "./serverUtils/apiError.js";
+import type { ProviderTimings } from "./verification.js";
 
 export type CredentialError = {
   provider: string;
@@ -22,6 +23,7 @@ export type CredentialError = {
 export type AutoVerificationResult = {
   credentials: VerifiableCredential[];
   credentialErrors: CredentialError[];
+  timings?: ProviderTimings;
 };
 
 export type AutoVerificationFields = {
@@ -85,7 +87,11 @@ export const autoVerifyStamps = async ({
     signatureType: "EIP712" as SignatureType,
   };
 
-  const results = await verifyProvidersAndIssueCredentials(evmProvidersByPlatform, address, credentialsInfo);
+  const { credentials: results, timings } = await verifyProvidersAndIssueCredentials(
+    evmProvidersByPlatform,
+    address,
+    credentialsInfo
+  );
 
   const credentials: VerifiableCredential[] = [];
   const credentialErrors: CredentialError[] = [];
@@ -112,5 +118,6 @@ export const autoVerifyStamps = async ({
   return {
     credentials,
     credentialErrors,
+    timings,
   };
 };

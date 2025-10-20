@@ -101,13 +101,14 @@ export const getScore = async ({
 
 export const autoVerificationHandler = createHandler<AutoVerificationRequestBodyType, AutoVerificationResponseBodyType>(
   async (req, res) => {
+    const requestStartTime = Date.now();
     const { address, scorerId, credentialIds } = req.body;
 
     if (!isAddress(address)) {
       throw new ApiError("Invalid address", "400_BAD_REQUEST");
     }
 
-    const { credentials, credentialErrors } = await autoVerifyStamps({
+    const { credentials, credentialErrors, timings } = await autoVerifyStamps({
       address,
       scorerId,
       credentialIds,
@@ -119,7 +120,28 @@ export const autoVerificationHandler = createHandler<AutoVerificationRequestBody
     const response = {
       ...score,
       credentialErrors,
+      debug: undefined as
+        | {
+            timings: {
+              platforms: Record<string, { total_ms: number; providers: Record<string, number> }>;
+              total_verification_ms: number;
+              total_request_ms: number;
+            };
+          }
+        | undefined,
     };
+
+    // Check for debug timing header
+    if (req.headers["x-debug-timing"] && timings) {
+      // Format timings into the structure requested
+      response.debug = {
+        timings: {
+          platforms: timings.platforms,
+          total_verification_ms: Math.max(...Object.values(timings.platforms).map((p) => p.total_ms)),
+          total_request_ms: Date.now() - requestStartTime,
+        },
+      };
+    }
 
     // TODO should we issue a score VC?
     return void res.json(response);
@@ -165,7 +187,7 @@ export const verificationHandler = createHandler<EmbedVerifyRequestBody, EmbedVe
     const types = payload.types?.filter((type) => type) || [];
     const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
-    const credentialsVerificationResponses = await verifyProvidersAndIssueCredentials(
+    const { credentials: credentialsVerificationResponses } = await verifyProvidersAndIssueCredentials(
       providersGroupedByPlatforms,
       address,
       payload

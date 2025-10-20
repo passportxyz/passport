@@ -123,7 +123,7 @@ describe("verifyTypes", () => {
       }
     );
 
-    const result = await verifyTypes(
+    const { results: result } = await verifyTypes(
       [
         ["provider-1", "provider-2"],
         ["provider-3", "provider-4"],
@@ -216,7 +216,7 @@ describe("verifyTypes", () => {
       }
     );
 
-    const result = await verifyTypes(
+    const { results: result } = await verifyTypes(
       [
         ["AllowList#test-1", "AllowList#test-2"],
         ["DeveloperList#test-1#0x1234", "DeveloperList#test-2#0x5678"],
@@ -330,7 +330,7 @@ describe("verifyTypes", () => {
       }
     );
 
-    const result = await verifyTypes([["test-1"], ["test-2"]], payload);
+    const { results: result } = await verifyTypes([["test-1"], ["test-2"]], payload);
 
     // Verify the calls to providers.verify
     expect(verifySpy).toHaveBeenCalledTimes(2);
@@ -632,7 +632,7 @@ describe("verifyProvidersAndIssueCredentials", () => {
       ["provider-1", "provider-2"],
       ["provider-3", "provider-4"],
     ];
-    const result = await verifyProvidersAndIssueCredentials(providersByPlatform, mockAddress, payload);
+    const { credentials: result } = await verifyProvidersAndIssueCredentials(providersByPlatform, mockAddress, payload);
 
     expect(result).toEqual(
       issuedCredentials.map((c) => ({
