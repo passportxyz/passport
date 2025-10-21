@@ -8,6 +8,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Binance",
   description: "Verify KYC with your Binance Account Bound Token",
   connectMessage: "Connect Account",
+  isEVM: true,
   timeToGet: "5-10 minutes",
   price: "~$1",
   cta: {
