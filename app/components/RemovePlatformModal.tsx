@@ -39,7 +39,8 @@ export const RemovePlatformModal = ({
       <p className="text-color-4">
         Are you sure you want to remove all credentials from{" "}
         <span className="font-semibold text-color-2">{platformName}</span>? This will remove {providerIds.length}{" "}
-        credentials and cannot be undone.
+        credential
+        {providerIds.length !== 1 ? "s" : ""} and cannot be undone.
       </p>
     </ActionOrCancelModal>
   );
