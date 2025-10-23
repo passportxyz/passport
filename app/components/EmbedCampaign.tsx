@@ -326,10 +326,10 @@ export const EmbedCampaign = () => {
             src="./assets/passportBackgroundLogo.svg"
             alt="Background Icon"
           />
-          <Heading className="col-start-1 col-end-1 lg:max-w-sm lg:row-start-4 lg:self-start lg:mt-16 backdrop-blur-md p-5">
-            Frequently Asked Questions
-          </Heading>
-          <FAQ className="col-span-1 w-full self-start" />
+          <div className="col-span-1 lg:col-span-2 w-full self-start flex flex-col gap-6">
+            <Heading>Frequently Asked Questions</Heading>
+            <FAQ />
+          </div>
         </BodyWrapper>
         <WelcomeFooter displayPrivacyPolicy={true} />
       </HeaderContentFooterGrid>
