@@ -283,7 +283,7 @@ export const EmbedCampaign = () => {
               <Button
                 variant="secondary"
                 className="w-full md:max-w-64"
-                onClick={() => window.open("https://tally.so/r/3X81KL", "_blank")?.focus()}
+                onClick={() => window.open("https://tally.so/r/3X81KL?ref=embed-campaign", "_blank")?.focus()}
               >
                 Partner With Us
               </Button>
