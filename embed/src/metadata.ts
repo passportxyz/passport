@@ -21,6 +21,7 @@ type MetadataResponseBody = {
     icon: string;
     requiresSignature?: boolean;
     requiresPopup?: boolean;
+    requiresSDKFlow?: boolean;
   }[];
 }[];
 
