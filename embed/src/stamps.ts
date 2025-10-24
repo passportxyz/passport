@@ -32,10 +32,10 @@ export const STAMP_PAGES: StampPage[] = [
         platformId: "Biometrics",
         name: "Biometrics",
         description:
-          "Complete biometric verification using your phone or computer camera for 3D facial liveness detection.",
+          "<div>Complete biometric verification <a href='https://id.human.tech/biometrics' target='_blank' rel='noopener noreferrer' style='text-decoration: underline; font-weight: bold; color: currentColor'>here</a> using your phone or computer camera for 3D facial liveness detection.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-biometrics-stamp",
-        requiresSDKFlow: true,
+        // requiresSDKFlow: true,
       },
       {
         platformId: "Coinbase",
