@@ -12,6 +12,7 @@ type Platform = {
   requiresSignature?: boolean;
   requiresPopup?: boolean;
   popupUrl?: string;
+  requiresSDKFlow?: boolean;
 };
 
 const oAuthPopupUrl = process.env.EMBED_POPUP_OAUTH_URL;
@@ -31,9 +32,10 @@ export const STAMP_PAGES: StampPage[] = [
         platformId: "Biometrics",
         name: "Biometrics",
         description:
-          "Complete biometric verification using your phone or computer camera for 3D facial liveness detection.",
+          "<div>Complete biometric verification <a href='https://id.human.tech/biometrics' target='_blank' rel='noopener noreferrer' style='text-decoration: underline; font-weight: bold; color: currentColor'>here</a> using your phone or computer camera for 3D facial liveness detection.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-biometrics-stamp",
+        // requiresSDKFlow: true,
       },
       {
         platformId: "Coinbase",
@@ -51,14 +53,16 @@ export const STAMP_PAGES: StampPage[] = [
         description: "Verify your government-issued identification document.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-government-id-stamp",
+        requiresSDKFlow: true,
       },
       {
         platformId: "CleanHands",
         name: "Proof of Clean Hands",
         description:
-          "Verify government ID, liveness check, and that you aren’t on a sanctions list or politically exposed persons list.",
+          "Verify government ID, liveness check, and that you aren't on a sanctions list or politically exposed persons list.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-proof-of-clean-hands-stamp",
+        requiresSDKFlow: true,
       },
       {
         platformId: "HumanIdPhone",
@@ -66,6 +70,7 @@ export const STAMP_PAGES: StampPage[] = [
         description: "Complete phone verification.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-phone-verification-stamp",
+        requiresSDKFlow: true,
       },
     ],
   },
