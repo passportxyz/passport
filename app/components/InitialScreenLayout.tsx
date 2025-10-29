@@ -12,14 +12,16 @@ export const InitialScreenWelcome: React.FC<{ imgUrl: string; children: React.Re
           <div className="flex flex-row justify-end md:max-w-[740px]">
             <img src={imgUrl} alt="Welcome"></img>
           </div>
-          <div className="md:col-span-5 flex flex-col justify-center items-center md:items-start gap-6 relative z-10 overflow-visible md:max-w-[740px]">
+          <div className="grid grid-cols-4 relative md:col-span-5 md:max-w-[740px]">
             <div
               style={{
                 background: "radial-gradient(closest-side, #EBFFF7, #EBFFF7, rgb(255,255,255,0), rgb(255,255,255,0))",
               }}
-              className="w-[200%] h-full absolute -z-10 -left-[50%]"
+              className="h-full w-full no-cursor col-start-1 row-start-1 col-end-5 lg:col-end-4"
             />
-            {children}
+            <div className="flex flex-col justify-center items-center md:items-start gap-6 overflow-visible col-start-1 col-end-5 row-start-1">
+              {children}
+            </div>
           </div>
         </div>
       </div>
