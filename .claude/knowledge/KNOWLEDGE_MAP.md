@@ -5,10 +5,12 @@
 ## 🏗️ Architecture
 - [Platform System Architecture](architecture/platform_system.md) - How platforms are identified, structured, and split between frontend/backend
 - [Credential Verification Error Handling](architecture/credential_verification_error_handling.md) - Error flow through verification layers and lost error information
+- [TopNav Dynamic Content Architecture](architecture/topnav_dynamic_content.md) - Dynamic partner dashboards via customization API with SVG handling
 
 ## 📦 Workflows
 - [Package Management](workflows/package_management.md) - Yarn commands and monorepo structure
 - [Storybook Component Development](workflows/storybook_component_development.md) - Isolated component development with visual testing and Figma integration
+- [TopNav Implementation Workflow](workflows/topnav_implementation.md) - Step-by-step approach for implementing dynamic partner dashboards
 
 ## 🎨 Patterns
 - [HumanID Platform Patterns](patterns/humanid_platforms.md) - CleanHands attestations, Biometrics migration, shared validation
