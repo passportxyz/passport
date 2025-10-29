@@ -6,18 +6,11 @@ import type { NavFeature, PartnerLink } from "../mocks/navData";
 interface TopNavProps {
   features?: NavFeature[];
   partners?: PartnerLink[];
-  onFeatureClick?: (id: string) => void;
   onPartnerClick?: (id: string) => void;
   onClose?: () => void;
 }
 
-export const TopNav: React.FC<TopNavProps> = ({
-  features = [],
-  partners = [],
-  onFeatureClick,
-  onPartnerClick,
-  onClose,
-}) => {
+export const TopNav: React.FC<TopNavProps> = ({ features = [], partners = [], onPartnerClick, onClose }) => {
   const WandIcon = getIcon("wand");
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -59,10 +52,10 @@ export const TopNav: React.FC<TopNavProps> = ({
       `}
     >
       {/* Feature Cards Section */}
-      <div className="flex gap-3 items-start justify-center w-full">
-        {features.map((feature) => (
-          <div key={feature.id} className="flex-1 min-w-0">
-            <FeatureCard {...feature} onClick={onFeatureClick} />
+      <div className="flex gap-3 items-stretch justify-center w-full">
+        {features.map((feature, index) => (
+          <div key={index} className="flex-1 min-w-0 flex">
+            <FeatureCard {...feature} />
           </div>
         ))}
       </div>

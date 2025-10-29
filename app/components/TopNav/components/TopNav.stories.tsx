@@ -16,7 +16,6 @@ const meta: Meta<typeof TopNav> = {
     },
   },
   argTypes: {
-    onFeatureClick: { action: "feature clicked" },
     onPartnerClick: { action: "partner clicked" },
   },
   decorators: [
@@ -65,13 +64,13 @@ export const CustomContent: Story = {
         icon: "user-check",
         title: "Custom Feature 1",
         description: "This is a custom feature description",
-        id: "custom-1",
+        url: "#custom-1",
       },
       {
         icon: "database",
         title: "Custom Feature 2",
         description: "Another custom feature with longer description text",
-        id: "custom-2",
+        url: "#custom-2",
       },
     ],
     partners: [

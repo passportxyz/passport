@@ -4,7 +4,7 @@ export interface NavFeature {
   icon: "user-check" | "embed" | "database" | "passport";
   title: string;
   description: string;
-  id: string; // Will be used for routing to /#/<id>/dashboard
+  url: string; // Navigation URL
 }
 
 export interface PartnerLink {
@@ -14,30 +14,31 @@ export interface PartnerLink {
   isCurrent?: boolean; // Optional flag to indicate if this is the current active dashboard
 }
 
+// TODO: Replace with API query when backend is ready
 export const mockNavFeatures: NavFeature[] = [
   {
     icon: "user-check",
     title: "Real-time Verification",
     description: "Protect programs in real-time with Stamps and Models",
-    id: "real-time",
+    url: "https://passport.human.tech/verification",
   },
   {
     icon: "embed",
     title: "Embed",
     description: "Embed humanity verification directly in your dApp",
-    id: "embed",
+    url: "https://passport.human.tech/embed",
   },
   {
     icon: "database",
     title: "Data Services",
     description: "Classify and cluster Sybils in bulk lists of addresses",
-    id: "data-services",
+    url: "https://passport.human.tech/data",
   },
   {
     icon: "passport",
     title: "Passport Ecosystem",
     description: "View all Passport-protected partners",
-    id: "ecosystem",
+    url: "https://passport.human.tech/ecosystem",
   },
 ];
 

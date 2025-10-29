@@ -13,6 +13,7 @@ import { Icon } from "@chakra-ui/react";
 import { useCustomization } from "../hooks/useCustomization";
 import { getChainName } from "../utils/chains";
 import { TopNav } from "./TopNav/components/TopNav";
+import type { NavFeature, PartnerLink } from "./TopNav/mocks/navData";
 
 type MinimalHeaderProps = {
   className?: string;
@@ -337,6 +338,43 @@ const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) =
   );
 };
 
+const navFeatures: NavFeature[] = [
+  {
+    icon: "user-check",
+    title: "Real-time Verification",
+    description: "Protect programs in real-time with Stamps and Models",
+    url: "https://passport.human.tech/verification",
+  },
+  {
+    icon: "embed",
+    title: "Embed",
+    description: "Embed humanity verification directly in your dApp",
+    url: "https://passport.human.tech/embed",
+  },
+  {
+    icon: "database",
+    title: "Data Services",
+    description: "Classify and cluster Sybils in bulk lists of addresses",
+    url: "https://passport.human.tech/data",
+  },
+  {
+    icon: "passport",
+    title: "Passport Ecosystem",
+    description: "View all Passport-protected partners",
+    url: "https://passport.human.tech/ecosystem",
+  },
+];
+
+// TODO: Fetch from backend API when ready
+const partnerDashboards: PartnerLink[] = [
+  { name: "Lido", logo: "lido", id: "lido" },
+  { name: "Verax", logo: "verax", id: "verax" },
+  { name: "Shape", logo: "shape", id: "shape" },
+  { name: "Octant", logo: "octant", id: "octant" },
+  { name: "Recall", logo: "recall", id: "recall" },
+  { name: "Linea", logo: "linea", id: "linea" },
+];
+
 const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   const [showSidebar, setShowSidebar] = React.useState(false);
   const [showTopNav, setShowTopNav] = React.useState(false);
@@ -389,7 +427,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
             </button>
             {showTopNav && (
               <div className="absolute top-12 right-0 z-50">
-                <TopNav onClose={() => setShowTopNav(false)} />
+                <TopNav features={navFeatures} partners={partnerDashboards} onClose={() => setShowTopNav(false)} />
               </div>
             )}
           </div>
