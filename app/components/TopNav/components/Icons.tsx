@@ -135,7 +135,7 @@ export const RecallLogo: React.FC<IconProps> = ({ className }) => (
 );
 
 export const LineaLogo: React.FC<IconProps> = ({ className }) => (
-  <svg width="23" height="23" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg" classNamee={className}>
+  <svg width="23" height="23" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <path
       d="M13.4165 5.75C15.0043 5.75 16.2915 4.46284 16.2915 2.875C16.2915 1.28718 15.0043 0 13.4165 0C11.8287 0 10.5415 1.28718 10.5415 2.875C10.5415 4.46284 11.8287 5.75 13.4165 5.75Z"
       fill="black"

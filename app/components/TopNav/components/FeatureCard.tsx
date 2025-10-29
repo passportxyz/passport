@@ -8,6 +8,8 @@ export const FeatureCard: React.FC<NavFeature> = ({ icon, title, description, ur
   return (
     <a
       href={url}
+      target="_blank"
+      rel="noopener noreferrer"
       className={`
         flex flex-col gap-2 p-4 rounded-lg text-left w-full h-full
         transition-all duration-200 ease-in-out

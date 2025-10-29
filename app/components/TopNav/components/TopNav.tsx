@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, RefObject } from "react";
 import { FeatureCard } from "./FeatureCard";
 import { getIcon, getPartnerLogo } from "./Icons";
 import type { NavFeature, PartnerLink } from "../mocks/navData";
@@ -8,16 +8,26 @@ interface TopNavProps {
   partners?: PartnerLink[];
   onPartnerClick?: (id: string) => void;
   onClose?: () => void;
+  buttonRef?: RefObject<HTMLButtonElement>;
 }
 
-export const TopNav: React.FC<TopNavProps> = ({ features = [], partners = [], onPartnerClick, onClose }) => {
+export const TopNav: React.FC<TopNavProps> = ({
+  features = [],
+  partners = [],
+  onPartnerClick,
+  onClose,
+  buttonRef = null,
+}) => {
   const WandIcon = getIcon("wand");
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Handle click outside to close
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        !containerRef.current?.contains(event.target as Node) &&
+        !buttonRef?.current?.contains(event.target as Node)
+      ) {
         onClose?.();
       }
     };
@@ -25,7 +35,7 @@ export const TopNav: React.FC<TopNavProps> = ({ features = [], partners = [], on
     // Add event listener after a small delay to avoid closing immediately on open
     const timeoutId = setTimeout(() => {
       document.addEventListener("mousedown", handleClickOutside);
-    }, 0);
+    }, 200);
 
     return () => {
       clearTimeout(timeoutId);

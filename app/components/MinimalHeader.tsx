@@ -1,15 +1,13 @@
 // --- React methods
-import React, { Fragment } from "react";
+import React, { useRef } from "react";
 import { PointsData, ScorerContext } from "../context/scorerContext";
 import { AccountCenter } from "./AccountCenter";
 import { Notifications } from "./Notifications";
 import { OnchainSidebar } from "./OnchainSidebar";
 import { useOneClickVerification } from "../hooks/useOneClickVerification";
-import { Popover, Transition } from "@headlessui/react";
 import { HumanPointsLabel } from "./humanPoints";
 import TooltipOverChildren from "./TooltipOverChildren";
 import { applyMultiplier, beforeHumanPointsRelease } from "../utils/helpers";
-import { Icon } from "@chakra-ui/react";
 import { useCustomization } from "../hooks/useCustomization";
 import { getChainName } from "../utils/chains";
 import { TopNav } from "./TopNav/components/TopNav";
@@ -91,111 +89,6 @@ const HumanPassportLogoWithText = () => {
         fill="black"
       />
     </svg>
-  );
-};
-
-const WalletIcon = () => {
-  return (
-    <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M17.5 14.4648H17.51M7.5 7.46484H19.5C20.0304 7.46484 20.5391 7.67556 20.9142 8.05063C21.2893 8.4257 21.5 8.93441 21.5 9.46484V19.4648C21.5 19.9953 21.2893 20.504 20.9142 20.8791C20.5391 21.2541 20.0304 21.4648 19.5 21.4648H5.5C4.96957 21.4648 4.46086 21.2541 4.08579 20.8791C3.71071 20.504 3.5 19.9953 3.5 19.4648V5.46484C3.5 4.93441 3.71071 4.4257 4.08579 4.05063C4.46086 3.67556 4.96957 3.46484 5.5 3.46484H19.5"
-        stroke="#3B3B3B"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-};
-
-const BridgeIcon = () => {
-  return (
-    <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g clipPath="url(#clip0_18656_12636)">
-        <path
-          d="M17.8926 12.8535L14.998 15.8486C15.1089 14.7168 15.125 13.6617 15.125 12.543C15.125 11.6474 15.068 10.7472 14.9863 9.84668L17.8926 12.8535Z"
-          fill="#929292"
-          stroke="#0A0A0A"
-        />
-        <path
-          d="M22.8532 14.6446C23.8102 13.6547 23.8102 12.0434 22.8532 11.0535L16.0601 4.02662C15.6884 3.64221 14.7045 2.85946 13.2565 3.44901C13.374 3.65815 13.5261 3.95292 13.6397 4.24571C13.7552 4.54646 13.8688 4.88306 13.9459 5.11809C14.2578 5.03045 14.6949 5.00257 15.0241 5.4288L21.5131 12.139C21.8924 12.5333 21.8905 13.1727 21.5131 13.565L14.9664 20.333C14.7507 20.5501 14.3618 20.7492 13.7129 20.5361C13.6551 20.7154 13.5723 20.9624 13.4683 21.2591C13.3547 21.5818 13.2296 21.8547 13.1333 22.0479C14.3348 22.5597 15.3611 22.4362 16.0427 21.6933L22.8532 14.6446Z"
-          fill="#929292"
-        />
-        <path
-          fillRule="evenodd"
-          clipRule="evenodd"
-          d="M9.3618 0.945312C9.9568 0.945312 10.4781 1.23682 10.9202 1.71711C11.3596 2.19445 11.7319 2.86896 12.042 3.67156C12.0706 3.74459 12.0981 3.81881 12.125 3.89328L12.2045 4.11711L12.2052 4.11898C12.342 4.51691 12.4675 4.94759 12.5761 5.40008C12.5765 5.40111 12.5771 5.40207 12.5774 5.40289C12.5856 5.42352 12.5908 5.44331 12.5935 5.45469C12.5998 5.4805 12.6056 5.51234 12.611 5.54469C12.6219 5.61127 12.6345 5.7034 12.6481 5.81C12.6754 6.02416 12.7078 6.30902 12.7401 6.59141C12.7725 6.87495 12.8049 7.15618 12.8317 7.36649C12.8386 7.42069 12.845 7.4695 12.8509 7.5118H12.8516L12.889 7.70469V7.70539C12.889 7.70539 12.8893 7.70637 12.8894 7.70703C12.8897 7.70835 12.8899 7.71025 12.8903 7.71266C12.8913 7.71758 12.8927 7.72484 12.8944 7.73422C12.8979 7.75297 12.9027 7.78065 12.9089 7.81672C12.9214 7.88889 12.939 7.99513 12.9597 8.13266C13.001 8.4078 13.055 8.80866 13.1058 9.31414C13.2074 10.325 13.2965 11.7558 13.2474 13.4384C13.1974 15.3946 13.0438 16.9662 12.8969 18.0507C12.8235 18.5929 12.7516 19.0143 12.6948 19.3018C12.6665 19.4451 12.6416 19.5572 12.6216 19.6353C12.6119 19.6735 12.6021 19.708 12.5928 19.7352C12.5897 19.7444 12.5842 19.7571 12.5781 19.771C12.4695 20.2233 12.344 20.6539 12.2072 21.0516L12.2065 21.0535C12.1541 21.202 12.1015 21.3521 12.0445 21.4979L12.0447 21.4981C11.7334 22.3011 11.3603 22.976 10.9205 23.4535C10.4781 23.9338 9.95682 24.2253 9.3618 24.2253C8.65023 24.2253 8.04865 23.8104 7.55709 23.1559C7.06643 22.5025 6.66448 21.5853 6.34511 20.5105C6.22583 20.1126 6.11769 19.6892 6.02223 19.2491C5.59414 19.1491 5.18546 19.0392 4.80005 18.9186L4.7996 18.9184C3.75657 18.5894 2.86704 18.1761 2.23358 17.6713C1.599 17.1655 1.19629 16.5458 1.19629 15.8115C1.1963 15.1964 1.47985 14.6589 1.94604 14.2037C2.38058 13.7794 2.98322 13.4161 3.69887 13.1091L3.84343 13.0484C3.91435 13.019 3.98613 12.991 4.05846 12.9636L4.27779 12.883C4.56802 12.7771 4.87499 12.6778 5.1968 12.5865C4.87456 12.4951 4.56723 12.3956 4.27665 12.2895C4.1252 12.2359 3.9804 12.1799 3.84026 12.1217C3.06145 11.8011 2.40742 11.4175 1.94468 10.9651C1.47913 10.5099 1.1963 9.97309 1.19629 9.35914C1.19629 8.62483 1.59895 8.00511 2.2338 7.49938C2.86737 6.99467 3.7572 6.58142 4.80096 6.2525L4.96297 6.20188C5.30039 6.09869 5.6565 6.00422 6.02608 5.91945C6.12307 5.47851 6.22998 5.05758 6.34692 4.65875L6.34737 4.65781L6.4081 4.45836C6.71714 3.46959 7.09872 2.62561 7.55822 2.01359C8.0493 1.35955 8.65032 0.94533 9.3618 0.945312ZM10.1412 13.5455C9.42132 13.5951 8.75708 13.6652 8.15028 13.753L8.1505 13.7532C6.89212 13.9365 5.5915 14.2294 4.48058 14.6935L4.48035 14.6933C3.90721 14.9351 3.50004 15.179 3.24073 15.3924C3.11086 15.4993 3.02396 15.594 2.97132 15.6713C2.917 15.7511 2.9106 15.7955 2.9106 15.807C2.91063 15.8187 2.91823 15.8678 2.9822 15.9566C3.04385 16.0421 3.14495 16.1461 3.29465 16.2627C3.59375 16.4954 4.06249 16.7593 4.72075 17.0141L4.86395 17.0682C5.11317 17.1606 5.38692 17.2514 5.68508 17.3382C5.63767 16.9976 5.59499 16.6498 5.55729 16.2985L5.55706 16.2959C5.52831 15.9997 5.49922 15.6959 5.47685 15.387L5.46303 15.1953L5.64089 15.1395C6.00314 15.0259 6.41696 14.9123 6.88663 14.8105L7.14811 14.7538L7.16578 15.0296C7.20089 15.5767 7.249 16.0921 7.30604 16.5758L7.33798 16.8348C7.49258 18.0446 7.73493 19.2744 8.10541 20.3577L8.18675 20.5873L8.18698 20.5878L8.23343 20.7127C8.46606 21.3255 8.70439 21.7676 8.91612 22.0564C9.02922 22.2107 9.13007 22.3151 9.21316 22.3787C9.29926 22.4445 9.34734 22.4525 9.35954 22.4525C9.37151 22.4525 9.41505 22.4457 9.49254 22.3897C9.56765 22.3354 9.65934 22.2457 9.76308 22.112C9.97031 21.8447 10.2071 21.4252 10.4419 20.8344L10.4945 20.6989C10.588 20.453 10.6803 20.1796 10.7689 19.8791C10.4344 19.8623 10.1008 19.8412 9.76965 19.8127C9.47192 19.7876 9.17861 19.76 8.88757 19.7302L8.73349 19.7145L8.6884 19.5615C8.5732 19.1705 8.46301 18.7231 8.36213 18.2127L8.29778 17.8862L8.61748 17.9263C8.96964 17.9703 9.33912 18.0093 9.72592 18.0413L10.1184 18.0709L10.1195 18.0711L10.4263 18.0913C10.674 18.1061 10.9301 18.1177 11.184 18.1271C11.247 17.7919 11.305 17.4334 11.3562 17.0551V17.0546L11.3897 16.7991C11.4594 16.2459 11.5152 15.6469 11.5537 15.001C10.9104 14.7374 10.3984 14.2082 10.1412 13.5455ZM10.4193 21.4658C10.4378 21.4274 10.4571 21.3886 10.4757 21.3484L10.4811 21.3359C10.4607 21.3805 10.4397 21.4235 10.4193 21.4658ZM11.9886 20.9713C11.9389 21.1118 11.8909 21.2483 11.8397 21.3809C11.8635 21.3192 11.8871 21.2569 11.9099 21.1934L11.9886 20.9713ZM8.06508 20.9232C8.07424 20.9464 8.08376 20.9692 8.09295 20.9919C8.06775 20.9296 8.04226 20.8658 8.01727 20.7999L8.06508 20.9232ZM11.0528 18.3627L11.3734 18.3741C11.251 18.3702 11.1273 18.3655 11.0036 18.3603C11.02 18.361 11.0364 18.362 11.0528 18.3627ZM11.5259 17.5034C11.5298 17.478 11.5338 17.4525 11.5377 17.4268L11.5463 17.3661C11.5395 17.4122 11.5328 17.458 11.5259 17.5034ZM4.78578 17.2941C4.79148 17.2963 4.79727 17.2981 4.803 17.3002C4.74734 17.2797 4.69274 17.2595 4.63941 17.2388L4.78578 17.2941ZM1.54364 16.4286L1.54704 16.437C1.53908 16.4167 1.53157 16.3962 1.52438 16.3756C1.53056 16.3933 1.53688 16.411 1.54364 16.4286ZM1.47997 16.2287C1.48218 16.2374 1.48487 16.246 1.48722 16.2547C1.48468 16.2453 1.48189 16.236 1.47951 16.2266L1.47997 16.2287ZM9.3618 2.71344C9.3497 2.71346 9.30165 2.72154 9.21543 2.7875C9.13234 2.85107 9.03126 2.95527 8.91816 3.10953C8.70642 3.39833 8.46833 3.8406 8.2357 4.45344L8.18925 4.57836C8.08179 4.87302 7.97509 5.20351 7.87453 5.57C8.20556 5.52107 8.54366 5.47718 8.88508 5.43828L8.88757 5.43805L9.32578 5.39422C9.47315 5.38016 9.62181 5.36707 9.77169 5.35555L9.95567 5.34125L10.0105 5.52336C10.1235 5.89831 10.2315 6.32531 10.3302 6.80844L10.3855 7.07914L10.1184 7.09742C9.58728 7.1336 9.08697 7.18303 8.61748 7.2418L8.61771 7.24203C7.27919 7.41187 5.90077 7.69152 4.72324 8.14953L4.72279 8.14977C4.06456 8.4045 3.59601 8.66841 3.29692 8.90117C3.14716 9.01773 3.04588 9.12173 2.98424 9.20727C2.92021 9.29611 2.91288 9.3452 2.91286 9.3568C2.91286 9.36832 2.91923 9.41267 2.97359 9.4925C3.02622 9.5698 3.11316 9.66429 3.24299 9.77117C3.5024 9.98473 3.90981 10.2286 4.48329 10.4705C4.75542 10.5852 5.06527 10.6998 5.41227 10.8083C5.42857 10.4623 5.44945 10.1184 5.47708 9.7768C5.50152 9.47002 5.52816 9.16774 5.55706 8.87L5.57269 8.70969L5.72201 8.66399C6.10055 8.54791 6.53392 8.43446 7.0287 8.32836L7.34523 8.26039L7.30604 8.5925C7.249 9.07621 7.20089 9.59175 7.16578 10.1389L7.16556 10.1401C7.1415 10.489 7.12388 10.8645 7.11095 11.2353C7.4365 11.3003 7.78479 11.36 8.15231 11.4127L8.40065 11.4474C8.93787 11.5193 9.52026 11.5773 10.1433 11.6202C10.4009 10.9554 10.9149 10.4281 11.5574 10.1616C11.5093 9.41842 11.4413 8.73455 11.3562 8.1118L11.3215 7.87039C11.1418 6.65915 10.8638 5.39541 10.444 4.33156C10.2092 3.74072 9.97258 3.32121 9.76534 3.05398C9.66166 2.9203 9.5699 2.83077 9.4948 2.77648C9.41731 2.72047 9.37378 2.71344 9.3618 2.71344ZM4.6709 10.8038C4.69629 10.8136 4.72203 10.8231 4.74794 10.8329C4.67336 10.8048 4.60085 10.7768 4.53065 10.7485L4.6709 10.8038ZM2.69512 9.45172C2.69805 9.46189 2.70148 9.4722 2.70532 9.48266C2.70122 9.47149 2.69773 9.46045 2.69467 9.44961L2.69512 9.45172ZM1.46184 9.02188C1.45939 9.03402 1.45723 9.04623 1.45504 9.05844C1.45787 9.04269 1.46084 9.02698 1.46411 9.01133L1.46184 9.02188ZM4.3981 8.02297C4.36249 8.0379 4.32741 8.05275 4.29297 8.06774C4.36529 8.03627 4.44029 8.00519 4.51773 7.97399L4.3981 8.02297ZM9.46716 2.49289C9.46271 2.49136 9.45841 2.48955 9.45402 2.4882L9.45198 2.48773C9.45703 2.48925 9.46204 2.49113 9.46716 2.49289ZM9.55236 1.19703C9.58328 1.20083 9.61403 1.20545 9.64457 1.21109C9.58304 1.19973 9.52074 1.19198 9.45765 1.18813L9.55236 1.19703Z"
-          fill="#3B3B3B"
-        />
-      </g>
-      <defs>
-        <clipPath id="clip0_18656_12636">
-          <rect width="24" height="24" fill="white" transform="translate(0.5 0.464844)" />
-        </clipPath>
-      </defs>
-    </svg>
-  );
-};
-
-const ZeronymIcon = () => {
-  return (
-    <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M16.5 10.4648H18.5M16.5 14.4648H18.5M6.67 15.4648C6.87614 14.8789 7.2591 14.3713 7.76602 14.0123C8.27294 13.6532 8.87881 13.4604 9.5 13.4604C10.1212 13.4604 10.7271 13.6532 11.234 14.0123C11.7409 14.3713 12.1239 14.8789 12.33 15.4648M11.5 11.4648C11.5 12.5694 10.6046 13.4648 9.5 13.4648C8.39543 13.4648 7.5 12.5694 7.5 11.4648C7.5 10.3603 8.39543 9.46484 9.5 9.46484C10.6046 9.46484 11.5 10.3603 11.5 11.4648ZM4.5 5.46484H20.5C21.6046 5.46484 22.5 6.36027 22.5 7.46484V17.4648C22.5 18.5694 21.6046 19.4648 20.5 19.4648H4.5C3.39543 19.4648 2.5 18.5694 2.5 17.4648V7.46484C2.5 6.36027 3.39543 5.46484 4.5 5.46484Z"
-        stroke="#3B3B3B"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-};
-
-const AppSelectorOptions = [
-  {
-    logo: (
-      <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M12.5399 12.4649V16.0149C12.5411 16.1418 12.5086 16.2668 12.4459 16.3772C12.3832 16.4875 12.2924 16.5793 12.1827 16.6433C12.0731 16.7073 11.9485 16.7411 11.8215 16.7414C11.6946 16.7416 11.5699 16.7084 11.4599 16.6449L8.84992 15.1649C8.54471 14.9887 8.29148 14.735 8.11588 14.4294C7.94027 14.1238 7.84852 13.7773 7.84992 13.4249V10.8749C7.85055 10.6073 7.9187 10.3442 8.04805 10.11C8.17741 9.87574 8.36379 9.67794 8.58992 9.53489L11.6499 7.59489C11.9192 7.42738 12.2321 7.34365 12.549 7.35433C12.866 7.36501 13.1726 7.46963 13.4299 7.65489L16.4299 9.83489C16.6318 9.98388 16.7959 10.1783 16.9088 10.4024C17.0217 10.6265 17.0803 10.874 17.0799 11.1249V18.5449C17.0811 18.7875 17.0268 19.0272 16.9211 19.2456C16.8153 19.464 16.661 19.6553 16.4699 19.8049L14.3599 21.4649C13.8246 21.8807 13.1758 22.1243 12.4991 22.1636C11.8224 22.2029 11.1497 22.0359 10.5699 21.6849L5.04992 18.3149C4.55647 18.0197 4.14732 17.6024 3.86184 17.1033C3.57637 16.6041 3.42418 16.0399 3.41992 15.4649V9.35489C3.42097 8.79118 3.56341 8.23674 3.83421 7.74233C4.105 7.24791 4.49549 6.82933 4.96992 6.52489L10.7199 2.84489C11.2615 2.49729 11.8914 2.3125 12.5349 2.3125C13.1784 2.3125 13.8084 2.49729 14.3499 2.84489L20.0399 6.51489C20.5117 6.81891 20.8998 7.23628 21.1689 7.72888C21.4379 8.22148 21.5792 8.77362 21.5799 9.33489V17.5949"
-          stroke="#3B3B3B"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-    label: "Passport",
-  },
-];
-
-const AppSelector = () => {
-  const active = AppSelectorOptions[0];
-  return (
-    <Popover className="relative text-gray-800">
-      <Popover.Button className="ml-auto" data-testid="app-bar-selector">
-        <button className="text-gray-800 shadow-md px-4 py-1 rounded-lg flex gap-2">
-          {active.logo}
-          {active.label}
-        </button>
-      </Popover.Button>
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="opacity-0 translate-y-1"
-        enterTo="opacity-100 translate-y-0"
-        leave="transition ease-in duration-150"
-        leaveFrom="opacity-100 translate-y-0"
-        leaveTo="opacity-0 translate-y-1"
-      >
-        <Popover.Panel className="absolute w-96 md:w-72 right-1 flex flex-col border-foreground-5 border rounded bg-white">
-          <ul>
-            <li>Option 1</li>
-            <li>Option 2</li>
-            <li>Option 3</li>
-          </ul>
-        </Popover.Panel>
-      </Transition>
-    </Popover>
   );
 };
 
@@ -375,120 +268,158 @@ const partnerDashboards: PartnerLink[] = [
   { name: "Linea", logo: "linea", id: "linea" },
 ];
 
+const partnerWithUs: NavFeature[] = [
+  {
+    icon: "user-check",
+    title: "Real-time Verification",
+    description: "Protect programs in real-time with Stamps and Models",
+    url: "https://passport.human.tech/verification",
+  },
+  {
+    icon: "embed",
+    title: "Embed",
+    description: "Embed humanity verification directly in your dApp",
+    url: "https://passport.human.tech/embed",
+  },
+  {
+    icon: "database",
+    title: "Data Services",
+    description: "Classify and cluster Sybils in bulk lists of addresses",
+    url: "https://passport.human.tech/data",
+  },
+  {
+    icon: "passport",
+    title: "Passport Ecosystem",
+    description: "View all Passport-protected partners",
+    url: "https://passport.human.tech/ecosystem",
+  },
+];
+
 const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
+  const navButtonRef = useRef<HTMLButtonElement>(null);
+  const partnerNavButtonRef = useRef<HTMLButtonElement>(null);
   const [showSidebar, setShowSidebar] = React.useState(false);
   const [showTopNav, setShowTopNav] = React.useState(false);
+  const [showPartnerNav, setShowPartnerNav] = React.useState(false);
   const { verificationComplete } = useOneClickVerification();
   const { scoreState, pointsData } = React.useContext(ScorerContext);
   const { hideHumnBranding } = useCustomization();
 
-  const icons = [
-    // {
-    //   link: "https://app.passport.xyz/",
-    //   icon: <ZeronymIcon />,
-    //   label: "Human Passport",
-    // },
-    {
-      link: "https://humansignon.com/",
-      icon: <WalletIcon />,
-      label: "Human Wallet",
-    },
-    // {
-    //   link: "https://bridge.human.tech/",
-    //   icon: <BridgeIcon />,
-    //   label: "Aztec Bridge",
-    // },
-  ];
-
   return (
     <>
       <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
-      <div className={`hidden md:flex items-center h-16 ${className}`}>
-        <div className="flex-1 flex items-center">
+      <div className={`flex gap-4 items-center h-16 ${className}`}>
+        <div className="flex items-center flex-grow md:flex-grow-0">
           <HumanPassportLogoWithText />
         </div>
-        {/* TopNav Passport Dropdown */}
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <button
-              onClick={() => setShowTopNav(!showTopNav)}
-              className="flex items-center bg-white px-3 py-1 rounded-lg shadow-md shadow-[#aaaaaa] hover:shadow-lg transition-shadow"
-            >
-              <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M11.96 12.4649V16.0149C11.9588 16.1418 11.9913 16.2668 12.054 16.3772C12.1167 16.4875 12.2075 16.5793 12.3172 16.6433C12.4268 16.7073 12.5514 16.7411 12.6784 16.7414C12.8053 16.7416 12.9301 16.7084 13.04 16.6449L15.65 15.1649C15.9552 14.9887 16.2084 14.735 16.384 14.4294C16.5596 14.1238 16.6514 13.7773 16.65 13.4249V10.8749C16.6494 10.6073 16.5812 10.3442 16.4519 10.11C16.3225 9.87574 16.1361 9.67794 15.91 9.53489L12.85 7.59489C12.5807 7.42738 12.2678 7.34365 11.9509 7.35433C11.6339 7.36501 11.3273 7.46963 11.07 7.65489L8.06999 9.83489C7.86807 9.98388 7.70404 10.1783 7.59112 10.4024C7.47821 10.6265 7.41959 10.874 7.41999 11.1249V18.5449C7.41878 18.7875 7.47312 19.0272 7.57886 19.2456C7.68459 19.464 7.83891 19.6553 8.02999 19.8049L10.14 21.4649C10.6753 21.8807 11.3241 22.1243 12.0008 22.1636C12.6775 22.2029 13.3502 22.0359 13.93 21.6849L19.45 18.3149C19.9434 18.0197 20.3526 17.6024 20.6381 17.1033C20.9235 16.6041 21.0757 16.0399 21.08 15.4649V9.35489C21.0789 8.79118 20.9365 8.23674 20.6657 7.74233C20.3949 7.24791 20.0044 6.82933 19.53 6.52489L13.78 2.84489C13.2384 2.49729 12.6085 2.3125 11.965 2.3125C11.3215 2.3125 10.6915 2.49729 10.15 2.84489L4.45999 6.51489C3.98819 6.81891 3.60006 7.23628 3.33105 7.72888C3.06205 8.22148 2.92072 8.77362 2.91999 9.33489V17.5949"
-                  stroke="#3B3B3B"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span className="pl-2 text-black">Passport</span>
-            </button>
-            {showTopNav && (
-              <div className="absolute top-12 right-0 z-50">
-                <TopNav features={navFeatures} partners={partnerDashboards} onClose={() => setShowTopNav(false)} />
-              </div>
-            )}
-          </div>
-
-          {scoreState.status !== "initial" && !hideHumnBranding && (
-            <>
-              <TooltipOverChildren
-                panelClassName="text-black w-fit"
-                tooltipElement={<PointsTooltip pointsData={pointsData} />}
-              >
-                <HumanPointsLabel
-                  points={pointsData ? applyMultiplier(pointsData.total_points, pointsData.multiplier) : 0}
-                  isVisible={!beforeHumanPointsRelease()}
-                />
-              </TooltipOverChildren>
-            </>
-          )}
-          <AccountCenter />
-          {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
-        </div>
-      </div>
-
-      <div className={`flex md:hidden gap-4 items-center justify-between h-16 px-2 ${className}`}>
-        <AccountCenter />
-        {scoreState.status !== "initial" && !hideHumnBranding && (
-          <HumanPointsLabel
-            points={pointsData ? applyMultiplier(pointsData.total_points, pointsData.multiplier) : 0}
-            isVisible={!beforeHumanPointsRelease()}
-          />
-        )}
-
-        <Popover className=" text-gray-800">
-          <Popover.Button className="ml-auto" data-testid="app-bar-selector">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </Popover.Button>
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-100"
-            enterFrom="opacity-0 translate-y-1"
-            enterTo="opacity-100 translate-y-0"
-            leave="transition ease-in duration-150"
-            leaveFrom="opacity-100 translate-y-0"
-            leaveTo="opacity-0 translate-y-1"
+        {/* Shrinkable Spacer */}
+        <div className="flex-shrink w-16" />
+        <div className="relative hidden md:flex flex-grow flex-shrink-0">
+          {/* TopNav Passport Dropdown */}
+          <button
+            ref={navButtonRef}
+            onClick={() => setShowTopNav((shown) => !shown)}
+            className="flex gap-2 items-center bg-white px-3 py-1 rounded-lg transition-all border-1 border-gray-200"
           >
-            <Popover.Panel className="fixed left-0 top-16 w-full flex flex-col bg-white">
-              <ul>
-                {icons.map((e, idx) => {
-                  return (
-                    <li key={idx}>
-                      <a href={e.link} target="_blank" className="flex h-8 m-2">
-                        {e.icon} <span className="ml-3">{e.label}</span>
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </Popover.Panel>
-          </Transition>
-        </Popover>
+            <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M11.96 12.4649V16.0149C11.9588 16.1418 11.9913 16.2668 12.054 16.3772C12.1167 16.4875 12.2075 16.5793 12.3172 16.6433C12.4268 16.7073 12.5514 16.7411 12.6784 16.7414C12.8053 16.7416 12.9301 16.7084 13.04 16.6449L15.65 15.1649C15.9552 14.9887 16.2084 14.735 16.384 14.4294C16.5596 14.1238 16.6514 13.7773 16.65 13.4249V10.8749C16.6494 10.6073 16.5812 10.3442 16.4519 10.11C16.3225 9.87574 16.1361 9.67794 15.91 9.53489L12.85 7.59489C12.5807 7.42738 12.2678 7.34365 11.9509 7.35433C11.6339 7.36501 11.3273 7.46963 11.07 7.65489L8.06999 9.83489C7.86807 9.98388 7.70404 10.1783 7.59112 10.4024C7.47821 10.6265 7.41959 10.874 7.41999 11.1249V18.5449C7.41878 18.7875 7.47312 19.0272 7.57886 19.2456C7.68459 19.464 7.83891 19.6553 8.02999 19.8049L10.14 21.4649C10.6753 21.8807 11.3241 22.1243 12.0008 22.1636C12.6775 22.2029 13.3502 22.0359 13.93 21.6849L19.45 18.3149C19.9434 18.0197 20.3526 17.6024 20.6381 17.1033C20.9235 16.6041 21.0757 16.0399 21.08 15.4649V9.35489C21.0789 8.79118 20.9365 8.23674 20.6657 7.74233C20.3949 7.24791 20.0044 6.82933 19.53 6.52489L13.78 2.84489C13.2384 2.49729 12.6085 2.3125 11.965 2.3125C11.3215 2.3125 10.6915 2.49729 10.15 2.84489L4.45999 6.51489C3.98819 6.81891 3.60006 7.23628 3.33105 7.72888C3.06205 8.22148 2.92072 8.77362 2.91999 9.33489V17.5949"
+                stroke="#3B3B3B"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span className="text-black">Passport</span>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className={`transition-all ${showTopNav ? "-rotate-180" : "rotate-0"}`}
+            >
+              <path
+                d="M15 12.5L10 7.5L5 12.5"
+                stroke="#0A0A0A"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          <button
+            ref={partnerNavButtonRef}
+            onClick={() => setShowPartnerNav((shown) => !shown)}
+            className="flex gap-2 items-center px-3 py-1 rounded-lg transition-all"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M9.00019 11.9991L11.0002 13.9991L15.0002 9.99912M3.85019 8.61912C3.70423 7.96165 3.72665 7.27796 3.91535 6.63146C4.10405 5.98496 4.45294 5.39657 4.92966 4.92084C5.40638 4.44512 5.9955 4.09747 6.6424 3.91012C7.2893 3.72277 7.97303 3.70179 8.63019 3.84912C8.9919 3.28342 9.4902 2.81788 10.0791 2.49541C10.6681 2.17293 11.3287 2.00391 12.0002 2.00391C12.6716 2.00391 13.3323 2.17293 13.9212 2.49541C14.5102 2.81788 15.0085 3.28342 15.3702 3.84912C16.0284 3.70114 16.7133 3.72203 17.3612 3.90983C18.0091 4.09764 18.599 4.44626 19.076 4.92327C19.5531 5.40029 19.9017 5.99019 20.0895 6.63812C20.2773 7.28605 20.2982 7.97095 20.1502 8.62912C20.7159 8.99083 21.1814 9.48912 21.5039 10.0781C21.8264 10.667 21.9954 11.3277 21.9954 11.9991C21.9954 12.6706 21.8264 13.3312 21.5039 13.9202C21.1814 14.5091 20.7159 15.0074 20.1502 15.3691C20.2975 16.0263 20.2765 16.71 20.0892 17.3569C19.9018 18.0038 19.5542 18.5929 19.0785 19.0697C18.6027 19.5464 18.0144 19.8953 17.3679 20.084C16.7213 20.2727 16.0377 20.2951 15.3802 20.1491C15.019 20.717 14.5203 21.1845 13.9303 21.5084C13.3404 21.8324 12.6782 22.0022 12.0052 22.0022C11.3322 22.0022 10.67 21.8324 10.0801 21.5084C9.49011 21.1845 8.99143 20.717 8.63019 20.1491C7.97303 20.2965 7.2893 20.2755 6.6424 20.0881C5.9955 19.9008 5.40638 19.5531 4.92966 19.0774C4.45294 18.6017 4.10405 18.0133 3.91535 17.3668C3.72665 16.7203 3.70423 16.0366 3.85019 15.3791C3.28015 15.0184 2.81061 14.5193 2.48524 13.9283C2.15988 13.3374 1.98926 12.6737 1.98926 11.9991C1.98926 11.3245 2.15988 10.6609 2.48524 10.0699C2.81061 9.47895 3.28015 8.97988 3.85019 8.61912Z"
+                stroke="#0A0A0A"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span className="text-black">Partner with us</span>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className={`transition-all ${showPartnerNav ? "-rotate-180" : "rotate-0"}`}
+            >
+              <path
+                d="M15 12.5L10 7.5L5 12.5"
+                stroke="#0A0A0A"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          {(showTopNav || showPartnerNav) && (
+            <div className="fixed left-0 top-14 z-50 w-screen">
+              <div className="inset-x-0 mx-auto w-[98%] max-w-5xl">
+                {showTopNav ? (
+                  <TopNav
+                    features={navFeatures}
+                    partners={partnerDashboards}
+                    onClose={() => setShowTopNav(false)}
+                    buttonRef={navButtonRef}
+                  />
+                ) : (
+                  <TopNav
+                    features={partnerWithUs}
+                    onClose={() => setShowPartnerNav(false)}
+                    buttonRef={partnerNavButtonRef}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Shrinkable Spacer */}
+        <div className="flex-shrink w-16" />
+
+        {scoreState.status !== "initial" && !hideHumnBranding && (
+          <>
+            <TooltipOverChildren
+              panelClassName="text-black w-fit"
+              tooltipElement={<PointsTooltip pointsData={pointsData} />}
+            >
+              <HumanPointsLabel
+                points={pointsData ? applyMultiplier(pointsData.total_points, pointsData.multiplier) : 0}
+                isVisible={!beforeHumanPointsRelease()}
+              />
+            </TooltipOverChildren>
+          </>
+        )}
+        <AccountCenter />
+        {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
       </div>
     </>
   );
