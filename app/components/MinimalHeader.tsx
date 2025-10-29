@@ -381,7 +381,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
             </svg>
           </button>
           {(showTopNav || showPartnerNav) && (
-            <div className="fixed left-0 top-14 z-50 w-screen">
+            <div className="fixed left-0 top-14 z-50 w-screen max-w-7xl">
               <div className="inset-x-0 mx-auto w-[98%] max-w-5xl">
                 {showTopNav ? (
                   <TopNav
