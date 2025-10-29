@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { FeatureCard } from "./FeatureCard";
 import { getIcon, getPartnerLogo } from "./Icons";
 import type { NavFeature, PartnerLink } from "../mocks/navData";
@@ -8,10 +8,37 @@ interface TopNavProps {
   partners?: PartnerLink[];
   onFeatureClick?: (id: string) => void;
   onPartnerClick?: (id: string) => void;
+  onClose?: () => void;
 }
 
-export const TopNav: React.FC<TopNavProps> = ({ features = [], partners = [], onFeatureClick, onPartnerClick }) => {
+export const TopNav: React.FC<TopNavProps> = ({
+  features = [],
+  partners = [],
+  onFeatureClick,
+  onPartnerClick,
+  onClose,
+}) => {
   const WandIcon = getIcon("wand");
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Handle click outside to close
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        onClose?.();
+      }
+    };
+
+    // Add event listener after a small delay to avoid closing immediately on open
+    const timeoutId = setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside);
+    }, 0);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
 
   const handlePartnerClick = (id: string) => {
     if (onPartnerClick) {
@@ -23,6 +50,7 @@ export const TopNav: React.FC<TopNavProps> = ({ features = [], partners = [], on
 
   return (
     <div
+      ref={containerRef}
       className={`
         backdrop-blur-[25px] backdrop-filter bg-foreground box-border
         flex flex-col gap-3 items-center p-4
