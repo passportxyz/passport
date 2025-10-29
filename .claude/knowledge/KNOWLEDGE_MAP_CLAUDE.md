@@ -6,9 +6,11 @@
 
 ## 📦 Workflows
 - @workflows/package_management.md - Yarn commands and monorepo structure
+- @workflows/storybook_component_development.md - Isolated component development with visual testing and Figma integration
 
 ## 🎨 Patterns
 - @patterns/humanid_platforms.md - CleanHands attestations, Biometrics migration, shared validation
+- @patterns/figma_to_react_conversion.md - Converting Figma designs to production React components with theme integration
 
 ## 📝 Conventions
 - @conventions/error_handling.md - Provider error philosophy and best practices
