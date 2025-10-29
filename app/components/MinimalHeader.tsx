@@ -258,16 +258,6 @@ const navFeatures: NavFeature[] = [
   },
 ];
 
-// TODO: Fetch from backend API when ready
-const partnerDashboards: PartnerLink[] = [
-  { name: "Lido", logo: "lido", id: "lido" },
-  { name: "Verax", logo: "verax", id: "verax" },
-  { name: "Shape", logo: "shape", id: "shape" },
-  { name: "Octant", logo: "octant", id: "octant" },
-  { name: "Recall", logo: "recall", id: "recall" },
-  { name: "Linea", logo: "linea", id: "linea" },
-];
-
 const partnerWithUs: NavFeature[] = [
   {
     icon: "user-check",
@@ -303,7 +293,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   const [showPartnerNav, setShowPartnerNav] = React.useState(false);
   const { verificationComplete } = useOneClickVerification();
   const { scoreState, pointsData } = React.useContext(ScorerContext);
-  const { hideHumnBranding } = useCustomization();
+  const { hideHumnBranding, topNavDashboards } = useCustomization();
 
   return (
     <>
@@ -386,7 +376,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
                 {showTopNav ? (
                   <TopNav
                     features={navFeatures}
-                    partners={partnerDashboards}
+                    partners={topNavDashboards}
                     onClose={() => setShowTopNav(false)}
                     buttonRef={navButtonRef}
                   />

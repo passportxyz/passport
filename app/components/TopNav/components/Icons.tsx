@@ -164,23 +164,3 @@ export const getIcon = (iconName: string): React.FC<IconProps> | null => {
       return null;
   }
 };
-
-// Get partner logo component by name
-export const getPartnerLogo = (logoName: string): React.FC<IconProps> | null => {
-  switch (logoName) {
-    case "lido":
-      return LidoLogo;
-    case "verax":
-      return VeraxLogo;
-    case "shape":
-      return ShapeLogo;
-    case "octant":
-      return OctantLogo;
-    case "recall":
-      return RecallLogo;
-    case "linea":
-      return LineaLogo;
-    default:
-      return null;
-  }
-};

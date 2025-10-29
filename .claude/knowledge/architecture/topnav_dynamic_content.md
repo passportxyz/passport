@@ -54,8 +54,11 @@ interface CustomizationResponse {
 - No additional caching needed (piggybacks on existing customization fetch)
 
 ### Frontend Implementation
-- Uses `useMemo` to filter and map dashboards with `isCurrent` flag
-- SVG rendering: `dangerouslySetInnerHTML` with DOMPurify sanitization
+- Data preparation centralized in `useCustomization` hook via `requestCustomizationConfig`
+- Hook returns pre-filtered `topNavDashboards` array (only where `showInTopNav === true`)
+- `isCurrent` flag added by comparing dashboard.id with customizationKey
+- Components consume ready-to-use data without additional processing
+- SVG rendering: `SanitizedHTMLComponent` with DOMPurify sanitization
 - Handles edge cases: empty arrays, undefined `partnerDashboards`
 
 ### Current Partner Set
@@ -69,7 +72,7 @@ Initial set of 6 partners with SVG logos:
 
 ## Related Files
 - `app/components/TopNav/components/TopNav.tsx` - TopNav component
-- `app/components/MinimalHeader.tsx` - Integration point (lines 234-269)
-- `app/hooks/useCustomization.tsx` - Data fetching hook
+- `app/components/MinimalHeader.tsx` - Integration point
+- `app/utils/customizationUtils.tsx` - Data fetching and preparation logic
 - `TopNav_Backend_Requirements.md` - Backend implementation specs
 - `TopNav_Frontend_Implementation.md` - Frontend implementation guide

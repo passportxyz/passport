@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, RefObject } from "react";
 import { FeatureCard } from "./FeatureCard";
-import { getIcon, getPartnerLogo } from "./Icons";
+import { getIcon } from "./Icons";
+import { SanitizedHTMLComponent } from "../../../utils/customizationUtils";
 import type { NavFeature, PartnerLink } from "../mocks/navData";
 
 interface TopNavProps {
@@ -83,27 +84,22 @@ export const TopNav: React.FC<TopNavProps> = ({
           </div>
 
           <div className="flex items-stretch gap-2 w-full">
-            {partners.map((partner) => {
-              const LogoComponent = getPartnerLogo(partner.logo);
-              return (
-                <button
-                  key={partner.id}
-                  onClick={() => handlePartnerClick(partner.id)}
-                  className={
-                    partner.isCurrent
-                      ? "flex-1 bg-foreground brightness-[.83] shadow-md cursor-default box-border flex gap-2 items-center justify-center p-2 rounded-lg transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-focus focus:ring-opacity-50"
-                      : "flex-1 bg-foreground box-border flex gap-2 items-center justify-center p-2 rounded-lg transition-all duration-200 ease-in-out hover:brightness-[.83] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-opacity-50"
-                  }
-                >
-                  {LogoComponent && (
-                    <div className="w-[23px] h-[23px] flex-shrink-0">
-                      <LogoComponent className="w-full h-full" />
-                    </div>
-                  )}
-                  <span className="font-medium text-sm leading-5 text-color-4 whitespace-nowrap">{partner.name}</span>
-                </button>
-              );
-            })}
+            {partners.map((partner) => (
+              <button
+                key={partner.id}
+                onClick={() => handlePartnerClick(partner.id)}
+                className={
+                  partner.isCurrent
+                    ? "flex-1 bg-foreground brightness-[.83] shadow-md cursor-default box-border flex gap-2 items-center justify-center p-2 rounded-lg transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-focus focus:ring-opacity-50"
+                    : "flex-1 bg-foreground box-border flex gap-2 items-center justify-center p-2 rounded-lg transition-all duration-200 ease-in-out hover:brightness-[.83] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-opacity-50"
+                }
+              >
+                <div className="w-[23px] h-[23px] flex-shrink-0">
+                  <SanitizedHTMLComponent html={partner.logo} />
+                </div>
+                <span className="font-medium text-sm leading-5 text-color-4 whitespace-nowrap">{partner.name}</span>
+              </button>
+            ))}
           </div>
         </div>
       )}
