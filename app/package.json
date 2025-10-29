@@ -11,7 +11,9 @@
     "lint": "next lint && prettier --check .",
     "prettier": "prettier --write .",
     "test": "vitest --run",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@chakra-ui/react": "=2.8.1",
@@ -68,6 +70,9 @@
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^12.1.5",
+    "@storybook/addon-links": "^10.0.1",
+    "@storybook/nextjs": "^10.0.1",
+    "@storybook/react": "^10.0.1",
     "@tanstack/eslint-plugin-query": "^5.35.6",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^14.0.0",
@@ -96,6 +101,7 @@
     "postcss": "^8.4.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "react-qr-code": "^2.0.7",
+    "storybook": "^10.0.1",
     "tailwindcss": "^3.4.10",
     "typescript": "^5.3.3",
     "uint8arrays": "^5.1.0",
