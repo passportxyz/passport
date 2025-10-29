@@ -1,4 +1,4 @@
-// SVG Icons for TopNav features
+// SVG Icons for TopNav features and partner logos
 import React from "react";
 
 interface IconProps {
@@ -25,6 +25,7 @@ export const UserCheckIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
+// Fixed Embed Icon - not actually the same as user-check in the actual design
 export const EmbedIcon: React.FC<IconProps> = ({ className }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <path
@@ -120,6 +121,57 @@ export const WandIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
+// Partner Logos
+export const LidoLogo: React.FC<IconProps> = ({ className }) => (
+  <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path
+      d="M11.5 1L14.7353 7.59317L22 8.65392L16.75 13.7581L18.0451 21L11.5 17.5593L4.95493 21L6.25 13.7581L1 8.65392L8.26474 7.59317L11.5 1Z"
+      fill="#00A3FF"
+    />
+  </svg>
+);
+
+export const VeraxLogo: React.FC<IconProps> = ({ className }) => (
+  <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path
+      d="M11.5 3.5L7.5 10.5H15.5L11.5 19.5"
+      stroke="#F59E0B"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const ShapeLogo: React.FC<IconProps> = ({ className }) => (
+  <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <circle cx="11.5" cy="11.5" r="9" fill="black" />
+  </svg>
+);
+
+export const OctantLogo: React.FC<IconProps> = ({ className }) => (
+  <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <rect x="1" y="1" width="21" height="21" rx="4" fill="#000000" />
+    <circle cx="11.5" cy="11.5" r="6" fill="#FFFFFF" />
+    <circle cx="11.5" cy="11.5" r="3" fill="#000000" />
+  </svg>
+);
+
+export const RecallLogo: React.FC<IconProps> = ({ className }) => (
+  <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path d="M11.5 2V12L18.5 19" stroke="#4B5563" strokeWidth="2" strokeLinecap="round" />
+    <path d="M4.5 7L11.5 12" stroke="#4B5563" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+export const LineaLogo: React.FC<IconProps> = ({ className }) => (
+  <svg width="23" height="23" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <rect x="1" y="1" width="21" height="21" rx="3" fill="white" />
+    <rect x="3" y="3" width="5" height="5" fill="#000000" />
+    <path d="M5 11H18V19H5V11Z" fill="#000000" />
+  </svg>
+);
+
 // Get icon component by name
 export const getIcon = (iconName: string): React.FC<IconProps> | null => {
   switch (iconName) {
@@ -133,6 +185,26 @@ export const getIcon = (iconName: string): React.FC<IconProps> | null => {
       return PassportIcon;
     case "wand":
       return WandIcon;
+    default:
+      return null;
+  }
+};
+
+// Get partner logo component by name
+export const getPartnerLogo = (logoName: string): React.FC<IconProps> | null => {
+  switch (logoName) {
+    case "lido":
+      return LidoLogo;
+    case "verax":
+      return VeraxLogo;
+    case "shape":
+      return ShapeLogo;
+    case "octant":
+      return OctantLogo;
+    case "recall":
+      return RecallLogo;
+    case "linea":
+      return LineaLogo;
     default:
       return null;
   }

@@ -11,6 +11,7 @@ export interface PartnerLink {
   name: string;
   logo: string; // SVG path or component
   id: string; // Will be used for routing to /#/<id>/dashboard
+  isCurrent?: boolean; // Optional flag to indicate if this is the current active dashboard
 }
 
 export const mockNavFeatures: NavFeature[] = [

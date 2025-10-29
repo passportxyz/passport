@@ -24,45 +24,6 @@ const meta: Meta<typeof FeatureCard> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Real-time Verification card
-export const RealTimeVerification: Story = {
-  args: {
-    ...mockNavFeatures[0],
-  },
-};
-
-// Embed card
-export const Embed: Story = {
-  args: {
-    ...mockNavFeatures[1],
-  },
-};
-
-// Data Services card
-export const DataServices: Story = {
-  args: {
-    ...mockNavFeatures[2],
-  },
-};
-
-// Passport Ecosystem card
-export const PassportEcosystem: Story = {
-  args: {
-    ...mockNavFeatures[3],
-  },
-};
-
-// All cards in a grid
-export const AllCardsGrid: Story = {
-  render: () => (
-    <div className="grid grid-cols-2 gap-3 p-4 bg-white rounded-lg" style={{ width: "600px" }}>
-      {mockNavFeatures.map((feature) => (
-        <FeatureCard key={feature.id} {...feature} onClick={(id) => console.log(`Clicked: ${id}`)} />
-      ))}
-    </div>
-  ),
-};
-
 // Responsive grid (shows how cards look at different widths)
 export const ResponsiveGrid: Story = {
   render: () => (
