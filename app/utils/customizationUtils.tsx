@@ -226,3 +226,14 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
     topNavDashboards,
   };
 };
+
+// Fetch only partner dashboards when no customization key is present
+export const requestPartnerDashboards = async (): Promise<PartnerDashboard[]> => {
+  try {
+    const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}`);
+    return response.data.partnerDashboards || [];
+  } catch (error) {
+    console.error("Failed to load partner dashboards", error);
+    return [];
+  }
+};
