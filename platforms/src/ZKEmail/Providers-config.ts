@@ -59,6 +59,7 @@ export const PlatformDetails: PlatformSpec = {
       type: "list",
       title: "Technical details",
       items: [
+        "This Stamp is in beta, and is subject to change. We're actively working on improving the Stamp and adding new features",
         "It may take a few minutes to process, so please be patient as we verify your activities",
         "The Stamp only searches your inbox, archive, and tagged emails. Any deleted emails will not count towards this Stamp",
         "Currently, this feature only works with Gmail. We're working on supporting other email providers",
