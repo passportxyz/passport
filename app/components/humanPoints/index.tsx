@@ -48,7 +48,7 @@ export const HumanPointsLabel: FC<HumanPointsLabelProps> = ({
       };
   return isVisible ? (
     <a href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live" target="_blank">
-      <div className={`flex items-center ${backgroundColor} rounded-full px-2 py-1`}>
+      <div className={`flex items-center ${backgroundColor} rounded-full px-2 py-1 shadow-sm hover:shadow-md`}>
         <Icon width={18} height={19} />
         <span className="px-1 pt-0.5 text-color-4">
           {prefix}
