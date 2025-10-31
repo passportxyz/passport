@@ -5,7 +5,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/biometrics.svg",
   platform: "Biometrics",
   name: "Biometrics",
-  description: "Verify your uniqueness using facial biometrics",
+  description: "Verify your uniqueness using facial biometrics using zero-knowledge proofs",
   connectMessage: "Verify",
   isEVM: true,
   timeToGet: "5 minutes",
@@ -60,6 +60,7 @@ export const PlatformDetails: PlatformSpec = {
         "Requires front-facing camera",
         "Uses 3D liveness detection to prevent spoofing attempts",
         "Biometric data is processed securely and not stored in raw form",
+        "This Stamp uses zero-knowledge proofs to verify your uniqueness without exposing your personal data",
       ],
     },
   ],
@@ -67,7 +68,7 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Biometric Verification",
+    platformGroup: "Zero-Knowledge Biometric Verification",
     providers: [
       {
         title: "Unique Biometric Identity",

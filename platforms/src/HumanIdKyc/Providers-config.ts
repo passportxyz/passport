@@ -6,7 +6,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/idCard.svg",
   platform: "HumanIdKyc",
   name: "Government ID",
-  description: "Verify your identity with government ID",
+  description: "Verify your identity with government ID using zero-knowledge proofs",
   connectMessage: "Connect Account",
   website: "https://human.tech",
   timeToGet: "10 minutes",
@@ -57,6 +57,7 @@ export const PlatformDetails: PlatformSpec = {
         "Requires a camera and valid government ID (passport, driver's license. Other forms of ID are accepted in certain countries)",
         "Stamp auto-renews after 90 days; full reverification required after 1 year",
         "To be eligible, you must mint your SBT on Optimism",
+        "Zero-knowledge privacy: Your government ID data is processed locally on your device. We only receive a cryptographic proof of verification - we never see or store your ID information.",
       ],
     },
   ],
@@ -64,13 +65,13 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Privacy-Preserving KYC",
+    platformGroup: "Zero-Knowledge ID Verification",
     providers: [
       {
         title: "Government ID Holder",
         name: "HolonymGovIdProvider",
         description:
-          "Complete identity verification using government-issued ID to prove uniqueness while maintaining privacy",
+          "Complete identity verification using government-issued ID to prove uniqueness. Your ID data never leaves your device - we use zero-knowledge proofs to verify uniqueness without seeing your information.",
       },
     ],
   },
