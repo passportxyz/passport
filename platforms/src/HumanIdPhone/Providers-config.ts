@@ -6,7 +6,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/smartphone.svg",
   platform: "HumanIdPhone",
   name: "Phone Verification",
-  description: "Verify your phone number",
+  description: "Verify your phone number using zero-knowledge proofs",
   connectMessage: "Connect Account",
   website: "https://human.tech",
   timeToGet: "5 minutes",
@@ -59,7 +59,7 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Phone Verification",
+    platformGroup: "Zero-Knowledge Phone Verification",
     providers: [
       {
         title: "Verified Phone Number",

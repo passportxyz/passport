@@ -6,7 +6,7 @@ export const PlatformDetails: PlatformSpec = {
   icon: "./assets/cleanHands.svg",
   platform: "CleanHands",
   name: "Proof of Clean Hands",
-  description: "Verify clean regulatory status",
+  description: "Verify clean regulatory status using zero-knowledge proofs",
   connectMessage: "Verify Account",
   isEVM: true,
   timeToGet: "10 minutes",
@@ -62,6 +62,7 @@ export const PlatformDetails: PlatformSpec = {
         "To be eligible, you must mint your SBT on Optimism",
         "Stamp auto-renews after 90 days; full reverification required after 1 year",
         "Some countries excluded from verification process",
+        "This Stamp uses zero-knowledge proofs to verify your identity and sanctions status without exposing your personal data",
       ],
     },
   ],
@@ -69,7 +70,7 @@ export const PlatformDetails: PlatformSpec = {
 
 export const ProviderConfig: PlatformGroupSpec[] = [
   {
-    platformGroup: "Proof of Clean Hands",
+    platformGroup: "Zero-Knowledge Sanctions Verification",
     providers: [
       {
         title: "Sanctions-Free Identity Verified",
