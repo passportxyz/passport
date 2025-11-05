@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, RefObject } from "react";
+import React from "react";
 import { FeatureCard } from "./FeatureCard";
 import { getIcon } from "./Icons";
 import { SanitizedHTMLComponent } from "../../../utils/customizationUtils";
@@ -8,41 +8,10 @@ interface TopNavProps {
   features?: NavFeature[];
   partners?: PartnerLink[];
   onPartnerClick?: (id: string) => void;
-  onClose?: () => void;
-  buttonRef?: RefObject<HTMLButtonElement>;
 }
 
-export const TopNav: React.FC<TopNavProps> = ({
-  features = [],
-  partners = [],
-  onPartnerClick,
-  onClose,
-  buttonRef = null,
-}) => {
+export const TopNav: React.FC<TopNavProps> = ({ features = [], partners = [], onPartnerClick }) => {
   const WandIcon = getIcon("wand");
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Handle click outside to close
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        !containerRef.current?.contains(event.target as Node) &&
-        !buttonRef?.current?.contains(event.target as Node)
-      ) {
-        onClose?.();
-      }
-    };
-
-    // Add event listener after a small delay to avoid closing immediately on open
-    const timeoutId = setTimeout(() => {
-      document.addEventListener("mousedown", handleClickOutside);
-    }, 200);
-
-    return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [onClose]);
 
   const handlePartnerClick = (id: string) => {
     if (onPartnerClick) {
@@ -54,44 +23,50 @@ export const TopNav: React.FC<TopNavProps> = ({
 
   return (
     <div
-      ref={containerRef}
       className={`
-        backdrop-blur-[25px] backdrop-filter bg-foreground box-border
+        bg-foreground box-border
         flex flex-col gap-3 items-center p-4
         rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.16),0px_10px_22px_0px_rgba(0,0,0,0.25)]
         w-full
       `}
     >
       {/* Feature Cards Section */}
-      <div className="flex gap-3 items-stretch justify-center w-full">
+      <div className="grid grid-cols-2 gap-3 w-full">
         {features.map((feature, index) => (
-          <div key={index} className="flex-1 min-w-0 flex">
+          <div key={index} className="flex">
             <FeatureCard {...feature} />
           </div>
         ))}
       </div>
 
       {/* Partner Custom Dashboards Section */}
-      {partners.length > 0 && (
-        <div className="bg-background box-border flex flex-col gap-4 items-start p-4 rounded-lg w-full">
-          <div className="flex gap-3 items-center">
-            {WandIcon && (
-              <div className="w-6 h-6 text-color-4 flex-shrink-0">
-                <WandIcon className="w-full h-full" />
-              </div>
-            )}
-            <h3 className="font-medium text-base leading-6 text-color-4">Partner Custom Dashboards</h3>
+      {partners.length > 0 ? (
+        <div className="bg-background box-border flex gap-4 items-start p-4 rounded-lg w-full">
+          {/* Left side: Icon, heading, and description */}
+          <div className="flex flex-col gap-2 flex-shrink-0" style={{ width: "280px" }}>
+            <div className="flex gap-3 items-center">
+              {WandIcon && (
+                <div className="w-6 h-6 text-color-4 flex-shrink-0">
+                  <WandIcon className="w-full h-full" />
+                </div>
+              )}
+              <h3 className="font-medium text-base leading-6 text-color-4">Partner Custom Dashboards</h3>
+            </div>
+            <p className="text-sm text-color-9 leading-5">
+              A comprehensive framework for managing and utilizing passports.
+            </p>
           </div>
 
-          <div className="flex items-stretch gap-2 w-full">
+          {/* Right side: 2x3 grid of partner dashboards */}
+          <div className="grid grid-cols-2 gap-2 flex-1">
             {partners.map((partner) => (
               <button
                 key={partner.id}
                 onClick={() => handlePartnerClick(partner.id)}
                 className={
                   partner.isCurrent
-                    ? "flex-1 bg-foreground brightness-[.83] shadow-md cursor-default box-border flex gap-2 items-center justify-center p-2 rounded-lg transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-focus focus:ring-opacity-50"
-                    : "flex-1 bg-foreground box-border flex gap-2 items-center justify-center p-2 rounded-lg transition-all duration-200 ease-in-out hover:brightness-[.83] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-opacity-50"
+                    ? "bg-foreground brightness-[.83] shadow-md cursor-default box-border flex gap-2 items-center justify-center p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-focus focus:ring-opacity-50"
+                    : "bg-foreground box-border flex gap-2 items-center justify-center p-2 rounded-lg hover:brightness-[.83] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-focus focus:ring-opacity-50"
                 }
               >
                 <div className="w-[23px] h-[23px] flex-shrink-0">
@@ -102,7 +77,7 @@ export const TopNav: React.FC<TopNavProps> = ({
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

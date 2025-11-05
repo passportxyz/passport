@@ -12,7 +12,6 @@ export const FeatureCard: React.FC<NavFeature> = ({ icon, title, description, ur
       rel="noopener noreferrer"
       className={`
         flex flex-col gap-2 p-4 rounded-lg text-left w-full h-full
-        transition-all duration-200 ease-in-out
         bg-background hover:brightness-90
         hover:shadow-md
         focus:outline-none focus:ring-2 focus:ring-focus focus:ring-opacity-50
