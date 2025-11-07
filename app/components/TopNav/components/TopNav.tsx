@@ -24,7 +24,7 @@ export const TopNav: React.FC<TopNavProps> = ({ features = [], partners = [], on
   return (
     <div
       className={`
-        bg-foreground box-border
+        bg-white box-border
         flex flex-col gap-3 items-center p-4
         rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.16),0px_10px_22px_0px_rgba(0,0,0,0.25)]
         w-full
@@ -52,9 +52,7 @@ export const TopNav: React.FC<TopNavProps> = ({ features = [], partners = [], on
               )}
               <h3 className="font-medium text-base leading-6 text-color-4">Partner Custom Dashboards</h3>
             </div>
-            <p className="text-sm text-color-9 leading-5">
-              A comprehensive framework for managing and utilizing passports.
-            </p>
+            <p className="text-sm text-color-9 leading-5">Active dashboards from Passport ecosystem partners.</p>
           </div>
 
           {/* Right side: 2x3 grid of partner dashboards */}
