@@ -315,13 +315,13 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   return (
     <>
       <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
-      <div className={`flex gap-4 items-center h-16 ${className}`}>
+      <div className={`relative flex gap-4 items-center h-16 ${className}`}>
         <div className="flex items-center flex-grow md:flex-grow-0">
           <HumanPassportLogoWithText />
         </div>
         {/* Shrinkable Spacer */}
         <div className="flex-shrink w-16" />
-        <div className="relative hidden md:flex flex-grow flex-shrink-0 gap-2">
+        <div className="hidden md:flex flex-grow flex-shrink-0 gap-2">
           {/* Passport Popover */}
           <NavPopover label="Passport" icon={<PassportIcon />}>
             <TopNav features={navFeatures} partners={topNavDashboards} />
