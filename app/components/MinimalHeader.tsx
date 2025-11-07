@@ -321,17 +321,19 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
         </div>
         {/* Shrinkable Spacer */}
         <div className="flex-shrink w-16" />
-        <div className="hidden md:flex flex-grow flex-shrink-0 gap-2">
-          {/* Passport Popover */}
-          <NavPopover label="Passport" icon={<PassportIcon />}>
-            <TopNav features={navFeatures} partners={topNavDashboards} />
-          </NavPopover>
+        {verificationComplete && (
+          <div className="hidden md:flex flex-grow flex-shrink-0 gap-2">
+            {/* Passport Popover */}
+            <NavPopover label="Passport" icon={<PassportIcon />}>
+              <TopNav features={navFeatures} partners={topNavDashboards} />
+            </NavPopover>
 
-          {/* Partner with us Popover */}
-          <NavPopover label="Partner with us" icon={<PartnerIcon />} size="compact">
-            <TopNav features={partnerWithUs} />
-          </NavPopover>
-        </div>
+            {/* Partner with us Popover */}
+            <NavPopover label="Partner with us" icon={<PartnerIcon />} size="compact">
+              <TopNav features={partnerWithUs} />
+            </NavPopover>
+          </div>
+        )}
 
         {/* Shrinkable Spacer */}
         <div className="flex-shrink w-16" />

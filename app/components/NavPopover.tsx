@@ -21,7 +21,7 @@ export const NavPopover: React.FC<NavPopoverProps> = ({ label, icon, children, s
           <>
             <Popover.Button
               className={`flex gap-2 items-center px-3 py-1 transition-all focus:outline-none relative ${
-                open ? "bg-white rounded-t-lg z-[51]" : "bg-white rounded-lg"
+                open ? "bg-white rounded-t-lg z-[51]" : "hover:bg-white bg-transparent rounded-lg"
               }`}
               style={
                 shouldElevate
@@ -49,7 +49,7 @@ export const NavPopover: React.FC<NavPopoverProps> = ({ label, icon, children, s
               leaveTo="opacity-0 translate-y-[-8px]"
             >
               <Popover.Panel
-                className="fixed top-20 z-50 left-0 right-0 mx-auto lg:absolute lg:top-full lg:-left-8 lg:right-auto lg:mx-0 lg:-mt-[1px]"
+                className="absolute top-[47px] z-50 left-0 right-0 mx-auto lg:left-32 lg:right-auto"
                 style={{
                   width: `${panelWidth}px`,
                 }}
