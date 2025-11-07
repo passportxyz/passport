@@ -1,9 +1,9 @@
 // Mock data for TopNav component stories and development
 
 export interface NavFeature {
-  icon: "user-check" | "embed" | "database" | "passport";
+  icon: "user-check" | "embed" | "database" | "passport" | "chat" | "code" | "briefcase" | "headset";
   title: string;
-  description: string;
+  description?: string; // Optional for compact displays
   url: string; // Navigation URL
 }
 
@@ -39,6 +39,29 @@ export const mockNavFeatures: NavFeature[] = [
     title: "Passport Ecosystem",
     description: "View all Passport-protected partners",
     url: "https://passport.human.tech/ecosystem",
+  },
+];
+
+export const mockPartnerFeatures: NavFeature[] = [
+  {
+    icon: "chat",
+    title: "Contact Us",
+    url: "https://tally.so/r/3X81KL?ref=passport-app",
+  },
+  {
+    icon: "code",
+    title: "Developer Docs",
+    url: "https://docs.passport.xyz/",
+  },
+  {
+    icon: "briefcase",
+    title: "Case Studies",
+    url: "https://passport.human.tech/blog",
+  },
+  {
+    icon: "headset",
+    title: "User Support",
+    url: "https://support.passport.xyz/passport-knowledge-base/need-support",
   },
 ];
 

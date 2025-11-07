@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import React from "react";
 import { NavPopover } from "../../NavPopover";
 import { TopNav } from "./TopNav";
-import { mockNavFeatures, mockPartners } from "../mocks/navData";
+import { mockNavFeatures, mockPartners, mockPartnerFeatures } from "../mocks/navData";
 
 const PassportIcon = () => (
   <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -39,8 +39,8 @@ const NavDemo = () => {
           <NavPopover label="Passport" icon={<PassportIcon />}>
             <TopNav features={mockNavFeatures} partners={mockPartners} />
           </NavPopover>
-          <NavPopover label="Partner with us" icon={<PartnerIcon />}>
-            <TopNav features={mockNavFeatures} />
+          <NavPopover label="Partner with us" icon={<PartnerIcon />} size="compact">
+            <TopNav features={mockPartnerFeatures} />
           </NavPopover>
         </div>
       </div>

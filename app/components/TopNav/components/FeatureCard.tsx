@@ -26,7 +26,7 @@ export const FeatureCard: React.FC<NavFeature> = ({ icon, title, description, ur
         )}
         <h3 className="text-color-4 font-medium text-base leading-6">{title}</h3>
       </div>
-      <p className="text-color-9 text-sm leading-5 pl-9">{description}</p>
+      {description && <p className="text-color-9 text-sm leading-5 pl-9">{description}</p>}
     </a>
   );
 };

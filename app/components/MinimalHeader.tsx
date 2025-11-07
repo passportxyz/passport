@@ -285,28 +285,24 @@ const navFeatures: NavFeature[] = [
 
 const partnerWithUs: NavFeature[] = [
   {
-    icon: "user-check",
-    title: "Real-time Verification",
-    description: "Protect programs in real-time with Stamps and Models",
-    url: "https://passport.human.tech/verification",
+    icon: "chat",
+    title: "Contact Us",
+    url: "https://tally.so/r/3X81KL?ref=passport-app",
   },
   {
-    icon: "embed",
-    title: "Embed",
-    description: "Embed humanity verification directly in your dApp",
-    url: "https://passport.human.tech/embed",
+    icon: "code",
+    title: "Developer Docs",
+    url: "https://docs.passport.xyz/",
   },
   {
-    icon: "database",
-    title: "Data Services",
-    description: "Classify and cluster Sybils in bulk lists of addresses",
-    url: "https://passport.human.tech/data",
+    icon: "briefcase",
+    title: "Case Studies",
+    url: "https://passport.human.tech/blog",
   },
   {
-    icon: "passport",
-    title: "Passport Ecosystem",
-    description: "View all Passport-protected partners",
-    url: "https://passport.human.tech/ecosystem",
+    icon: "headset",
+    title: "User Support",
+    url: "https://support.passport.xyz/passport-knowledge-base/need-support",
   },
 ];
 
@@ -332,7 +328,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
           </NavPopover>
 
           {/* Partner with us Popover */}
-          <NavPopover label="Partner with us" icon={<PartnerIcon />}>
+          <NavPopover label="Partner with us" icon={<PartnerIcon />} size="compact">
             <TopNav features={partnerWithUs} />
           </NavPopover>
         </div>
