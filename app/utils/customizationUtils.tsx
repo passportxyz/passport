@@ -24,6 +24,14 @@ export const initializeDOMPurify = () => {
 export type CustomizationLogoBackground = "dots" | "none";
 export type BodyActionType = "Simple Link" | "Onchain Push";
 
+// Interface for partner dashboards
+export interface PartnerDashboard {
+  id: string; // Used for routing: /#/{id}/dashboard
+  name: string; // Display name in TopNav
+  logo: string; // SVG string (complete SVG code)
+  showInTopNav: boolean; // Whether to show in TopNav
+}
+
 type CustomStamp = {
   platformType: string;
   iconUrl: string;
@@ -86,6 +94,8 @@ export type Customization = {
   customStamps?: {
     [name: string]: CustomStamp;
   };
+  partnerDashboards?: PartnerDashboard[];
+  topNavDashboards?: PartnerDashboard[]; // Pre-filtered dashboards for TopNav display
 };
 
 type CustomizationResponse = {
@@ -127,9 +137,10 @@ type CustomizationResponse = {
   customStamps?: {
     [name: string]: CustomStamp;
   };
+  partnerDashboards?: PartnerDashboard[];
 };
 
-const SanitizedHTMLComponent = ({ html }: { html: string }) => {
+export const SanitizedHTMLComponent = ({ html }: { html: string }) => {
   const sanitizedHTML = useMemo(() => html && sanitize(html), [html]);
 
   if (!html) {
@@ -160,6 +171,15 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
   const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}/${customizationKey}`);
   const customizationResponse: CustomizationResponse = response.data;
   const allowListProviders: PlatformGroupSpec[] = buildAllowListProviders(customizationResponse.scorer?.weights);
+
+  // Pre-filter dashboards for TopNav display and add isCurrent flag
+  const topNavDashboards =
+    customizationResponse.partnerDashboards
+      ?.filter((dashboard) => dashboard.showInTopNav)
+      .map((dashboard) => ({
+        ...dashboard,
+        isCurrent: dashboard.id === customizationKey, // Mark current based on customization key
+      })) || [];
 
   return {
     key: customizationKey,
@@ -202,5 +222,18 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
     includedChainIds: customizationResponse.includedChainIds,
     showExplanationPanel: customizationResponse.showExplanationPanel,
     customStamps: customizationResponse.customStamps,
+    partnerDashboards: customizationResponse.partnerDashboards,
+    topNavDashboards,
   };
+};
+
+// Fetch only partner dashboards when no customization key is present
+export const requestPartnerDashboards = async (): Promise<PartnerDashboard[]> => {
+  try {
+    const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}`);
+    return response.data.partnerDashboards || [];
+  } catch (error) {
+    console.error("Failed to load partner dashboards", error);
+    return [];
+  }
 };

@@ -26,12 +26,6 @@ export default function Home() {
 
   return (
     <InitialScreenWelcome imgUrl="/assets/hmnWelcomeImage.svg">
-      <div
-        style={{
-          background: "radial-gradient(closest-side, #EBFFF7, #EBFFF7, rgb(255,255,255,0), rgb(255,255,255,0))",
-        }}
-        className="w-[200%] h-full absolute -z-10 -left-[50%]"
-      />
       <div className="mb-4 text-2xl leading-none md:text-6xl font-bold font-alt">Verify Your Humanity, Your Way</div>
       <div className="max-w-md text-lg">
         Collect Stamps, build your Unique Humanity Score of {!!threshold ? threshold : "20+"}, and access the internet

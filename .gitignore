@@ -31,3 +31,5 @@ schemas/.env.yarn
 
 # Do not ignore tehse files
 !.env.example
+
+.playwright-mcp

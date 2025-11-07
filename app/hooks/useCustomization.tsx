@@ -1,5 +1,10 @@
 import { setCustomizationTheme } from "../utils/theme/setCustomizationTheme";
-import { Customization, initializeDOMPurify, requestCustomizationConfig } from "../utils/customizationUtils";
+import {
+  Customization,
+  initializeDOMPurify,
+  requestCustomizationConfig,
+  requestPartnerDashboards,
+} from "../utils/customizationUtils";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect } from "react";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
@@ -83,7 +88,27 @@ export const useSetCustomizationKey = (): ((customizationKey: string | undefined
           setCustomizationConfig({ ...DEFAULT_CUSTOMIZATION, hideHumnBranding: true });
         }
       } else {
-        setCustomizationConfig(DEFAULT_CUSTOMIZATION);
+        // Fetch partner dashboards even when no customization key
+        try {
+          const partnerDashboards = await requestPartnerDashboards();
+
+          // Pre-filter dashboards for TopNav display (all with isCurrent: false)
+          const topNavDashboards = partnerDashboards
+            .filter((dashboard) => dashboard.showInTopNav)
+            .map((dashboard) => ({
+              ...dashboard,
+              isCurrent: false, // No dashboard is current when no customization key
+            }));
+
+          setCustomizationConfig({
+            ...DEFAULT_CUSTOMIZATION,
+            partnerDashboards,
+            topNavDashboards,
+          });
+        } catch (e) {
+          console.error("Failed to load partner dashboards", e);
+          setCustomizationConfig(DEFAULT_CUSTOMIZATION);
+        }
       }
     },
     [setCustomizationConfig]
