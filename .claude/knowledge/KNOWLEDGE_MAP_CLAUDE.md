@@ -24,3 +24,4 @@
 
 ## ⚠️ Gotchas & Non-Obvious Behaviors
 - @gotchas/platform_identification.md - Platform name vs ID mismatches, dead code removal
+- @gotchas/topnav_positioning_responsive.md - NavPopover responsive positioning issues across screen sizes

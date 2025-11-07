@@ -1,6 +1,6 @@
 # 📚 Gitcoin Passport Knowledge Map
 
-*Last updated: 2025-10-29*
+*Last updated: 2025-11-07*
 
 ## 🏗️ Architecture
 - [Platform System Architecture](architecture/platform_system.md) - How platforms are identified, structured, and split between frontend/backend
@@ -26,3 +26,4 @@
 
 ## ⚠️ Gotchas & Non-Obvious Behaviors
 - [Platform Identification](gotchas/platform_identification.md) - Platform name vs ID mismatches, dead code removal
+- [TopNav Positioning Responsive](gotchas/topnav_positioning_responsive.md) - NavPopover responsive positioning issues across screen sizes
