@@ -310,7 +310,11 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
   const [showSidebar, setShowSidebar] = React.useState(false);
   const { verificationComplete } = useOneClickVerification();
   const { scoreState, pointsData } = React.useContext(ScorerContext);
-  const { hideHumnBranding, topNavDashboards } = useCustomization();
+  const customization = useCustomization();
+  const { hideHumnBranding, topNavDashboards, key: customizationKey } = customization;
+
+  // Check if we're on a custom dashboard (any customization key other than "none")
+  const isOnCustomDashboard = customizationKey !== "none";
 
   return (
     <>
@@ -327,7 +331,7 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
           <div className="hidden md:flex flex-grow flex-shrink-0 gap-2">
             {/* Passport Popover */}
             <NavPopover label="Passport" icon={<PassportIcon />}>
-              <TopNav features={navFeatures} partners={topNavDashboards} />
+              <TopNav features={navFeatures} partners={topNavDashboards} isOnCustomDashboard={isOnCustomDashboard} />
             </NavPopover>
 
             {/* Partner with us Popover */}
