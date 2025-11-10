@@ -247,7 +247,7 @@ export default function Dashboard() {
       </Script>
       <HeaderContentFooterGrid>
         <Confetti />
-        <Header />
+        <Header showTopNav={true} />
         <BodyWrapper className="mt-4 md:mt-0 pt-12 md:pt-16">
           {
             // This is just offsetting the dashboard, such that it is shown below the banners

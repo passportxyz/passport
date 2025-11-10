@@ -16,6 +16,7 @@ import { NavPopover } from "./NavPopover";
 
 type MinimalHeaderProps = {
   className?: string;
+  showTopNav?: boolean;
 };
 
 const PassportIcon = () => (
@@ -306,7 +307,7 @@ const partnerWithUs: NavFeature[] = [
   },
 ];
 
-const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
+const MinimalHeader = ({ className, showTopNav }: MinimalHeaderProps): JSX.Element => {
   const [showSidebar, setShowSidebar] = React.useState(false);
   const { verificationComplete } = useOneClickVerification();
   const { scoreState, pointsData } = React.useContext(ScorerContext);
@@ -320,14 +321,14 @@ const MinimalHeader = ({ className }: MinimalHeaderProps): JSX.Element => {
     <>
       <OnchainSidebar isOpen={showSidebar} onClose={() => setShowSidebar(false)} />
       <div className={`relative flex gap-4 items-center h-16 ${className}`}>
-        <div className={`flex items-center flex-grow ${verificationComplete ? "md:flex-grow-0" : "md:flex-grow"}`}>
+        <div className={`flex items-center flex-grow ${showTopNav ? "md:flex-grow-0" : "md:flex-grow"}`}>
           <HumanPassportLogoWithText />
         </div>
 
         {/* Shrinkable Spacer */}
         <div className="flex-shrink w-16" />
 
-        {verificationComplete && (
+        {showTopNav && (
           <div className="hidden md:flex flex-grow flex-shrink-0 gap-2">
             {/* Passport Popover */}
             <NavPopover label="Passport" icon={<PassportIcon />}>
