@@ -49,7 +49,7 @@ export const NavPopover: React.FC<NavPopoverProps> = ({ label, icon, children, s
               leaveTo="opacity-0 translate-y-[-8px]"
             >
               <Popover.Panel
-                className="absolute top-[47px] z-50 left-0 right-0 mx-auto lg:left-32 lg:right-auto"
+                className="absolute top-[47px] z-50 left-[-8px] right-0 mx-auto lg:left-32 lg:right-auto"
                 style={{
                   width: `${panelWidth}px`,
                 }}
