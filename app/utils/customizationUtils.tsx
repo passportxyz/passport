@@ -96,6 +96,7 @@ export type Customization = {
   };
   partnerDashboards?: PartnerDashboard[];
   topNavDashboards?: PartnerDashboard[]; // Pre-filtered dashboards for TopNav display
+  betaStamps?: Set<string>; // Set of provider names that are in beta
 };
 
 type CustomizationResponse = {
@@ -138,6 +139,11 @@ type CustomizationResponse = {
     [name: string]: CustomStamp;
   };
   partnerDashboards?: PartnerDashboard[];
+  stampMetadata?: {
+    [providerName: string]: {
+      isBeta: boolean;
+    };
+  };
 };
 
 export const SanitizedHTMLComponent = ({ html }: { html: string }) => {
@@ -180,6 +186,16 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
         ...dashboard,
         isCurrent: dashboard.id === customizationKey, // Mark current based on customization key
       })) || [];
+
+  // Process stampMetadata to create a Set of beta providers
+  const betaStamps = new Set<string>();
+  if (customizationResponse.stampMetadata) {
+    Object.entries(customizationResponse.stampMetadata).forEach(([providerName, metadata]) => {
+      if (metadata.isBeta) {
+        betaStamps.add(providerName);
+      }
+    });
+  }
 
   return {
     key: customizationKey,
@@ -224,6 +240,7 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
     customStamps: customizationResponse.customStamps,
     partnerDashboards: customizationResponse.partnerDashboards,
     topNavDashboards,
+    betaStamps,
   };
 };
 

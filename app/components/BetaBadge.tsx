@@ -1,0 +1,9 @@
+import React from "react";
+
+export const BetaBadge = (): React.ReactElement => {
+  return (
+    <div className="inline-flex items-center rounded-full bg-background-5 px-2 py-0.5 w-fit text-white text-xs font-medium">
+      BETA
+    </div>
+  );
+};
