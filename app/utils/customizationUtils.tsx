@@ -244,13 +244,33 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
   };
 };
 
-// Fetch only partner dashboards when no customization key is present
-export const requestPartnerDashboards = async (): Promise<PartnerDashboard[]> => {
+// Fetch base customization data (partner dashboards and stamp metadata) when no customization key is present
+export const requestBaseCustomizationData = async (): Promise<{
+  partnerDashboards: PartnerDashboard[];
+  betaStamps: Set<string>;
+}> => {
   try {
     const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}`);
-    return response.data.partnerDashboards || [];
+
+    // Process stampMetadata to create a Set of beta providers
+    const betaStamps = new Set<string>();
+    if (response.data.stampMetadata) {
+      Object.entries(response.data.stampMetadata).forEach(([providerName, metadata]: [string, any]) => {
+        if (metadata.isBeta) {
+          betaStamps.add(providerName);
+        }
+      });
+    }
+
+    return {
+      partnerDashboards: response.data.partnerDashboards || [],
+      betaStamps,
+    };
   } catch (error) {
-    console.error("Failed to load partner dashboards", error);
-    return [];
+    console.error("Failed to load base customization data", error);
+    return {
+      partnerDashboards: [],
+      betaStamps: new Set<string>(),
+    };
   }
 };

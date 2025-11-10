@@ -3,7 +3,7 @@ import {
   Customization,
   initializeDOMPurify,
   requestCustomizationConfig,
-  requestPartnerDashboards,
+  requestBaseCustomizationData,
 } from "../utils/customizationUtils";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect } from "react";
@@ -88,9 +88,9 @@ export const useSetCustomizationKey = (): ((customizationKey: string | undefined
           setCustomizationConfig({ ...DEFAULT_CUSTOMIZATION, hideHumnBranding: true });
         }
       } else {
-        // Fetch partner dashboards even when no customization key
+        // Fetch partner dashboards and beta stamps even when no customization key
         try {
-          const partnerDashboards = await requestPartnerDashboards();
+          const { partnerDashboards, betaStamps } = await requestBaseCustomizationData();
 
           // Pre-filter dashboards for TopNav display (all with isCurrent: false)
           const topNavDashboards = partnerDashboards
@@ -104,9 +104,10 @@ export const useSetCustomizationKey = (): ((customizationKey: string | undefined
             ...DEFAULT_CUSTOMIZATION,
             partnerDashboards,
             topNavDashboards,
+            betaStamps,
           });
         } catch (e) {
-          console.error("Failed to load partner dashboards", e);
+          console.error("Failed to load base customization data", e);
           setCustomizationConfig(DEFAULT_CUSTOMIZATION);
         }
       }
