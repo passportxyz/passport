@@ -53,7 +53,7 @@ export const TopNav: React.FC<TopNavProps> = ({
               <PassportIcon className="w-full h-full" />
             </div>
           )}
-          <span className="font-semibold text-lg leading-6 text-color-4">Passport Dashboard</span>
+          <span className="font-medium text-base leading-6 text-color-4">Passport Dashboard</span>
         </button>
       )}
 
