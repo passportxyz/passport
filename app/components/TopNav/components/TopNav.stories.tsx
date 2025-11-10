@@ -50,6 +50,7 @@ export const WithCurrentDashboard: Story = {
       { name: "Recall", logo: "recall", id: "recall" },
       { name: "Linea", logo: "linea", id: "linea" },
     ],
+    isOnCustomDashboard: true, // Show the Passport Dashboard button
     onPartnerClick: (id: string) => {
       console.log(`Partner clicked: ${id}`);
     },

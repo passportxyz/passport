@@ -8,10 +8,17 @@ interface TopNavProps {
   features?: NavFeature[];
   partners?: PartnerLink[];
   onPartnerClick?: (id: string) => void;
+  isOnCustomDashboard?: boolean; // Whether we're currently viewing a custom partner dashboard
 }
 
-export const TopNav: React.FC<TopNavProps> = ({ features = [], partners = [], onPartnerClick }) => {
+export const TopNav: React.FC<TopNavProps> = ({
+  features = [],
+  partners = [],
+  onPartnerClick,
+  isOnCustomDashboard = false,
+}) => {
   const WandIcon = getIcon("wand");
+  const PassportIcon = getIcon("passport");
 
   const handlePartnerClick = (id: string) => {
     if (onPartnerClick) {
@@ -19,6 +26,11 @@ export const TopNav: React.FC<TopNavProps> = ({ features = [], partners = [], on
     } else {
       window.location.hash = `#/${id}/dashboard`;
     }
+  };
+
+  const handlePassportDashboardClick = () => {
+    // Navigate back to main dashboard
+    window.location.hash = "#/dashboard";
   };
 
   return (
@@ -30,6 +42,21 @@ export const TopNav: React.FC<TopNavProps> = ({ features = [], partners = [], on
         w-full
       `}
     >
+      {/* Passport Dashboard Button - Only shown when on a custom dashboard */}
+      {isOnCustomDashboard && (
+        <button
+          onClick={handlePassportDashboardClick}
+          className="bg-background box-border flex gap-3 items-center justify-center p-3 rounded-lg w-full hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-focus focus:ring-opacity-50"
+        >
+          {PassportIcon && (
+            <div className="w-6 h-6 text-color-4 flex-shrink-0">
+              <PassportIcon className="w-full h-full" />
+            </div>
+          )}
+          <span className="font-medium text-base leading-6 text-color-4">Passport Dashboard</span>
+        </button>
+      )}
+
       {/* Feature Cards Section */}
       <div className="grid grid-cols-2 gap-3 w-full">
         {features.map((feature, index) => (

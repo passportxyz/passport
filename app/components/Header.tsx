@@ -20,7 +20,13 @@ export const useRadialBackgroundColorForHeader = (skipCustomisation: Boolean = f
   return (!skipCustomisation && customizationTheme?.colors.customizationBackground1) || fallbackBackgroundColor;
 };
 
-const Header = ({ skipCustomisation }: { skipCustomisation?: Boolean }): JSX.Element => {
+const Header = ({
+  skipCustomisation,
+  showTopNav,
+}: {
+  skipCustomisation?: Boolean;
+  showTopNav?: boolean;
+}): JSX.Element => {
   const [userWarning, setUserWarning] = useAtom(userWarningAtom);
   const { banners, loadBanners } = useSupportBanners();
   const backgroundColor = useRadialBackgroundColorForHeader(skipCustomisation === true);
@@ -35,7 +41,7 @@ const Header = ({ skipCustomisation }: { skipCustomisation?: Boolean }): JSX.Ele
       className="top-0 left-0 w-full fixed z-30"
     >
       <div className={`${PAGE_PADDING}`}>
-        <MinimalHeader />
+        <MinimalHeader showTopNav={showTopNav} />
       </div>
       {/* TODO: #3502 : wait for clarification on how to display banners ....
       
