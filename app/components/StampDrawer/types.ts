@@ -17,6 +17,7 @@ export interface Credential {
   isEligible: boolean;
   humanPointsAvailable?: number;
   humanPointsEarned?: number;
+  isBeta?: boolean;
 }
 
 export interface CredentialGroup {
@@ -79,6 +80,7 @@ export interface CredentialCardProps {
   isEligible: boolean;
   humanPointsAvailable?: number;
   humanPointsEarned?: number;
+  isBeta?: boolean;
 }
 
 export interface CredentialGridProps {
