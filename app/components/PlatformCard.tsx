@@ -149,13 +149,13 @@ const DefaultStamp = ({
 
           <div className="mt-4 h-full md:mt-6 inline-block justify-start text-color-4">
             <div
-              className={`flex place-items-start flex-row gap-2 ${
+              className={`flex place-items-start flex-row gap-2 mr-0 md:mr-4 ${
                 platform.name.split(" ").length > 1 ? "items-center md:items-baseline" : "items-center"
               }`}
             >
               <h1
                 data-testid="platform-name"
-                className={`mr-0 text-xl md:mr-4 ${platform.name.split(" ").length > 1 ? "text-left" : "text-center"}`}
+                className={`text-xl ${platform.name.split(" ").length > 1 ? "text-left" : "text-center"}`}
               >
                 {platform.name}
               </h1>
