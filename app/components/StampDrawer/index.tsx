@@ -76,6 +76,7 @@ const StampDrawer = ({
   const { allProvidersState } = useContext(CeramicContext);
   const { possiblePointsDataForStamps, pointsDataForStamps, pointsData } = useContext(ScorerContext);
   const customization = useCustomization();
+  const { betaStamps } = useCustomization();
 
   // Modal states
   const [jsonModalIsOpen, setJsonModalIsOpen] = useState(false);
@@ -117,6 +118,7 @@ const StampDrawer = ({
               : providerId in pointsDataForStamps
                 ? pointsDataForStamps[providerId as POINTED_STAMP_PROVIDER]
                 : 0,
+          isBeta: betaStamps?.has(providerId),
         };
       }),
     }));

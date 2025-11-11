@@ -4,6 +4,7 @@ import { PassportPoints } from "../../PassportPoints";
 import { HumanPointsLabelSMDark } from "../../humanPoints";
 import { beforeHumanPointsRelease } from "../../../utils/helpers";
 import { useCustomization } from "../../../hooks/useCustomization";
+import { BetaBadge } from "../../BetaBadge";
 
 const ExpiredIcon = () => (
   <svg width="16" height="16" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -93,6 +94,7 @@ export const CredentialCard = ({
   isEligible,
   humanPointsAvailable,
   humanPointsEarned,
+  isBeta,
 }: CredentialCardProps) => {
   const { hideHumnBranding } = useCustomization();
 
@@ -145,6 +147,12 @@ export const CredentialCard = ({
       )}
 
       {description && <p className="text-xs text-color-9 mt-2 leading-relaxed">{description}</p>}
+
+      {isBeta && (
+        <div className="mt-2">
+          <BetaBadge />
+        </div>
+      )}
     </div>
   );
 };

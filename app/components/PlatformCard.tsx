@@ -19,6 +19,7 @@ import { HumanPointsLabelSMDark } from "./humanPoints";
 import { providersForPoints, ScorerContext } from "../context/scorerContext";
 import { beforeHumanPointsRelease } from "../utils/helpers";
 import { useCustomization } from "../hooks/useCustomization";
+import { BetaBadge } from "./BetaBadge";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
@@ -43,6 +44,7 @@ type StampProps = {
   variant?: CardVariant;
   isDeduplicated?: boolean;
   isHumanTech?: boolean;
+  isBeta?: boolean;
 };
 
 const variantClasses: Record<CardVariant, string> = {
@@ -71,7 +73,16 @@ const SecureDByHumanTech: React.FC = () => {
   );
 };
 
-const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech, platformProviders }: StampProps) => {
+const DefaultStamp = ({
+  idx,
+  platform,
+  className,
+  onClick,
+  variant,
+  isHumanTech,
+  platformProviders,
+  isBeta,
+}: StampProps) => {
   const { possiblePointsDataForStamps, pointsData, stampWeights } = useContext(ScorerContext);
   const [possibleHumanPoints, setPossibleHumanPoints] = useState<number>();
   const { hideHumnBranding } = useCustomization();
@@ -138,16 +149,17 @@ const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech,
 
           <div className="mt-4 h-full md:mt-6 inline-block justify-start text-color-4">
             <div
-              className={`flex place-items-start flex-row ${
+              className={`flex place-items-start flex-row gap-2 mr-0 md:mr-4 ${
                 platform.name.split(" ").length > 1 ? "items-center md:items-baseline" : "items-center"
               }`}
             >
               <h1
                 data-testid="platform-name"
-                className={`mr-0 text-xl md:mr-4 ${platform.name.split(" ").length > 1 ? "text-left" : "text-center"}`}
+                className={`text-xl ${platform.name.split(" ").length > 1 ? "text-left" : "text-center"}`}
               >
                 {platform.name}
               </h1>
+              {isBeta && <BetaBadge />}
             </div>
             {isHumanTech && <SecureDByHumanTech />}
             <p className="flex-1 pleading-relaxed mt-2 text-sm inline-block visible text-gray-600">
@@ -176,6 +188,7 @@ const VerifiedStamp = ({
   onClick,
   isDeduplicated,
   isHumanTech,
+  isBeta,
 }: StampProps) => {
   const { activeChainProviders } = useOnChainData();
   const [isAnyOnchain, setIsAnyOnchain] = useState(false);
@@ -274,7 +287,7 @@ const VerifiedStamp = ({
 
           <div className="mt-4 h-full md:mt-6 inline-block justify-start text-color-4">
             <div
-              className={`flex place-items-start flex-row ${
+              className={`flex place-items-start flex-row gap-2 ${
                 platform.name.split(" ").length > 1 ? "items-center md:items-baseline" : "items-center"
               }`}
             >
@@ -284,6 +297,7 @@ const VerifiedStamp = ({
               >
                 {platform.name}
               </h1>
+              {isBeta && <BetaBadge />}
             </div>
             {isHumanTech && <SecureDByHumanTech />}
             <p className="flex-1 pleading-relaxed mt-2 text-sm inline-block visible text-gray-600">
@@ -331,6 +345,7 @@ const ExpiredStamp = ({
   onClick,
   isDeduplicated,
   isHumanTech,
+  isBeta,
 }: StampProps) => {
   const [hovering, setHovering] = useState(false);
   return (
@@ -358,7 +373,7 @@ const ExpiredStamp = ({
           </div>
           <div className="mt-4 h-full md:mt-6 inline-block justify-start text-color-4">
             <div
-              className={`flex place-items-start flex-row ${
+              className={`flex place-items-start flex-row gap-2 ${
                 platform.name.split(" ").length > 1 ? "items-center md:items-baseline" : "items-center"
               }`}
             >
@@ -368,6 +383,7 @@ const ExpiredStamp = ({
               >
                 {platform.name}
               </h1>
+              {isBeta && <BetaBadge />}
             </div>
             {isHumanTech && <SecureDByHumanTech />}
             <p className="flex-1 pleading-relaxed mt-2 text-sm inline-block visible text-gray-600">
@@ -407,6 +423,7 @@ export const PlatformCard = ({
 }: PlatformCardProps): JSX.Element => {
   const { platformExpirationDates, expiredPlatforms, allProvidersState } = useContext(CeramicContext);
   const { platformSpecs, platformProviderIds } = usePlatforms();
+  const { betaStamps } = useCustomization();
 
   const selectedProviders = platformSpecs.reduce((platforms, platform) => {
     const providerIds = platformProviderIds[platform.platform] || [];
@@ -426,6 +443,10 @@ export const PlatformCard = ({
   const isDeduplicated = useStampDeduplication(platform);
   const isHumanTech = humanTechPlatforms.has(platform.name);
 
+  // Check if any of this platform's providers are in beta
+  const platformProviders = platformProviderIds[platform.platform] || [];
+  const isBeta = platformProviders.some((providerId) => betaStamps?.has(providerId));
+
   const verified =
     platform.earnedPoints > 0 ||
     (selectedProviders[platform.platform] && selectedProviders[platform.platform].length > 0);
@@ -441,6 +462,7 @@ export const PlatformCard = ({
         className={className}
         isDeduplicated={isDeduplicated}
         isHumanTech={isHumanTech}
+        isBeta={isBeta}
         onClick={() => {
           setCurrentPlatform(platform);
           onOpen();
@@ -458,6 +480,7 @@ export const PlatformCard = ({
         className={className}
         isDeduplicated={isDeduplicated}
         isHumanTech={isHumanTech}
+        isBeta={isBeta}
         onClick={() => {
           setCurrentPlatform(platform);
           onOpen();
@@ -473,6 +496,7 @@ export const PlatformCard = ({
         platformProviders={platformProviderIds[platform.platform]}
         className={className}
         isHumanTech={isHumanTech}
+        isBeta={isBeta}
         onClick={() => {
           setCurrentPlatform(platform);
           onOpen();
