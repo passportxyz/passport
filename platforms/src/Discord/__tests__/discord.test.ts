@@ -1,5 +1,3 @@
-// TODO - remove eslint disable below once type rules are unified
-
 // ---- Test subject
 import { DiscordProvider } from "../Providers/discord.js";
 
@@ -13,130 +11,653 @@ jest.mock("axios");
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-const validDiscordUserResponse = {
-  data: {
-    user: {
-      id: "268473310986240001",
-      username: "Discord",
-      avatar: "f749bb0cbeeb26ef21eca719337d20f1",
-      discriminator: "0001",
-      public_flags: 131072,
-    },
-  },
-  status: 200,
+const code = "ABC123_ACCESSCODE";
+
+// Helper to create a Discord snowflake ID for a specific age
+const createSnowflakeId = (daysOld: number): string => {
+  const now = Date.now();
+  const createdAt = now - daysOld * 24 * 60 * 60 * 1000;
+  const discordEpoch = 1420070400000;
+  const timestamp = createdAt - discordEpoch;
+  const snowflake = BigInt(timestamp) << 22n;
+  return snowflake.toString();
 };
 
-const validCodeResponse = {
+const validAccessTokenResponse = {
   data: {
     access_token: "762165719dhiqudgasyuqwt6235",
   },
   status: 200,
 };
 
-const code = "ABC123_ACCESSCODE";
-
-beforeEach(() => {
-  jest.clearAllMocks();
-  mockedAxios.post.mockImplementation(async () => {
-    return validCodeResponse;
+describe("Discord Enhanced Verification", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  mockedAxios.get.mockImplementation(async () => {
-    return validDiscordUserResponse;
-  });
-});
+  describe("All criteria pass", () => {
+    it("should verify successfully when all requirements are met", async () => {
+      const testUserId = createSnowflakeId(400); // Create once and reuse
 
-describe("Attempt verification", function () {
-  it("handles valid verification attempt", async () => {
-    const discord = new DiscordProvider();
-    const discordPayload = await discord.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
+      // Mock token exchange
+      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
 
-    // Check the request to get the user
-    expect(mockedAxios.get).toHaveBeenCalledWith("https://discord.com/api/oauth2/@me", {
-      headers: { Authorization: "Bearer 762165719dhiqudgasyuqwt6235" },
-    });
+      // Mock API responses
+      mockedAxios.get.mockImplementation(async (url) => {
+        if (url.includes("/oauth2/@me")) {
+          return {
+            data: {
+              user: {
+                id: testUserId, // Use the same ID
+                username: "TestUser",
+              },
+            },
+            status: 200,
+          };
+        }
 
-    expect(discordPayload).toEqual({
-      valid: true,
-      record: {
-        id: validDiscordUserResponse.data.user.id,
-      },
-      errors: [],
-    });
-  });
+        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+          // Return 15 guilds (> 10 required)
+          return {
+            data: Array.from({ length: 15 }, (_, i) => ({
+              id: `guild_${i}`,
+              name: `Server ${i}`,
+            })),
+            status: 200,
+          };
+        }
 
-  it("should return invalid payload when unable to retrieve auth token", async () => {
-    mockedAxios.post.mockImplementation(async () => {
-      return {
-        status: 500,
-      };
-    });
+        if (url.includes("/member")) {
+          // Return roles for first 5 guilds (> 3 required)
+          const guildId = url.split("/guilds/")[1]?.split("/member")[0];
+          const guildIndex = parseInt(guildId?.split("_")[1] || "0");
 
-    const discord = new DiscordProvider();
+          return {
+            data: {
+              roles: guildIndex < 5 ? ["role1", "role2"] : [],
+            },
+            status: 200,
+          };
+        }
 
-    await expect(async () => {
-      return await discord.verify({
-        proofs: {
-          code,
-        },
+        if (url.includes("/connections")) {
+          // Return 3 verified connections (> 2 required)
+          return {
+            data: [
+              { type: "github", name: "testuser", verified: true },
+              { type: "twitter", name: "testuser", verified: true },
+              { type: "steam", name: "testuser", verified: false },
+            ],
+            status: 200,
+          };
+        }
+      });
+
+      const discord = new DiscordProvider();
+      const result = await discord.verify({
+        proofs: { code },
       } as unknown as RequestPayload);
-    }).rejects.toThrow(
-      new ProviderExternalVerificationError(
-        "Discord account check error: Post for request returned status code 500 instead of the expected 200"
-      )
-    );
-  });
 
-  it("should return invalid payload when there is no id in verifyDiscord response", async () => {
-    mockedAxios.get.mockImplementation(async () => {
-      return {
-        data: {
-          id: undefined,
-          login: "my-login-handle",
-          type: "User",
-        },
-        status: 200,
-      };
-    });
-
-    const discord = new DiscordProvider();
-
-    const discordPayload = await discord.verify({
-      proofs: {
-        code,
-      },
-    } as unknown as RequestPayload);
-
-    expect(discordPayload).toMatchObject({
-      valid: false,
-      errors: ["We were not able to verify a Discord account with your provided credentials."],
-      record: undefined,
+      expect(result.valid).toBe(true);
+      expect(result.errors).toEqual([]);
+      expect(result.record).toBeDefined();
+      expect(result.record?.id).toBe(testUserId);
     });
   });
 
-  it("should return invalid payload when a bad status code is returned by discord user api", async () => {
-    mockedAxios.get.mockImplementation(async () => {
-      return {
-        status: 500,
-      };
-    });
+  describe("Account age validation", () => {
+    it("should fail when account is less than 365 days old", async () => {
+      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
 
-    const discord = new DiscordProvider();
+      mockedAxios.get.mockImplementation(async (url) => {
+        if (url.includes("/oauth2/@me")) {
+          return {
+            data: {
+              user: {
+                id: createSnowflakeId(200), // Only 200 days old
+                username: "TestUser",
+              },
+            },
+            status: 200,
+          };
+        }
 
-    await expect(async () => {
-      return await discord.verify({
-        proofs: {
-          code,
-        },
+        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+          return {
+            data: Array.from({ length: 15 }, (_, i) => ({
+              id: `guild_${i}`,
+              name: `Server ${i}`,
+            })),
+            status: 200,
+          };
+        }
+
+        if (url.includes("/member")) {
+          const guildId = url.split("/guilds/")[1]?.split("/member")[0];
+          const guildIndex = parseInt(guildId?.split("_")[1] || "0");
+          return {
+            data: { roles: guildIndex < 5 ? ["role1"] : [] },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/connections")) {
+          return {
+            data: [
+              { type: "github", name: "testuser", verified: true },
+              { type: "twitter", name: "testuser", verified: true },
+            ],
+            status: 200,
+          };
+        }
+      });
+
+      const discord = new DiscordProvider();
+      const result = await discord.verify({
+        proofs: { code },
       } as unknown as RequestPayload);
-    }).rejects.toThrow(
-      new ProviderExternalVerificationError(
-        "Discord account check error: ProviderExternalVerificationError: Get user request returned status code 500 instead of the expected 200"
-      )
-    );
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain("Discord account must be at least 365 days old (current: 200 days)");
+    });
+  });
+
+  describe("Server count validation", () => {
+    it("should fail when user is in less than 10 servers", async () => {
+      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
+
+      mockedAxios.get.mockImplementation(async (url) => {
+        if (url.includes("/oauth2/@me")) {
+          return {
+            data: {
+              user: {
+                id: createSnowflakeId(400),
+                username: "TestUser",
+              },
+            },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+          // Only 5 guilds
+          return {
+            data: Array.from({ length: 5 }, (_, i) => ({
+              id: `guild_${i}`,
+              name: `Server ${i}`,
+            })),
+            status: 200,
+          };
+        }
+
+        if (url.includes("/member")) {
+          return {
+            data: { roles: ["role1"] },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/connections")) {
+          return {
+            data: [
+              { type: "github", name: "testuser", verified: true },
+              { type: "twitter", name: "testuser", verified: true },
+            ],
+            status: 200,
+          };
+        }
+      });
+
+      const discord = new DiscordProvider();
+      const result = await discord.verify({
+        proofs: { code },
+      } as unknown as RequestPayload);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain("Must be a member of at least 10 servers (current: 5)");
+    });
+  });
+
+  describe("Role assignments validation", () => {
+    it("should fail when user has roles in less than 3 servers", async () => {
+      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
+
+      mockedAxios.get.mockImplementation(async (url) => {
+        if (url.includes("/oauth2/@me")) {
+          return {
+            data: {
+              user: {
+                id: createSnowflakeId(400),
+                username: "TestUser",
+              },
+            },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+          return {
+            data: Array.from({ length: 15 }, (_, i) => ({
+              id: `guild_${i}`,
+              name: `Server ${i}`,
+            })),
+            status: 200,
+          };
+        }
+
+        if (url.includes("/member")) {
+          const guildId = url.split("/guilds/")[1]?.split("/member")[0];
+          const guildIndex = parseInt(guildId?.split("_")[1] || "0");
+          // Only first 2 guilds have roles
+          return {
+            data: { roles: guildIndex < 2 ? ["role1"] : [] },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/connections")) {
+          return {
+            data: [
+              { type: "github", name: "testuser", verified: true },
+              { type: "twitter", name: "testuser", verified: true },
+            ],
+            status: 200,
+          };
+        }
+      });
+
+      const discord = new DiscordProvider();
+      const result = await discord.verify({
+        proofs: { code },
+      } as unknown as RequestPayload);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain("Must have roles in at least 3 servers (current: 2)");
+    });
+
+    it("should skip guilds that return 404 (user left server)", async () => {
+      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
+
+      let memberCallCount = 0;
+
+      mockedAxios.get.mockImplementation(async (url) => {
+        if (url.includes("/oauth2/@me")) {
+          return {
+            data: {
+              user: {
+                id: createSnowflakeId(400),
+                username: "TestUser",
+              },
+            },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+          return {
+            data: Array.from({ length: 15 }, (_, i) => ({
+              id: `guild_${i}`,
+              name: `Server ${i}`,
+            })),
+            status: 200,
+          };
+        }
+
+        if (url.includes("/member")) {
+          memberCallCount++;
+          const guildId = url.split("/guilds/")[1]?.split("/member")[0];
+          const guildIndex = parseInt(guildId?.split("_")[1] || "0");
+
+          // Simulate 404 for guilds 1 and 3 (user left)
+          if (guildIndex === 1 || guildIndex === 3) {
+            throw {
+              response: { status: 404 },
+              isAxiosError: true,
+            };
+          }
+
+          // Guilds 0, 2, 4 have roles (should count as 3)
+          return {
+            data: { roles: guildIndex < 5 ? ["role1"] : [] },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/connections")) {
+          return {
+            data: [
+              { type: "github", name: "testuser", verified: true },
+              { type: "twitter", name: "testuser", verified: true },
+            ],
+            status: 200,
+          };
+        }
+      });
+
+      const discord = new DiscordProvider();
+      const result = await discord.verify({
+        proofs: { code },
+      } as unknown as RequestPayload);
+
+      expect(result.valid).toBe(true);
+      expect(result.errors).toEqual([]);
+      // Should have made calls for guilds 0, 1, 2, 3, 4 (stops at 3 successful)
+      expect(memberCallCount).toBeGreaterThanOrEqual(3);
+    });
+
+    it("should stop checking guilds after finding 3 with roles (early bailout)", async () => {
+      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
+
+      let memberCallCount = 0;
+
+      mockedAxios.get.mockImplementation(async (url) => {
+        if (url.includes("/oauth2/@me")) {
+          return {
+            data: {
+              user: {
+                id: createSnowflakeId(400),
+                username: "TestUser",
+              },
+            },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+          // Return many guilds (100)
+          return {
+            data: Array.from({ length: 100 }, (_, i) => ({
+              id: `guild_${i}`,
+              name: `Server ${i}`,
+            })),
+            status: 200,
+          };
+        }
+
+        if (url.includes("/member")) {
+          memberCallCount++;
+          // All guilds have roles
+          return {
+            data: { roles: ["role1", "role2"] },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/connections")) {
+          return {
+            data: [
+              { type: "github", name: "testuser", verified: true },
+              { type: "twitter", name: "testuser", verified: true },
+            ],
+            status: 200,
+          };
+        }
+      });
+
+      const discord = new DiscordProvider();
+      const result = await discord.verify({
+        proofs: { code },
+      } as unknown as RequestPayload);
+
+      expect(result.valid).toBe(true);
+      // Should only check exactly 3 guilds, not all 100
+      expect(memberCallCount).toBe(3);
+    });
+  });
+
+  describe("Verified connections validation", () => {
+    it("should fail when user has less than 2 verified connections", async () => {
+      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
+
+      mockedAxios.get.mockImplementation(async (url) => {
+        if (url.includes("/oauth2/@me")) {
+          return {
+            data: {
+              user: {
+                id: createSnowflakeId(400),
+                username: "TestUser",
+              },
+            },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+          return {
+            data: Array.from({ length: 15 }, (_, i) => ({
+              id: `guild_${i}`,
+              name: `Server ${i}`,
+            })),
+            status: 200,
+          };
+        }
+
+        if (url.includes("/member")) {
+          const guildId = url.split("/guilds/")[1]?.split("/member")[0];
+          const guildIndex = parseInt(guildId?.split("_")[1] || "0");
+          return {
+            data: { roles: guildIndex < 5 ? ["role1"] : [] },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/connections")) {
+          // Only 1 verified connection
+          return {
+            data: [
+              { type: "github", name: "testuser", verified: true },
+              { type: "twitter", name: "testuser", verified: false },
+              { type: "steam", name: "testuser", verified: false },
+            ],
+            status: 200,
+          };
+        }
+      });
+
+      const discord = new DiscordProvider();
+      const result = await discord.verify({
+        proofs: { code },
+      } as unknown as RequestPayload);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain("Must have at least 2 verified external connections (current: 1)");
+    });
+  });
+
+  describe("Multiple criteria fail", () => {
+    it("should list all failures when multiple criteria are not met", async () => {
+      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
+
+      mockedAxios.get.mockImplementation(async (url) => {
+        if (url.includes("/oauth2/@me")) {
+          return {
+            data: {
+              user: {
+                id: createSnowflakeId(100), // Too young
+                username: "TestUser",
+              },
+            },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+          // Too few guilds
+          return {
+            data: Array.from({ length: 5 }, (_, i) => ({
+              id: `guild_${i}`,
+              name: `Server ${i}`,
+            })),
+            status: 200,
+          };
+        }
+
+        if (url.includes("/member")) {
+          // No roles
+          return {
+            data: { roles: [] },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/connections")) {
+          // No verified connections
+          return {
+            data: [{ type: "steam", name: "testuser", verified: false }],
+            status: 200,
+          };
+        }
+      });
+
+      const discord = new DiscordProvider();
+      const result = await discord.verify({
+        proofs: { code },
+      } as unknown as RequestPayload);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toHaveLength(4);
+      expect(result.errors).toContain("Discord account must be at least 365 days old (current: 100 days)");
+      expect(result.errors).toContain("Must be a member of at least 10 servers (current: 5)");
+      expect(result.errors).toContain("Must have roles in at least 3 servers (current: 0)");
+      expect(result.errors).toContain("Must have at least 2 verified external connections (current: 0)");
+    });
+  });
+
+  describe("API failures", () => {
+    it("should throw error when unable to retrieve auth token", async () => {
+      mockedAxios.post.mockResolvedValue({
+        status: 500,
+      });
+
+      const discord = new DiscordProvider();
+
+      await expect(
+        discord.verify({
+          proofs: { code },
+        } as unknown as RequestPayload)
+      ).rejects.toThrow(ProviderExternalVerificationError);
+    });
+
+    it("should throw error when user API returns bad status code", async () => {
+      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
+
+      mockedAxios.get.mockImplementation(async (url) => {
+        if (url.includes("/oauth2/@me")) {
+          return {
+            status: 500,
+          };
+        }
+      });
+
+      const discord = new DiscordProvider();
+
+      await expect(
+        discord.verify({
+          proofs: { code },
+        } as unknown as RequestPayload)
+      ).rejects.toThrow(ProviderExternalVerificationError);
+    });
+
+    it("should return invalid payload when user ID is missing", async () => {
+      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
+
+      mockedAxios.get.mockImplementation(async (url) => {
+        if (url.includes("/oauth2/@me")) {
+          return {
+            data: {
+              user: {
+                id: undefined,
+                username: "TestUser",
+              },
+            },
+            status: 200,
+          };
+        }
+      });
+
+      const discord = new DiscordProvider();
+      const result = await discord.verify({
+        proofs: { code },
+      } as unknown as RequestPayload);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain("We were not able to verify a Discord account with your provided credentials.");
+    });
+  });
+
+  describe("Rate limit handling", () => {
+    it("should retry on 429 rate limit and succeed", async () => {
+      const testUserId = createSnowflakeId(400);
+      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
+
+      let attemptCount = 0;
+      const rateLimitError = {
+        response: {
+          status: 429,
+          headers: { "retry-after": "1" },
+        },
+        isAxiosError: true,
+      };
+
+      // Mock axios.isAxiosError to recognize our mock error
+      jest.spyOn(axios, "isAxiosError").mockImplementation((error) => error?.isAxiosError === true);
+
+      mockedAxios.get.mockImplementation(async (url) => {
+        if (url.includes("/oauth2/@me")) {
+          attemptCount++;
+          if (attemptCount === 1) {
+            // First attempt - rate limited
+            throw rateLimitError;
+          }
+          // Second attempt - success
+          return {
+            data: {
+              user: {
+                id: testUserId,
+                username: "TestUser",
+              },
+            },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+          return {
+            data: Array.from({ length: 15 }, (_, i) => ({
+              id: `guild_${i}`,
+              name: `Server ${i}`,
+            })),
+            status: 200,
+          };
+        }
+
+        if (url.includes("/member")) {
+          const guildId = url.split("/guilds/")[1]?.split("/member")[0];
+          const guildIndex = parseInt(guildId?.split("_")[1] || "0");
+          return {
+            data: { roles: guildIndex < 5 ? ["role1"] : [] },
+            status: 200,
+          };
+        }
+
+        if (url.includes("/connections")) {
+          return {
+            data: [
+              { type: "github", name: "testuser", verified: true },
+              { type: "twitter", name: "testuser", verified: true },
+            ],
+            status: 200,
+          };
+        }
+      });
+
+      const discord = new DiscordProvider();
+      const result = await discord.verify({
+        proofs: { code },
+      } as unknown as RequestPayload);
+
+      expect(result.valid).toBe(true);
+      expect(attemptCount).toBe(2); // Should have retried once
+    });
   });
 });
