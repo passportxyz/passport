@@ -94,6 +94,8 @@ const createHumanNetworkNullifier = async ({
   version,
   record,
 }: HumanNetworkNullifierGeneratorOptions & { record: ProofRecord }) => {
+  const startTime = Date.now();
+
   const value = JSON.stringify(objToSortedArray(record));
 
   const humanNetworkEncrypted = await humanNetworkOprf({
@@ -104,6 +106,9 @@ const createHumanNetworkNullifier = async ({
     secret: localSecret,
     value: humanNetworkEncrypted,
   });
+
+  const duration = Date.now() - startTime;
+  logger.info(`Human network nullifier: ${duration}ms`);
 
   return `v${version}:${hashedValue}`;
 };
