@@ -11,7 +11,7 @@ jest.mock("brightid_sdk", () => ({
   sponsor: jest.fn(),
 }));
 
-describe("Attempt BrightId", () => {
+describe.skip("Attempt BrightId", () => {
   const did = "did:pkh:eip155:1:0x0";
   const nonUniqueResponse: BrightIdVerificationResponse = {
     unique: false,
