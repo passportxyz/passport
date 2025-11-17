@@ -116,6 +116,85 @@ describe("GET /embed/stamps/metadata", () => {
     });
   });
 
+  it("should use custom stamp sections when available", async () => {
+    // Mock the weights response
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        BinanceBABT: 10.0,
+        Discord: 5.0,
+      },
+    });
+
+    // Mock the custom sections response
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      data: [
+        {
+          title: "Custom Section 1",
+          order: 0,
+          items: [{ platform_id: "Binance", order: 0 }],
+        },
+        {
+          title: "Custom Section 2",
+          order: 1,
+          items: [{ platform_id: "Discord", order: 0 }],
+        },
+      ],
+    });
+
+    const response = await request(app)
+      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    // Verify custom section titles are used
+    expect(response.body).toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({
+          header: "Custom Section 1",
+        }),
+        expect.objectContaining({
+          header: "Custom Section 2",
+        }),
+      ])
+    );
+  });
+
+  it("should fall back to default STAMP_PAGES when custom sections API fails", async () => {
+    // Mock the weights response (first call)
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        BinanceBABT: 10.0,
+        Discord: 5.0,
+      },
+    });
+
+    // Mock the custom sections API to fail (second call)
+    mockedAxios.get.mockRejectedValueOnce(new Error("Custom sections not found"));
+
+    const response = await request(app)
+      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    // Should still return data using default STAMP_PAGES
+    expect(response.body.length).toBeGreaterThan(0);
+    expect(response.body).toMatchObject(
+      expect.arrayContaining([
+        {
+          header: expect.any(String),
+          platforms: expect.any(Array),
+        },
+      ])
+    );
+  });
+
   describe("unexpected errors", () => {
     it("should handle errors from the embedWeightsUrl API correctly", async () => {
       mockedAxios.get.mockImplementationOnce(() => {
