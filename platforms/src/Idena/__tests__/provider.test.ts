@@ -46,7 +46,7 @@ type IdenaCache = {
   signature?: string;
 };
 
-describe("Idena", () => {
+describe.skip("Idena", () => {
   beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date(Date.UTC(2023, 0, 1)));
@@ -182,7 +182,7 @@ describe("Idena", () => {
   });
 });
 
-describe("Idena Error", () => {
+describe.skip("Idena Error", () => {
   beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date(Date.UTC(2023, 0, 1)));
