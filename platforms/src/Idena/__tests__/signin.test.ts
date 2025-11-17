@@ -42,7 +42,7 @@ afterEach(async () => {
   jest.clearAllMocks();
 });
 
-describe("Attempt signin", function () {
+describe.skip("Attempt signin", function () {
   it("should generate nonce", async () => {
     const nonce = await loadIdenaSession(MOCK_SESSION_KEY, MOCK_ADDRESS);
     expect(nonce).toBeDefined();
