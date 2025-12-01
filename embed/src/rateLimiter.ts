@@ -66,7 +66,6 @@ export async function apiKeyRateLimit(req: Request, _res: Response): Promise<num
       {
         headers: {
           "X-API-KEY": apiKey,
-          "X-Use-Rust-Scorer": "true",
         },
       }
     );

@@ -57,7 +57,6 @@ export const addStampsAndGetScore = async ({
       {
         headers: {
           Authorization: apiKey,
-          "X-Use-Rust-Scorer": "true",
         },
       }
     );
@@ -87,7 +86,6 @@ export const getScore = async ({
     } = await axios.get(`${process.env.SCORER_ENDPOINT}/internal/embed/score/${scorerId}/${address}`, {
       headers: {
         Authorization: apiKey,
-        "X-Use-Rust-Scorer": "true",
       },
     });
 
