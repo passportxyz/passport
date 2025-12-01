@@ -68,6 +68,26 @@ export const PlatformDetails: PlatformSpec = {
         "For additional support, contact the team at support@zk.email",
       ],
     },
+    {
+      type: "list",
+      title: "Supported Amazon countries",
+      items: [
+        "🇨🇦 Canada",
+        "🇪🇲 Emirates",
+        "🇫🇷 France",
+        "🇩🇪 Germany",
+        "🇮🇳 India",
+        "🇮🇹 Italy",
+        "🇯🇵 Japan",
+        "🇲🇽 Mexico",
+        "🇳🇱 Netherlands",
+        "🇵🇱 Poland",
+        "🇪🇸 Spain",
+        "🇸🇪 Sweden",
+        "🇬🇧 UK",
+        "🇺🇸 USA",
+      ],
+    },
   ],
 };
 
