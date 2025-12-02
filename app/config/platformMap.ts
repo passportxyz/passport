@@ -130,10 +130,10 @@ defaultPlatformMap.set("Google", {
   platFormGroupSpec: Google.ProviderConfig,
 });
 
-defaultPlatformMap.set("Brightid", {
-  platform: new Brightid.BrightidPlatform(),
-  platFormGroupSpec: Brightid.ProviderConfig,
-});
+// defaultPlatformMap.set("Brightid", {
+//   platform: new Brightid.BrightidPlatform(),
+//   platFormGroupSpec: Brightid.ProviderConfig,
+// });
 
 if (process.env.NEXT_PUBLIC_FF_COINBASE_STAMP === "on") {
   defaultPlatformMap.set("Coinbase", {
@@ -172,12 +172,13 @@ defaultPlatformMap.set("HumanIdPhone", {
   platFormGroupSpec: HumanIdPhone.ProviderConfig,
 });
 
-if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP === "on") {
-  defaultPlatformMap.set("Idena", {
-    platform: new Idena.IdenaPlatform(),
-    platFormGroupSpec: Idena.ProviderConfig,
-  });
-}
+// Idena stamp retired - see #3794
+// if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP === "on") {
+//   defaultPlatformMap.set("Idena", {
+//     platform: new Idena.IdenaPlatform(),
+//     platFormGroupSpec: Idena.ProviderConfig,
+//   });
+// }
 
 defaultPlatformMap.set("Civic", {
   platform: new Civic.CivicPlatform({

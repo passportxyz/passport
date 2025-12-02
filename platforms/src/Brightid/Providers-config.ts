@@ -66,6 +66,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
         title: "Peer-Verified Identity",
         name: "Brightid",
         description: "Validated as unique human through community-based social verification",
+        isDeprecated: true,
       },
     ],
   },
