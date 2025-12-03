@@ -5,6 +5,7 @@ import React, { useContext, useEffect, useRef } from "react";
 // --Components
 import PageRoot from "../components/PageRoot";
 import { CardList } from "../components/CardList";
+import { PartnersSection } from "../components/PartnersSection";
 import WelcomeFooter from "../components/WelcomeFooter";
 import Header from "../components/Header";
 import BodyWrapper from "../components/BodyWrapper";
@@ -256,6 +257,7 @@ export default function Dashboard() {
                 isLoadingPassport == IsLoadingPassportState.FailedToConnect
               }
             />
+            <PartnersSection />
           </PageWidthGrid>
         </BodyWrapper>
         {/* This footer contains dark colored text and dark images */}
