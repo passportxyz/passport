@@ -27,6 +27,7 @@ import * as HumanIdPhone from "./HumanIdPhone/index.js";
 import * as HumanIdKyc from "./HumanIdKyc/index.js";
 import * as Biometrics from "./Biometrics/index.js";
 import * as ZKEmail from "./ZKEmail/index.js";
+import * as X from "./X/index.js";
 
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types.js";
 
@@ -67,6 +68,7 @@ const platforms: Record<string, PlatformConfig> = {
   HumanIdPhone,
   Biometrics,
   ZKEmail,
+  X,
 };
 
 if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {
