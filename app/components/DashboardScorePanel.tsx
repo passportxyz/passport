@@ -10,9 +10,7 @@ import { LoadButton } from "./LoadButton";
 import { Hyperlink } from "@gitcoin/passport-platforms";
 import { OnchainSidebar } from "./OnchainSidebar";
 import { LoadingBar } from "./LoadingBar";
-import { HumanPointsLabel } from "./humanPoints";
 import { OnChainStatus } from "../utils/onChainStatus";
-import { beforeHumanPointsRelease } from "../utils/helpers";
 
 const PanelDiv = ({ className, children }: { className: string; children: React.ReactNode }) => {
   return (
@@ -121,50 +119,28 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
   const { rawScore, threshold } = React.useContext(ScorerContext);
   const { someChainUpToDate, onChainAttestationProviders } = useAllOnChainStatus();
   const customization = useCustomization();
-  const { pointsData } = React.useContext(ScorerContext);
-  const hideHumnBranding = customization.hideHumnBranding;
 
   const aboveThreshold = rawScore >= threshold;
   const customText = customization?.scorerPanel?.text;
-  const mintPointsGained = pointsData?.breakdown.PMT;
-  const humanPoints = mintPointsGained || 1800;
-  const prefix = !!mintPointsGained ? "+" : "";
 
   const renderContent = (
     title: string,
     description?: string,
     linkText?: string,
     linkHref?: string,
-    button?: React.ReactNode,
-    pointsLocation: "top" | "bottom" = "top"
+    button?: React.ReactNode
   ) => (
     <div className="w-full h-full p-2 flex flex-col">
       <div className="flex flex-col h-full w-full">
         <div className="flex flex-col md:flex-row items-start justify-between flex-wrap">
           <div className="flex justify-start">
             <h2 className={`text-2xl text-black font-semibold pr-4 text-nowrap ${!description && "mb-4"}`}>{title}</h2>
-            {pointsLocation === "top" && (
-              <HumanPointsLabel
-                points={humanPoints}
-                prefix={prefix}
-                isVisible={aboveThreshold && !!humanPoints && !beforeHumanPointsRelease() && !hideHumnBranding}
-              />
-            )}
           </div>
         </div>
         <p className="py-2 self-center md:self-start">{description}</p>
       </div>
       <div className="w-full flex flex-col md:flex-row justify-between items-center">
-        <div className="flex flex-row items-center gap-2">
-          {button}
-          {pointsLocation === "bottom" && (
-            <HumanPointsLabel
-              points={humanPoints}
-              prefix={prefix}
-              isVisible={aboveThreshold && !!humanPoints && !beforeHumanPointsRelease() && !hideHumnBranding}
-            />
-          )}
-        </div>
+        <div className="flex flex-row items-center gap-2">{button}</div>
         {linkText && linkHref && (
           <Hyperlink href={linkHref} className="font-normal text-gray-500 pl-4">
             {linkText}
@@ -192,11 +168,6 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
           <div className="flex flex-col md:flex-row items-start justify-between flex-wrap">
             <div className="flex justify-start">
               <h2 className="text-2xl text-black font-semibold pr-4 text-nowrap">Passport minted!</h2>
-              <HumanPointsLabel
-                points={humanPoints}
-                prefix={prefix}
-                isVisible={!!humanPoints && !beforeHumanPointsRelease() && !hideHumnBranding}
-              />
             </div>
             <div className="flex w-full md:w-auto justify-center gap-0">
               {onChainAttestationProviders?.map(({ attestationProvider, status }, idx) => {
@@ -242,10 +213,9 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
         {renderContent(
           "Congrats! You have a passing Unique Humanity Score!",
           "Next up, mint your Passport onchain!",
-          "Here’s what you can do with your Passport!",
+          "Here's what you can do with your Passport!",
           "https://www.passport.xyz/ecosystem",
-          renderButton("Mint onchain", () => setShowSidebar(true), <IconHammer />),
-          "bottom"
+          renderButton("Mint onchain", () => setShowSidebar(true), <IconHammer />)
         )}
       </>
     );
@@ -255,8 +225,8 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
     <>
       {renderContent(
         "Let's increase that Unique Humanity Score",
-        "You will need at least 20 points to verify your humanity and qualify for HUMN Points",
-        "Here’s some tips on how to raise your Unique Humanity Score",
+        "You will need at least 20 points to verify your humanity",
+        "Here's some tips on how to raise your Unique Humanity Score",
         "https://support.passport.xyz/passport-knowledge-base/stamps/scoring-20-for-humans",
         renderButton(
           "Verify Stamps",

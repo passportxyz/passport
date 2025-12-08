@@ -33,7 +33,7 @@ import { useMessage } from "../hooks/useMessage";
 import { Customization } from "../utils/customizationUtils";
 import { useAccount } from "wagmi";
 import { useRadialBackgroundColorForHeader } from "../components/Header";
-import { HumanPointsMultiplierPanel } from "../components/humanPoints";
+import { HumnSeasonPanel } from "../components/humanPoints";
 import { beforeHumanPointsRelease } from "../utils/helpers";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
@@ -44,23 +44,15 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
 
   const backgroundColor = useRadialBackgroundColorForHeader();
 
-  const { pointsData } = useContext(ScorerContext);
-  const multiplier = pointsData?.multiplier;
-  const isEligible = !!pointsData?.is_eligible;
-  const showMultiplierPanel = multiplier && multiplier > 1 && !hideHumnBranding;
+  // Show HUMN season panel for everyone (unless branding is hidden or before release)
+  const showHumnPanel = !hideHumnBranding && !beforeHumanPointsRelease();
 
   return (
     <div className="relative col-span-full">
       <div className="col-span-full mt-2 flex flex-col xl:flex-row gap-8 relative left-0 top-0 z-10">
         <div className="col-span-full flex flex-col grow lg:flex-row gap-8 mt-0.5">
           <DashboardScorePanel className={`w-full ${useCustomDashboardPanel || "xl:w-1/2"}`} />
-          {showMultiplierPanel && (
-            <HumanPointsMultiplierPanel
-              multiplier={multiplier}
-              isVisible={isEligible && !beforeHumanPointsRelease()}
-              className="xl:w-1/2"
-            />
-          )}
+          <HumnSeasonPanel isVisible={showHumnPanel} className="xl:w-1/2" />
           {explanationPanel && <DashboardScoreExplanationPanel />}
         </div>
         {useCustomDashboardPanel && <DynamicCustomDashboardPanel className="max-w-full xl:w-2/3" />}

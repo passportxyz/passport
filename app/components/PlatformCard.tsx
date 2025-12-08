@@ -15,9 +15,6 @@ import { useStampDeduplication } from "../hooks/useStampDeduplication";
 import { useOnChainData } from "../hooks/useOnChainData";
 import { ExpiredLabel } from "./LabelExpired";
 import { PassportPoints } from "./PassportPoints";
-import { HumanPointsLabelSMDark } from "./humanPoints";
-import { providersForPoints, ScorerContext } from "../context/scorerContext";
-import { beforeHumanPointsRelease } from "../utils/helpers";
 import { useCustomization } from "../hooks/useCustomization";
 import { BetaBadge } from "./BetaBadge";
 
@@ -73,44 +70,7 @@ const SecureDByHumanTech: React.FC = () => {
   );
 };
 
-const DefaultStamp = ({
-  idx,
-  platform,
-  className,
-  onClick,
-  variant,
-  isHumanTech,
-  platformProviders,
-  isBeta,
-}: StampProps) => {
-  const { possiblePointsDataForStamps, pointsData, stampWeights } = useContext(ScorerContext);
-  const [possibleHumanPoints, setPossibleHumanPoints] = useState<number>();
-  const { hideHumnBranding } = useCustomization();
-  const customization = useCustomization();
-  const isHumanPointsVisible =
-    !!(possibleHumanPoints && possibleHumanPoints > 0) && !beforeHumanPointsRelease() && !hideHumnBranding;
-
-  useEffect(() => {
-    const providerSet = new Set(platformProviders);
-    const pointedProviders = providersForPoints.intersection(providerSet);
-
-    if (pointedProviders.size > 0) {
-      let platformPoints = 0;
-      pointedProviders.forEach((k) => {
-        // Use custom scorer weights if available, otherwise fall back to standard weights
-        if (customization.scorer?.weights && stampWeights[k]) {
-          platformPoints += parseFloat(String(stampWeights[k])) || 0;
-        } else {
-          platformPoints += possiblePointsDataForStamps[k] || 0;
-        }
-      });
-
-      setPossibleHumanPoints(platformPoints);
-    } else {
-      setPossibleHumanPoints(undefined);
-    }
-  }, [platformProviders, possiblePointsDataForStamps, stampWeights, customization.scorer?.weights]);
-
+const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech, isBeta }: StampProps) => {
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
       <div
@@ -133,18 +93,10 @@ const DefaultStamp = ({
               </svg>
             )}
 
-            <div className="flex items-center">
-              <div className="relative -right-1">
-                {possibleHumanPoints && possibleHumanPoints > 0 && (
-                  <HumanPointsLabelSMDark points={possibleHumanPoints} prefix="" isVisible={isHumanPointsVisible} />
-                )}
-              </div>
-
-              <PassportPoints
-                points={Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0)}
-                className="text-right"
-              />
-            </div>
+            <PassportPoints
+              points={Math.max(platform.displayPossiblePoints - platform.earnedPoints, 0)}
+              className="text-right"
+            />
           </div>
 
           <div className="mt-4 h-full md:mt-6 inline-block justify-start text-color-4">
@@ -192,37 +144,13 @@ const VerifiedStamp = ({
 }: StampProps) => {
   const { activeChainProviders } = useOnChainData();
   const [isAnyOnchain, setIsAnyOnchain] = useState(false);
-  const { pointsDataForStamps, pointsData, stampWeights } = useContext(ScorerContext);
-  const [humanPoints, setHumanPoints] = useState<number>(0);
-  const [isVisiblePoints, setVisible] = useState<boolean>(false);
-  const { hideHumnBranding } = useCustomization();
-  const customization = useCustomization();
 
   useEffect(() => {
     const onchainProviderSet = new Set(activeChainProviders.map((p) => p.providerName));
     const providerSet = new Set(platformProviders);
-    const pointedProviders = providersForPoints.intersection(providerSet);
-
-    if (pointedProviders.size > 0) {
-      let platformPoints = 0;
-      pointedProviders.forEach((k) => {
-        // Use custom scorer weights if available, otherwise fall back to standard weights
-        if (customization.scorer?.weights && stampWeights[k]) {
-          platformPoints += parseFloat(String(stampWeights[k])) || 0;
-        } else {
-          platformPoints += pointsDataForStamps[k] || 0;
-        }
-      });
-      setHumanPoints(platformPoints);
-      setVisible(!!platformPoints);
-    } else {
-      setHumanPoints(0);
-      setVisible(false);
-    }
-
     const intersection = onchainProviderSet.intersection(providerSet);
     setIsAnyOnchain(intersection.size > 0);
-  }, [activeChainProviders, platformProviders, pointsDataForStamps, stampWeights, customization.scorer?.weights]);
+  }, [activeChainProviders, platformProviders]);
 
   const style = {
     boxShadow: "0px 4px 16px 0px #0E865066",
@@ -272,17 +200,7 @@ const VerifiedStamp = ({
               )}
             </div>
 
-            <div className="flex items-center">
-              <div className="relative -right-1">
-                <HumanPointsLabelSMDark
-                  points={humanPoints}
-                  prefix="+"
-                  isVisible={isVisiblePoints && !beforeHumanPointsRelease() && !hideHumnBranding}
-                />
-              </div>
-
-              <PassportPoints points={platform.earnedPoints} prefix="+" className="text-right" />
-            </div>
+            <PassportPoints points={platform.earnedPoints} prefix="+" className="text-right" />
           </div>
 
           <div className="mt-4 h-full md:mt-6 inline-block justify-start text-color-4">

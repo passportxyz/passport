@@ -47,7 +47,8 @@ export const HumanPointsLabel: FC<HumanPointsLabelProps> = ({
         backgroundColor: "bg-emerald-100",
       };
   return isVisible ? (
-    <a href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live" target="_blank">
+    // TODO: Update href to actual HUMN szn 2 destination
+    <a href="https://google.com" target="_blank" rel="noopener noreferrer">
       <div className={`flex items-center ${backgroundColor} rounded-full px-2 py-1 shadow-sm hover:shadow-md`}>
         <Icon width={18} height={19} />
         <span className="px-1 pt-0.5 text-color-4">
@@ -65,7 +66,8 @@ export const HumanPointsLabelSMDark: FC<HumanPointsLabelProps> = ({
   isVisible,
 }: HumanPointsLabelProps) => {
   return isVisible ? (
-    <a href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live" target="_blank">
+    // TODO: Update href to actual HUMN szn 2 destination
+    <a href="https://google.com" target="_blank" rel="noopener noreferrer">
       <div className={`flex text-sm items-center bg-emerald-500 rounded-full px-1 py-0`}>
         <Icon width={18} height={19} strokeColor="#7BF9C9" />
         <span className="pl-0.5 pr-1 pt-0.5 text-white">
@@ -77,38 +79,101 @@ export const HumanPointsLabelSMDark: FC<HumanPointsLabelProps> = ({
   ) : null;
 };
 
+// HUMN Logo (white version)
+const HumnLogo: FC = () => (
+  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M20 0C22.5528 0 24.7667 1.17408 26.5348 2.85648C28.2883 4.52472 29.7374 6.80236 30.8889 9.39322C31.7648 11.3638 32.4986 13.5913 33.077 16.0082C35.4955 16.5869 37.7244 17.3236 39.6967 18.2014C42.2877 19.3529 44.5648 20.8021 46.2325 22.5551C47.9151 24.3232 49.0893 26.5375 49.0893 29.0903C49.0893 31.6432 47.9153 33.8578 46.2325 35.6259C44.5649 37.3786 42.2877 38.8281 39.6967 39.9796C37.7241 40.857 35.4952 41.5934 33.077 42.1721C32.4985 44.5893 31.7652 46.8171 30.8889 48.7878C29.7374 51.3787 28.2883 53.6562 26.5348 55.3245C24.7667 57.0069 22.5528 58.1812 20 58.1812C17.4472 58.181 15.2333 57.0072 13.4652 55.3245C11.7118 53.6563 10.2659 51.3786 9.11441 48.7878C8.23808 46.8166 7.50115 44.5889 6.92263 42.1721C4.50523 41.5935 2.27693 40.8567 0.305328 39.9796C-2.28576 38.828 -4.56287 37.3786 -6.23046 35.6259C-7.91328 33.8578 -9.08926 31.6432 -9.08926 29.0903C-9.08926 26.5375 -7.91307 24.3232 -6.23046 22.5551C-4.56308 20.8021 -2.28576 19.3529 0.305328 18.2014C2.27735 17.324 4.50544 16.5868 6.92263 16.0082C7.50094 13.5909 8.23849 11.3642 9.11441 9.39322C10.2659 6.80236 11.7118 4.52472 13.4652 2.85648C15.2333 1.17387 17.4472 0.000212288 20 0ZM26.7431 43.2843C24.5724 43.5275 22.3147 43.6568 20 43.6568C17.6841 43.6568 15.4251 43.5276 13.2532 43.2843C13.6086 44.4218 14.0011 45.479 14.4294 46.4428C15.3838 48.5893 16.4452 50.1477 17.4762 50.9286C18.4924 51.6973 19.3407 51.8884 20 51.8886C20.6593 51.8886 21.5076 51.6971 22.5238 50.9286C23.5548 50.1477 24.6162 48.5893 25.5706 46.4428C25.9988 45.4793 26.3877 44.4214 26.7431 43.2843ZM20 20.3595C17.1327 20.3595 14.4036 20.5851 11.883 20.9727C11.4961 23.4933 11.2736 26.2226 11.2736 29.0903C11.2736 31.9566 11.4964 34.6848 11.883 37.2045C14.4037 37.5915 17.1326 37.8175 20 37.8175C22.8661 37.8175 25.594 37.5912 28.1137 37.2045C28.5011 34.6847 28.7299 31.957 28.7299 29.0903C28.7299 26.2223 28.5014 23.4935 28.1137 20.9727C25.5941 20.5855 22.866 20.3595 20 20.3595ZM5.85121 22.3423C4.7144 22.6977 3.65775 23.0903 2.69452 23.518C0.548105 24.4724 -1.01016 25.5339 -1.79086 26.5649C-2.55997 27.5808 -2.75089 28.4294 -2.75089 29.0903C-2.75089 29.7512 -2.55976 30.5998 -1.79086 31.6157C-1.01016 32.6466 0.548273 33.7082 2.69452 34.6626C3.65775 35.0903 4.7144 35.4829 5.85121 35.8383C5.60776 33.6666 5.48211 31.4079 5.48211 29.0903C5.48211 26.7727 5.60776 24.514 5.85121 22.3423ZM34.1455 22.3423C34.389 24.5142 34.5214 26.7727 34.5214 29.0903C34.5214 31.4079 34.389 33.6663 34.1455 35.8383C35.2836 35.4827 36.3407 35.0906 37.3055 34.6626C39.4519 33.7082 41.0101 32.6466 41.7909 31.6157C42.56 30.5998 42.7509 29.7512 42.7509 29.0903C42.7509 28.4294 42.5598 27.5808 41.7909 26.5649C41.0101 25.5339 39.4517 24.4724 37.3055 23.518C36.3405 23.0899 35.2836 22.6981 34.1455 22.3423ZM20 6.29198C19.3407 6.29219 18.4924 6.48353 17.4762 7.25201C16.4452 8.0329 15.3838 9.59134 14.4294 11.7378C14.0016 12.7013 13.6084 13.7584 13.2532 14.8963C15.425 15.1398 17.6842 15.2655 20 15.2655C22.3145 15.2655 24.5725 15.14 26.7431 14.8963C26.3879 13.7589 25.9984 12.701 25.5706 11.7378C24.6162 9.59134 23.5548 8.0329 22.5238 7.25201C21.5076 6.48332 20.6593 6.29198 20 6.29198Z"
+      transform="translate(0, 0)"
+      fill="white"
+    />
+  </svg>
+);
+
+// Signal/Live icon for the chip
+const SignalIcon: FC = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M3.33333 11.3333C2.44928 10.4493 1.875 9.30053 1.69333 8.06C1.51167 6.81947 1.73217 5.55447 2.32133 4.46C2.91049 3.36553 3.83573 2.5014 4.96667 2C M12.6667 11.3333C13.5507 10.4493 14.125 9.30053 14.3067 8.06C14.4883 6.81947 14.2678 5.55447 13.6787 4.46C13.0895 3.36553 12.1643 2.5014 11.0333 2 M5.66667 9C5.20101 8.53433 4.9375 7.90313 4.9375 7.24333C4.9375 6.58353 5.20101 5.95233 5.66667 5.48667 M10.3333 9C10.799 8.53433 11.0625 7.90313 11.0625 7.24333C11.0625 6.58353 10.799 5.95233 10.3333 5.48667 M8 8V8.00667"
+      stroke="#119725"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+// Arrow up-right icon for the button
+const ArrowUpRightIcon: FC = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#0A0A0A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+export type HumnSeasonPanelProps = {
+  className?: string;
+  isVisible: boolean;
+};
+
+export const HumnSeasonPanel: FC<HumnSeasonPanelProps> = ({ className = "", isVisible }) => {
+  if (!isVisible) return null;
+
+  return (
+    <div
+      className={`relative flex flex-col rounded-3xl p-5 overflow-hidden ${className}`}
+      style={{ background: "#00B88A" }}
+    >
+      {/* Background blur/glow effect */}
+      <div
+        className="absolute -left-20 -top-20 w-72 h-64 pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse at center, #18ECA9 0%, transparent 70%)",
+          filter: "blur(40px)",
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col gap-4 grow">
+        {/* Header row */}
+        <div className="flex items-center justify-between">
+          <HumnLogo />
+          <div className="flex items-center gap-1 bg-white rounded-full pl-1 pr-2 py-0.5">
+            <SignalIcon />
+            <span className="text-sm text-[#119725]">Live Now</span>
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className="flex flex-col grow justify-center">
+          <h2 className="text-2xl font-medium text-white">HUMN szn 2</h2>
+        </div>
+
+        {/* Button */}
+        {/* TODO: Update href to actual HUMN szn 2 destination */}
+        <a
+          href="https://google.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 bg-white rounded-lg px-5 py-2.5 w-full hover:brightness-95 transition-all"
+        >
+          <span className="text-base font-medium text-[#0A0A0A]">Join now</span>
+          <ArrowUpRightIcon />
+        </a>
+      </div>
+    </div>
+  );
+};
+
+// Keep the old component for backwards compatibility but mark as deprecated
+/** @deprecated Use HumnSeasonPanel instead */
 export type HumanPointsMultiplierPanelProps = {
   multiplier: number;
   className: string;
   isVisible: boolean;
 };
-export const HumanPointsMultiplierPanel: FC<HumanPointsMultiplierPanelProps> = ({
-  multiplier,
-  className = "",
-  isVisible,
-}) => {
-  return isVisible ? (
-    <div className={`relative flex flex-col rounded-3xl p-8 ${className}`}>
-      <div
-        style={{ background: `radial-gradient(ellipse 75% 50% at 20% 25%, oklch(0.905 0.093 164.15), #00B88A)` }}
-        className="absolute w-full h-full left-0 top-0 -z-10 rounded-3xl"
-      />
-      <div className="flex items-center rounded-full bg-emerald-400 w-fit">
-        <div className="font-semibold text-[48px] px-6">{multiplier}x</div>
-        <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="72" height="72" rx="36" fill="#009973" />
-          <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M36 9.81836C38.2975 9.81836 40.29 10.8751 41.8814 12.3892C43.4595 13.891 44.7636 15.9417 45.8001 18.2739C46.5883 20.0474 47.2487 22.0523 47.7693 24.2276C49.946 24.7483 51.9517 25.4114 53.7263 26.2001C56.0583 27.2365 58.1092 28.5409 59.611 30.1188C61.1249 31.71 62.1816 33.703 62.1818 36.0002C62.1816 38.2975 61.1251 40.2903 59.611 41.8816C58.1093 43.4595 56.0583 44.7605 53.7263 45.797C51.9518 46.5857 49.9459 47.2482 47.7693 47.7695C47.2486 49.946 46.5887 51.9521 45.8001 53.7265C44.7636 56.0587 43.4595 58.1093 41.8814 59.6112C40.29 61.1252 38.2975 62.182 36 62.182C33.7025 62.1818 31.71 61.1255 30.1186 59.6112C28.5406 58.1094 27.2397 56.0586 26.2032 53.7265C25.4144 51.9517 24.7487 49.9464 24.2274 47.7695C22.052 47.2483 20.0473 46.5853 18.2737 45.797C15.9417 44.7605 13.8907 43.4595 12.389 41.8816C10.8749 40.2903 9.8184 38.2975 9.81818 36.0002C9.8184 33.703 10.8751 31.71 12.389 30.1188C13.8908 28.5409 15.9417 27.2365 18.2737 26.2001C20.0474 25.4118 22.0519 24.7482 24.2274 24.2276C24.7486 22.0519 25.4148 20.0478 26.2032 18.2739C27.2397 15.9418 28.5406 13.891 30.1186 12.3892C31.71 10.8749 33.7025 9.81858 36 9.81836ZM42.0688 48.7558C40.1152 48.9747 38.0821 49.0911 36 49.0911C33.9168 49.0911 31.8825 48.9749 29.9279 48.7558C30.2478 49.78 30.601 50.732 30.9865 51.5995C31.8453 53.5317 32.8004 54.9343 33.7283 55.8174C34.6424 56.6872 35.406 56.9481 36 56.9483C36.5939 56.9483 37.3576 56.687 38.2717 55.8174C39.1996 54.9343 40.1547 53.5317 41.0135 51.5995C41.3989 50.7323 41.7487 49.7796 42.0688 48.7558ZM36 28.143C33.4195 28.143 30.9632 28.3463 28.6951 28.6953C28.3468 30.9633 28.1461 33.4198 28.1461 36.0002C28.1461 38.5793 28.3471 41.0346 28.6951 43.3018C30.9633 43.6501 33.4194 43.8541 36 43.8541C38.5794 43.8541 41.0343 43.6498 43.3016 43.3018C43.6503 41.0345 43.8572 38.5797 43.8572 36.0002C43.8572 33.4194 43.6506 30.9635 43.3016 28.6953C41.0344 28.3467 38.5793 28.143 36 28.143ZM23.2411 29.9281C22.2181 30.248 21.2673 30.6016 20.4007 30.9867C18.4687 31.8454 17.0659 32.8007 16.1828 33.7285C15.3135 34.6422 15.0521 35.4063 15.0519 36.0002C15.0521 36.5941 15.3132 37.358 16.1828 38.2719C17.0658 39.1997 18.4686 40.1549 20.4007 41.0137C21.2673 41.3988 22.2181 41.7526 23.2411 42.0722C23.022 40.1178 22.9091 38.0832 22.9091 36.0002C22.9091 33.9171 23.022 31.8825 23.2411 29.9281ZM48.7556 29.9281C48.9743 31.8827 49.0909 33.917 49.0909 36.0002C49.0909 38.0834 48.9743 40.1177 48.7556 42.0722C49.7797 41.7524 50.7319 41.3991 51.5993 41.0137C53.5314 40.1549 54.9341 39.1997 55.8172 38.2719C56.6868 37.358 56.9479 36.5941 56.9481 36.0002C56.9479 35.4063 56.6865 34.6422 55.8172 33.7285C54.9341 32.8007 53.5312 31.8454 51.5993 30.9867C50.7318 30.6012 49.7797 30.2483 48.7556 29.9281ZM36 15.0521C35.406 15.0523 34.6424 15.3131 33.7283 16.183C32.8004 17.0661 31.8453 18.4687 30.9865 20.4009C30.6014 21.2675 30.2476 22.2182 29.9279 23.2413C31.8824 23.0226 33.917 22.9093 36 22.9093C38.0819 22.9093 40.1153 23.0228 42.0688 23.2413C41.7489 22.2187 41.3985 21.2672 41.0135 20.4009C40.1547 18.4687 39.1996 17.0661 38.2717 16.183C37.3576 15.3134 36.5939 15.0521 36 15.0521Z"
-            fill="white"
-          />
-        </svg>
-      </div>
-      <p className="pl-0.5 pr-1 pt-0.5 text-white text-2xl font-medium pt-4">Double HUMN Points!</p>
-      <p className="pl-0.5 pr-1 pt-0.5 text-white text-xl font-normal">
-        Thank you for being an early bird! Here’s your doubled points as a reward!
-      </p>
-    </div>
-  ) : null;
+/** @deprecated Use HumnSeasonPanel instead */
+export const HumanPointsMultiplierPanel: FC<HumanPointsMultiplierPanelProps> = ({ className = "", isVisible }) => {
+  return <HumnSeasonPanel className={className} isVisible={isVisible} />;
 };
