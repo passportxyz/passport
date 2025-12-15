@@ -6,7 +6,6 @@ import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../../context/userState";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
-import { DID } from "dids";
 import { DatastoreConnectionContext } from "../../context/datastoreConnectionContext";
 import { fetchVerifiableCredential } from "../../utils/credentials";
 import { fetchPossibleEVMStamps } from "../../signer/utils";
@@ -14,9 +13,6 @@ import { VerifiableCredential } from "@gitcoin/passport-types";
 
 vi.mock("../../context/walletStore", () => ({
   useWalletStore: () => "validAddress",
-}));
-vi.mock("../../utils/helpers", () => ({
-  createSignedPayload: vi.fn(),
 }));
 
 vi.mock("../../utils/credentials", () => ({
@@ -223,21 +219,22 @@ const TestingComponent = () => {
     // initiateVerification();
   }, [verificationState]);
 
+  const mockSignMessage = vi.fn().mockResolvedValue("0xmocksignature");
+
   return (
     <DatastoreConnectionContext.Provider
       value={{
         dbAccessToken: "token",
         dbAccessTokenStatus: "idle",
-        did: {
-          id: "did:3:abc",
-          parent: "did:3:abc",
-        } as unknown as DID,
+        userAddress: "0x1234567890123456789012345678901234567890",
         connect: async () => {},
         disconnect: async () => {},
         checkSessionIsValid: () => false,
       }}
     >
-      <div onClick={initiateVerification}>Click me</div>
+      <div onClick={() => initiateVerification(mockSignMessage, "0x1234567890123456789012345678901234567890")}>
+        Click me
+      </div>
       <div data-testid="loadingState">{verificationState.loading.toString()}</div>
       <div data-testid="success">{verificationState.success.toString()}</div>
       <div data-testid="error">{verificationState?.error?.toString()}</div>

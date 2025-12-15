@@ -32,12 +32,6 @@ vi.mock("@self.id/web", () => {
   };
 });
 
-vi.mock("@didtools/cacao", () => ({
-  Cacao: {
-    fromBlockBytes: vi.fn(),
-  },
-}));
-
 vi.mock("next/router", () => ({
   useRouter: () => ({
     query: { filter: "" },

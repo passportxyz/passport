@@ -17,7 +17,7 @@ import { PlatformClass } from "@gitcoin/passport-platforms";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 
 // --- Helpers
-import { createSignedPayload, generateUID } from "../utils/helpers";
+import { generateUID } from "../utils/helpers";
 
 import { debounce } from "ts-debounce";
 import { BroadcastChannel } from "broadcast-channel";
@@ -25,7 +25,7 @@ import { datadogRum } from "@datadog/browser-rum";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useMessage } from "../hooks/useMessage";
 import { usePlatforms } from "../hooks/usePlatforms";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 
 export enum StampClaimProgressStatus {
   Idle = "idle",
@@ -89,7 +89,7 @@ export const StampClaimingContext = createContext(startingState);
 export const StampClaimingContextProvider = ({ children }: { children: any }) => {
   const { handlePatchStamps, userDid } = useContext(CeramicContext);
   const { address } = useAccount();
-  const { did } = useDatastoreConnectionContext();
+  const { signMessageAsync } = useSignMessage();
   const { success, failure } = useMessage();
   const [status, setStatus] = useState(StampClaimProgressStatus.Idle);
   const { platforms } = usePlatforms();
@@ -118,7 +118,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
     indicateError: (platform: PLATFORM_ID | "EVMBulkVerify") => void,
     platformGroups: StampClaimForPlatform[]
   ): Promise<any> => {
-    if (!did) throw new Error("No DID found");
+    if (!address) throw new Error("No address found");
 
     // In `step` we count the number of steps / platforms we are processing.
     // This will different form i because we may skip some platforms that have no expired
@@ -175,7 +175,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
               proofs: providerPayload,
               signatureType: IAM_SIGNATURE_TYPE,
             },
-            (data: any) => createSignedPayload(did, data)
+            (message: string) => signMessageAsync({ message })
           );
 
           const verifiedCredentials =

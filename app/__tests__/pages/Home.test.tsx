@@ -30,12 +30,6 @@ vi.mock("react-router-dom", async () => ({
   useNavigate: () => navigate,
 }));
 
-vi.mock("@didtools/cacao", () => ({
-  Cacao: {
-    fromBlockBytes: vi.fn(),
-  },
-}));
-
 const mockConnect = vi.fn();
 
 const mockWalletState = {

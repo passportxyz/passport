@@ -3,9 +3,6 @@
 // --- Types
 import { ValidResponseBody, CredentialResponseBody, PROVIDER_ID, VerifiableCredential } from "@gitcoin/passport-types";
 import axios, { AxiosResponse } from "axios";
-import { datadogRum } from "@datadog/browser-rum";
-import { Cacao } from "@didtools/cacao";
-import { DID } from "dids";
 import { parseAbi } from "viem";
 
 // --- Stamp Data Point Helpers
@@ -156,27 +153,33 @@ export const isServerOnMaintenance = () => {
   return false;
 };
 
-export const createSignedPayload = async (did: DID, data: any) => {
-  const { jws, cacaoBlock } = await did.createDagJWS(data);
+/**
+ * Create a signed payload using wallet signature (replaces DID-based signing)
+ * @param walletClient - The wallet client to sign with
+ * @param address - The user's address
+ * @param data - The data to sign
+ * @returns Signed payload compatible with IAM verification
+ */
+export const createWalletSignedPayload = async (
+  walletClient: any,
+  address: string,
+  data: any
+): Promise<{
+  signatures: string[];
+  payload: string;
+  message: string;
+}> => {
+  const message = typeof data === "string" ? data : JSON.stringify(data);
 
-  if (!cacaoBlock) {
-    const msg = `Failed to create DagJWS for did: ${did.parent}`;
-    datadogRum.addError(msg);
-    throw msg;
-  }
-
-  // Get the JWS & serialize it (this is what we would send to the BE)
-  const { link, payload, signatures } = jws;
-
-  const cacao = await Cacao.fromBlockBytes(cacaoBlock);
-  const issuer = cacao.p.iss;
+  const signature = await walletClient.signMessage({
+    account: address as `0x${string}`,
+    message,
+  });
 
   return {
-    signatures: signatures,
-    payload: payload,
-    cid: Array.from(link ? link.bytes : []),
-    cacao: Array.from(cacaoBlock ? cacaoBlock : []),
-    issuer,
+    signatures: [signature],
+    payload: message,
+    message,
   };
 };
 

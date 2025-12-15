@@ -3,12 +3,10 @@ import { useContext, useEffect, useMemo } from "react";
 import { fetchPossibleEVMStamps } from "../signer/utils";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 import { fetchVerifiableCredential } from "../utils/credentials";
-import { createSignedPayload } from "../utils/helpers";
 import { CeramicContext } from "../context/ceramicContext";
 import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../context/userState";
 import { datadogLogs } from "@datadog/browser-logs";
-import { DID } from "dids";
 import { useMessage } from "./useMessage";
 
 export const useOneClickVerification = () => {
@@ -17,7 +15,7 @@ export const useOneClickVerification = () => {
   const { passport, allPlatforms, handlePatchStamps } = useContext(CeramicContext);
   const { success } = useMessage();
 
-  const initiateVerification = async function (did: DID, address: string) {
+  const initiateVerification = async function (signMessage: (message: string) => Promise<string>, address: string) {
     datadogLogs.logger.info("Initiating one click verification", { address });
 
     setUserVerificationState({
@@ -59,7 +57,7 @@ export const useOneClickVerification = () => {
           proofs: {},
           signatureType: IAM_SIGNATURE_TYPE,
         },
-        (data: any) => createSignedPayload(did, data)
+        signMessage
       );
 
       // Should be able to assume that all stamps should be patched

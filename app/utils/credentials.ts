@@ -34,18 +34,21 @@ export const fetchChallengeCredential = async (iamUrl: string, payload: RequestP
 export const fetchVerifiableCredential = async (
   iamUrl: string,
   payload: RequestPayload,
-  createSignedPayload: (data: any) => Promise<any>
+  signer: (message: string) => Promise<string>
 ): Promise<{ credentials: CredentialResponseBody[] }> => {
   // first pull a challenge that can be signed by the user
   const { challenge } = await fetchChallengeCredential(iamUrl, payload);
 
-  // sign the challenge provided by the IAM
-  const signedChallenge = challenge.credentialSubject.challenge
-    ? await createSignedPayload(challenge.credentialSubject.challenge)
-    : "";
+  // sign the challenge provided by the IAM using wallet signature
+  const challengeMessage = challenge.credentialSubject.challenge;
+  if (!challengeMessage) {
+    throw new Error("No challenge provided");
+  }
+
+  const signature = await signer(challengeMessage);
 
   // must provide signature for message
-  if (!signedChallenge) {
+  if (!signature) {
     throw new Error("Unable to sign message");
   }
 
@@ -55,7 +58,7 @@ export const fetchVerifiableCredential = async (
     {
       payload,
       challenge,
-      signedChallenge,
+      signedChallenge: signature,
     }
   );
 

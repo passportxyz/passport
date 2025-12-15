@@ -77,7 +77,7 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
   const setCustomizationKey = useSetCustomizationKey();
   const goToLoginStep = useNavigateToRootStep();
   const { isConnected } = useAccount();
-  const { did, dbAccessToken } = useDatastoreConnectionContext();
+  const { dbAccessToken } = useDatastoreConnectionContext();
   const { database } = useContext(CeramicContext);
 
   const { onMint, syncingToChain, badgesFreshlyMinted } = useMintBadge();
@@ -87,11 +87,11 @@ export const ScrollCampaign = ({ step }: { step: number }) => {
   }, [setCustomizationKey]);
 
   useEffect(() => {
-    if ((!dbAccessToken || !did || !database || !isConnected) && step > 0) {
-      console.log("Access token or did are not present. Going back to login step!");
+    if ((!dbAccessToken || !database || !isConnected) && step > 0) {
+      console.log("Access token or database are not present. Going back to login step!");
       goToLoginStep();
     }
-  }, [dbAccessToken, did, step, goToLoginStep, database, isConnected]);
+  }, [dbAccessToken, step, goToLoginStep, database, isConnected]);
 
   if (step === 0) {
     return <ScrollLogin />;
