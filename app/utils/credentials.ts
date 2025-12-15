@@ -1,7 +1,7 @@
 import { RequestPayload, IssuedChallenge, CredentialResponseBody, ValidResponseBody } from "@gitcoin/passport-types";
 
 // --- Node/Browser http req library
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 // Fetch a verifiable challenge credential (legacy flow)
 export const fetchChallengeCredential = async (iamUrl: string, payload: RequestPayload): Promise<IssuedChallenge> => {
@@ -96,4 +96,43 @@ export const fetchVerifiableCredential = async (
   return {
     credentials: Array.isArray(response.data) ? response.data : [response.data],
   };
+};
+
+/**
+ * Fetch verifiable credentials with resilient authentication
+ *
+ * Tries JWT authentication first (no wallet popup), falls back to challenge-based
+ * auth if JWT fails. This allows safe deployment regardless of IAM version.
+ *
+ * TODO: Remove fallback once IAM JWT support is fully deployed and stable.
+ * Track: https://github.com/passportxyz/passport/issues/XXXX
+ *
+ * @param iamUrl - IAM service URL
+ * @param payload - Request payload with provider types
+ * @param dbAccessToken - JWT token from SIWE authentication
+ * @param signMessage - Fallback signer function for legacy challenge flow
+ */
+export const fetchVerifiableCredentialWithFallback = async (
+  iamUrl: string,
+  payload: RequestPayload,
+  dbAccessToken: string | undefined,
+  signMessage: (message: string) => Promise<string>
+): Promise<{ credentials: CredentialResponseBody[] }> => {
+  // Try JWT authentication first (preferred - no wallet popup)
+  if (dbAccessToken) {
+    try {
+      return await fetchVerifiableCredential(iamUrl, payload, dbAccessToken);
+    } catch (error) {
+      // If auth error (401), fall back to challenge-based auth
+      // Other errors should propagate
+      const isAuthError = error instanceof AxiosError && error.response?.status === 401;
+      if (!isAuthError) {
+        throw error;
+      }
+      console.warn("JWT authentication failed, falling back to challenge-based auth");
+    }
+  }
+
+  // Fallback to challenge-based authentication (legacy flow with wallet popup)
+  return await fetchVerifiableCredential(iamUrl, payload, signMessage);
 };

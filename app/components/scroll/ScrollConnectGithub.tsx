@@ -8,7 +8,7 @@ import { CUSTOM_PLATFORM_TYPE_INFO } from "../../config/platformMap";
 import { generateUID } from "../../utils/helpers";
 import { scrollCampaignBadgeProviders } from "../../config/scroll_campaign";
 import { waitForRedirect } from "../../context/stampClaimingContext";
-import { fetchVerifiableCredential } from "../../utils/credentials";
+import { fetchVerifiableCredentialWithFallback } from "../../utils/credentials";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../../config/stamp_config";
 import { PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import { datadogLogs } from "@datadog/browser-logs";
@@ -21,7 +21,7 @@ import { useAccount, useSignMessage } from "wagmi";
 export const ScrollConnectGithub = () => {
   const goToNextStep = useNextCampaignStep();
   const goToLastStep = useNavigateToLastStep();
-  const { checkSessionIsValid } = useDatastoreConnectionContext();
+  const { checkSessionIsValid, dbAccessToken } = useDatastoreConnectionContext();
   const { userDid, database } = useContext(CeramicContext);
   const goToLoginStep = useNavigateToRootStep();
   const { address } = useAccount();
@@ -72,7 +72,7 @@ export const ScrollConnectGithub = () => {
         }
 
         setMsg("Please wait, we are checking your eligibility ...");
-        const verifyCredentialsResponse = await fetchVerifiableCredential(
+        const verifyCredentialsResponse = await fetchVerifiableCredentialWithFallback(
           iamUrl,
           {
             type: customGithubPlatform.platformId,
@@ -82,6 +82,7 @@ export const ScrollConnectGithub = () => {
             proofs: providerPayload,
             signatureType: IAM_SIGNATURE_TYPE,
           },
+          dbAccessToken,
           (message: string) => signMessageAsync({ message })
         );
 
@@ -119,7 +120,17 @@ export const ScrollConnectGithub = () => {
     } finally {
       setIsVerificationRunning(false);
     }
-  }, [address, checkSessionIsValid, goToLoginStep, goToNextStep, userDid, database, failure, signMessageAsync]);
+  }, [
+    address,
+    checkSessionIsValid,
+    dbAccessToken,
+    goToLoginStep,
+    goToNextStep,
+    userDid,
+    database,
+    failure,
+    signMessageAsync,
+  ]);
 
   return (
     <ScrollCampaignPage>

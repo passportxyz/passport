@@ -249,6 +249,7 @@ const datastoreConnectionContext = {
   dbAccessToken: "token",
   dbAccessTokenStatus: "connected" as DbAuthTokenStatus,
   did: vi.fn() as any,
+  userAddress: "0x1234567890123456789012345678901234567890",
   checkSessionIsValid: vi.fn().mockImplementation(() => true),
 };
 

@@ -8,7 +8,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 export const useAutoVerification = () => {
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
-  const { dbAccessTokenStatus } = useDatastoreConnectionContext();
+  const { dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
   const { databaseReady } = useContext(CeramicContext);
   const { initiateVerification } = useOneClickVerification();
 
@@ -31,7 +31,7 @@ export const useAutoVerification = () => {
 
       datadogLogs.logger.info("Initiating automatic stamp verification", { address });
 
-      initiateVerification((message: string) => signMessageAsync({ message }), address)
+      initiateVerification((message: string) => signMessageAsync({ message }), address, dbAccessToken)
         .then(() => {
           datadogLogs.logger.info("Auto verification completed successfully", { address });
         })
@@ -45,7 +45,7 @@ export const useAutoVerification = () => {
           verificationInitiatedRef.current = false;
         });
     }
-  }, [address, dbAccessTokenStatus, databaseReady, initiateVerification, signMessageAsync]);
+  }, [address, dbAccessToken, dbAccessTokenStatus, databaseReady, initiateVerification, signMessageAsync]);
 
   return {
     isAutoVerificationReady: !verificationInitiatedRef.current,

@@ -1,8 +1,8 @@
 import { PROVIDER_ID, StampPatch, ValidResponseBody } from "@gitcoin/passport-types";
-import { useContext, useEffect, useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { fetchPossibleEVMStamps } from "../signer/utils";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
-import { fetchVerifiableCredential } from "../utils/credentials";
+import { fetchVerifiableCredentialWithFallback } from "../utils/credentials";
 import { CeramicContext } from "../context/ceramicContext";
 import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../context/userState";
@@ -15,7 +15,11 @@ export const useOneClickVerification = () => {
   const { passport, allPlatforms, handlePatchStamps } = useContext(CeramicContext);
   const { success } = useMessage();
 
-  const initiateVerification = async function (signMessage: (message: string) => Promise<string>, address: string) {
+  const initiateVerification = async function (
+    signMessage: (message: string) => Promise<string>,
+    address: string,
+    dbAccessToken?: string
+  ) {
     datadogLogs.logger.info("Initiating one click verification", { address });
 
     setUserVerificationState({
@@ -47,7 +51,7 @@ export const useOneClickVerification = () => {
         )
         .flat(2);
 
-      const credentialResponse = await fetchVerifiableCredential(
+      const credentialResponse = await fetchVerifiableCredentialWithFallback(
         iamUrl,
         {
           type: "EVMBulkVerify",
@@ -57,6 +61,7 @@ export const useOneClickVerification = () => {
           proofs: {},
           signatureType: IAM_SIGNATURE_TYPE,
         },
+        dbAccessToken,
         signMessage
       );
 
