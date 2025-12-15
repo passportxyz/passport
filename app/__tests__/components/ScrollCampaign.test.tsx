@@ -22,7 +22,13 @@ vi.mock("@gitcoin/passport-database-client");
 vi.mock("wagmi", async (importActual) => ({
   ...(await importActual()),
   usePublicClient: vi.fn(),
-  useAccount: vi.fn().mockReturnValue({ isConnected: true }),
+  useAccount: vi.fn().mockReturnValue({
+    address: "0x1234567890123456789012345678901234567890",
+    isConnected: true,
+  }),
+  useSignMessage: () => ({
+    signMessageAsync: vi.fn().mockResolvedValue("0xmocksignature"),
+  }),
 }));
 
 vi.mock("../../utils/credentials", async (importActual) => {

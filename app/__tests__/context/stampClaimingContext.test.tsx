@@ -12,6 +12,17 @@ import { PlatformProps } from "../../components/GenericPlatform";
 import { AppContext, PlatformClass } from "@gitcoin/passport-platforms";
 import { DatastoreConnectionContext, DbAuthTokenStatus } from "../../context/datastoreConnectionContext";
 
+const mockAddress = "0x1234567890123456789012345678901234567890";
+
+// Mock wagmi hooks
+vi.mock("wagmi", async (importOriginal) => ({
+  ...(await importOriginal()),
+  useAccount: () => ({
+    address: mockAddress,
+    isConnected: true,
+  }),
+}));
+
 vi.mock("../../utils/helpers", () => ({
   generateUID: vi.fn((length: number) => "some random string"),
 }));

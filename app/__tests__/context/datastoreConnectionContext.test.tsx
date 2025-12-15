@@ -54,6 +54,16 @@ vi.mock("axios", () => ({
   })),
 }));
 
+// Mock wagmi hooks needed by DatastoreConnectionContextProvider
+vi.mock("wagmi", async (importOriginal) => ({
+  ...(await importOriginal()),
+  useAccount: () => ({
+    address: mockAddress,
+    isConnected: true,
+    chain: { id: 1 },
+  }),
+}));
+
 vi.mock("../../context/walletStore", () => {
   return {
     useWalletStore: () => ({

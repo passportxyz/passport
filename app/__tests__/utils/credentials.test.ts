@@ -141,7 +141,7 @@ describe("Fetch Credentials", function () {
     });
 
     await expect(fetchVerifiableCredential(IAM_URL, payload, MOCK_CREATE_SIGNED_PAYLOAD)).rejects.toThrow(
-      "Unable to sign message"
+      "No challenge provided"
     );
 
     expect(axios.post).toHaveBeenNthCalledWith(1, IAM_CHALLENGE_ENDPOINT, expectedChallengeRequestBody);

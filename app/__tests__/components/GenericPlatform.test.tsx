@@ -15,6 +15,26 @@ import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 import { PlatformScoreSpec } from "../../context/scorerContext";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
+const mockAddress = "0x1234567890123456789012345678901234567890";
+
+// Mock wagmi hooks
+vi.mock("wagmi", async (importOriginal) => ({
+  ...(await importOriginal()),
+  useSignMessage: () => ({
+    signMessageAsync: vi.fn().mockResolvedValue("0xmocksignature"),
+  }),
+  useSendTransaction: () => ({
+    sendTransactionAsync: vi.fn().mockResolvedValue("0xmocktxhash"),
+  }),
+  useSwitchChain: () => ({
+    switchChainAsync: vi.fn().mockResolvedValue({}),
+  }),
+  useAccount: () => ({
+    address: mockAddress,
+    isConnected: true,
+  }),
+}));
+
 vi.mock("../../utils/credentials", () => ({
   fetchVerifiableCredential: vi.fn(),
 }));
