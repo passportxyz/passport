@@ -25,7 +25,7 @@ import { datadogRum } from "@datadog/browser-rum";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useMessage } from "../hooks/useMessage";
 import { usePlatforms } from "../hooks/usePlatforms";
-import { useAccount, useSignMessage } from "wagmi";
+import { useAccount } from "wagmi";
 
 export enum StampClaimProgressStatus {
   Idle = "idle",
@@ -89,7 +89,7 @@ export const StampClaimingContext = createContext(startingState);
 export const StampClaimingContextProvider = ({ children }: { children: any }) => {
   const { handlePatchStamps, userDid } = useContext(CeramicContext);
   const { address } = useAccount();
-  const { signMessageAsync } = useSignMessage();
+  const { dbAccessToken } = useDatastoreConnectionContext();
   const { success, failure } = useMessage();
   const [status, setStatus] = useState(StampClaimProgressStatus.Idle);
   const { platforms } = usePlatforms();
@@ -165,6 +165,10 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
             }
           }
 
+          if (!dbAccessToken) {
+            throw new Error("No database access token available - please sign in again");
+          }
+
           const verifyCredentialsResponse = await fetchVerifiableCredential(
             iamUrl,
             {
@@ -175,7 +179,7 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
               proofs: providerPayload,
               signatureType: IAM_SIGNATURE_TYPE,
             },
-            (message: string) => signMessageAsync({ message })
+            dbAccessToken
           );
 
           const verifiedCredentials =

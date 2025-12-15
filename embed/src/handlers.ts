@@ -17,6 +17,7 @@ import {
   getIssuerInfo,
   serverUtils,
 } from "./utils/identityHelper.js";
+import { verifyAndExtractAddress, extractBearerToken } from "./utils/scorerJwt.js";
 import {
   VerifiableCredential,
   VerifyRequestBody,
@@ -165,13 +166,42 @@ type EmbedVerifyResponseBody = {
 };
 
 export const verificationHandler = createHandler<EmbedVerifyRequestBody, EmbedVerifyResponseBody>(async (req, res) => {
-  // each verify request should be received with a challenge credential detailing a signature contained in the RequestPayload.proofs
   const { challenge, payload, scorerId } = req.body;
 
-  // Check the challenge and the payload is valid before issuing a credential from a registered provider
-  const verified = await verifyCredential(DIDKit, challenge);
-  if (verified && hasValidIssuer(challenge.issuer)) {
-    const address = await verifyChallengeAndGetAddress(req.body);
+  // Check for JWT authentication first (new SIWE-based flow)
+  const authHeader = req.headers.authorization as string | undefined;
+  const token = extractBearerToken(authHeader);
+
+  let address: string | undefined;
+
+  if (token) {
+    // JWT authentication - verify token and extract address
+    const jwtAddress = verifyAndExtractAddress(token);
+
+    if (jwtAddress) {
+      // JWT is valid - use the address from the JWT, skip challenge verification
+      console.log(`JWT authenticated embed request for address: ${jwtAddress}`);
+      address = jwtAddress;
+    } else {
+      // JWT verification failed, fall through to challenge-based auth
+      console.warn("JWT verification failed, falling back to challenge-based auth");
+    }
+  }
+
+  // If we don't have an address yet (no JWT or JWT failed), try challenge-based auth
+  if (!address) {
+    // Legacy challenge-based authentication flow
+    if (!challenge) {
+      throw new ApiError("Missing challenge - provide either JWT token or challenge credential", "401_UNAUTHORIZED");
+    }
+
+    // Check the challenge and the payload is valid before issuing a credential from a registered provider
+    const verified = await verifyCredential(DIDKit, challenge);
+    if (!verified || !hasValidIssuer(challenge.issuer)) {
+      throw new ApiError("Unable to verify payload", "401_UNAUTHORIZED");
+    }
+
+    address = await verifyChallengeAndGetAddress(req.body);
 
     // Check signer and type
     const isSigner = challenge.credentialSubject.id === `did:pkh:eip155:1:${address}`;
@@ -183,48 +213,51 @@ export const verificationHandler = createHandler<EmbedVerifyRequestBody, EmbedVe
         "401_UNAUTHORIZED"
       );
     }
-
-    const types = payload.types?.filter((type) => type) || [];
-    const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
-
-    const { credentials: credentialsVerificationResponses } = await verifyProvidersAndIssueCredentials(
-      providersGroupedByPlatforms,
-      address,
-      payload
-    );
-
-    const stamps: VerifiableCredential[] = [];
-    const credentialErrors: CredentialError[] = [];
-
-    // Separate successful credentials from errors
-    credentialsVerificationResponses.forEach((response, index) => {
-      if ("credential" in response && response.credential) {
-        stamps.push(response.credential);
-      } else if ("error" in response) {
-        // Get the provider name from the original types array
-        const providerName = types[index] || "unknown";
-        credentialErrors.push({
-          provider: providerName,
-          error: response.error || "Verification failed",
-          code: response.code,
-        });
-      }
-    });
-
-    const score = await addStampsAndGetScore({
-      address,
-      scorerId,
-      stamps,
-    });
-
-    return void res.json({
-      score: score,
-      credentials: stamps,
-      credentialErrors,
-    });
   }
 
-  throw new ApiError("Unable to verify payload", "401_UNAUTHORIZED");
+  // At this point, address must be set (either via JWT or challenge auth)
+  if (!address) {
+    throw new ApiError("Authentication failed", "401_UNAUTHORIZED");
+  }
+
+  const types = payload.types?.filter((type) => type) || [];
+  const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
+
+  const { credentials: credentialsVerificationResponses } = await verifyProvidersAndIssueCredentials(
+    providersGroupedByPlatforms,
+    address,
+    payload
+  );
+
+  const stamps: VerifiableCredential[] = [];
+  const credentialErrors: CredentialError[] = [];
+
+  // Separate successful credentials from errors
+  credentialsVerificationResponses.forEach((response, index) => {
+    if ("credential" in response && response.credential) {
+      stamps.push(response.credential);
+    } else if ("error" in response) {
+      // Get the provider name from the original types array
+      const providerName = types[index] || "unknown";
+      credentialErrors.push({
+        provider: providerName,
+        error: response.error || "Verification failed",
+        code: response.code,
+      });
+    }
+  });
+
+  const score = await addStampsAndGetScore({
+    address,
+    scorerId,
+    stamps,
+  });
+
+  return void res.json({
+    score: score,
+    credentials: stamps,
+    credentialErrors,
+  });
 });
 
 // TODO This is copied from the iam/, should we source it from identity/ or something?

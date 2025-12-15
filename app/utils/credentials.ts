@@ -3,7 +3,7 @@ import { RequestPayload, IssuedChallenge, CredentialResponseBody, ValidResponseB
 // --- Node/Browser http req library
 import axios from "axios";
 
-// Fetch a verifiable challenge credential
+// Fetch a verifiable challenge credential (legacy flow)
 export const fetchChallengeCredential = async (iamUrl: string, payload: RequestPayload): Promise<IssuedChallenge> => {
   // fetch challenge as a credential from API that fits the version, address and type (this credential has a short ttl)
   const response: { data: CredentialResponseBody } = await axios.post(
@@ -30,12 +30,42 @@ export const fetchChallengeCredential = async (iamUrl: string, payload: RequestP
   }
 };
 
-// Fetch a verifiableCredential
+/**
+ * Fetch verifiable credentials from IAM
+ *
+ * Supports two authentication modes:
+ * 1. JWT auth (preferred): Pass dbAccessToken from SIWE authentication - no wallet signature needed
+ * 2. Legacy challenge auth: Pass signer function for per-request wallet signatures
+ *
+ * @param iamUrl - IAM service URL
+ * @param payload - Request payload with provider types
+ * @param auth - Either JWT token string OR signer function for legacy flow
+ */
 export const fetchVerifiableCredential = async (
   iamUrl: string,
   payload: RequestPayload,
-  signer: (message: string) => Promise<string>
+  auth: string | ((message: string) => Promise<string>)
 ): Promise<{ credentials: CredentialResponseBody[] }> => {
+  // JWT authentication flow (new SIWE-based)
+  if (typeof auth === "string") {
+    const response: { data: CredentialResponseBody | CredentialResponseBody[] } = await axios.post(
+      `${iamUrl.replace(/\/*?$/, "")}/v${payload.version}/verify`,
+      { payload },
+      {
+        headers: {
+          Authorization: `Bearer ${auth}`,
+        },
+      }
+    );
+
+    return {
+      credentials: Array.isArray(response.data) ? response.data : [response.data],
+    };
+  }
+
+  // Legacy challenge-based authentication flow
+  const signer = auth;
+
   // first pull a challenge that can be signed by the user
   const { challenge } = await fetchChallengeCredential(iamUrl, payload);
 
