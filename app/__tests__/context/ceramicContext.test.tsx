@@ -15,16 +15,9 @@ import {
 } from "../../__test-fixtures__/databaseStorageFixtures";
 import { PROVIDER_ID, Passport, Stamp } from "@gitcoin/passport-types";
 import { DatastoreConnectionContext } from "../../context/datastoreConnectionContext";
-import { DID } from "dids";
 import { ChakraProvider } from "@chakra-ui/react";
 
 process.env.NEXT_PUBLIC_FF_CERAMIC_CLIENT = "on";
-
-vi.mock("@didtools/cacao", () => ({
-  Cacao: {
-    fromBlockBytes: vi.fn(),
-  },
-}));
 
 vi.mock("wagmi", () => ({
   useAccount: () => ({
@@ -707,10 +700,7 @@ const mockComponent = ({ invalidSession }: { invalidSession?: boolean } = {}) =>
       value={{
         dbAccessToken: "token",
         dbAccessTokenStatus: "idle",
-        did: {
-          id: "did:3:abc",
-          parent: "did:3:abc",
-        } as unknown as DID,
+        userAddress: "0x123",
         connect: async () => {},
         disconnect: async () => {},
         checkSessionIsValid: () => !invalidSession,
@@ -766,12 +756,10 @@ describe("CeramicContextProvider", () => {
           value={{
             dbAccessToken: "token",
             dbAccessTokenStatus: "idle",
-            did: {
-              id: "did:3:abc",
-              parent: "did:3:abc",
-            } as unknown as DID,
+            userAddress: "0x123",
             connect: async () => {},
             disconnect: async () => {},
+            checkSessionIsValid: () => true,
           }}
         >
           <CeramicContextProvider>

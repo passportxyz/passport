@@ -7,12 +7,6 @@ import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures
 import { CeramicContextState } from "../../context/ceramicContext";
 import { Stamp } from "@gitcoin/passport-types";
 
-vi.mock("@didtools/cacao", () => ({
-  Cacao: {
-    fromBlockBytes: vi.fn(),
-  },
-}));
-
 const mockCeramicContext: CeramicContextState = makeTestCeramicContext();
 
 const ceramicWithPassport = {

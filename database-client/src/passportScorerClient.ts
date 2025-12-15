@@ -1,7 +1,6 @@
 import axios from "axios";
 import { Logger } from "./logger.js";
 import { DataStorageBase } from "./types.js";
-import type { DID as CeramicDID } from "dids";
 import {
   PROVIDER_ID,
   Stamp,
@@ -21,11 +20,12 @@ export class PassportDatabase implements DataStorageBase {
   logger: Logger;
   allowEmpty: boolean;
 
-  constructor(passportScorerUrl: string, address: string, token: string, logger?: Logger, did?: CeramicDID) {
+  constructor(passportScorerUrl: string, address: string, token: string, logger?: Logger, userAddress?: string) {
     this.passportScorerUrl = passportScorerUrl;
     this.address = address;
     this.logger = logger;
-    this.did = (did.hasParent ? did.parent : did.id).toLowerCase();
+    // Construct DID string from address for backward compatibility
+    this.did = `did:pkh:eip155:1:${(userAddress || address).toLowerCase()}`;
     this.allowEmpty = false;
     this.token = token;
   }

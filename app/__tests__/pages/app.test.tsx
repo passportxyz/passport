@@ -5,12 +5,6 @@ import { AppProps } from "next/app";
 
 vi.mock("@datadog/browser-rum");
 vi.mock("@datadog/browser-logs");
-vi.mock("@didtools/cacao", () => ({
-  Cacao: {
-    fromBlockBytes: vi.fn(),
-  },
-}));
-
 const mockPostMessage = vi.fn();
 vi.mock("broadcast-channel", () => {
   return {

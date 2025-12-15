@@ -19,12 +19,6 @@ import { usePlatforms } from "../../hooks/usePlatforms";
 import { WagmiProvider } from "wagmi";
 import { wagmiConfig } from "../../utils/web3";
 
-vi.mock("@didtools/cacao", () => ({
-  Cacao: {
-    fromBlockBytes: vi.fn(),
-  },
-}));
-
 vi.mock("next/router", () => ({
   useRouter: () => ({
     query: { filter: "" },

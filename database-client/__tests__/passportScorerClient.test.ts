@@ -3,15 +3,11 @@ import { Stamp } from "@gitcoin/passport-types";
 import { Logger } from "../src/logger";
 import { PassportDatabase } from "../src/passportScorerClient";
 import { jest } from "@jest/globals";
-import { DID } from "dids";
-import { Ed25519Provider } from "key-did-provider-ed25519";
-import { getResolver } from "key-did-resolver";
-
-const TEST_SEED = Uint8Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
 
 const passportScorerUrl = "https://example.com/";
 const token = "fake-token";
 const address = "0x123456789abcdef";
+const userAddress = "0xabc123456789abcdef";
 
 jest.mock("axios");
 
@@ -29,13 +25,13 @@ const logger = {
 
 describe("scorerClient", () => {
   beforeEach(async () => {
-    const testDID = new DID({
-      provider: new Ed25519Provider(TEST_SEED),
-      resolver: getResolver(),
-    });
-
-    await testDID.authenticate();
-    passportDatabase = new PassportDatabase(passportScorerUrl, address, token, logger as unknown as Logger, testDID);
+    passportDatabase = new PassportDatabase(
+      passportScorerUrl,
+      address,
+      token,
+      logger as unknown as Logger,
+      userAddress
+    );
   });
 
   afterEach(() => {

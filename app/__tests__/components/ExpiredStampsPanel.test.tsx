@@ -10,12 +10,6 @@ import {
 import { CeramicContextState } from "../../context/ceramicContext";
 import { ExpiredStampsPanel } from "../../components/ExpiredStampsPanel";
 
-vi.mock("@didtools/cacao", () => ({
-  Cacao: {
-    fromBlockBytes: vi.fn(),
-  },
-}));
-
 vi.mock("next/router", () => ({
   useRouter: () => ({
     query: { filter: "" },

@@ -12,7 +12,7 @@ import {
   StampPatch,
   ValidResponseBody,
 } from "@gitcoin/passport-types";
-import { fetchVerifiableCredential } from "../utils/credentials";
+import { fetchVerifiableCredentialWithFallback } from "../utils/credentials";
 
 // --- Style Components
 import { StampDrawer } from "./StampDrawer";
@@ -31,7 +31,7 @@ import { PlatformClass } from "@gitcoin/passport-platforms";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 
 // --- Helpers
-import { createSignedPayload, difference, intersect, generateUID } from "../utils/helpers";
+import { difference, intersect, generateUID } from "../utils/helpers";
 
 import { datadogRum } from "@datadog/browser-rum";
 import { PlatformScoreSpec } from "../context/scorerContext";
@@ -89,7 +89,7 @@ export const GenericPlatform = ({
   const [submitted, setSubmitted] = useState(false);
   const [verificationResponse, setVerificationResponse] = useState<CredentialResponseBody[]>([]);
   const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
-  const { did, checkSessionIsValid } = useDatastoreConnectionContext();
+  const { checkSessionIsValid, dbAccessToken } = useDatastoreConnectionContext();
   const [verificationState, _setUserVerificationState] = useAtom(mutableUserVerificationAtom);
 
   const { success, failure, message } = useMessage();
@@ -147,7 +147,7 @@ export const GenericPlatform = ({
     const selectedProviders = platformProviderIds;
 
     try {
-      if (!did) throw new Error("No DID found");
+      if (!address) throw new Error("No address found");
 
       const state = `${platform.path}-` + generateUID(10);
       const appContext = {
@@ -178,7 +178,7 @@ export const GenericPlatform = ({
 
       if (!checkSessionIsValid()) throw new InvalidSessionError();
 
-      const verifyCredentialsResponse = await fetchVerifiableCredential(
+      const verifyCredentialsResponse = await fetchVerifiableCredentialWithFallback(
         iamUrl,
         {
           type: platform.platformId,
@@ -188,7 +188,8 @@ export const GenericPlatform = ({
           proofs: providerPayload,
           signatureType: IAM_SIGNATURE_TYPE,
         },
-        (data: any) => createSignedPayload(did, data)
+        dbAccessToken,
+        (message: string) => signMessageAsync({ message })
       );
 
       const verifiedCredentials =
