@@ -7,7 +7,24 @@
 import jwt from "jsonwebtoken";
 
 // Public key for verifying SIWE JWTs (RS256)
-const SIWE_JWT_PUBLIC_KEY = process.env.SIWE_JWT_PUBLIC_KEY;
+// Supports both raw PEM and base64-encoded PEM (for Docker/secrets managers)
+function decodeKey(envVar: string): string | undefined {
+  const value = process.env[envVar];
+  if (!value) return undefined;
+  // If it already looks like a PEM key, use it directly
+  if (value.includes("-----BEGIN")) {
+    return value;
+  }
+  // Otherwise, decode from base64
+  try {
+    return Buffer.from(value, "base64").toString("utf-8");
+  } catch {
+    console.error(`Failed to base64 decode ${envVar}`);
+    return undefined;
+  }
+}
+
+const SIWE_JWT_PUBLIC_KEY = decodeKey("SIWE_JWT_PUBLIC_KEY");
 
 export interface ScorerJwtPayload {
   did: string;
