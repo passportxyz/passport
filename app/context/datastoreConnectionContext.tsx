@@ -28,6 +28,16 @@ export const DatastoreConnectionContext = createContext<DatastoreConnectionConte
   checkSessionIsValid: () => false,
 });
 
+// Helper function to get JWT algorithm from header
+const getJwtAlgorithm = (token: string): string | undefined => {
+  try {
+    const header = JSON.parse(atob(token.split(".")[0]));
+    return header.alg;
+  } catch {
+    return undefined;
+  }
+};
+
 // Helper function to parse JWT expiry
 const parseJwtExpiry = (token: string): Date | undefined => {
   try {
@@ -39,7 +49,15 @@ const parseJwtExpiry = (token: string): Date | undefined => {
 };
 
 // Helper function to check if token is valid
+// Rejects old HS256 tokens from pre-SIWE migration - only RS256 tokens are valid
 const isTokenValid = (token: string): boolean => {
+  // Check algorithm - only accept RS256 (new SIWE tokens)
+  const alg = getJwtAlgorithm(token);
+  if (alg !== "RS256") {
+    return false;
+  }
+
+  // Check expiry
   const expiry = parseJwtExpiry(token);
   if (!expiry) return false;
   return expiry > new Date();
@@ -138,14 +156,19 @@ export const useDatastoreConnection = () => {
 
     // Check for existing valid token first (session continuity)
     const existingToken = window.localStorage.getItem(dbCacheTokenKey);
-    if (existingToken && isTokenValid(existingToken)) {
-      setDbAccessToken(existingToken);
-      setDbAccessTokenStatus("connected");
-      setUserAddress(address);
+    if (existingToken) {
+      if (isTokenValid(existingToken)) {
+        setDbAccessToken(existingToken);
+        setDbAccessTokenStatus("connected");
+        setUserAddress(address);
 
-      // Set up session validity check
-      setCheckSessionIsValid(() => () => isTokenValid(existingToken));
-      return;
+        // Set up session validity check
+        setCheckSessionIsValid(() => () => isTokenValid(existingToken));
+        return;
+      } else {
+        // Clear invalid token (e.g., old HS256 token or expired)
+        window.localStorage.removeItem(dbCacheTokenKey);
+      }
     }
 
     // Need to get a new access token
