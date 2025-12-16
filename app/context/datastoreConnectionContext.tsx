@@ -66,7 +66,7 @@ const isTokenValid = (token: string): boolean => {
 // In the app, the context hook should be used. This is only exported for testing
 export const useDatastoreConnection = () => {
   const { disconnect: disconnectWallet } = useCustomDisconnect();
-  const { isConnected, address: web3ModalAddress, chain } = useAccount();
+  const { isConnected, address: web3ModalAddress, chain, chainId } = useAccount();
 
   const [dbAccessTokenStatus, setDbAccessTokenStatus] = useState<DbAuthTokenStatus>("idle");
   const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();
@@ -106,6 +106,12 @@ export const useDatastoreConnection = () => {
     }
 
     try {
+      // Use the actual connected chain for SIWE message
+      // This is critical for smart wallet verification (ERC-6492) which must happen
+      // on the chain where the wallet is deployed (e.g., Coinbase Smart Wallet on Base)
+      // Note: chainId comes directly from the connector, works even if chain isn't in wagmi config
+      const connectedChainId = chainId ?? 1;
+
       // Create SIWE message
       const siweMessage = new SiweMessage({
         domain: window.location.host,
@@ -113,7 +119,7 @@ export const useDatastoreConnection = () => {
         statement: "Sign in to Human Passport",
         uri: window.location.origin,
         version: "1",
-        chainId: 1,
+        chainId: connectedChainId,
         nonce,
       });
 

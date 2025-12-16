@@ -187,25 +187,24 @@ if (!TEST_MODE) {
     wagmiTransports[fantom.id] = http("https://rpc.ftm.tools/");
   }
 
-  if (process.env.NEXT_PUBLIC_FF_ONCHAIN_BASE === "on") {
-    chainConfigs.push({
-      id: baseChainId,
-      token: "ETH",
-      label: "Base",
-      icon: "./assets/baseLogo.svg",
-      chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
-      explorerUrl: "https://basescan.org/",
-      attestationProviderConfig: {
-        name: "Ethereum Attestation Service",
-        status: usingTestEnvironment ? "disabled" : "enabled",
-        skipByDefault: false,
-        easScanUrl: "https://base.easscan.org",
-        monochromeIcon: "./assets/baseLogoBW.svg",
-      },
-    });
-    wagmiChains.push(base);
-    wagmiTransports[base.id] = http(process.env.NEXT_PUBLIC_PASSPORT_BASE_RPC_URL);
-  }
+  // Base is always enabled - required for smart wallet support (e.g., Coinbase Smart Wallet)
+  chainConfigs.push({
+    id: baseChainId,
+    token: "ETH",
+    label: "Base",
+    icon: "./assets/baseLogo.svg",
+    chainLink: "https://support.passport.xyz/passport-knowledge-base/using-passport/onchain-passport",
+    explorerUrl: "https://basescan.org/",
+    attestationProviderConfig: {
+      name: "Ethereum Attestation Service",
+      status: usingTestEnvironment ? "disabled" : "enabled",
+      skipByDefault: false,
+      easScanUrl: "https://base.easscan.org",
+      monochromeIcon: "./assets/baseLogoBW.svg",
+    },
+  });
+  wagmiChains.push(base);
+  wagmiTransports[base.id] = http(process.env.NEXT_PUBLIC_PASSPORT_BASE_RPC_URL);
 
   chainConfigs.push({
     id: lineaChainId,
