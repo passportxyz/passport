@@ -92,7 +92,8 @@ export const useLoginFlow = ({
   }, [web3ModalIsOpen, loginStep, disconnect]);
 
   useEffect(() => {
-    if (loginStep === "DONE") {
+    // Ensure address is available before navigating (prevents race condition)
+    if (loginStep === "DONE" && address) {
       if (onLoggedIn) {
         onLoggedIn();
       } else {
