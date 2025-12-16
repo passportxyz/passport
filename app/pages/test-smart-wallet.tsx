@@ -2,16 +2,17 @@ import { useState, useEffect } from "react";
 import { useAccount, useDisconnect, useWalletClient } from "wagmi";
 import { hashMessage, recoverMessageAddress } from "viem";
 import { base } from "viem/chains";
+import { SiweMessage } from "siwe";
 import { web3Modal } from "../utils/web3";
 
 export default function TestSmartWallet() {
-  const { address, isConnected, chain } = useAccount();
+  const { address, isConnected, chain, chainId } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: walletClient } = useWalletClient();
 
   const [logs, setLogs] = useState<string[]>([]);
   const [signature, setSignature] = useState<string>("");
-  const [testMessage, setTestMessage] = useState("Hello, Smart Wallet!");
+  const [preparedMessage, setPreparedMessage] = useState<string>("");
 
   const log = (msg: string) => {
     console.log(msg);
@@ -45,16 +46,34 @@ export default function TestSmartWallet() {
     }
 
     clearLogs();
-    log(`--- PLAIN MESSAGE SIGNING TEST ---`);
-    log(`Message: "${testMessage}"`);
-    log(`Message bytes (hex): ${Buffer.from(testMessage).toString("hex")}`);
+    log(`--- SIWE MESSAGE SIGNING TEST (same as main app) ---`);
+
+    // Use the actual connected chain (critical for smart wallet)
+    const connectedChainId = chainId ?? 1;
+    log(`Chain ID: ${connectedChainId}`);
+
+    // Create SIWE message exactly like main app
+    const siweMessage = new SiweMessage({
+      domain: window.location.host,
+      address,
+      statement: "Sign in to Human Passport",
+      uri: window.location.origin,
+      version: "1",
+      chainId: connectedChainId,
+      nonce: Math.random().toString(36).substring(2, 15), // Random nonce for testing
+    });
+
+    const message = siweMessage.prepareMessage();
+    setPreparedMessage(message);
+
+    log(`SIWE Message:\n${message}`);
 
     try {
-      // Step 1: Sign using walletClient (same as main app)
+      // Step 1: Sign using walletClient (EXACTLY same as main app)
       log("\n[1] Requesting signature from wallet...");
       const sig = await walletClient.signMessage({
         account: address as `0x${string}`,
-        message: testMessage,
+        message,
       });
       setSignature(sig);
       log(`Signature received!`);
@@ -68,14 +87,14 @@ export default function TestSmartWallet() {
 
       // Step 2: Hash the message (EIP-191)
       log("\n[2] Computing message hash (EIP-191)...");
-      const hash = hashMessage(testMessage);
+      const hash = hashMessage(message);
       log(`EIP-191 hash: ${hash}`);
 
       // Step 3: Try to recover signer (will fail for smart wallets)
       log("\n[3] Attempting ecrecover (will fail for smart wallets)...");
       try {
         const recovered = await recoverMessageAddress({
-          message: testMessage,
+          message: message,
           signature: sig as `0x${string}`,
         });
         log(`Recovered address: ${recovered}`);
@@ -152,8 +171,8 @@ export default function TestSmartWallet() {
   };
 
   const verifyWithViem = async () => {
-    if (!signature || !address) {
-      log("No signature to verify");
+    if (!signature || !address || !preparedMessage) {
+      log("No signature or message to verify");
       return;
     }
 
@@ -161,7 +180,7 @@ export default function TestSmartWallet() {
     log("--- VIEM ERC-6492 VERIFICATION TEST ---");
     log(`Address: ${address}`);
     log(`Chain: ${chain?.name} (${chain?.id})`);
-    log(`Message: "${testMessage}"`);
+    log(`Message:\n${preparedMessage}`);
 
     try {
       const { createPublicClient, http } = await import("viem");
@@ -175,7 +194,7 @@ export default function TestSmartWallet() {
 
       const validOnBase = await baseClient.verifyMessage({
         address: address as `0x${string}`,
-        message: testMessage,
+        message: preparedMessage,
         signature: signature as `0x${string}`,
       });
       log(`Result on Base: ${validOnBase ? "VALID" : "INVALID"}`);
@@ -190,7 +209,7 @@ export default function TestSmartWallet() {
 
         const validOnCurrentChain = await currentChainClient.verifyMessage({
           address: address as `0x${string}`,
-          message: testMessage,
+          message: preparedMessage,
           signature: signature as `0x${string}`,
         });
         log(`Result on ${chain.name}: ${validOnCurrentChain ? "VALID" : "INVALID"}`);
@@ -230,19 +249,11 @@ export default function TestSmartWallet() {
 
       {isConnected && (
         <div className="mb-6 space-y-4">
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Test Message:</label>
-            <input
-              type="text"
-              value={testMessage}
-              onChange={(e) => setTestMessage(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2"
-            />
-          </div>
+          <div className="text-sm text-gray-400">Uses SIWE message format (same as main app)</div>
 
           <div className="flex gap-2 flex-wrap">
             <button onClick={signPlainMessage} className="bg-green-600 px-4 py-2 rounded hover:bg-green-700">
-              1. Sign Message
+              1. Sign SIWE Message
             </button>
             <button
               onClick={verifyWithViem}
