@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAccount, useDisconnect, useSignMessage } from "wagmi";
+import { useAccount, useDisconnect, useWalletClient } from "wagmi";
 import { hashMessage, recoverMessageAddress } from "viem";
 import { base } from "viem/chains";
 import { web3Modal } from "../utils/web3";
@@ -7,7 +7,7 @@ import { web3Modal } from "../utils/web3";
 export default function TestSmartWallet() {
   const { address, isConnected, chain } = useAccount();
   const { disconnect } = useDisconnect();
-  const { signMessageAsync } = useSignMessage();
+  const { data: walletClient } = useWalletClient();
 
   const [logs, setLogs] = useState<string[]>([]);
   const [signature, setSignature] = useState<string>("");
@@ -39,15 +39,23 @@ export default function TestSmartWallet() {
   };
 
   const signPlainMessage = async () => {
+    if (!walletClient || !address) {
+      log("ERROR: No wallet client available");
+      return;
+    }
+
     clearLogs();
     log(`--- PLAIN MESSAGE SIGNING TEST ---`);
     log(`Message: "${testMessage}"`);
     log(`Message bytes (hex): ${Buffer.from(testMessage).toString("hex")}`);
 
     try {
-      // Step 1: Sign
+      // Step 1: Sign using walletClient (same as main app)
       log("\n[1] Requesting signature from wallet...");
-      const sig = await signMessageAsync({ message: testMessage });
+      const sig = await walletClient.signMessage({
+        account: address as `0x${string}`,
+        message: testMessage,
+      });
       setSignature(sig);
       log(`Signature received!`);
       log(`Signature length: ${(sig.length - 2) / 2} bytes`);
@@ -138,6 +146,8 @@ export default function TestSmartWallet() {
       log("\n--- SIGNING COMPLETE ---");
     } catch (e: any) {
       log(`ERROR: ${e.message}`);
+      log(`Full error: ${JSON.stringify(e, null, 2)}`);
+      console.error("Sign error:", e);
     }
   };
 
