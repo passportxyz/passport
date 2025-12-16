@@ -106,11 +106,9 @@ export const useDatastoreConnection = () => {
     }
 
     try {
-      // Use the actual connected chain for SIWE message
-      // This is critical for smart wallet verification (ERC-6492) which must happen
-      // on the chain where the wallet is deployed (e.g., Coinbase Smart Wallet on Base)
-      // Note: chainId comes directly from the connector, works even if chain isn't in wagmi config
-      const connectedChainId = chainId ?? 1;
+      // Always use mainnet (chainId: 1) for SIWE messages
+      // Smart wallet factories are deployed on mainnet, so ERC-6492 verification works there
+      const connectedChainId = 1;
 
       // Create SIWE message
       const siweMessage = new SiweMessage({
