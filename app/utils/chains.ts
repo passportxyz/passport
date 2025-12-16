@@ -30,7 +30,9 @@ import { http, HttpTransport } from "viem";
 
 // Type matches the library, forces at least 1 element
 export const wagmiChains: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet];
-export let wagmiTransports: Record<Config["chains"][number]["id"], HttpTransport> = {};
+export let wagmiTransports: Record<Config["chains"][number]["id"], HttpTransport> = {
+  [mainnet.id]: http(process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL),
+};
 
 const sepoliaChainId = "0xaa36a7";
 const hardhatChainId = "0x7a69";

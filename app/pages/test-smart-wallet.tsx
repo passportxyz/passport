@@ -265,6 +265,28 @@ export default function TestSmartWallet() {
             <button onClick={clearLogs} className="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700">
               Clear Logs
             </button>
+            <button
+              onClick={() => {
+                if (signature && preparedMessage && address) {
+                  const debugData = JSON.stringify(
+                    {
+                      address,
+                      message: preparedMessage,
+                      signature,
+                      chainId: chainId || 1,
+                    },
+                    null,
+                    2
+                  );
+                  navigator.clipboard.writeText(debugData);
+                  log("Copied debug data to clipboard!");
+                }
+              }}
+              disabled={!signature}
+              className="bg-yellow-600 px-4 py-2 rounded hover:bg-yellow-700 disabled:opacity-50"
+            >
+              Copy Debug JSON
+            </button>
           </div>
         </div>
       )}
