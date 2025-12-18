@@ -28,7 +28,7 @@ const {
   HumanIdPhone,
   HumanIdKyc,
   Biometrics,
-
+  X,
   ZKEmail,
 } = platforms;
 
@@ -113,6 +113,11 @@ defaultPlatformMap.set("Linkedin", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_LINKEDIN_CALLBACK,
   }),
   platFormGroupSpec: Linkedin.ProviderConfig,
+});
+
+defaultPlatformMap.set("X", {
+  platform: new X.XPlatform(),
+  platFormGroupSpec: X.ProviderConfig,
 });
 
 defaultPlatformMap.set("GtcStaking", {

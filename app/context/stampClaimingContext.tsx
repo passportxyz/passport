@@ -36,6 +36,7 @@ export type VerificationStatuses = { success: string[]; errors: string[] };
 
 export const waitForRedirect = (platform: Platform, timeout?: number): Promise<ProviderPayload> => {
   const channel = new BroadcastChannel(`${platform.path}_oauth_channel`);
+
   const waitForRedirect = new Promise<ProviderPayload>((resolve, reject) => {
     // Listener to watch for oauth redirect response on other windows (on the same host)
     function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
@@ -49,7 +50,6 @@ export const waitForRedirect = (platform: Platform, timeout?: number): Promise<P
           resolve({ code: queryCode, state: queryState });
         } catch (e) {
           datadogLogs.logger.error("Error saving Stamp", { platform: platform.platformId });
-          console.error(e);
           reject(e);
         }
       }
