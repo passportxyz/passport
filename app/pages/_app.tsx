@@ -24,7 +24,16 @@ import { AutoVerificationProvider } from "../components/AutoVerificationProvider
 
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Prevent unhandled errors from RPC failures (e.g., balance fetches)
+      // from crashing the app. These are usually non-critical.
+      throwOnError: false,
+      retry: 1,
+    },
+  },
+});
 
 const RenderOnlyOnClient = ({ children }: { children: React.ReactNode }) => {
   const [isMounted, setIsMounted] = React.useState(false);

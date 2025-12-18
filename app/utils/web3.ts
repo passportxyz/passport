@@ -7,11 +7,11 @@ import { initSilk } from "@silk-wallet/silk-wallet-sdk";
 
 const projectId = (process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID as string) || "default-project-id";
 
-// Initialize Silk and announce via EIP-6963
-// WAGMI will automatically discover it and create an injected connector
-if (typeof window !== "undefined") {
+// Silk initialization disabled for smart wallet debugging
+// TODO: Re-enable when smart wallet auth is working
+/*
+if (typeof window !== "undefined" && typeof crypto !== "undefined" && crypto.subtle) {
   try {
-    // Check if Silk is already initialized
     if ((window as any).silk) {
       initSilkWithEIP6963((window as any).silk);
     } else {
@@ -23,16 +23,11 @@ if (typeof window !== "undefined") {
           styles: { darkMode: true },
         },
         walletConnectProjectId: projectId,
-        // Must set one to true and other to false
         useStaging,
         useProd: !useStaging,
       });
-
-      // Announce via EIP-6963 so WAGMI can discover it
       initSilkWithEIP6963(silk);
-
       (window as any).silk = silk;
-
       if (silk.on && typeof silk.on === "function") {
         silk.on("error", (error: any) => {
           console.error("Human Wallet provider error:", error);
@@ -43,6 +38,7 @@ if (typeof window !== "undefined") {
     console.error("Failed to initialize Silk wallet:", error);
   }
 }
+*/
 
 const metadata = {
   name: "Passport",
