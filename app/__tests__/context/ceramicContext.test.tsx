@@ -11,7 +11,7 @@ import { useEffect } from "react";
 import {
   googleStampFixture,
   discordStampFixture,
-  brightidStampFixture,
+  githubStampFixture,
 } from "../../__test-fixtures__/databaseStorageFixtures";
 import { PROVIDER_ID, Passport, Stamp } from "@gitcoin/passport-types";
 import { DatastoreConnectionContext } from "../../context/datastoreConnectionContext";
@@ -660,7 +660,7 @@ export const dbDeleteStampMock = vi.fn();
 export const dbDeleteStampsMock = vi.fn();
 export const dbCreatePassportMock = vi.fn();
 
-const stamps = [googleStampFixture, discordStampFixture, brightidStampFixture].map((stamp) => {
+const stamps = [googleStampFixture, discordStampFixture, githubStampFixture].map((stamp) => {
   stamp.credential.expirationDate = "2099-05-15T21:04:01.708Z";
   stamp.credential.credentialSubject.id = "test-user-did";
   stamp.credential.issuer = process.env.NEXT_PUBLIC_PASSPORT_IAM_ISSUER_DID || "";
@@ -793,7 +793,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     });
     render(mockComponent());
 
-    await waitFor(() => expect(screen.getAllByText("# Stamps = 3")).toHaveLength(1));
+    await waitFor(() => expect(screen.getAllByText("# Stamps = 2")).toHaveLength(1));
   });
   it("should clean a dirty passport after successful fetch", async () => {
     const expiredStamp = {
@@ -816,7 +816,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
     });
     render(mockComponent());
 
-    await waitFor(() => expect(screen.getAllByText("# Stamps = 4")).toHaveLength(1));
+    await waitFor(() => expect(screen.getAllByText("# Stamps = 3")).toHaveLength(1));
     await waitFor(() => expect(screen.getAllByText("Expired providers: Google")).toHaveLength(1));
   });
 
@@ -864,7 +864,7 @@ describe("CeramicContextProvider syncs stamp state with ceramic", () => {
 
     render(mockComponent());
 
-    await waitFor(() => expect(screen.getAllByText("# Stamps = 3")).toHaveLength(1));
+    await waitFor(() => expect(screen.getAllByText("# Stamps = 2")).toHaveLength(1));
   });
 
   it("should attempt to delete stamps from database", async () => {

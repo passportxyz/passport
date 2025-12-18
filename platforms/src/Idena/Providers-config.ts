@@ -65,16 +65,19 @@ export const ProviderConfig: PlatformGroupSpec[] = [
         name: "IdenaState#Newbie",
         description:
           "Granted after passing the initial validation, indicating your verification initiation in the Idena system",
+        isDeprecated: true,
       },
       {
         title: "Verified",
         name: "IdenaState#Verified",
         description: "Achieved by successfully completing three consecutive validations with a total score >= 75%",
+        isDeprecated: true,
       },
       {
         title: "Human",
         name: "IdenaState#Human",
         description: "Earned through four consecutive successful validations and maintaining a total score >= 92%",
+        isDeprecated: true,
       },
     ],
   },
