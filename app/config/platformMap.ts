@@ -17,10 +17,8 @@ const {
   Linkedin,
   GtcStaking,
   Google,
-  Brightid,
   Coinbase,
   GuildXYZ,
-  Idena,
   Civic,
   TrustaLabs,
   Outdid,
@@ -130,11 +128,6 @@ defaultPlatformMap.set("Google", {
   platFormGroupSpec: Google.ProviderConfig,
 });
 
-// defaultPlatformMap.set("Brightid", {
-//   platform: new Brightid.BrightidPlatform(),
-//   platFormGroupSpec: Brightid.ProviderConfig,
-// });
-
 if (process.env.NEXT_PUBLIC_FF_COINBASE_STAMP === "on") {
   defaultPlatformMap.set("Coinbase", {
     platform: new Coinbase.CoinbasePlatform({
@@ -171,14 +164,6 @@ defaultPlatformMap.set("HumanIdPhone", {
   platform: new HumanIdPhone.HumanIdPhonePlatform(),
   platFormGroupSpec: HumanIdPhone.ProviderConfig,
 });
-
-// Idena stamp retired - see #3794
-// if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP === "on") {
-//   defaultPlatformMap.set("Idena", {
-//     platform: new Idena.IdenaPlatform(),
-//     platFormGroupSpec: Idena.ProviderConfig,
-//   });
-// }
 
 defaultPlatformMap.set("Civic", {
   platform: new Civic.CivicPlatform({

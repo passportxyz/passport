@@ -62,9 +62,6 @@ const useShouldDisplayPlatform = () => {
       // Feature Flag Guild Stamp
       if (process.env.NEXT_PUBLIC_FF_GUILD_STAMP !== "on" && platform.platform === "GuildXYZ") return false;
 
-      // Feature Flag Idena Stamp
-      // if (process.env.NEXT_PUBLIC_FF_IDENA_STAMP !== "on" && platform.platform === "Idena") return false;
-
       // Feature Flag PHI Stamp
       if (process.env.NEXT_PUBLIC_FF_PHI_STAMP !== "on" && platform.platform === "PHI") return false;
 
