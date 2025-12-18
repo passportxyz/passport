@@ -2,9 +2,9 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { XProvider } from "./Providers/x.js";
 
 export const PlatformDetails: PlatformSpec = {
-  icon: "./assets/twitterStampIcon.svg",
+  icon: "./assets/xStampIcon.svg",
   platform: "X",
-  name: "X (Twitter)",
+  name: "X",
   description: "Verify your X account with verified status, followers, and account age",
   connectMessage: "Connect Account",
   website: "https://x.com/",
