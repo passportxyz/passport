@@ -33,7 +33,7 @@
   "dependencies": {
     "@gitcoin/passport-types": "^1.0.0",
     "@guildxyz/sdk": "^2.5.0",
-    "@holonym-foundation/human-id-sdk": "^0.0.16",
+    "@holonym-foundation/human-id-sdk": "^0.0.24",
     "@spruceid/didkit-wasm": "^0.3.0-alpha0",
     "@zk-email/sdk": "2.0.11",
     "axios": "^1.7.9",
