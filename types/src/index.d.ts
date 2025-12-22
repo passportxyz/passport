@@ -363,6 +363,7 @@ export type PLATFORM_ID =
   | "HumanIdPhone"
   | "HumanIdKyc"
   | "Biometrics"
+  | "Steam"
   | "ZKEmail";
 
 export type PLATFORM_CATEGORY = {
@@ -399,6 +400,7 @@ export type PROVIDER_ID =
   | "Discord"
   | "Snapshot"
   | "SnapshotProposalsProvider"
+  | "SteamGamingCredentials"
   | "ethPossessionsGte#1"
   | "ethPossessionsGte#10"
   | "ethPossessionsGte#32"

@@ -28,7 +28,7 @@ const {
   HumanIdPhone,
   HumanIdKyc,
   Biometrics,
-
+  Steam,
   ZKEmail,
 } = platforms;
 
@@ -217,3 +217,14 @@ if (process.env.NEXT_PUBLIC_FF_ZKEMAIL_STAMP === "on") {
     platFormGroupSpec: ZKEmail.ProviderConfig,
   });
 }
+
+defaultPlatformMap.set("Steam", {
+  platform: new Steam.SteamPlatform({
+    redirectUri: process.env.NEXT_PUBLIC_PASSPORT_STEAM_CALLBACK,
+    realm:
+      process.env.NEXT_PUBLIC_PASSPORT_STEAM_REALM ||
+      process.env.NEXT_PUBLIC_PASSPORT_IAM_URL ||
+      "https://passport.xyz",
+  }),
+  platFormGroupSpec: Steam.ProviderConfig,
+});
