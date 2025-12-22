@@ -204,12 +204,12 @@ const MinimalHeader = ({ className, showTopNav }: MinimalHeaderProps): JSX.Eleme
         {/* Shrinkable Spacer */}
         <div className="flex-shrink w-16" />
 
-        {scoreState.status !== "initial" && !hideHumnBranding && (
-          <HumanPointsLabel
-            points={pointsData ? applyMultiplier(pointsData.total_points, pointsData.multiplier) : 0}
-            isVisible={!beforeHumanPointsRelease()}
-          />
-        )}
+        {(() => {
+          const points = pointsData ? applyMultiplier(pointsData.total_points, pointsData.multiplier) : 0;
+          return scoreState.status !== "initial" && !hideHumnBranding && points > 0 ? (
+            <HumanPointsLabel points={points} isVisible={!beforeHumanPointsRelease()} />
+          ) : null;
+        })()}
         <AccountCenter />
         {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
       </div>
