@@ -15,8 +15,6 @@ export interface Credential {
   flags: ("expired" | "deduplicated")[];
   points: number;
   isEligible: boolean;
-  humanPointsAvailable?: number;
-  humanPointsEarned?: number;
   isBeta?: boolean;
 }
 
@@ -77,9 +75,6 @@ export interface CredentialCardProps {
   verified: boolean;
   flags?: ("expired" | "deduplicated")[];
   points: number;
-  isEligible: boolean;
-  humanPointsAvailable?: number;
-  humanPointsEarned?: number;
   isBeta?: boolean;
 }
 
