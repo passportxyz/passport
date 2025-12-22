@@ -1,9 +1,6 @@
 import React from "react";
 import { CredentialCardProps } from "../types";
 import { PassportPoints } from "../../PassportPoints";
-import { HumanPointsLabelSMDark } from "../../humanPoints";
-import { beforeHumanPointsRelease } from "../../../utils/helpers";
-import { useCustomization } from "../../../hooks/useCustomization";
 import { BetaBadge } from "../../BetaBadge";
 
 const ExpiredIcon = () => (
@@ -85,25 +82,11 @@ const Flag = ({ icon: Icon, label, infoUrl }: FlagProps) => {
   );
 };
 
-export const CredentialCard = ({
-  name,
-  description,
-  verified,
-  flags = [],
-  points,
-  isEligible,
-  humanPointsAvailable,
-  humanPointsEarned,
-  isBeta,
-}: CredentialCardProps) => {
-  const { hideHumnBranding } = useCustomization();
-
+export const CredentialCard = ({ name, description, verified, flags = [], points, isBeta }: CredentialCardProps) => {
   const hasExpiredFlag = flags.includes("expired");
   const hasDeduplicatedFlag = flags.includes("deduplicated");
   const hasFlags = flags.length > 0;
   const getsPoints = verified && !hasFlags;
-  const humanPoints = humanPointsEarned || humanPointsAvailable || 0;
-  const prefix = !!humanPointsEarned ? "+" : "";
 
   return (
     <div
@@ -117,14 +100,6 @@ export const CredentialCard = ({
     >
       <div className="flex items-start justify-between gap-3">
         <h4 className="text-sm font-semibold text-color-4 flex-1 min-w-0">{name}</h4>
-
-        <div className="relative -right-4 pt-0.5">
-          <HumanPointsLabelSMDark
-            prefix={prefix}
-            points={humanPoints}
-            isVisible={!!humanPoints && !beforeHumanPointsRelease() && !hideHumnBranding}
-          />
-        </div>
         <PassportPoints
           className={hasFlags ? "bg-opacity-50" : "bg-opacity-100"}
           prefix={getsPoints ? "+" : ""}

@@ -106,18 +106,6 @@ const StampDrawer = ({
           flags,
           points,
           isEligible: !!pointsData?.is_eligible,
-          humanPointsAvailable:
-            customization.scorer?.weights && stampWeights?.[providerId]
-              ? parseFloat(String(stampWeights[providerId])) || 0
-              : providerId in possiblePointsDataForStamps
-                ? possiblePointsDataForStamps[providerId as POINTED_STAMP_PROVIDER]
-                : 0,
-          humanPointsEarned:
-            customization.scorer?.weights && stampWeights?.[providerId]
-              ? parseFloat(String(stampWeights[providerId])) || 0
-              : providerId in pointsDataForStamps
-                ? pointsDataForStamps[providerId as POINTED_STAMP_PROVIDER]
-                : 0,
           isBeta: betaStamps?.has(providerId),
         };
       }),

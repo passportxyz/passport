@@ -1,15 +1,13 @@
 // --- React methods
 import React from "react";
-import { PointsData, ScorerContext } from "../context/scorerContext";
+import { ScorerContext } from "../context/scorerContext";
 import { AccountCenter } from "./AccountCenter";
 import { Notifications } from "./Notifications";
 import { OnchainSidebar } from "./OnchainSidebar";
 import { useOneClickVerification } from "../hooks/useOneClickVerification";
 import { HumanPointsLabel } from "./humanPoints";
-import TooltipOverChildren from "./TooltipOverChildren";
 import { applyMultiplier, beforeHumanPointsRelease } from "../utils/helpers";
 import { useCustomization } from "../hooks/useCustomization";
-import { getChainName } from "../utils/chains";
 import { TopNav } from "./TopNav/components/TopNav";
 import type { NavFeature } from "./TopNav/mocks/navData";
 import { NavPopover } from "./NavPopover";
@@ -118,145 +116,6 @@ const HumanPassportLogoWithText = () => {
   );
 };
 
-const PointsTooltipItem = ({ title, text }: { title: string; text: string }) => {
-  return (
-    <li className="flex gap-3">
-      <span className="text-black text-sm leading-relaxed">•</span>
-      <p className="text-sm text-black leading-relaxed">
-        <span className="text-md font-semibold mr-2">{title}</span>
-        {text}
-      </p>
-    </li>
-  );
-};
-
-const PointsTooltip = ({ pointsData }: { pointsData: PointsData | undefined }) => {
-  if (!pointsData) return null;
-  return (
-    <>
-      {pointsData?.total_points < 20 ? (
-        <>
-          <p className="my-1 font-medium">This is your HUMN Points balance</p>
-          <p className="my-1">Build up a Unique Humanity Score of 20+ to qualify for HUMN points</p>
-          <p className="my-1">
-            Learn more about the{" "}
-            <a
-              className="underline text-color-9"
-              href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live"
-              target="_blank"
-            >
-              HUMN onchain SUMR
-            </a>
-          </p>
-        </>
-      ) : (
-        <>
-          <p className="my-1 font-medium">This is your HUMN Points balance</p>
-          <p className="my-1">
-            Learn more about the{" "}
-            <a
-              className="underline text-color-9"
-              href="https://passport.human.tech/blog/humn-onchain-sumr-season-1-is-live"
-              target="_blank"
-            >
-              HUMN onchain SUMR
-            </a>
-          </p>
-          <p className="my-1">HUMN points earned:</p>
-          <ul className="space-y-1.5">
-            {pointsData.multiplier == 2 && (
-              <PointsTooltipItem
-                title="Returning User (2x)"
-                // text={`+${applyMultiplier(pointsData.total_points, pointsData.multiplier)}`}
-                text={`+${pointsData.total_points}`}
-              />
-            )}
-            {pointsData.breakdown?.SCB && (
-              <PointsTooltipItem
-                title="Scored > 20 with 3 or more partner campaigns"
-                text={`+${pointsData.breakdown.SCB}`}
-              />
-            )}
-            {pointsData.breakdown?.HKY && (
-              <PointsTooltipItem title="Human Keys Created" text={`+${pointsData.breakdown.HKY}`} />
-            )}
-            {pointsData.breakdown?.HGO && (
-              <PointsTooltipItem title="Government ID Stamp" text={`+${pointsData.breakdown.HGO}`} />
-            )}
-            {pointsData.breakdown?.HPH && (
-              <PointsTooltipItem title="Phone Verification Stamp" text={`+${pointsData.breakdown.HPH}`} />
-            )}
-            {pointsData.breakdown?.HBI && (
-              <PointsTooltipItem title="Biometrics Stamp" text={`+${pointsData.breakdown.HBI}`} />
-            )}
-            {pointsData.breakdown?.HCH && (
-              <PointsTooltipItem title="Proof of Clean Hands Stamp" text={`+${pointsData.breakdown.HCH}`} />
-            )}
-            {(pointsData.breakdown?.ISB || pointsData.breakdown?.ISG || pointsData.breakdown?.ISS) && (
-              <PointsTooltipItem
-                title="Identity Staking Stamp"
-                text={`+${
-                  (pointsData.breakdown?.ISB ?? 0) + (pointsData.breakdown?.ISG ?? 0) + (pointsData.breakdown?.ISS ?? 0)
-                }`}
-              />
-            )}
-            {(pointsData.breakdown?.CSB || pointsData.breakdown?.CSE || pointsData.breakdown?.CST) && (
-              <PointsTooltipItem
-                title="Community Staking Stamp"
-                text={`+${
-                  (pointsData.breakdown?.CSB ?? 0) + (pointsData.breakdown?.CSE ?? 0) + (pointsData.breakdown?.CST ?? 0)
-                }`}
-              />
-            )}
-            {pointsData.breakdown?.PMT &&
-              (() => {
-                const pmtChainIDs = Object.keys(pointsData.breakdown ?? {})
-                  .filter((key) => key.startsWith("PMT_"))
-                  .map((key) => key.replace("PMT_", ""));
-                return pmtChainIDs.map((chainID) => {
-                  return (
-                    <PointsTooltipItem
-                      key={chainID}
-                      title={`Passport Minted (${getChainName(chainID)})`}
-                      text={`+${pointsData.breakdown?.[("PMT_" + chainID) as `PMT_${number}`] ?? 0}`}
-                    />
-                  );
-                });
-              })()}
-            {pointsData.breakdown?.HIM &&
-              (() => {
-                const himChainIDs = Object.keys(pointsData.breakdown ?? {})
-                  .filter((key) => key.startsWith("HIM_"))
-                  .map((key) => key.replace("HIM_", ""));
-                return himChainIDs.map((chainID) => {
-                  return (
-                    <PointsTooltipItem
-                      key={chainID}
-                      title={`Human ID Minted (${getChainName(chainID)})`}
-                      text={`+${pointsData.breakdown?.[("HIM_" + chainID) as `HIM_${number}`] ?? 0}`}
-                    />
-                  );
-                });
-              })()}
-            {pointsData.breakdown?.MTA && (
-              <PointsTooltipItem title="MetaMask OG" text={`+${pointsData.breakdown.MTA}`} />
-            )}
-            {pointsData.breakdown?.MM2 && (
-              <PointsTooltipItem title="MetaMask OG" text={`+${pointsData.breakdown.MM2}`} />
-            )}
-            {pointsData.breakdown?.SOG && (
-              <PointsTooltipItem title="Seasoned Passport OG" text={`+${pointsData.breakdown.SOG}`} />
-            )}
-            {pointsData.breakdown?.TCO && (
-              <PointsTooltipItem title="The Chosen One" text={`+${pointsData.breakdown.TCO}`} />
-            )}
-          </ul>
-        </>
-      )}
-    </>
-  );
-};
-
 const navFeatures: NavFeature[] = [
   {
     icon: "user-check",
@@ -345,19 +204,12 @@ const MinimalHeader = ({ className, showTopNav }: MinimalHeaderProps): JSX.Eleme
         {/* Shrinkable Spacer */}
         <div className="flex-shrink w-16" />
 
-        {scoreState.status !== "initial" && !hideHumnBranding && (
-          <>
-            <TooltipOverChildren
-              panelClassName="text-black w-fit"
-              tooltipElement={<PointsTooltip pointsData={pointsData} />}
-            >
-              <HumanPointsLabel
-                points={pointsData ? applyMultiplier(pointsData.total_points, pointsData.multiplier) : 0}
-                isVisible={!beforeHumanPointsRelease()}
-              />
-            </TooltipOverChildren>
-          </>
-        )}
+        {(() => {
+          const points = pointsData ? applyMultiplier(pointsData.total_points, pointsData.multiplier) : 0;
+          return scoreState.status !== "initial" && !hideHumnBranding && points > 0 ? (
+            <HumanPointsLabel points={points} isVisible={!beforeHumanPointsRelease()} />
+          ) : null;
+        })()}
         <AccountCenter />
         {verificationComplete && <Notifications setShowSidebar={() => setShowSidebar(true)} />}
       </div>

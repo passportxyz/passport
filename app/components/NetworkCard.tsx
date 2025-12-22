@@ -1,30 +1,19 @@
-import React, { useContext } from "react";
+import React from "react";
 import { SyncToChainButton } from "./SyncToChainButton";
 import { Chain } from "../utils/chains";
 import { useOnChainStatus } from "../hooks/useOnChainStatus";
-import { OnChainStatus, onChainStatusString } from "../utils/onChainStatus";
+import { OnChainStatus } from "../utils/onChainStatus";
 import { getDaysToExpiration } from "../utils/duration";
 
 import { useOnChainData } from "../hooks/useOnChainData";
 import { Hyperlink } from "@gitcoin/passport-platforms";
 import { useAccount } from "wagmi";
 import { ExpiredLabel } from "./LabelExpired";
-import { POINTS_BREAKDOWN_KEY, ScorerContext } from "../context/scorerContext";
-import { HumanPointsLabelSMDark } from "./humanPoints";
-import { beforeHumanPointsRelease } from "../utils/helpers";
-import { useCustomization } from "../hooks/useCustomization";
 
 export function NetworkCard({ chain }: { chain: Chain }) {
   const { status, isPending } = useOnChainStatus({ chain });
   const { expirationDate } = useOnChainData().data[chain.id] || {};
   const { address } = useAccount();
-  const { pointsData } = useContext(ScorerContext);
-  const { hideHumnBranding } = useCustomization();
-  const keyForChainPoints = `PMT_${Number.parseInt(chain.id, 16)}` as POINTS_BREAKDOWN_KEY;
-  const gainedHumanPoints = pointsData?.breakdown[keyForChainPoints];
-  const prefix = !!gainedHumanPoints ? "+" : "";
-  const humanPoints = gainedHumanPoints || 300;
-  const showHumanPoints = !!humanPoints && !beforeHumanPointsRelease() && !hideHumnBranding;
 
   const isOnChain = [
     OnChainStatus.MOVED_OUT_OF_DATE,
@@ -59,8 +48,7 @@ export function NetworkCard({ chain }: { chain: Chain }) {
         <div className="grid grid-rows-3 content-between h-full">
           <div className="flex justify-between items-start">
             <img className="h-8" src={chain.icon} alt={`${chain.label} logo`} />
-            <HumanPointsLabelSMDark points={humanPoints || 0} prefix={prefix} isVisible={showHumanPoints} />
-            {!expired || <ExpiredLabel className="" />}
+            {expired && <ExpiredLabel className="" />}
           </div>
           <div className="">
             <h1 className="grow font-medium text-lg">{chain.label}</h1>
