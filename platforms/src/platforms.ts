@@ -28,6 +28,7 @@ import * as HumanIdKyc from "./HumanIdKyc/index.js";
 import * as Biometrics from "./Biometrics/index.js";
 import * as ZKEmail from "./ZKEmail/index.js";
 import * as X from "./X/index.js";
+import * as Steam from "./Steam/index.js";
 
 import { PlatformSpec, PlatformGroupSpec, Provider } from "./types.js";
 
@@ -69,6 +70,7 @@ const platforms: Record<string, PlatformConfig> = {
   Biometrics,
   ZKEmail,
   X,
+  Steam,
 };
 
 if (process.env.NEXT_PUBLIC_FF_NEW_POAP_STAMPS === "on") {

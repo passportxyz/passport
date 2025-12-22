@@ -1,0 +1,19 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_steam)">
+<circle cx="20" cy="20" r="20" fill="#1B2838"/>
+<circle cx="20" cy="20" r="18" fill="#171A21"/>
+<path d="M20 4C26.627 4 32 9.373 32 16C32 22.627 26.627 28 20 28C13.373 28 8 22.627 8 16C8 9.373 13.373 4 20 4Z" fill="#66C0F4"/>
+<path d="M20 6C24.418 6 28 9.582 28 14C28 18.418 24.418 22 20 22C15.582 22 12 18.418 12 14C12 9.582 15.582 6 20 6Z" fill="#1B2838"/>
+<circle cx="20" cy="14" r="2.5" fill="#66C0F4"/>
+<path d="M11 16L15 20L11 24L7 20L11 16Z" fill="#66C0F4" opacity="0.7"/>
+<path d="M29 16L33 20L29 24L25 20L29 16Z" fill="#66C0F4" opacity="0.7"/>
+<path d="M20 24L24 28L20 32L16 28L20 24Z" fill="#66C0F4" opacity="0.7"/>
+<path d="M20 8L22 12L18 12L20 8Z" fill="#66C0F4" opacity="0.6"/>
+<path d="M20 20L24 18L24 22L20 20Z" fill="#66C0F4" opacity="0.6"/>
+</g>
+<defs>
+<clipPath id="clip0_steam">
+<rect width="40" height="40" fill="white"/>
+</clipPath>
+</defs>
+</svg>
