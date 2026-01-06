@@ -24,10 +24,6 @@ export type DiscordGuild = {
   name: string;
 };
 
-export type DiscordMemberData = {
-  roles: string[];
-};
-
 export type DiscordConnection = {
   type: string;
   name: string;
@@ -85,33 +81,7 @@ export class DiscordProvider implements Provider {
         errors.push(`Must be a member of at least 10 servers (current: ${guilds.length})`);
       }
 
-      // Step 5: Check role assignments (with early bailout)
-      let serversWithRoles = 0;
-
-      for (const guild of guilds) {
-        if (serversWithRoles >= 3) break; // Early bailout - exactly 3, no more
-
-        try {
-          const memberData = await makeDiscordRequest<DiscordMemberData>(
-            `https://discord.com/api/users/@me/guilds/${guild.id}/member`,
-            accessToken
-          );
-
-          if (memberData.roles && memberData.roles.length > 0) {
-            serversWithRoles++;
-          }
-        } catch (e) {
-          // If a single guild check fails (e.g., 404, user left server), skip it
-          // Don't let it fail the entire verification
-          continue;
-        }
-      }
-
-      if (serversWithRoles < 3) {
-        errors.push(`Must have roles in at least 3 servers (current: ${serversWithRoles})`);
-      }
-
-      // Step 6: Get verified connections
+      // Step 5: Get verified connections
       const connections = await makeDiscordRequest<DiscordConnection[]>(
         "https://discord.com/api/users/@me/connections",
         accessToken
@@ -122,7 +92,7 @@ export class DiscordProvider implements Provider {
         errors.push(`Must have at least 2 verified external connections (current: ${verifiedConnections.length})`);
       }
 
-      // Step 7: Final validation
+      // Step 6: Final validation
       const valid = errors.length === 0;
 
       return {

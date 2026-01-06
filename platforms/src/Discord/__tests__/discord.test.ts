@@ -48,7 +48,7 @@ describe("Discord Enhanced Verification", () => {
           return {
             data: {
               user: {
-                id: testUserId, // Use the same ID
+                id: testUserId,
                 username: "TestUser",
               },
             },
@@ -56,7 +56,7 @@ describe("Discord Enhanced Verification", () => {
           };
         }
 
-        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+        if (url.includes("/users/@me/guilds")) {
           // Return 15 guilds (> 10 required)
           return {
             data: Array.from({ length: 15 }, (_, i) => ({
@@ -67,21 +67,8 @@ describe("Discord Enhanced Verification", () => {
           };
         }
 
-        if (url.includes("/member")) {
-          // Return roles for first 5 guilds (> 3 required)
-          const guildId = url.split("/guilds/")[1]?.split("/member")[0];
-          const guildIndex = parseInt(guildId?.split("_")[1] || "0");
-
-          return {
-            data: {
-              roles: guildIndex < 5 ? ["role1", "role2"] : [],
-            },
-            status: 200,
-          };
-        }
-
         if (url.includes("/connections")) {
-          // Return 3 verified connections (> 2 required)
+          // Return 2 verified connections (>= 2 required)
           return {
             data: [
               { type: "github", name: "testuser", verified: true },
@@ -122,21 +109,12 @@ describe("Discord Enhanced Verification", () => {
           };
         }
 
-        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+        if (url.includes("/users/@me/guilds")) {
           return {
             data: Array.from({ length: 15 }, (_, i) => ({
               id: `guild_${i}`,
               name: `Server ${i}`,
             })),
-            status: 200,
-          };
-        }
-
-        if (url.includes("/member")) {
-          const guildId = url.split("/guilds/")[1]?.split("/member")[0];
-          const guildIndex = parseInt(guildId?.split("_")[1] || "0");
-          return {
-            data: { roles: guildIndex < 5 ? ["role1"] : [] },
             status: 200,
           };
         }
@@ -179,20 +157,13 @@ describe("Discord Enhanced Verification", () => {
           };
         }
 
-        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+        if (url.includes("/users/@me/guilds")) {
           // Only 5 guilds
           return {
             data: Array.from({ length: 5 }, (_, i) => ({
               id: `guild_${i}`,
               name: `Server ${i}`,
             })),
-            status: 200,
-          };
-        }
-
-        if (url.includes("/member")) {
-          return {
-            data: { roles: ["role1"] },
             status: 200,
           };
         }
@@ -218,193 +189,6 @@ describe("Discord Enhanced Verification", () => {
     });
   });
 
-  describe("Role assignments validation", () => {
-    it("should fail when user has roles in less than 3 servers", async () => {
-      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
-
-      mockedAxios.get.mockImplementation(async (url) => {
-        if (url.includes("/oauth2/@me")) {
-          return {
-            data: {
-              user: {
-                id: createSnowflakeId(400),
-                username: "TestUser",
-              },
-            },
-            status: 200,
-          };
-        }
-
-        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
-          return {
-            data: Array.from({ length: 15 }, (_, i) => ({
-              id: `guild_${i}`,
-              name: `Server ${i}`,
-            })),
-            status: 200,
-          };
-        }
-
-        if (url.includes("/member")) {
-          const guildId = url.split("/guilds/")[1]?.split("/member")[0];
-          const guildIndex = parseInt(guildId?.split("_")[1] || "0");
-          // Only first 2 guilds have roles
-          return {
-            data: { roles: guildIndex < 2 ? ["role1"] : [] },
-            status: 200,
-          };
-        }
-
-        if (url.includes("/connections")) {
-          return {
-            data: [
-              { type: "github", name: "testuser", verified: true },
-              { type: "twitter", name: "testuser", verified: true },
-            ],
-            status: 200,
-          };
-        }
-      });
-
-      const discord = new DiscordProvider();
-      const result = await discord.verify({
-        proofs: { code },
-      } as unknown as RequestPayload);
-
-      expect(result.valid).toBe(false);
-      expect(result.errors).toContain("Must have roles in at least 3 servers (current: 2)");
-    });
-
-    it("should skip guilds that return 404 (user left server)", async () => {
-      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
-
-      let memberCallCount = 0;
-
-      mockedAxios.get.mockImplementation(async (url) => {
-        if (url.includes("/oauth2/@me")) {
-          return {
-            data: {
-              user: {
-                id: createSnowflakeId(400),
-                username: "TestUser",
-              },
-            },
-            status: 200,
-          };
-        }
-
-        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
-          return {
-            data: Array.from({ length: 15 }, (_, i) => ({
-              id: `guild_${i}`,
-              name: `Server ${i}`,
-            })),
-            status: 200,
-          };
-        }
-
-        if (url.includes("/member")) {
-          memberCallCount++;
-          const guildId = url.split("/guilds/")[1]?.split("/member")[0];
-          const guildIndex = parseInt(guildId?.split("_")[1] || "0");
-
-          // Simulate 404 for guilds 1 and 3 (user left)
-          if (guildIndex === 1 || guildIndex === 3) {
-            throw {
-              response: { status: 404 },
-              isAxiosError: true,
-            };
-          }
-
-          // Guilds 0, 2, 4 have roles (should count as 3)
-          return {
-            data: { roles: guildIndex < 5 ? ["role1"] : [] },
-            status: 200,
-          };
-        }
-
-        if (url.includes("/connections")) {
-          return {
-            data: [
-              { type: "github", name: "testuser", verified: true },
-              { type: "twitter", name: "testuser", verified: true },
-            ],
-            status: 200,
-          };
-        }
-      });
-
-      const discord = new DiscordProvider();
-      const result = await discord.verify({
-        proofs: { code },
-      } as unknown as RequestPayload);
-
-      expect(result.valid).toBe(true);
-      expect(result.errors).toEqual([]);
-      // Should have made calls for guilds 0, 1, 2, 3, 4 (stops at 3 successful)
-      expect(memberCallCount).toBeGreaterThanOrEqual(3);
-    });
-
-    it("should stop checking guilds after finding 3 with roles (early bailout)", async () => {
-      mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
-
-      let memberCallCount = 0;
-
-      mockedAxios.get.mockImplementation(async (url) => {
-        if (url.includes("/oauth2/@me")) {
-          return {
-            data: {
-              user: {
-                id: createSnowflakeId(400),
-                username: "TestUser",
-              },
-            },
-            status: 200,
-          };
-        }
-
-        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
-          // Return many guilds (100)
-          return {
-            data: Array.from({ length: 100 }, (_, i) => ({
-              id: `guild_${i}`,
-              name: `Server ${i}`,
-            })),
-            status: 200,
-          };
-        }
-
-        if (url.includes("/member")) {
-          memberCallCount++;
-          // All guilds have roles
-          return {
-            data: { roles: ["role1", "role2"] },
-            status: 200,
-          };
-        }
-
-        if (url.includes("/connections")) {
-          return {
-            data: [
-              { type: "github", name: "testuser", verified: true },
-              { type: "twitter", name: "testuser", verified: true },
-            ],
-            status: 200,
-          };
-        }
-      });
-
-      const discord = new DiscordProvider();
-      const result = await discord.verify({
-        proofs: { code },
-      } as unknown as RequestPayload);
-
-      expect(result.valid).toBe(true);
-      // Should only check exactly 3 guilds, not all 100
-      expect(memberCallCount).toBe(3);
-    });
-  });
-
   describe("Verified connections validation", () => {
     it("should fail when user has less than 2 verified connections", async () => {
       mockedAxios.post.mockResolvedValue(validAccessTokenResponse);
@@ -422,21 +206,12 @@ describe("Discord Enhanced Verification", () => {
           };
         }
 
-        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+        if (url.includes("/users/@me/guilds")) {
           return {
             data: Array.from({ length: 15 }, (_, i) => ({
               id: `guild_${i}`,
               name: `Server ${i}`,
             })),
-            status: 200,
-          };
-        }
-
-        if (url.includes("/member")) {
-          const guildId = url.split("/guilds/")[1]?.split("/member")[0];
-          const guildIndex = parseInt(guildId?.split("_")[1] || "0");
-          return {
-            data: { roles: guildIndex < 5 ? ["role1"] : [] },
             status: 200,
           };
         }
@@ -481,21 +256,13 @@ describe("Discord Enhanced Verification", () => {
           };
         }
 
-        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+        if (url.includes("/users/@me/guilds")) {
           // Too few guilds
           return {
             data: Array.from({ length: 5 }, (_, i) => ({
               id: `guild_${i}`,
               name: `Server ${i}`,
             })),
-            status: 200,
-          };
-        }
-
-        if (url.includes("/member")) {
-          // No roles
-          return {
-            data: { roles: [] },
             status: 200,
           };
         }
@@ -515,10 +282,9 @@ describe("Discord Enhanced Verification", () => {
       } as unknown as RequestPayload);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(4);
+      expect(result.errors).toHaveLength(3);
       expect(result.errors).toContain("Discord account must be at least 365 days old (current: 100 days)");
       expect(result.errors).toContain("Must be a member of at least 10 servers (current: 5)");
-      expect(result.errors).toContain("Must have roles in at least 3 servers (current: 0)");
       expect(result.errors).toContain("Must have at least 2 verified external connections (current: 0)");
     });
   });
@@ -621,21 +387,12 @@ describe("Discord Enhanced Verification", () => {
           };
         }
 
-        if (url.includes("/users/@me/guilds") && !url.includes("/member")) {
+        if (url.includes("/users/@me/guilds")) {
           return {
             data: Array.from({ length: 15 }, (_, i) => ({
               id: `guild_${i}`,
               name: `Server ${i}`,
             })),
-            status: 200,
-          };
-        }
-
-        if (url.includes("/member")) {
-          const guildId = url.split("/guilds/")[1]?.split("/member")[0];
-          const guildIndex = parseInt(guildId?.split("_")[1] || "0");
-          return {
-            data: { roles: guildIndex < 5 ? ["role1"] : [] },
             status: 200,
           };
         }
