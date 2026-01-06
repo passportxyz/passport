@@ -1,5 +1,5 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
-import { GuildAdminProvider, GuildPassportMemberProvider } from "./Providers/guildXYZ.js";
+import { GuildAdminProvider } from "./Providers/guildXYZ.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/guildXYZStampIcon.svg",
@@ -64,9 +64,10 @@ export const ProviderConfig: PlatformGroupSpec[] = [
         description:
           "Show active participation in the Human Passport community through verified Guild membership and roles",
         name: "GuildPassportMember",
+        isDeprecated: true,
       },
     ],
   },
 ];
 
-export const providers: Provider[] = [new GuildAdminProvider(), new GuildPassportMemberProvider()];
+export const providers: Provider[] = [new GuildAdminProvider()];
