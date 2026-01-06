@@ -19,6 +19,17 @@ export type DiscordFindMyUserResponse = {
   };
 };
 
+export type DiscordGuild = {
+  id: string;
+  name: string;
+};
+
+export type DiscordConnection = {
+  type: string;
+  name: string;
+  verified: boolean;
+};
+
 // Export a Discord Provider to carry out OAuth and return a record object
 export class DiscordProvider implements Provider {
   // Give the provider a type so that we can select it with a payload
@@ -34,32 +45,101 @@ export class DiscordProvider implements Provider {
 
   // verify that the proof object contains valid === "true"
   async verify(payload: RequestPayload): Promise<VerifiedPayload> {
-    const errors = [];
-    let valid = false,
-      verifiedPayload: DiscordFindMyUserResponse = {},
-      record = undefined;
+    const errors: string[] = [];
 
     try {
-      verifiedPayload = await verifyDiscord(payload.proofs.code);
+      // Step 1: Exchange code for access token
+      const accessToken = await requestAccessToken(payload.proofs.code);
 
-      valid = verifiedPayload && verifiedPayload.user?.id ? true : false;
-      if (valid) {
-        record = {
-          id: verifiedPayload.user?.id,
-        };
-      } else {
+      // Step 2: Get user info
+      const userInfo = await makeDiscordRequest<DiscordFindMyUserResponse>(
+        "https://discord.com/api/oauth2/@me",
+        accessToken
+      );
+
+      if (!userInfo.user?.id) {
         errors.push("We were not able to verify a Discord account with your provided credentials.");
+        return { valid: false, errors };
       }
+
+      const userId = userInfo.user.id;
+
+      // Step 3: Validate account age (from snowflake ID)
+      const snowflake = BigInt(userId);
+      const timestamp = Number(snowflake >> 22n) + 1420070400000;
+      const createdAt = new Date(timestamp);
+      const accountAgeDays = Math.floor((Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (accountAgeDays < 365) {
+        errors.push(`Discord account must be at least 365 days old (current: ${accountAgeDays} days)`);
+      }
+
+      // Step 4: Get server list and validate count
+      const guilds = await makeDiscordRequest<DiscordGuild[]>("https://discord.com/api/users/@me/guilds", accessToken);
+
+      if (guilds.length < 10) {
+        errors.push(`Must be a member of at least 10 servers (current: ${guilds.length})`);
+      }
+
+      // Step 5: Get verified connections
+      const connections = await makeDiscordRequest<DiscordConnection[]>(
+        "https://discord.com/api/users/@me/connections",
+        accessToken
+      );
+      const verifiedConnections = connections.filter((conn) => conn.verified);
+
+      if (verifiedConnections.length < 2) {
+        errors.push(`Must have at least 2 verified external connections (current: ${verifiedConnections.length})`);
+      }
+
+      // Step 6: Final validation
+      const valid = errors.length === 0;
 
       return {
         valid,
-        record,
+        record: valid ? { id: userId } : undefined,
         errors,
       };
     } catch (e: unknown) {
       throw new ProviderExternalVerificationError(`Discord account check error: ${String(e)}`);
     }
   }
+}
+
+// Helper function to make Discord API requests with rate limit handling
+async function makeDiscordRequest<T>(url: string, accessToken: string, retries = 3): Promise<T> {
+  let lastError: any;
+
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      return response.data;
+    } catch (error) {
+      lastError = error;
+
+      if (axios.isAxiosError(error) && error.response?.status === 429) {
+        // Rate limited - check Retry-After header
+        const retryAfter = error.response.headers["retry-after"];
+        const waitMs = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, attempt) * 1000;
+
+        if (attempt < retries - 1) {
+          // Wait and retry
+          await new Promise((resolve) => setTimeout(resolve, waitMs));
+          continue;
+        }
+      }
+
+      // For non-429 errors, throw immediately without retrying
+      if (!axios.isAxiosError(error) || error.response?.status !== 429) {
+        handleProviderAxiosError(error, "Discord API request", [url]);
+      }
+    }
+  }
+
+  // If we exhausted all retries (only happens for 429s), throw the last error
+  handleProviderAxiosError(lastError, "Discord API request after retries", [url]);
 }
 
 const requestAccessToken = async (code: string): Promise<string> => {
