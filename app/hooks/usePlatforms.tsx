@@ -87,7 +87,7 @@ const BASE_PLATFORM_CATEGORIES: PLATFORM_CATEGORY[] = [
       </svg>
     ),
     description: "Connect traditional web platforms and services to demonstrate digital presence",
-    platforms: ["Discord", "Github", "Google", "Linkedin", "X", "ZKEmail"],
+    platforms: ["Discord", "Github", "Google", "Linkedin", "X", "Steam", "ZKEmail"],
   },
 ];
 

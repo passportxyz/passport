@@ -74,21 +74,26 @@ function App({ Component, pageProps }: AppProps) {
     const queryError = queryString.get("error");
     const queryCode = queryString.get("code");
     const queryState = queryString.get("state");
+    // Steam OpenID uses openid.claimed_id instead of code
+    const openIdClaimedId = queryString.get("openid.claimed_id");
 
     // We expect for a queryState like" 'twitter-asdfgh', 'google-asdfghjk'
     const providerPath = queryState?.split("-");
     const provider = providerPath ? providerPath[0] : undefined;
 
-    // if Twitter oauth then submit message to other windows and close self
-    if ((queryError || queryCode) && queryState && provider) {
+    // Handle Steam OpenID response
+    const code = queryCode || openIdClaimedId || null;
+
+    // if Twitter oauth or Steam OpenID then submit message to other windows and close self
+    if ((queryError || code) && queryState && provider) {
       // shared message channel between windows (on the same domain)
       const channel = new BroadcastChannel(`${provider}_oauth_channel`);
 
       // only continue with the process if a code is returned
-      if (queryCode) {
+      if (code) {
         channel.postMessage({
           target: provider,
-          data: { code: queryCode, state: queryState },
+          data: { code: code, state: queryState },
         });
       }
 
