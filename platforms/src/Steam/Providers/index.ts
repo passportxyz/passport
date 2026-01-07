@@ -1,1 +1,1 @@
-export { SteamGamingCredentialsProvider } from "./steamGamingCredentials.js";
+export { SteamProvider } from "./steamGamingCredentials.js";

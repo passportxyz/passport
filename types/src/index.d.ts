@@ -402,7 +402,7 @@ export type PROVIDER_ID =
   | "X"
   | "Snapshot"
   | "SnapshotProposalsProvider"
-  | "SteamGamingCredentials"
+  | "Steam"
   | "ethPossessionsGte#1"
   | "ethPossessionsGte#10"
   | "ethPossessionsGte#32"

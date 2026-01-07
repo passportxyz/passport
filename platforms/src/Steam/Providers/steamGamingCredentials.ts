@@ -41,9 +41,9 @@ type QualificationMetrics = {
   mostPlayedPercentage: number;
 };
 
-// Export a Steam Gaming Credentials Provider
-export class SteamGamingCredentialsProvider implements Provider {
-  type = "SteamGamingCredentials";
+// Export a Steam Provider
+export class SteamProvider implements Provider {
+  type = "Steam";
   _options = {};
 
   constructor(options: ProviderOptions = {}) {

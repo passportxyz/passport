@@ -1,5 +1,5 @@
 // ---- Test subject
-import { SteamGamingCredentialsProvider } from "../Providers/steamGamingCredentials.js";
+import { SteamProvider } from "../Providers/steamGamingCredentials.js";
 import { RequestPayload } from "@gitcoin/passport-types";
 import { ProviderExternalVerificationError } from "../../types.js";
 
@@ -107,10 +107,10 @@ afterEach(() => {
   process.env = originalEnv;
 });
 
-describe("SteamGamingCredentialsProvider", function () {
+describe("SteamProvider", function () {
   describe("verify", function () {
     it("should return valid when all criteria are met", async () => {
-      const provider = new SteamGamingCredentialsProvider();
+      const provider = new SteamProvider();
       const payload = {
         proofs: {
           code: MOCK_CLAIMED_ID,
@@ -130,7 +130,7 @@ describe("SteamGamingCredentialsProvider", function () {
     });
 
     it("should return invalid when missing claimed_id", async () => {
-      const provider = new SteamGamingCredentialsProvider();
+      const provider = new SteamProvider();
       const payload = {
         proofs: {},
       } as unknown as RequestPayload;
@@ -143,7 +143,7 @@ describe("SteamGamingCredentialsProvider", function () {
     });
 
     it("should return invalid when claimed_id format is invalid", async () => {
-      const provider = new SteamGamingCredentialsProvider();
+      const provider = new SteamProvider();
       const payload = {
         proofs: {
           code: "invalid-claimed-id",
@@ -165,7 +165,7 @@ describe("SteamGamingCredentialsProvider", function () {
         throw new Error(`Unexpected URL: ${url}`);
       });
 
-      const provider = new SteamGamingCredentialsProvider();
+      const provider = new SteamProvider();
       const payload = {
         proofs: {
           code: MOCK_CLAIMED_ID,
@@ -205,7 +205,7 @@ describe("SteamGamingCredentialsProvider", function () {
         throw new Error(`Unexpected URL: ${url}`);
       });
 
-      const provider = new SteamGamingCredentialsProvider();
+      const provider = new SteamProvider();
       const payload = {
         proofs: {
           code: MOCK_CLAIMED_ID,
@@ -261,7 +261,7 @@ describe("SteamGamingCredentialsProvider", function () {
         throw new Error(`Unexpected URL: ${url}`);
       });
 
-      const provider = new SteamGamingCredentialsProvider();
+      const provider = new SteamProvider();
       const payload = {
         proofs: {
           code: MOCK_CLAIMED_ID,
@@ -305,7 +305,7 @@ describe("SteamGamingCredentialsProvider", function () {
         throw new Error(`Unexpected URL: ${url}`);
       });
 
-      const provider = new SteamGamingCredentialsProvider();
+      const provider = new SteamProvider();
       const payload = {
         proofs: {
           code: MOCK_CLAIMED_ID,
@@ -354,7 +354,7 @@ describe("SteamGamingCredentialsProvider", function () {
         throw new Error(`Unexpected URL: ${url}`);
       });
 
-      const provider = new SteamGamingCredentialsProvider();
+      const provider = new SteamProvider();
       const payload = {
         proofs: {
           code: MOCK_CLAIMED_ID,
@@ -373,7 +373,7 @@ describe("SteamGamingCredentialsProvider", function () {
         throw new Error("Network error");
       });
 
-      const provider = new SteamGamingCredentialsProvider();
+      const provider = new SteamProvider();
       const payload = {
         proofs: {
           code: MOCK_CLAIMED_ID,
@@ -386,7 +386,7 @@ describe("SteamGamingCredentialsProvider", function () {
     it("should handle missing STEAM_API_KEY", async () => {
       process.env.STEAM_API_KEY = undefined;
 
-      const provider = new SteamGamingCredentialsProvider();
+      const provider = new SteamProvider();
       const payload = {
         proofs: {
           code: MOCK_CLAIMED_ID,
@@ -415,7 +415,7 @@ describe("SteamGamingCredentialsProvider", function () {
         throw new Error(`Unexpected URL: ${url}`);
       });
 
-      const provider = new SteamGamingCredentialsProvider();
+      const provider = new SteamProvider();
       const payload = {
         proofs: {
           code: MOCK_CLAIMED_ID,
