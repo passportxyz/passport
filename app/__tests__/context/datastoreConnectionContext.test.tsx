@@ -1,7 +1,5 @@
 import { vi, describe, it, expect, Mock } from "vitest";
 import { render, waitFor, screen, fireEvent } from "@testing-library/react";
-import { EthereumWebAuth } from "@didtools/pkh-ethereum";
-import { AccountId } from "caip";
 import { useEffect, useState } from "react";
 import { makeTestCeramicContext } from "../../__test-fixtures__/contextTestHelpers";
 
@@ -10,40 +8,64 @@ import {
   useDatastoreConnectionContext,
 } from "../../context/datastoreConnectionContext";
 import { CeramicContext } from "../../context/ceramicContext";
-import { Eip1193Provider } from "ethers";
-import { DIDSession } from "did-session";
+import { WalletClient } from "viem";
 
-const mockAddress = "0xfF7edbD01e9d044486781ff52c42EA7a01612644";
+const mockAddress = "0xfF7edbD01e9d044486781ff52EA7a01612644";
 
-vi.mock("axios", () => ({
-  get: () => ({
-    data: {
-      nonce: "123",
-    },
-  }),
-  post: () => ({
-    data: {
-      access: "456",
-    },
-  }),
-}));
-
-vi.mock("@didtools/pkh-ethereum", () => {
+// Mock SIWE
+vi.mock("siwe", () => {
   return {
-    EthereumWebAuth: {
-      getAuthMethod: vi.fn(),
-    },
+    SiweMessage: vi.fn().mockImplementation((config) => ({
+      domain: config.domain,
+      address: config.address,
+      statement: config.statement,
+      uri: config.uri,
+      version: config.version,
+      chainId: config.chainId,
+      nonce: config.nonce,
+      issuedAt: config.issuedAt || new Date().toISOString(),
+      prepareMessage: () => "Sign in to Human Passport with your wallet",
+    })),
   };
 });
 
-vi.mock("@didtools/cacao", () => ({
-  Cacao: {
-    fromBlockBytes: () => ({
-      p: {
-        iss: "did:3:myDid",
+// RS256 header: {"alg":"RS256","typ":"JWT"} -> eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9
+// Payload with far future exp: {"exp":9999999999} -> eyJleHAiOjk5OTk5OTk5OTl9
+const validRS256Token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjk5OTk5OTk5OTl9.signature";
+
+vi.mock("axios", () => ({
+  default: {
+    get: vi.fn(() => ({
+      data: {
+        nonce: "test-nonce-123",
       },
-    }),
+    })),
+    post: vi.fn(() => ({
+      data: {
+        access: validRS256Token,
+      },
+    })),
   },
+  get: vi.fn(() => ({
+    data: {
+      nonce: "test-nonce-123",
+    },
+  })),
+  post: vi.fn(() => ({
+    data: {
+      access: validRS256Token,
+    },
+  })),
+}));
+
+// Mock wagmi hooks needed by DatastoreConnectionContextProvider
+vi.mock("wagmi", async (importOriginal) => ({
+  ...(await importOriginal()),
+  useAccount: () => ({
+    address: mockAddress,
+    isConnected: true,
+    chain: { id: 1 },
+  }),
 }));
 
 vi.mock("../../context/walletStore", () => {
@@ -55,41 +77,17 @@ vi.mock("../../context/walletStore", () => {
   };
 });
 
-const did = {
-  createDagJWS: () => ({
-    jws: {
-      link: {
-        bytes: [1, 2, 3, 4],
-      },
-      payload: "test-payload",
-      signatures: ["test-signature"],
-    },
-    cacaoBlock: "test-cacao-block",
-  }),
-};
-
-vi.mock("did-session", () => {
-  return {
-    DIDSession: {
-      authorize: () => ({
-        serialize: vi.fn(),
-        did,
-      }),
-      fromSession: vi.fn(() => ({
-        serialize: vi.fn(),
-        did,
-      })),
-    },
-  };
-});
+const mockWalletClient = {
+  signMessage: vi.fn(() => Promise.resolve("0xmocksignature")),
+} as unknown as WalletClient;
 
 const TestingComponent = () => {
-  const { connect, dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
+  const { connect, dbAccessTokenStatus, dbAccessToken, userAddress } = useDatastoreConnectionContext();
   const [session, setSession] = useState("");
 
   useEffect(() => {
     // using https://www.npmjs.com/package/vitest-localstorage-mock to mock localStorage
-    setSession(localStorage.getItem("didsession-0xmyAddress") ?? "");
+    setSession(localStorage.getItem(`dbcache-token-${mockAddress}`) ?? "");
   });
 
   return (
@@ -97,7 +95,8 @@ const TestingComponent = () => {
       <div data-testid="session-id">{session}</div>
       <div data-testid="db-access-token-status">Status: {dbAccessTokenStatus}</div>
       <div data-testid="db-access-token">{dbAccessToken}</div>
-      <button onClick={() => connect("0xmyAddress", vi.fn() as unknown as Eip1193Provider)}>Connect</button>
+      <div data-testid="user-address">{userAddress}</div>
+      <button onClick={() => connect(mockAddress, mockWalletClient)}>Connect</button>
     </div>
   );
 };
@@ -110,7 +109,7 @@ const mockCeramicContext = makeTestCeramicContext({
   },
 });
 
-describe("<UserContext>", () => {
+describe("<DatastoreConnectionContext>", () => {
   const renderTestComponent = () =>
     render(
       <DatastoreConnectionContextProvider>
@@ -121,15 +120,12 @@ describe("<UserContext>", () => {
     );
 
   beforeEach(() => {
-    localStorage.setItem("connectedWallets", "[]");
+    localStorage.clear();
+    vi.clearAllMocks();
   });
 
-  describe.skip("when using multichain", () => {
-    afterEach(() => {
-      vi.clearAllMocks();
-    });
-
-    it("should use chain id 1 in the DID regardless of the wallet chain", async () => {
+  describe("SIWE authentication", () => {
+    it("should authenticate using SIWE and store token", async () => {
       renderTestComponent();
 
       fireEvent.click(screen.getByRole("button"));
@@ -138,26 +134,47 @@ describe("<UserContext>", () => {
         expect(screen.getByTestId("db-access-token-status").textContent).toContain("connected");
       });
 
-      expect(EthereumWebAuth.getAuthMethod as Mock).toHaveBeenCalledWith(
-        expect.anything(),
-        new AccountId({ address: mockAddress, chainId: "eip155:1" })
-      );
+      expect(screen.getByTestId("user-address").textContent).toBe(mockAddress);
+      expect(mockWalletClient.signMessage).toHaveBeenCalled();
     });
 
-    it("should reuse existing DIDsession when applicable", async () => {
-      localStorage.setItem("didsession-0xmyAddress", "eyJzZXNzaW9uS2V5U2VlZCI6IlF5cTN4aW9ubGxD...");
+    it("should reuse existing valid RS256 JWT token when available", async () => {
+      // Pre-populate localStorage with a valid RS256 token (expires far in the future)
+      localStorage.setItem(`dbcache-token-${mockAddress}`, validRS256Token);
 
       renderTestComponent();
 
-      screen.getByRole("button").click();
+      fireEvent.click(screen.getByRole("button"));
 
       await waitFor(() => {
         expect(screen.getByTestId("db-access-token-status").textContent).toContain("connected");
       });
 
+      // Should NOT have called signMessage since we reused existing token
+      expect(mockWalletClient.signMessage).not.toHaveBeenCalled();
+      expect(screen.getByTestId("db-access-token").textContent).toBe(validRS256Token);
+    });
+
+    it("should reject old HS256 tokens and require new SIWE authentication", async () => {
+      // Pre-populate localStorage with an old HS256 token (pre-SIWE migration)
+      // HS256 header: {"alg":"HS256","typ":"JWT"} -> eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+      const oldHS256Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjk5OTk5OTk5OTl9.signature";
+      localStorage.setItem(`dbcache-token-${mockAddress}`, oldHS256Token);
+
+      renderTestComponent();
+
+      fireEvent.click(screen.getByRole("button"));
+
       await waitFor(() => {
-        expect(DIDSession.fromSession as Mock).toHaveBeenCalled();
+        expect(screen.getByTestId("db-access-token-status").textContent).toContain("connected");
       });
+
+      // Should have called signMessage because HS256 token was rejected
+      expect(mockWalletClient.signMessage).toHaveBeenCalled();
+      // Should have new RS256 token, not the old HS256 one
+      expect(screen.getByTestId("db-access-token").textContent).toBe(validRS256Token);
+      // Old token should be cleared from localStorage
+      expect(localStorage.getItem(`dbcache-token-${mockAddress}`)).toBe(validRS256Token);
     });
   });
 });

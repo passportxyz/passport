@@ -8,26 +8,39 @@ const { Ens } = platforms;
 
 import { CeramicContextState } from "../../context/ceramicContext";
 import { UN_SUCCESSFUL_ENS_RESULT, SUCCESSFUL_ENS_RESULTS } from "../../__test-fixtures__/verifiableCredentialResults";
-import { fetchVerifiableCredential } from "../../utils/credentials";
+import { fetchVerifiableCredentialWithFallback } from "../../utils/credentials";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { ChakraProvider } from "@chakra-ui/react";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
 import { PlatformScoreSpec } from "../../context/scorerContext";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
-vi.mock("@didtools/cacao", () => ({
-  Cacao: {
-    fromBlockBytes: vi.fn(),
-  },
+const mockAddress = "0x1234567890123456789012345678901234567890";
+
+// Mock wagmi hooks
+vi.mock("wagmi", async (importOriginal) => ({
+  ...(await importOriginal()),
+  useSignMessage: () => ({
+    signMessageAsync: vi.fn().mockResolvedValue("0xmocksignature"),
+  }),
+  useSendTransaction: () => ({
+    sendTransactionAsync: vi.fn().mockResolvedValue("0xmocktxhash"),
+  }),
+  useSwitchChain: () => ({
+    switchChainAsync: vi.fn().mockResolvedValue({}),
+  }),
+  useAccount: () => ({
+    address: mockAddress,
+    isConnected: true,
+  }),
 }));
 
 vi.mock("../../utils/credentials", () => ({
-  fetchVerifiableCredential: vi.fn(),
+  fetchVerifiableCredentialWithFallback: vi.fn(),
 }));
 
 vi.mock("../../utils/helpers.tsx", async (importActual) => ({
   ...(await importActual()),
-  createSignedPayload: vi.fn(),
   generateUID: vi.fn(),
   getProviderSpec: vi.fn(),
 }));
@@ -54,7 +67,7 @@ const EnsScoreSpec: PlatformScoreSpec = {
 describe("when user has not verified with EnsProvider", () => {
   beforeEach(async () => {
     await closeAllToasts();
-    vi.mocked(fetchVerifiableCredential).mockResolvedValue({
+    vi.mocked(fetchVerifiableCredentialWithFallback).mockResolvedValue({
       credentials: [SUCCESSFUL_ENS_RESULTS],
     });
   });
@@ -90,7 +103,7 @@ describe("when user has not verified with EnsProvider", () => {
     // Click the first one (from CTAButtons)
     fireEvent.click(verifyButtons[0]);
     await waitFor(() => {
-      expect(fetchVerifiableCredential).toHaveBeenCalled();
+      expect(fetchVerifiableCredentialWithFallback).toHaveBeenCalled();
     });
   });
 
@@ -146,7 +159,7 @@ describe("when user has not verified with EnsProvider", () => {
 describe("when user has previously verified with EnsProvider", () => {
   beforeEach(async () => {
     await closeAllToasts();
-    vi.mocked(fetchVerifiableCredential).mockResolvedValue({
+    vi.mocked(fetchVerifiableCredentialWithFallback).mockResolvedValue({
       credentials: [UN_SUCCESSFUL_ENS_RESULT],
     });
   });
@@ -189,11 +202,11 @@ describe("when user has previously verified with EnsProvider", () => {
       expect(handlePatchStampsMock).toHaveBeenCalledWith([]);
 
       expect(screen.getByText("Successfully re-verified Ens data point.")).toBeInTheDocument();
-      expect(fetchVerifiableCredential).toHaveBeenCalled();
+      expect(fetchVerifiableCredentialWithFallback).toHaveBeenCalled();
     });
   });
   it("should remove expired stamps if the no longer qualify", async () => {
-    vi.mocked(fetchVerifiableCredential).mockResolvedValue({
+    vi.mocked(fetchVerifiableCredentialWithFallback).mockResolvedValue({
       credentials: [UN_SUCCESSFUL_ENS_RESULT],
     });
     const drawer = () => (
@@ -236,14 +249,14 @@ describe("when user has previously verified with EnsProvider", () => {
         },
       ]);
 
-      expect(fetchVerifiableCredential).toHaveBeenCalled();
+      expect(fetchVerifiableCredentialWithFallback).toHaveBeenCalled();
     });
   });
 });
 
 describe("Multiple EVM platforms", () => {
   it("Should show no stamp modal if the platform isEVM and no stamps were found", async () => {
-    vi.mocked(fetchVerifiableCredential).mockResolvedValue({
+    vi.mocked(fetchVerifiableCredentialWithFallback).mockResolvedValue({
       credentials: [UN_SUCCESSFUL_ENS_RESULT],
     });
     const drawer = () => (
@@ -290,7 +303,7 @@ it("should indicate that there was an error issuing the credential", async () =>
 
 // describe("when user attempts to re-verify their passport data point(s)", () => {
 //   beforeEach(() => {
-//     (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
+//     (fetchVerifiableCredentialWithFallback as jest.Mock).mockResolvedValue({
 //       credentials: [SUCCESSFUL_ENS_RESULTS],
 //     });
 //   });
@@ -335,7 +348,7 @@ it("should indicate that there was an error issuing the credential", async () =>
 
 // describe("when user does not successfully verify an EnsProvider", () => {
 //   beforeEach(() => {
-//     (fetchVerifiableCredential as jest.Mock).mockResolvedValue({
+//     (fetchVerifiableCredentialWithFallback as jest.Mock).mockResolvedValue({
 //       credentials: [],
 //     });
 //   });

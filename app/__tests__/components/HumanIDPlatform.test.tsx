@@ -36,19 +36,12 @@ vi.mock("wagmi", async (importOriginal) => ({
   }),
 }));
 
-vi.mock("@didtools/cacao", () => ({
-  Cacao: {
-    fromBlockBytes: vi.fn(),
-  },
-}));
-
 vi.mock("../../utils/credentials", () => ({
   fetchVerifiableCredential: vi.fn(),
 }));
 
 vi.mock("../../utils/helpers.tsx", async (importActual) => ({
   ...(await importActual()),
-  createSignedPayload: vi.fn(),
   generateUID: vi.fn(),
   getProviderSpec: vi.fn(),
 }));

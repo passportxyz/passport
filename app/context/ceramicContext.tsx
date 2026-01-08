@@ -168,7 +168,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const { platforms: allPlatforms } = usePlatforms();
 
   const { address } = useAccount();
-  const { dbAccessToken, did, checkSessionIsValid } = useDatastoreConnectionContext();
+  const { dbAccessToken, userAddress, checkSessionIsValid } = useDatastoreConnectionContext();
   const { refreshScore, fetchStampWeights } = useContext(ScorerContext);
   const customization = useCustomization();
 
@@ -200,15 +200,18 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   useEffect((): void => {
     try {
-      if (dbAccessToken && address && !database && did) {
-        setUserDid((did.hasParent ? did.parent : did.id).toLowerCase());
+      if (dbAccessToken && address && !database && userAddress) {
+        // Construct DID string from address for backward compatibility
+        const didString = `did:pkh:eip155:1:${userAddress.toLowerCase()}`;
+        setUserDid(didString);
+
         // Ceramic cache db
         const databaseInstance = new PassportDatabase(
           CERAMIC_CACHE_ENDPOINT || "",
           address,
           dbAccessToken,
           datadogLogs.logger,
-          did
+          userAddress
         );
 
         setDatabase(databaseInstance);
@@ -220,7 +223,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
       console.log("failed to connect self id :(");
       setDatabase(undefined);
     }
-  }, [address, dbAccessToken]);
+  }, [address, dbAccessToken, userAddress]);
 
   useEffect(() => {
     if (database && address) {

@@ -12,7 +12,7 @@ import {
   StampPatch,
   ValidResponseBody,
 } from "@gitcoin/passport-types";
-import { fetchVerifiableCredential } from "../utils/credentials";
+import { fetchVerifiableCredentialWithFallback } from "../utils/credentials";
 
 // --- Style Components
 import { StampDrawer } from "./StampDrawer";
@@ -31,7 +31,7 @@ import { PlatformClass } from "@gitcoin/passport-platforms";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
 
 // --- Helpers
-import { createSignedPayload, difference, intersect, generateUID } from "../utils/helpers";
+import { difference, intersect, generateUID } from "../utils/helpers";
 
 import { datadogRum } from "@datadog/browser-rum";
 import { PlatformScoreSpec } from "../context/scorerContext";
@@ -89,7 +89,7 @@ export const GenericPlatform = ({
   const [submitted, setSubmitted] = useState(false);
   const [verificationResponse, setVerificationResponse] = useState<CredentialResponseBody[]>([]);
   const [payloadModalIsOpen, setPayloadModalIsOpen] = useState(false);
-  const { did, checkSessionIsValid } = useDatastoreConnectionContext();
+  const { checkSessionIsValid, dbAccessToken } = useDatastoreConnectionContext();
   const [verificationState, _setUserVerificationState] = useAtom(mutableUserVerificationAtom);
 
   const { success, failure, message } = useMessage();
@@ -147,7 +147,7 @@ export const GenericPlatform = ({
     const selectedProviders = platformProviderIds;
 
     try {
-      if (!did) throw new Error("No DID found");
+      if (!address) throw new Error("No address found");
 
       const state = `${platform.path}-` + generateUID(10);
       const appContext = {
@@ -178,7 +178,7 @@ export const GenericPlatform = ({
 
       if (!checkSessionIsValid()) throw new InvalidSessionError();
 
-      const verifyCredentialsResponse = await fetchVerifiableCredential(
+      const verifyCredentialsResponse = await fetchVerifiableCredentialWithFallback(
         iamUrl,
         {
           type: platform.platformId,
@@ -188,12 +188,15 @@ export const GenericPlatform = ({
           proofs: providerPayload,
           signatureType: IAM_SIGNATURE_TYPE,
         },
-        (data: any) => createSignedPayload(did, data)
+        dbAccessToken,
+        (message: string) => signMessageAsync({ message })
       );
 
       const verifiedCredentials =
         selectedProviders.length > 0
-          ? verifyCredentialsResponse.credentials?.filter((cred: any): cred is ValidResponseBody => !cred.error) || []
+          ? verifyCredentialsResponse.credentials?.filter(
+              (cred: any): cred is ValidResponseBody => !cred.error && cred.credential && cred.record
+            ) || []
           : [];
 
       setVerificationResponse(verifyCredentialsResponse.credentials || []);
@@ -202,6 +205,37 @@ export const GenericPlatform = ({
       // If the stamp was not selected, return {provider} to delete the stamp
       // If the stamp was selected but cannot be claimed, return null to do nothing and
       //   therefore keep any existing valid stamp if it exists
+      // If no verified credentials and we expected some, show an error
+      // But still allow the code to continue to handlePatchStamps for keeping/deleting existing stamps
+      if (verifiedCredentials.length === 0 && selectedProviders.length > 0) {
+        const allCredentials = verifyCredentialsResponse.credentials || [];
+        if (allCredentials.length > 0) {
+          // There were credentials but they all had errors or were invalid
+          const firstErrorResponse = allCredentials.find(
+            (c: any) => c && typeof c === "object" && "error" in c && c.error && typeof c.error === "string"
+          ) as { error: string } | undefined;
+          if (firstErrorResponse?.error) {
+            failure({
+              title: "Verification Failed",
+              message: firstErrorResponse.error,
+              testId: platform.platformId,
+            });
+          } else {
+            failure({
+              title: "Verification Failed",
+              message: "Unable to verify your stamp. Please check that you meet all requirements and try again.",
+              testId: platform.platformId,
+            });
+          }
+        } else {
+          failure({
+            title: "Verification Failed",
+            message: "No verification response received. Please try again.",
+            testId: platform.platformId,
+          });
+        }
+      }
+
       const stampPatches = platformProviderIds
         .map((provider: PROVIDER_ID) => {
           const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
@@ -266,6 +300,7 @@ export const GenericPlatform = ({
 
       setLoading(false);
     } catch (e) {
+      setLoading(false);
       if (e instanceof InvalidSessionError) {
         failure({
           title: "Session Invalid",

@@ -50,16 +50,16 @@ export const ScrollMintedBadge = ({ badgesFreshlyMinted }: { badgesFreshlyMinted
   const goToLoginStep = useNavigateToRootStep();
   const goToGithubConnectStep = useNavigateToGithubConnectStep();
   const { address } = useAccount();
-  const { did, dbAccessToken } = useDatastoreConnectionContext();
+  const { dbAccessToken, userAddress } = useDatastoreConnectionContext();
   const { badges, areBadgesLoading, errors, hasAtLeastOneBadge } = useScrollBadge(address);
   const { failure } = useMessage();
 
   useEffect(() => {
-    if (!dbAccessToken || !did) {
-      console.log("Access token or did are not present. Going back to login step!");
+    if (!dbAccessToken || !userAddress) {
+      console.log("Access token is not present. Going back to login step!");
       goToLoginStep();
     }
-  }, [dbAccessToken, did, goToLoginStep]);
+  }, [dbAccessToken, userAddress, goToLoginStep]);
 
   useEffect(() => {
     if (!areBadgesLoading && !hasAtLeastOneBadge) {

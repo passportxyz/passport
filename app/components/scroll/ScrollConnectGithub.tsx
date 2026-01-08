@@ -5,10 +5,10 @@ import { CeramicContext } from "../../context/ceramicContext";
 import { useMessage } from "../../hooks/useMessage";
 import { useScrollBadge } from "../../hooks/useScrollBadge";
 import { CUSTOM_PLATFORM_TYPE_INFO } from "../../config/platformMap";
-import { createSignedPayload, generateUID } from "../../utils/helpers";
+import { generateUID } from "../../utils/helpers";
 import { scrollCampaignBadgeProviders } from "../../config/scroll_campaign";
 import { waitForRedirect } from "../../context/stampClaimingContext";
-import { fetchVerifiableCredential } from "../../utils/credentials";
+import { fetchVerifiableCredentialWithFallback } from "../../utils/credentials";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../../config/stamp_config";
 import { PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import { datadogLogs } from "@datadog/browser-logs";
@@ -16,15 +16,16 @@ import { LoadButton } from "../LoadButton";
 import { GitHubIcon } from "../WelcomeFooter";
 import { ScrollCampaignPage } from "./ScrollCampaignPage";
 import { BadgeCTA } from "../ScrollCampaign";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 
 export const ScrollConnectGithub = () => {
   const goToNextStep = useNextCampaignStep();
   const goToLastStep = useNavigateToLastStep();
-  const { did, checkSessionIsValid } = useDatastoreConnectionContext();
+  const { checkSessionIsValid, dbAccessToken } = useDatastoreConnectionContext();
   const { userDid, database } = useContext(CeramicContext);
   const goToLoginStep = useNavigateToRootStep();
   const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
   const [noCredentialReceived, setNoCredentialReceived] = useState(false);
   const [msg, setMsg] = useState<string | undefined>("Verifying existing badges on chain ... ");
   const [isVerificationRunning, setIsVerificationRunning] = useState(false);
@@ -44,7 +45,7 @@ export const ScrollConnectGithub = () => {
   const signInWithGithub = useCallback(async () => {
     setIsVerificationRunning(true);
     try {
-      if (did) {
+      if (address) {
         const customGithubPlatform = new CUSTOM_PLATFORM_TYPE_INFO.DEVEL.platformClass(
           // @ts-ignore
           CUSTOM_PLATFORM_TYPE_INFO.DEVEL.platformParams
@@ -71,7 +72,7 @@ export const ScrollConnectGithub = () => {
         }
 
         setMsg("Please wait, we are checking your eligibility ...");
-        const verifyCredentialsResponse = await fetchVerifiableCredential(
+        const verifyCredentialsResponse = await fetchVerifiableCredentialWithFallback(
           iamUrl,
           {
             type: customGithubPlatform.platformId,
@@ -81,7 +82,8 @@ export const ScrollConnectGithub = () => {
             proofs: providerPayload,
             signatureType: IAM_SIGNATURE_TYPE,
           },
-          (data: any) => createSignedPayload(did, data)
+          dbAccessToken,
+          (message: string) => signMessageAsync({ message })
         );
 
         setMsg(undefined);
@@ -118,7 +120,17 @@ export const ScrollConnectGithub = () => {
     } finally {
       setIsVerificationRunning(false);
     }
-  }, [did, address, checkSessionIsValid, goToLoginStep, goToNextStep, userDid, database, failure]);
+  }, [
+    address,
+    checkSessionIsValid,
+    dbAccessToken,
+    goToLoginStep,
+    goToNextStep,
+    userDid,
+    database,
+    failure,
+    signMessageAsync,
+  ]);
 
   return (
     <ScrollCampaignPage>

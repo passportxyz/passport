@@ -76,7 +76,7 @@ export const DashboardCTAs = ({ customization }: { customization: Customization 
 export default function Dashboard() {
   const customization = useCustomization();
   const { isLoadingPassport } = useContext(CeramicContext);
-  const { disconnect, dbAccessTokenStatus, dbAccessToken, did } = useDatastoreConnectionContext();
+  const { disconnect, dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
   const { address } = useAccount();
 
   const { success, failure } = useMessage();

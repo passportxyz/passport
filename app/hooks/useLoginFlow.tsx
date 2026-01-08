@@ -11,7 +11,7 @@ import { useNavigateToPage, useCustomization } from "../hooks/useCustomization";
 import { datadogRum } from "@datadog/browser-rum";
 import { useMessage } from "./useMessage";
 import { useAppKit, useAppKitEvents, useAppKitState, useDisconnect } from "@reown/appkit/react";
-import { useAccount, useWalletClient } from "wagmi";
+import { useAccount, useWalletClient, useSwitchChain } from "wagmi";
 
 type LoginStep = "NOT_STARTED" | "PENDING_WALLET_CONNECTION" | "PENDING_DATABASE_CONNECTION" | "DONE";
 
@@ -25,10 +25,11 @@ export const useLoginFlow = ({
   isLoggingIn: boolean;
   signIn: () => void;
 } => {
-  const { address, isConnected, connector } = useAccount();
+  const { address, isConnected, connector, chainId } = useAccount();
   const { data: walletClient } = useWalletClient();
   const { open: web3ModalIsOpen } = useAppKitState();
   const { disconnect } = useDisconnect();
+  const { switchChainAsync } = useSwitchChain();
   const { dbAccessTokenStatus, connect: connectDatastore } = useDatastoreConnectionContext();
   const [enabled, setEnabled] = useState(false);
   const [loginStep, setLoginStep] = useState<LoginStep>("NOT_STARTED");
@@ -92,7 +93,8 @@ export const useLoginFlow = ({
   }, [web3ModalIsOpen, loginStep, disconnect]);
 
   useEffect(() => {
-    if (loginStep === "DONE") {
+    // Ensure address is available before navigating (prevents race condition)
+    if (loginStep === "DONE" && address) {
       if (onLoggedIn) {
         onLoggedIn();
       } else {
@@ -118,6 +120,17 @@ export const useLoginFlow = ({
       ) {
         isConnectingToDatabaseRef.current = true;
         try {
+          // Ensure wallet is on mainnet before signing SIWE message
+          // This fixes an issue where AppKit caches the last chain selection,
+          // causing smart wallet signatures to fail verification on the backend
+          if (chainId !== 1) {
+            try {
+              await switchChainAsync({ chainId: 1 });
+            } catch (switchError) {
+              // If switch fails, continue anyway - the SIWE message will still specify chainId: 1
+              console.warn("Could not switch to mainnet before signing:", switchError);
+            }
+          }
           await connectDatastore(address, walletClient);
         } catch (e) {
           resetLogin();
@@ -128,7 +141,7 @@ export const useLoginFlow = ({
         }
       }
     })();
-  }, [loginStep, address, walletClient, connectDatastore, showConnectionError, resetLogin]);
+  }, [loginStep, address, walletClient, connectDatastore, showConnectionError, resetLogin, chainId, switchChainAsync]);
 
   const isLoggingIn = loginStep !== "DONE" && loginStep !== "NOT_STARTED";
 
