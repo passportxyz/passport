@@ -85,7 +85,7 @@ export class SteamProvider implements Provider {
         metrics.totalPlaytimeHours >= 100 &&
         metrics.totalAchievements >= 10 &&
         metrics.gamesOver1Hr >= 3 &&
-        metrics.mostPlayedPercentage <= 50;
+        metrics.mostPlayedPercentage <= 80;
 
       if (valid) {
         record = {
@@ -107,9 +107,9 @@ export class SteamProvider implements Provider {
         if (metrics.gamesOver1Hr < 3) {
           errorMessages.push(`You have ${metrics.gamesOver1Hr} games with >1 hour. 3 required.`);
         }
-        if (metrics.mostPlayedPercentage > 50) {
+        if (metrics.mostPlayedPercentage > 80) {
           errorMessages.push(
-            `One game is ${Math.round(metrics.mostPlayedPercentage)}% of playtime. Maximum 50% allowed.`
+            `One game is ${Math.round(metrics.mostPlayedPercentage)}% of playtime. Maximum 80% allowed.`
           );
         }
         errors.push(...errorMessages);
