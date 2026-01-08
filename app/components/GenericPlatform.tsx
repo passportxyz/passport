@@ -193,9 +193,7 @@ export const GenericPlatform = ({
 
       const verifiedCredentials =
         selectedProviders.length > 0
-          ? verifyCredentialsResponse.credentials?.filter(
-              (cred: any): cred is ValidResponseBody => !cred.error && cred.credential && cred.record
-            ) || []
+          ? verifyCredentialsResponse.credentials?.filter((cred: any): cred is ValidResponseBody => !cred.error) || []
           : [];
 
       setVerificationResponse(verifyCredentialsResponse.credentials || []);
@@ -204,37 +202,6 @@ export const GenericPlatform = ({
       // If the stamp was not selected, return {provider} to delete the stamp
       // If the stamp was selected but cannot be claimed, return null to do nothing and
       //   therefore keep any existing valid stamp if it exists
-      // If no verified credentials and we expected some, show an error
-      // But still allow the code to continue to handlePatchStamps for keeping/deleting existing stamps
-      if (verifiedCredentials.length === 0 && selectedProviders.length > 0) {
-        const allCredentials = verifyCredentialsResponse.credentials || [];
-        if (allCredentials.length > 0) {
-          // There were credentials but they all had errors or were invalid
-          const firstErrorResponse = allCredentials.find(
-            (c: any) => c && typeof c === "object" && "error" in c && c.error && typeof c.error === "string"
-          ) as { error: string } | undefined;
-          if (firstErrorResponse?.error) {
-            failure({
-              title: "Verification Failed",
-              message: firstErrorResponse.error,
-              testId: platform.platformId,
-            });
-          } else {
-            failure({
-              title: "Verification Failed",
-              message: "Unable to verify your stamp. Please check that you meet all requirements and try again.",
-              testId: platform.platformId,
-            });
-          }
-        } else {
-          failure({
-            title: "Verification Failed",
-            message: "No verification response received. Please try again.",
-            testId: platform.platformId,
-          });
-        }
-      }
-
       const stampPatches = platformProviderIds
         .map((provider: PROVIDER_ID) => {
           const cred = verifiedCredentials.find((cred: any) => cred.record?.type === provider);
@@ -299,7 +266,6 @@ export const GenericPlatform = ({
 
       setLoading(false);
     } catch (e) {
-      setLoading(false);
       if (e instanceof InvalidSessionError) {
         failure({
           title: "Session Invalid",

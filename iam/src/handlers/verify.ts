@@ -1,9 +1,4 @@
-import {
-  CredentialResponseBody,
-  ErrorResponseBody,
-  ValidResponseBody,
-  VerifyRequestBody,
-} from "@gitcoin/passport-types";
+import { CredentialResponseBody, VerifyRequestBody } from "@gitcoin/passport-types";
 
 import {
   hasValidIssuer,
@@ -53,21 +48,7 @@ export const verifyHandler = createHandler<VerifyRequestBody, CredentialResponse
   const types = payload.types.filter((type) => type);
   const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
-  const result = await verifyProvidersAndIssueCredentials(providersGroupedByPlatforms, address, payload);
-
-  // Handle both cases: { credentials: [...] } or direct array
-  let credentials: CredentialResponseBody[];
-  if (Array.isArray(result)) {
-    credentials = result;
-  } else if (result && typeof result === "object" && "credentials" in result) {
-    credentials = (result as { credentials: CredentialResponseBody[] }).credentials;
-  } else {
-    throw new ApiError("Unexpected response format from verification", "500_SERVER_ERROR");
-  }
-
-  if (!credentials || !Array.isArray(credentials)) {
-    throw new ApiError("No credentials returned from verification", "500_SERVER_ERROR");
-  }
+  const { credentials } = await verifyProvidersAndIssueCredentials(providersGroupedByPlatforms, address, payload);
 
   return void res.json(credentials);
 });
