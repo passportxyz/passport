@@ -83,33 +83,44 @@ const StampDrawer = ({
   const [removeModalIsOpen, setRemoveModalIsOpen] = useState(false);
   // Process credential groups with runtime data
   const processedData = useMemo(() => {
-    // Process and group credentials
-    const processedCredentialGroups: CredentialGroup[] = credentialGroups.map((group) => ({
-      title: group.platformGroup,
-      credentials: group.providers.map((provider) => {
-        const providerId = provider.name;
-        const isVerified = verifiedProviders.includes(providerId);
-        const isExpired = expiredProviders.includes(providerId);
-        const isDeduplicated = stampDedupStatus?.[providerId] === true;
+    // Process and group credentials, filtering out deprecated stamps without earned points
+    const processedCredentialGroups: CredentialGroup[] = credentialGroups
+      .map((group) => ({
+        title: group.platformGroup,
+        credentials: group.providers
+          .filter((provider) => {
+            // Hide deprecated stamps unless user has already verified them
+            if (provider.isDeprecated && !verifiedProviders.includes(provider.name)) {
+              return false;
+            }
+            return true;
+          })
+          .map((provider) => {
+            const providerId = provider.name;
+            const isVerified = verifiedProviders.includes(providerId);
+            const isExpired = expiredProviders.includes(providerId);
+            const isDeduplicated = stampDedupStatus?.[providerId] === true;
 
-        const points = stampWeights?.[providerId] ? parseFloat(String(stampWeights[providerId])) : 0;
+            const points = stampWeights?.[providerId] ? parseFloat(String(stampWeights[providerId])) : 0;
 
-        const flags: ("expired" | "deduplicated")[] = [];
-        if (isExpired) flags.push("expired");
-        if (isDeduplicated) flags.push("deduplicated");
+            const flags: ("expired" | "deduplicated")[] = [];
+            if (isExpired) flags.push("expired");
+            if (isDeduplicated) flags.push("deduplicated");
 
-        return {
-          id: providerId,
-          name: provider.title,
-          description: provider.description,
-          verified: isVerified,
-          flags,
-          points,
-          isEligible: !!pointsData?.is_eligible,
-          isBeta: betaStamps?.has(providerId),
-        };
-      }),
-    }));
+            return {
+              id: providerId,
+              name: provider.title,
+              description: provider.description,
+              verified: isVerified,
+              flags,
+              points,
+              isEligible: !!pointsData?.is_eligible,
+              isBeta: betaStamps?.has(providerId),
+            };
+          }),
+      }))
+      // Filter out empty groups (where all providers were deprecated)
+      .filter((group) => group.credentials.length > 0);
 
     // Calculate points from all credentials across groups
     const allCredentials = processedCredentialGroups.flatMap((group) => group.credentials);

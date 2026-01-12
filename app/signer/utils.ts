@@ -31,8 +31,13 @@ export const getTypesToCheck = (
 ): PROVIDER_ID[] => {
   const existingProviders = passport && passport.stamps.map((stamp) => stamp.provider);
 
+  // Exclude deprecated providers - they can't be verified
   const evmProviders: PROVIDER_ID[] = evmPlatforms
-    .map(({ platFormGroupSpec }) => platFormGroupSpec.map(({ providers }) => providers.map(({ name }) => name)))
+    .map(({ platFormGroupSpec }) =>
+      platFormGroupSpec.map(({ providers }) =>
+        providers.filter((provider) => !provider.isDeprecated).map(({ name }) => name)
+      )
+    )
     .flat(2);
 
   if (existingProviders && !reIssueStamps) {
@@ -77,10 +82,12 @@ export const fetchPossibleEVMStamps = async (
     []
   );
 
-  // Define helper functions to filter out invalid providers and groups
+  // Define helper functions to filter out invalid and deprecated providers and groups
   const getValidGroupProviders = (groupSpec: PlatformGroupSpec): ValidatedProvider[] =>
     groupSpec.providers.reduce((providers: ValidatedProvider[], provider) => {
-      const { name, title } = provider;
+      const { name, title, isDeprecated } = provider;
+      // Exclude deprecated providers - they can't be verified
+      if (isDeprecated) return providers;
       if (validPlatformIds.includes(name)) return [...providers, { name, title }];
       else return providers;
     }, []);

@@ -9,6 +9,19 @@ vi.mock("../../../hooks/useBreakpoint", () => ({
   useBreakpoint: vi.fn(() => true),
 }));
 
+// Mock useCustomization to avoid platformMap import chain issues
+vi.mock("../../../hooks/useCustomization", () => ({
+  useCustomization: vi.fn(() => ({
+    betaStamps: new Set(),
+    scorer: { weights: {} },
+  })),
+}));
+
+// Mock usePlatforms to avoid platformMap import issues with X platform
+vi.mock("../../../hooks/usePlatforms", () => ({
+  usePlatforms: vi.fn(() => new Map()),
+}));
+
 // Mock wagmi hooks
 vi.mock("wagmi", () => ({
   useAccount: vi.fn(() => ({ address: "0x1234567890123456789012345678901234567890" })),
@@ -123,5 +136,110 @@ describe("StampDrawer", () => {
     });
 
     expect(screen.getByText("Deduplicated")).toBeInTheDocument();
+  });
+
+  describe("deprecated stamp filtering", () => {
+    const credentialGroupsWithDeprecated = [
+      {
+        platformGroup: "Active Group",
+        providers: [
+          {
+            name: "ActiveProvider" as PROVIDER_ID,
+            title: "Active Provider",
+            description: "Active provider description",
+          },
+        ],
+      },
+      {
+        platformGroup: "Mixed Group",
+        providers: [
+          {
+            name: "DeprecatedProvider" as PROVIDER_ID,
+            title: "Deprecated Provider",
+            description: "Deprecated provider description",
+            isDeprecated: true,
+          },
+          {
+            name: "AnotherActiveProvider" as PROVIDER_ID,
+            title: "Another Active Provider",
+            description: "Another active description",
+          },
+        ],
+      },
+      {
+        platformGroup: "All Deprecated Group",
+        providers: [
+          {
+            name: "FullyDeprecated" as PROVIDER_ID,
+            title: "Fully Deprecated",
+            description: "Fully deprecated description",
+            isDeprecated: true,
+          },
+        ],
+      },
+    ];
+
+    it("should hide deprecated stamps when user has not verified them", () => {
+      renderComponent({
+        credentialGroups: credentialGroupsWithDeprecated,
+        verifiedProviders: [],
+        stampWeights: {
+          ActiveProvider: 1.0,
+          DeprecatedProvider: 1.0,
+          AnotherActiveProvider: 1.0,
+          FullyDeprecated: 1.0,
+        },
+      });
+
+      // Active providers should be visible
+      expect(screen.getByText("Active Provider")).toBeInTheDocument();
+      expect(screen.getByText("Another Active Provider")).toBeInTheDocument();
+
+      // Deprecated providers should be hidden
+      expect(screen.queryByText("Deprecated Provider")).not.toBeInTheDocument();
+      expect(screen.queryByText("Fully Deprecated")).not.toBeInTheDocument();
+
+      // Group with all deprecated providers should be hidden entirely
+      expect(screen.queryByText("All Deprecated Group")).not.toBeInTheDocument();
+    });
+
+    it("should show deprecated stamps when user has already verified them", () => {
+      renderComponent({
+        credentialGroups: credentialGroupsWithDeprecated,
+        verifiedProviders: ["DeprecatedProvider" as PROVIDER_ID],
+        stampWeights: {
+          ActiveProvider: 1.0,
+          DeprecatedProvider: 1.0,
+          AnotherActiveProvider: 1.0,
+          FullyDeprecated: 1.0,
+        },
+      });
+
+      // Active providers should be visible
+      expect(screen.getByText("Active Provider")).toBeInTheDocument();
+      expect(screen.getByText("Another Active Provider")).toBeInTheDocument();
+
+      // Verified deprecated provider should be visible
+      expect(screen.getByText("Deprecated Provider")).toBeInTheDocument();
+
+      // Unverified deprecated provider should still be hidden
+      expect(screen.queryByText("Fully Deprecated")).not.toBeInTheDocument();
+    });
+
+    it("should not include deprecated stamps in total possible points calculation", () => {
+      renderComponent({
+        credentialGroups: credentialGroupsWithDeprecated,
+        verifiedProviders: [],
+        stampWeights: {
+          ActiveProvider: 1.0,
+          DeprecatedProvider: 2.0,
+          AnotherActiveProvider: 1.5,
+          FullyDeprecated: 3.0,
+        },
+      });
+
+      // Total should be 2.5 (1.0 + 1.5), not 7.5 (including deprecated)
+      expect(screen.getByText("/2.5 points gained")).toBeInTheDocument();
+    });
   });
 });

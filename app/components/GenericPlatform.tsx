@@ -94,7 +94,7 @@ export const GenericPlatform = ({
 
   const { success, failure, message } = useMessage();
 
-  // find all providerIds
+  // find all providerIds (including deprecated - needed for tracking verified status)
   const platformProviderIds = useMemo(
     () =>
       platFormGroupSpec?.reduce((all, stamp) => {
