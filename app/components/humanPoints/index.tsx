@@ -75,6 +75,26 @@ export const HumanPointsLabelSMDark: FC<HumanPointsLabelProps> = ({
   ) : null;
 };
 
+// Signal/Live icon for the chip
+const SignalIcon: FC = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M1.33337 13.3337H1.34004M4.66671 13.3337V10.667M8.00004 13.3337V8.00033M11.3334 13.3337V5.33366M14.6667 2.66699V13.3337"
+      stroke="#119725"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+// Arrow up-right icon for the button
+const ArrowUpRightIcon: FC = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="#0A0A0A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 export type HumnSeasonPanelProps = {
   className?: string;
 };
@@ -82,62 +102,43 @@ export type HumnSeasonPanelProps = {
 export const HumnSeasonPanel: FC<HumnSeasonPanelProps> = ({ className = "" }) => {
   return (
     <div
-      className={`relative rounded-3xl overflow-hidden ${className}`}
-      style={{ backgroundColor: "rgba(0, 184, 138, 1)" }}
+      className={`relative flex flex-col rounded-3xl p-5 overflow-hidden ${className}`}
+      style={{ background: "#00B88A" }}
     >
-      {/* Gradient overlay with blur */}
+      {/* Background blur/glow effect */}
       <div
+        className="absolute -left-20 -top-20 w-72 h-64 pointer-events-none"
         style={{
-          background: "radial-gradient(80% 70% at 10% 15%, rgba(120, 230, 200, 1), transparent 100%)",
-          filter: "blur(10px)",
+          background: "radial-gradient(ellipse at center, #18ECA9 0%, transparent 70%)",
+          filter: "blur(40px)",
         }}
-        className="absolute inset-0 pointer-events-none"
       />
-      {/* Content above gradient */}
-      <div className="relative z-10 flex flex-col p-4 h-full">
-        {/* Top row: Icon on left, Live Now badge on right */}
-        <div className="flex justify-between items-start">
-          <div className="bg-transparent">
-            <Icon width={40} height={40} strokeColor="#FFFFFF" />
-          </div>
-          <div className="flex items-center bg-white rounded-full px-3 py-1">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="mr-1.5"
-            >
-              <path
-                d="M1.33337 13.3337H1.34004M4.66671 13.3337V10.667M8.00004 13.3337V8.00033M11.3334 13.3337V5.33366M14.6667 2.66699V13.3337"
-                stroke="#119725"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className="text-[#119725] font-medium text-sm">Live Now</span>
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col gap-4 grow">
+        {/* Header row */}
+        <div className="flex items-center justify-between">
+          <Icon width={40} height={40} strokeColor="#FFFFFF" />
+          <div className="flex items-center gap-1 bg-white rounded-full pl-1 pr-2 py-0.5">
+            <SignalIcon />
+            <span className="text-sm text-[#119725]">Live Now</span>
           </div>
         </div>
-        {/* Spacer to push content down */}
-        <div className="flex-grow" />
+
         {/* Title */}
-        <p className="text-white text-2xl font-medium">HUMN szn 2</p>
-        {/* Join button */}
-        <a href="https://manifest.human.tech/" target="_blank" rel="noopener noreferrer" className="mt-4 w-full">
-          <Button variant="custom" className="w-full bg-white text-color-4 border-foreground-2">
-            <span className="font-semibold">Join now</span>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M1 13L13 1M13 1H1M13 1V13"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Button>
+        <div className="flex flex-col grow justify-center">
+          <h2 className="text-2xl font-medium text-white">HUMN szn 2</h2>
+        </div>
+
+        {/* Button */}
+        <a
+          href="https://manifest.human.tech/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 bg-white rounded-lg px-5 py-2.5 w-full hover:brightness-95 transition-all"
+        >
+          <span className="text-base font-semibold text-[#0A0A0A]">Join now</span>
+          <ArrowUpRightIcon />
         </a>
       </div>
     </div>
