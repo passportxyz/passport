@@ -319,7 +319,7 @@ describe("SteamProvider", function () {
       expect(result.errors?.some((e) => e.includes("games") && e.includes("3"))).toBe(true);
     });
 
-    it("should return invalid when one game is >50% of playtime", async () => {
+    it("should return invalid when one game is >80% of playtime", async () => {
       mockedAxios.get.mockImplementation(async (url: string) => {
         if (url.includes("GetOwnedGames")) {
           return {
@@ -330,17 +330,17 @@ describe("SteamProvider", function () {
                   {
                     appid: 123456,
                     name: "Game 1",
-                    playtime_forever: 12000, // 200 hours (66.7% of total)
+                    playtime_forever: 10000, // 166.7 hours (83.3% of total)
                   },
                   {
                     appid: 234567,
                     name: "Game 2",
-                    playtime_forever: 3000, // 50 hours
+                    playtime_forever: 1000, // 16.7 hours
                   },
                   {
                     appid: 345678,
                     name: "Game 3",
-                    playtime_forever: 3000, // 50 hours
+                    playtime_forever: 1000, // 16.7 hours
                   },
                 ],
               },
@@ -365,7 +365,7 @@ describe("SteamProvider", function () {
 
       expect(result.valid).toBe(false);
       expect(result.errors).toBeDefined();
-      expect(result.errors?.some((e) => e.includes("50%"))).toBe(true);
+      expect(result.errors?.some((e) => e.includes("80%"))).toBe(true);
     });
 
     it("should handle API errors gracefully", async () => {

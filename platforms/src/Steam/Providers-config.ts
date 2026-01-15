@@ -55,7 +55,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
       {
         title: "Verify Steam Gaming Credentials",
         description:
-          "Connect your Steam account and verify gaming activity meets qualification criteria: 100+ hours playtime, 10+ achievements, 3+ games with >1 hour each, and no more than 50% playtime in a single game.",
+          "Connect your Steam account and verify gaming activity meets qualification criteria: 100+ hours playtime, 10+ achievements, 3+ games with >1 hour each, and no more than 80% playtime in a single game.",
         name: "Steam",
       },
     ],
