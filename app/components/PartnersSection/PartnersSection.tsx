@@ -37,11 +37,6 @@ export const PartnersSection: React.FC = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  // Return null if no campaigns to display
-  if (!featuredCampaigns || featuredCampaigns.length === 0) {
-    return null;
-  }
-
   // Calculate visible cards and total pages based on container width
   const updateScrollState = useCallback(() => {
     const container = scrollContainerRef.current;
@@ -87,6 +82,11 @@ export const PartnersSection: React.FC = () => {
       behavior: "smooth",
     });
   };
+
+  // Return null if no campaigns to display
+  if (!featuredCampaigns || featuredCampaigns.length === 0) {
+    return null;
+  }
 
   return (
     <div className="col-span-full flex flex-col gap-8 mt-12">
