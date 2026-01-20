@@ -88,9 +88,9 @@ export const useSetCustomizationKey = (): ((customizationKey: string | undefined
           setCustomizationConfig({ ...DEFAULT_CUSTOMIZATION, hideHumnBranding: true });
         }
       } else {
-        // Fetch partner dashboards and beta stamps even when no customization key
+        // Fetch partner dashboards, beta stamps, and featured campaigns even when no customization key
         try {
-          const { partnerDashboards, betaStamps } = await requestBaseCustomizationData();
+          const { partnerDashboards, betaStamps, featuredCampaigns } = await requestBaseCustomizationData();
 
           // Pre-filter dashboards for TopNav display (all with isCurrent: false)
           const topNavDashboards = partnerDashboards
@@ -105,6 +105,7 @@ export const useSetCustomizationKey = (): ((customizationKey: string | undefined
             partnerDashboards,
             topNavDashboards,
             betaStamps,
+            featuredCampaigns,
           });
         } catch (e) {
           console.error("Failed to load base customization data", e);

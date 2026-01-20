@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { CampaignCard } from "./CampaignCard";
-import { FEATURED_CAMPAIGNS } from "../../config/featuredCampaigns";
+import { useCustomization } from "../../hooks/useCustomization";
 
 // Chevron Left Icon
 const ChevronLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -30,29 +30,35 @@ const StackIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 export const PartnersSection: React.FC = () => {
+  const { featuredCampaigns } = useCustomization();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
+  // Return null if no campaigns to display
+  if (!featuredCampaigns || featuredCampaigns.length === 0) {
+    return null;
+  }
+
   // Calculate visible cards and total pages based on container width
   const updateScrollState = useCallback(() => {
     const container = scrollContainerRef.current;
-    if (!container) return;
+    if (!container || !featuredCampaigns) return;
 
     const scrollLeft = container.scrollLeft;
     const scrollWidth = container.scrollWidth;
     const clientWidth = container.clientWidth;
     const cardWidth = 305; // card width + gap
     const visibleCards = Math.max(1, Math.floor(clientWidth / cardWidth));
-    const pages = Math.ceil(FEATURED_CAMPAIGNS.length / visibleCards);
+    const pages = Math.ceil(featuredCampaigns.length / visibleCards);
 
     setTotalPages(pages);
     setCurrentPage(Math.round(scrollLeft / (cardWidth * visibleCards)));
     setCanScrollLeft(scrollLeft > 0);
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-  }, []);
+  }, [featuredCampaigns]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -98,7 +104,7 @@ export const PartnersSection: React.FC = () => {
             className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory pb-2"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {FEATURED_CAMPAIGNS.map((campaign) => (
+            {featuredCampaigns.map((campaign) => (
               <div key={campaign.id} className="flex-shrink-0 w-[285px] snap-start">
                 <CampaignCard campaign={campaign} />
               </div>
