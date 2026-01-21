@@ -120,7 +120,7 @@ export const PartnersSection: React.FC = () => {
   }
 
   return (
-    <div className="col-span-full flex flex-col gap-8 mt-12">
+    <div id="partners-section" className="col-span-full flex flex-col gap-8 mt-12">
       {/* Header */}
       <div className="px-4 md:px-0">
         <span className="font-heading text-4xl text-gray-800">Partners</span>

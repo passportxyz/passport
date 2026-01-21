@@ -35,6 +35,7 @@ import { Customization } from "../utils/customizationUtils";
 import { useAccount } from "wagmi";
 import { useRadialBackgroundColorForHeader } from "../components/Header";
 import { HumnSeasonPanel } from "../components/humanPoints";
+import { SectionTabs } from "../components/SectionTabs";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
@@ -263,6 +264,7 @@ export default function Dashboard() {
         {/* This footer contains dark colored text and dark images */}
         <WelcomeFooter displayPrivacyPolicy={false} />
       </HeaderContentFooterGrid>
+      <SectionTabs />
       {modals}
     </PageRoot>
   );
