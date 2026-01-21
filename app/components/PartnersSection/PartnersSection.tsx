@@ -101,11 +101,11 @@ export const PartnersSection: React.FC = () => {
           {/* Scrollable cards */}
           <div
             ref={scrollContainerRef}
-            className="flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory pb-2"
+            className="flex gap-5 justify-between overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory pb-2"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {featuredCampaigns.map((campaign) => (
-              <div key={campaign.id} className="flex-shrink-0 w-[285px] snap-start">
+              <div key={campaign.id} className="flex-shrink-0 w-[305px] snap-start">
                 <CampaignCard campaign={campaign} />
               </div>
             ))}
