@@ -84,8 +84,27 @@ export const useSetCustomizationKey = (): ((customizationKey: string | undefined
           customizationConfig && setCustomizationConfig(customizationConfig);
           customizationConfig?.customizationTheme && setCustomizationTheme(customizationConfig.customizationTheme);
         } catch (e) {
+          // If customization doesn't exist (404), fall back to base data
           console.error("Failed to load customization config", e);
-          setCustomizationConfig({ ...DEFAULT_CUSTOMIZATION, hideHumnBranding: true });
+          try {
+            const { partnerDashboards, betaStamps, featuredCampaigns } = await requestBaseCustomizationData();
+            const topNavDashboards = partnerDashboards
+              .filter((dashboard) => dashboard.showInTopNav)
+              .map((dashboard) => ({
+                ...dashboard,
+                isCurrent: false,
+              }));
+            setCustomizationConfig({
+              ...DEFAULT_CUSTOMIZATION,
+              hideHumnBranding: true,
+              partnerDashboards,
+              topNavDashboards,
+              betaStamps,
+              featuredCampaigns,
+            });
+          } catch {
+            setCustomizationConfig({ ...DEFAULT_CUSTOMIZATION, hideHumnBranding: true });
+          }
         }
       } else {
         // Fetch partner dashboards, beta stamps, and featured campaigns even when no customization key
