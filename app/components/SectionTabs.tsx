@@ -60,18 +60,26 @@ export const SectionTabs: React.FC = () => {
     const shouldScrollToFeatured =
       urlParams.get("section") === "featured" || storedParams.get("section") === "featured";
 
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
     if (shouldScrollToFeatured && partnersRef.current) {
       // Clear stored params after using
       if (storedSearch) {
         sessionStorage.removeItem("returnSearch");
       }
       // Small delay to ensure layout is complete
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         if (partnersRef.current) {
           scrollToElement(partnersRef.current);
         }
       }, 100);
     }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [partnersRef]);
 
   const scrollToSection = (section: Section) => {

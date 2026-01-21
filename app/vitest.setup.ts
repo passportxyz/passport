@@ -12,6 +12,21 @@ vi.mock("@silk-wallet/silk-wallet-sdk", () => ({
   })),
 }));
 
+// Mock @reown/appkit to prevent network requests during tests
+vi.mock("@reown/appkit/react", () => ({
+  useAppKit: () => ({ open: vi.fn() }),
+  useAppKitEvents: () => ({
+    data: { event: "MODAL_CLOSE", properties: { connected: true } },
+  }),
+  useAppKitState: () => ({ open: false }),
+  useDisconnect: () => ({ disconnect: vi.fn() }),
+  useAppKitAccount: () => ({
+    address: "0x1234567890123456789012345678901234567890",
+    isConnected: true,
+  }),
+  createAppKit: vi.fn(() => ({ open: vi.fn() })),
+}));
+
 const { info, log, warn, error } = console;
 const ignored = ["Lit is in dev mode"];
 
