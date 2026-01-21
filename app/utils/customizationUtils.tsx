@@ -32,6 +32,17 @@ export interface PartnerDashboard {
   showInTopNav: boolean; // Whether to show in TopNav
 }
 
+// Interface for featured campaigns
+export interface FeaturedCampaign {
+  id: string;
+  header: string;
+  subheader: string;
+  destinationUrl: string;
+  imageTag: string;
+  partnerName: string;
+  partnerLogo: string;
+}
+
 type CustomStamp = {
   platformType: string;
   iconUrl: string;
@@ -97,6 +108,7 @@ export type Customization = {
   partnerDashboards?: PartnerDashboard[];
   topNavDashboards?: PartnerDashboard[]; // Pre-filtered dashboards for TopNav display
   betaStamps?: Set<string>; // Set of provider names that are in beta
+  featuredCampaigns?: FeaturedCampaign[];
 };
 
 type CustomizationResponse = {
@@ -139,6 +151,7 @@ type CustomizationResponse = {
     [name: string]: CustomStamp;
   };
   partnerDashboards?: PartnerDashboard[];
+  featuredCampaigns?: FeaturedCampaign[];
   stampMetadata?: {
     [providerName: string]: {
       isBeta: boolean;
@@ -241,13 +254,15 @@ export const requestCustomizationConfig = async (customizationKey: string): Prom
     partnerDashboards: customizationResponse.partnerDashboards,
     topNavDashboards,
     betaStamps,
+    featuredCampaigns: customizationResponse.featuredCampaigns,
   };
 };
 
-// Fetch base customization data (partner dashboards and stamp metadata) when no customization key is present
+// Fetch base customization data (partner dashboards, stamp metadata, featured campaigns) when no customization key is present
 export const requestBaseCustomizationData = async (): Promise<{
   partnerDashboards: PartnerDashboard[];
   betaStamps: Set<string>;
+  featuredCampaigns: FeaturedCampaign[];
 }> => {
   try {
     const response = await axios.get(`${CUSTOMIZATION_ENDPOINT}`);
@@ -265,12 +280,14 @@ export const requestBaseCustomizationData = async (): Promise<{
     return {
       partnerDashboards: response.data.partnerDashboards || [],
       betaStamps,
+      featuredCampaigns: response.data.featuredCampaigns || [],
     };
   } catch (error) {
     console.error("Failed to load base customization data", error);
     return {
       partnerDashboards: [],
       betaStamps: new Set<string>(),
+      featuredCampaigns: [],
     };
   }
 };
