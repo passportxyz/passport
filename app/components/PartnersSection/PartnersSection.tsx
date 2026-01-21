@@ -16,11 +16,11 @@ const ChevronRightIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-// Stack Icon for "Explore all Partners" button
-const StackIcon: React.FC<{ className?: string }> = ({ className }) => (
+// Stacked squares icon for "Explore all Partners" button
+const StackedSquaresIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <path
-      d="M4 7H20M4 12H20M4 17H20"
+      d="M4 10C2.9 10 2 9.1 2 8V4C2 2.9 2.9 2 4 2H8C9.1 2 10 2.9 10 4M10 16C8.9 16 8 15.1 8 14V10C8 8.9 8.9 8 10 8H14C15.1 8 16 8.9 16 10M16 14H20C21.1046 14 22 14.8954 22 16V20C22 21.1046 21.1046 22 20 22H16C14.8954 22 14 21.1046 14 20V16C14 14.8954 14.8954 14 16 14Z"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
@@ -32,12 +32,14 @@ const StackIcon: React.FC<{ className?: string }> = ({ className }) => (
 export const PartnersSection: React.FC = () => {
   const { featuredCampaigns } = useCustomization();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const trackRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [thumbWidthPercent, setThumbWidthPercent] = useState(100);
+  const [hasOverflow, setHasOverflow] = useState(false);
 
-  // Calculate visible cards and total pages based on container width
+  // Calculate scroll progress and thumb width based on container scroll state
   const updateScrollState = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container || !featuredCampaigns) return;
@@ -45,14 +47,24 @@ export const PartnersSection: React.FC = () => {
     const scrollLeft = container.scrollLeft;
     const scrollWidth = container.scrollWidth;
     const clientWidth = container.clientWidth;
-    const cardWidth = 305; // card width + gap
-    const visibleCards = Math.max(1, Math.floor(clientWidth / cardWidth));
-    const pages = Math.ceil(featuredCampaigns.length / visibleCards);
+    const maxScroll = scrollWidth - clientWidth;
 
-    setTotalPages(pages);
-    setCurrentPage(Math.round(scrollLeft / (cardWidth * visibleCards)));
+    // Check if there's overflow
+    const overflow = scrollWidth > clientWidth;
+    setHasOverflow(overflow);
+
+    if (overflow && maxScroll > 0) {
+      // Calculate scroll progress (0 to 1)
+      setScrollProgress(scrollLeft / maxScroll);
+      // Calculate thumb width as percentage of track (viewport / total content)
+      setThumbWidthPercent((clientWidth / scrollWidth) * 100);
+    } else {
+      setScrollProgress(0);
+      setThumbWidthPercent(100);
+    }
+
     setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    setCanScrollRight(scrollLeft < maxScroll - 10);
   }, [featuredCampaigns]);
 
   useEffect(() => {
@@ -79,6 +91,25 @@ export const PartnersSection: React.FC = () => {
 
     container.scrollBy({
       left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  // Handle click on track to seek to position
+  const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const container = scrollContainerRef.current;
+    const track = trackRef.current;
+    if (!container || !track) return;
+
+    const trackRect = track.getBoundingClientRect();
+    const clickX = e.clientX - trackRect.left;
+    const clickPercent = clickX / trackRect.width;
+
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    const targetScroll = clickPercent * maxScroll;
+
+    container.scrollTo({
+      left: targetScroll,
       behavior: "smooth",
     });
   };
@@ -113,54 +144,61 @@ export const PartnersSection: React.FC = () => {
 
           {/* Controls row */}
           <div className="flex items-center justify-between">
-            {/* Pagination controls - left side */}
-            <div className="flex items-center gap-6">
-              {/* Left arrow */}
-              <button
-                onClick={() => scrollToPage("left")}
-                disabled={!canScrollLeft}
-                className={`p-3 rounded-lg transition-opacity ${
-                  canScrollLeft ? "opacity-100 hover:bg-gray-100" : "opacity-40 cursor-not-allowed"
-                }`}
-                aria-label="Previous"
-              >
-                <ChevronLeftIcon />
-              </button>
+            {/* Pagination controls - left side (only show when there's overflow) */}
+            {hasOverflow ? (
+              <div className="flex items-center gap-4">
+                {/* Left arrow */}
+                <button
+                  onClick={() => scrollToPage("left")}
+                  disabled={!canScrollLeft}
+                  className={`p-1 transition-opacity ${
+                    canScrollLeft ? "opacity-100" : "opacity-40 cursor-not-allowed"
+                  }`}
+                  aria-label="Previous"
+                >
+                  <ChevronLeftIcon className="text-gray-600" />
+                </button>
 
-              {/* Dots */}
-              <div className="flex items-center gap-2">
-                {Array.from({ length: totalPages }).map((_, idx) => (
-                  <div
-                    key={idx}
-                    className={`h-[3px] rounded-sm transition-all ${
-                      idx === currentPage ? "w-8 bg-gray-900" : "w-8 bg-gray-400"
-                    }`}
-                  />
-                ))}
+                {/* Track with sliding thumb - outer div for larger click area */}
+                <div ref={trackRef} onClick={handleTrackClick} className="relative w-32 py-3 cursor-pointer">
+                  {/* Visual track */}
+                  <div className="h-[3px] bg-gray-300 rounded-full">
+                    {/* Thumb */}
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 h-[3px] bg-gray-600 rounded-full"
+                      style={{
+                        width: `${thumbWidthPercent}%`,
+                        left: `${scrollProgress * (100 - thumbWidthPercent)}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Right arrow */}
+                <button
+                  onClick={() => scrollToPage("right")}
+                  disabled={!canScrollRight}
+                  className={`p-1 transition-opacity ${
+                    canScrollRight ? "opacity-100" : "opacity-40 cursor-not-allowed"
+                  }`}
+                  aria-label="Next"
+                >
+                  <ChevronRightIcon className="text-gray-600" />
+                </button>
               </div>
-
-              {/* Right arrow */}
-              <button
-                onClick={() => scrollToPage("right")}
-                disabled={!canScrollRight}
-                className={`p-3 rounded-lg transition-opacity ${
-                  canScrollRight ? "opacity-100 hover:bg-gray-100" : "opacity-40 cursor-not-allowed"
-                }`}
-                aria-label="Next"
-              >
-                <ChevronRightIcon />
-              </button>
-            </div>
+            ) : (
+              <div /> /* Empty div to maintain justify-between spacing */
+            )}
 
             {/* Explore all Partners button - right side */}
             <a
               href="https://google.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-900"
             >
-              <StackIcon />
-              <span className="font-medium text-base text-gray-900">Explore all Partners</span>
+              <StackedSquaresIcon />
+              <span className="font-medium text-base">Explore all Partners</span>
             </a>
           </div>
         </div>
