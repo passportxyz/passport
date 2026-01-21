@@ -50,10 +50,21 @@ export const SectionTabs: React.FC = () => {
     return () => window.removeEventListener("scroll", updateActiveSection);
   }, [updateActiveSection]);
 
-  // Handle ?section=featured query param on mount
+  // Handle ?section=featured - check URL (hash routing) or sessionStorage (preserved through auth)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("section") === "featured" && partnersRef.current) {
+    const hashParts = window.location.hash.split("?");
+    const urlParams = new URLSearchParams(hashParts[1] || "");
+    const storedSearch = sessionStorage.getItem("returnSearch");
+    const storedParams = new URLSearchParams(storedSearch || "");
+
+    const shouldScrollToFeatured =
+      urlParams.get("section") === "featured" || storedParams.get("section") === "featured";
+
+    if (shouldScrollToFeatured && partnersRef.current) {
+      // Clear stored params after using
+      if (storedSearch) {
+        sessionStorage.removeItem("returnSearch");
+      }
       // Small delay to ensure layout is complete
       setTimeout(() => {
         if (partnersRef.current) {

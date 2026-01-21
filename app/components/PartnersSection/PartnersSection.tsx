@@ -194,7 +194,7 @@ export const PartnersSection: React.FC = () => {
 
             {/* Explore all Partners button - right side */}
             <a
-              href="https://google.com"
+              href="https://passport.human.tech/ecosystem"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-900"

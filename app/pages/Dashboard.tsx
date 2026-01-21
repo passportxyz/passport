@@ -139,6 +139,11 @@ export default function Dashboard() {
   // Route user to home when wallet is disconnected
   useEffect(() => {
     if (!address || dbAccessTokenStatus !== "connected") {
+      // Preserve query params for after login (hash routing puts params in the hash)
+      const hashParts = window.location.hash.split("?");
+      if (hashParts[1]) {
+        sessionStorage.setItem("returnSearch", "?" + hashParts[1]);
+      }
       navigateToPage("home");
     }
   }, [address, dbAccessTokenStatus]);
