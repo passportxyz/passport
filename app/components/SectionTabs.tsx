@@ -4,6 +4,25 @@ import { useSectionRefs } from "../context/SectionRefsContext";
 
 type Section = "humanity" | "campaigns";
 
+const scrollToElement = (element: HTMLElement, duration = 550) => {
+  const start = window.scrollY;
+  const target = element.getBoundingClientRect().top + start;
+  const startTime = performance.now();
+
+  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+  const animate = (currentTime: number) => {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    window.scrollTo(0, start + (target - start) * easeOutCubic(progress));
+
+    if (progress < 1) requestAnimationFrame(animate);
+  };
+
+  requestAnimationFrame(animate);
+};
+
 export const SectionTabs: React.FC = () => {
   const { featuredCampaigns } = useCustomization();
   const { stampsRef, partnersRef } = useSectionRefs();
@@ -31,18 +50,31 @@ export const SectionTabs: React.FC = () => {
     return () => window.removeEventListener("scroll", updateActiveSection);
   }, [updateActiveSection]);
 
+  // Handle ?section=featured query param on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("section") === "featured" && partnersRef.current) {
+      // Small delay to ensure layout is complete
+      setTimeout(() => {
+        if (partnersRef.current) {
+          scrollToElement(partnersRef.current);
+        }
+      }, 100);
+    }
+  }, [partnersRef]);
+
   const scrollToSection = (section: Section) => {
     if (section === "humanity") {
       const stampsElement = stampsRef.current;
       if (stampsElement) {
-        stampsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        scrollToElement(stampsElement);
       } else {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } else {
       const partnersElement = partnersRef.current;
       if (partnersElement) {
-        partnersElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        scrollToElement(partnersElement);
       }
     }
   };
