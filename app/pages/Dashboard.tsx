@@ -36,8 +36,18 @@ import { useAccount } from "wagmi";
 import { useRadialBackgroundColorForHeader } from "../components/Header";
 import { HumnSeasonPanel } from "../components/humanPoints";
 import { SectionTabs } from "../components/SectionTabs";
+import { SectionRefsProvider, useSectionRefs } from "../context/SectionRefsContext";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+
+const StampsHeader: React.FC = () => {
+  const { stampsRef } = useSectionRefs();
+  return (
+    <span ref={stampsRef} className="px-4 md:px-0 col-span-full font-heading text-4xl text-gray-800 mt-12">
+      Add Stamps
+    </span>
+  );
+};
 
 export const DashboardCTAs = ({ customization }: { customization: Customization }) => {
   const { useCustomDashboardPanel, hideHumnBranding } = customization;
@@ -226,46 +236,46 @@ export default function Dashboard() {
 
   return (
     <PageRoot className="text-color-1">
-      <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
+      <SectionRefsProvider>
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', '${GA_ID}');
         `}
-      </Script>
-      <HeaderContentFooterGrid>
-        <Confetti />
-        <Header showTopNav={true} />
-        <BodyWrapper className="mt-4 md:mt-0 pt-12 md:pt-16">
-          {
-            // This is just offsetting the dashboard, such that it is shown below the banners
-            banners.map((_v, idx) => (
-              <div className="col-span-full h-8" key={idx}></div>
-            ))
-          }
-          <PageWidthGrid>
-            <DashboardCTAs customization={customization} />
-            <span id="add-stamps" className="px-4 md:px-0 col-span-full font-heading text-4xl text-gray-800 mt-12">
-              Add Stamps
-            </span>
-            <CardList
-              className="col-span-full"
-              isLoading={
-                isLoadingPassport == IsLoadingPassportState.Loading ||
-                isLoadingPassport == IsLoadingPassportState.CreatingPassport ||
-                isLoadingPassport == IsLoadingPassportState.FailedToConnect
-              }
-            />
-            <PartnersSection />
-          </PageWidthGrid>
-        </BodyWrapper>
-        {/* This footer contains dark colored text and dark images */}
-        <WelcomeFooter displayPrivacyPolicy={false} />
-      </HeaderContentFooterGrid>
-      <SectionTabs />
-      {modals}
+        </Script>
+        <HeaderContentFooterGrid>
+          <Confetti />
+          <Header showTopNav={true} />
+          <BodyWrapper className="mt-4 md:mt-0 pt-12 md:pt-16">
+            {
+              // This is just offsetting the dashboard, such that it is shown below the banners
+              banners.map((_v, idx) => (
+                <div className="col-span-full h-8" key={idx}></div>
+              ))
+            }
+            <PageWidthGrid>
+              <DashboardCTAs customization={customization} />
+              <StampsHeader />
+              <CardList
+                className="col-span-full"
+                isLoading={
+                  isLoadingPassport == IsLoadingPassportState.Loading ||
+                  isLoadingPassport == IsLoadingPassportState.CreatingPassport ||
+                  isLoadingPassport == IsLoadingPassportState.FailedToConnect
+                }
+              />
+              <PartnersSection />
+            </PageWidthGrid>
+          </BodyWrapper>
+          {/* This footer contains dark colored text and dark images */}
+          <WelcomeFooter displayPrivacyPolicy={false} />
+        </HeaderContentFooterGrid>
+        <SectionTabs />
+        {modals}
+      </SectionRefsProvider>
     </PageRoot>
   );
 }

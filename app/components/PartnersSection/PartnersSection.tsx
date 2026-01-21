@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { CampaignCard } from "./CampaignCard";
 import { useCustomization } from "../../hooks/useCustomization";
+import { useSectionRefs } from "../../context/SectionRefsContext";
 
 // Chevron Left Icon
 const ChevronLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -31,6 +32,7 @@ const StackedSquaresIcon: React.FC<{ className?: string }> = ({ className }) => 
 
 export const PartnersSection: React.FC = () => {
   const { featuredCampaigns } = useCustomization();
+  const { partnersRef } = useSectionRefs();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -120,7 +122,7 @@ export const PartnersSection: React.FC = () => {
   }
 
   return (
-    <div id="partners-section" className="col-span-full flex flex-col gap-8 mt-12">
+    <div ref={partnersRef} className="col-span-full flex flex-col gap-8 mt-12">
       {/* Header */}
       <div className="px-4 md:px-0">
         <span className="font-heading text-4xl text-gray-800">Partners</span>

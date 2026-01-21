@@ -1,18 +1,20 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useCustomization } from "../hooks/useCustomization";
+import { useSectionRefs } from "../context/SectionRefsContext";
 
 type Section = "humanity" | "campaigns";
 
 export const SectionTabs: React.FC = () => {
   const { featuredCampaigns } = useCustomization();
+  const { stampsRef, partnersRef } = useSectionRefs();
   const [activeSection, setActiveSection] = useState<Section>("humanity");
 
   // Detect which section is in view based on scroll position
   const updateActiveSection = useCallback(() => {
-    const campaignsSection = document.getElementById("partners-section");
-    if (!campaignsSection) return;
+    const partnersElement = partnersRef.current;
+    if (!partnersElement) return;
 
-    const rect = campaignsSection.getBoundingClientRect();
+    const rect = partnersElement.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
 
     // If the top of the campaigns section is in the upper half of viewport, it's active
@@ -21,7 +23,7 @@ export const SectionTabs: React.FC = () => {
     } else {
       setActiveSection("humanity");
     }
-  }, []);
+  }, [partnersRef]);
 
   useEffect(() => {
     updateActiveSection();
@@ -31,16 +33,16 @@ export const SectionTabs: React.FC = () => {
 
   const scrollToSection = (section: Section) => {
     if (section === "humanity") {
-      const stampsSection = document.getElementById("add-stamps");
-      if (stampsSection) {
-        stampsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      const stampsElement = stampsRef.current;
+      if (stampsElement) {
+        stampsElement.scrollIntoView({ behavior: "smooth", block: "start" });
       } else {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } else {
-      const campaignsSection = document.getElementById("partners-section");
-      if (campaignsSection) {
-        campaignsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      const partnersElement = partnersRef.current;
+      if (partnersElement) {
+        partnersElement.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }
   };
