@@ -127,7 +127,7 @@ export const HumnSeasonPanel: FC<HumnSeasonPanelProps> = ({ className = "" }) =>
 
         {/* Title */}
         <div className="flex flex-col grow justify-center">
-          <h2 className="text-2xl font-medium text-white">HUMN szn 2</h2>
+          <h2 className="text-2xl font-medium text-white">HUMN Season 2</h2>
         </div>
 
         {/* Button */}

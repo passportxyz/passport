@@ -125,16 +125,16 @@ export const PartnersSection: React.FC = () => {
     <div ref={partnersRef} className="col-span-full flex flex-col gap-8 mt-12">
       {/* Header */}
       <div className="px-4 md:px-0">
-        <span className="font-heading text-4xl text-gray-800">Partners</span>
+        <span className="font-heading text-4xl text-gray-800">Featured Campaigns</span>
       </div>
 
       {/* Cards container */}
       <div className="w-full">
         <div className="flex flex-col gap-6">
-          {/* Scrollable cards */}
+          {/* Scrollable cards - negative margins to extend edge-to-edge, padding for content, scroll-padding for snap alignment */}
           <div
             ref={scrollContainerRef}
-            className="flex gap-5 justify-between overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory pb-2"
+            className={`flex gap-5 overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory pb-2 -mx-4 md:-mx-10 lg:-mx-20 px-4 md:px-10 lg:px-20 scroll-px-4 md:scroll-px-10 lg:scroll-px-20 ${hasOverflow ? "justify-start" : "justify-center"}`}
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {featuredCampaigns.map((campaign) => (
