@@ -26,7 +26,7 @@ export class XPlatform extends Platform {
     ),
     cta: {
       label: "Learn more",
-      url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps",
+      url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-x-stamp",
     },
   };
 

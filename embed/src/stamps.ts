@@ -117,6 +117,26 @@ export const STAMP_PAGES: StampPage[] = [
         requiresPopup: true,
         popupUrl: oAuthPopupUrl,
       },
+      {
+        platformId: "Steam",
+        name: "Steam",
+        description: "Verify your Steam gaming credentials and activity.",
+        documentationLink:
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-steam-stamp",
+        requiresSignature: true,
+        requiresPopup: true,
+        popupUrl: oAuthPopupUrl,
+      },
+      {
+        platformId: "X",
+        name: "X",
+        description: "Verify your X account with verified status, followers, and account age.",
+        documentationLink:
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-x-stamp",
+        requiresSignature: true,
+        requiresPopup: true,
+        popupUrl: oAuthPopupUrl,
+      },
     ],
   },
 ];
