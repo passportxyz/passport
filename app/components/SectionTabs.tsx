@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useCustomization } from "../hooks/useCustomization";
 import { useSectionRefs } from "../context/SectionRefsContext";
+import { CeramicContext, IsLoadingPassportState } from "../context/ceramicContext";
 
 type Section = "humanity" | "campaigns";
 
@@ -26,6 +27,7 @@ const scrollToElement = (element: HTMLElement, duration = 550) => {
 export const SectionTabs: React.FC = () => {
   const { featuredCampaigns } = useCustomization();
   const { stampsRef, partnersRef } = useSectionRefs();
+  const { isLoadingPassport } = useContext(CeramicContext);
   const [activeSection, setActiveSection] = useState<Section>("humanity");
 
   // Detect which section is in view based on scroll position
@@ -98,8 +100,8 @@ export const SectionTabs: React.FC = () => {
     }
   };
 
-  // Don't render if there are no featured campaigns
-  if (!featuredCampaigns || featuredCampaigns.length === 0) {
+  // Don't render if still loading stamps or there are no featured campaigns
+  if (isLoadingPassport === IsLoadingPassportState.Loading || !featuredCampaigns || featuredCampaigns.length === 0) {
     return null;
   }
 
