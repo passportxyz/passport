@@ -6,6 +6,7 @@ import { cluster } from "./cluster";
 import { secretsManager } from "infra-libs";
 import { stack, defaultTags } from "../lib/tags";
 import { createSweeperService } from "../lib/sweeper_service";
+import { createAutoCreditsService } from "../lib/auto_credits_service";
 import {
   vpcId,
   vpcPrivateSubnets,
@@ -606,3 +607,4 @@ const gitcoinServiceRecord = new aws.route53.Record("passport-record", {
 });
 
 createSweeperService({ stack, defaultTags });
+createAutoCreditsService();

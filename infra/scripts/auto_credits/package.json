@@ -1,0 +1,21 @@
+{
+  "name": "auto-credits",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "test": "jest",
+    "run:local": "ts-node run.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.525.0",
+    "ethers": "^6.11.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
