@@ -80,7 +80,8 @@ export const STAMP_PAGES: StampPage[] = [
       {
         platformId: "Discord",
         name: "Discord",
-        description: "Verify that you own a Discord account.",
+        description:
+          "Verify Discord account age (365+ days), server membership (10+), and verified external connections (2+).",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-discord-account-to-passport",
         requiresSignature: true,
@@ -113,6 +114,27 @@ export const STAMP_PAGES: StampPage[] = [
         description: "Verify that you own a LinkedIn account.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-linkedin-stamp",
+        requiresSignature: true,
+        requiresPopup: true,
+        popupUrl: oAuthPopupUrl,
+      },
+      {
+        platformId: "Steam",
+        name: "Steam",
+        description:
+          "Requires 100+ hours playtime, 10+ achievements, 3+ games with >1hr played, and diverse play history.",
+        documentationLink:
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-steam-stamp",
+        requiresSignature: true,
+        requiresPopup: true,
+        popupUrl: oAuthPopupUrl,
+      },
+      {
+        platformId: "X",
+        name: "X",
+        description: "Requires verified status (Premium/Legacy), 100+ followers, and account age over 365 days.",
+        documentationLink:
+          "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-x-stamp",
         requiresSignature: true,
         requiresPopup: true,
         popupUrl: oAuthPopupUrl,

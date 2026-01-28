@@ -14,7 +14,7 @@ export class SteamPlatform extends Platform {
     this.banner = {
       cta: {
         label: "Learn more",
-        url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-steam-account-to-passport",
+        url: "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-steam-stamp",
       },
     };
   }
