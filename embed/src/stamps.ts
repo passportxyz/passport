@@ -132,7 +132,7 @@ export const STAMP_PAGES: StampPage[] = [
       {
         platformId: "X",
         name: "X",
-        description: "Requires verified status (Premium/Legacy), 100+ followers, and account age over 365 days.",
+        description: "Requires verified status (Premium or Legacy), 100+ followers, and account age over 365 days.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-x-stamp",
         requiresSignature: true,
