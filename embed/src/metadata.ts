@@ -73,21 +73,12 @@ export const metadataHandler = createHandler<MetadataRequestBody, MetadataRespon
     throw new ApiError("Missing required query parameter: `scorerId`", "400_BAD_REQUEST");
   }
 
-  // Get weight for scorerId
-  const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/weights?community_id=${scorerId as string}`;
-  const weightsResponse = await axios.get(embedWeightsUrl);
-  const weightsResponseData: { [key: string]: number } = weightsResponse.data as { [key: string]: number };
-
-  // Try to get customized stamp sections for this scorer
-  let customSections: CustomSection[] = [];
-  try {
-    const sectionsUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/stamp-sections?community_id=${scorerId as string}`;
-    const sectionsResponse = await axios.get(sectionsUrl);
-    customSections = sectionsResponse.data as CustomSection[];
-  } catch {
-    // If fetching custom sections fails, we'll fall back to default STAMP_PAGES
-    // This is expected behavior when no customization exists
-  }
+  // Get config (weights + stamp sections) for scorerId
+  const configUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/config?community_id=${scorerId as string}`;
+  const configResponse = await axios.get(configUrl);
+  const configData = configResponse.data as { weights: { [key: string]: number }; stamp_sections: CustomSection[] };
+  const weightsResponseData: { [key: string]: number } = configData.weights;
+  const customSections: CustomSection[] = configData.stamp_sections || [];
 
   // If custom sections exist, use them; otherwise fall back to STAMP_PAGES
   const sectionsToUse =

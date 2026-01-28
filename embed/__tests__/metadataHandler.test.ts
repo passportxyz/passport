@@ -19,7 +19,7 @@ jest.unstable_mockModule("@gitcoin/passport-platforms", () => ({
 describe("GET /embed/stamps/metadata", () => {
   let originalScorerEndpoint: string | undefined;
   const mockScorerId = "10";
-  const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/weights?community_id=${mockScorerId}`;
+  const embedConfigUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/config?community_id=${mockScorerId}`;
 
   beforeEach(() => {
     originalScorerEndpoint = process.env.SCORER_ENDPOINT;
@@ -51,13 +51,16 @@ describe("GET /embed/stamps/metadata", () => {
     });
   });
 
-  it("should call embedWeightsUrl and return the correct metadata structure", async () => {
+  it("should call embedConfigUrl and return the correct metadata structure", async () => {
     // Mock the axios GET request
     mockedAxios.get.mockResolvedValueOnce({
       status: 200,
       data: {
-        BinanceBABT: 16.021,
-        HolonymPhone: 1.521,
+        weights: {
+          BinanceBABT: 16.021,
+          HolonymPhone: 1.521,
+        },
+        stamp_sections: [],
       },
     });
 
@@ -92,13 +95,15 @@ describe("GET /embed/stamps/metadata", () => {
     mockedAxios.get.mockResolvedValueOnce({
       status: 200,
       data: {
-        BinanceBABT: 0,
-        HolonymPhone: 0,
-        Google: 0,
-        // Add more providers with 0 weights
-        Discord: 0,
-        Github: 0,
-        Linkedin: 0,
+        weights: {
+          BinanceBABT: 0,
+          HolonymPhone: 0,
+          Google: 0,
+          Discord: 0,
+          Github: 0,
+          Linkedin: 0,
+        },
+        stamp_sections: [],
       },
     });
 
@@ -117,30 +122,27 @@ describe("GET /embed/stamps/metadata", () => {
   });
 
   it("should use custom stamp sections when available", async () => {
-    // Mock the weights response
+    // Mock the combined config response with weights and custom sections
     mockedAxios.get.mockResolvedValueOnce({
       status: 200,
       data: {
-        BinanceBABT: 10.0,
-        Discord: 5.0,
+        weights: {
+          BinanceBABT: 10.0,
+          Discord: 5.0,
+        },
+        stamp_sections: [
+          {
+            title: "Custom Section 1",
+            order: 0,
+            items: [{ platform_id: "Binance", order: 0 }],
+          },
+          {
+            title: "Custom Section 2",
+            order: 1,
+            items: [{ platform_id: "Discord", order: 0 }],
+          },
+        ],
       },
-    });
-
-    // Mock the custom sections response
-    mockedAxios.get.mockResolvedValueOnce({
-      status: 200,
-      data: [
-        {
-          title: "Custom Section 1",
-          order: 0,
-          items: [{ platform_id: "Binance", order: 0 }],
-        },
-        {
-          title: "Custom Section 2",
-          order: 1,
-          items: [{ platform_id: "Discord", order: 0 }],
-        },
-      ],
     });
 
     const response = await request(app)
@@ -163,18 +165,18 @@ describe("GET /embed/stamps/metadata", () => {
     );
   });
 
-  it("should fall back to default STAMP_PAGES when custom sections API fails", async () => {
-    // Mock the weights response (first call)
+  it("should fall back to default STAMP_PAGES when stamp_sections is empty", async () => {
+    // Mock the config response with empty stamp_sections
     mockedAxios.get.mockResolvedValueOnce({
       status: 200,
       data: {
-        BinanceBABT: 10.0,
-        Discord: 5.0,
+        weights: {
+          BinanceBABT: 10.0,
+          Discord: 5.0,
+        },
+        stamp_sections: [],
       },
     });
-
-    // Mock the custom sections API to fail (second call)
-    mockedAxios.get.mockRejectedValueOnce(new Error("Custom sections not found"));
 
     const response = await request(app)
       .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
@@ -196,7 +198,7 @@ describe("GET /embed/stamps/metadata", () => {
   });
 
   describe("unexpected errors", () => {
-    it("should handle errors from the embedWeightsUrl API correctly", async () => {
+    it("should handle errors from the embedConfigUrl API correctly", async () => {
       mockedAxios.get.mockImplementationOnce(() => {
         throw new Error("Failed to fetch embed weights");
       });
