@@ -80,7 +80,8 @@ export const STAMP_PAGES: StampPage[] = [
       {
         platformId: "Discord",
         name: "Discord",
-        description: "Verify that you own a Discord account.",
+        description:
+          "Verify Discord account age (365+ days), server membership (10+), and verified external connections (2+).",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/connecting-a-discord-account-to-passport",
         requiresSignature: true,
@@ -120,7 +121,8 @@ export const STAMP_PAGES: StampPage[] = [
       {
         platformId: "Steam",
         name: "Steam",
-        description: "Verify your Steam gaming credentials and activity.",
+        description:
+          "Requires 100+ hours playtime, 10+ achievements, 3+ games with >1hr played, and diverse play history.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-steam-stamp",
         requiresSignature: true,
@@ -130,7 +132,7 @@ export const STAMP_PAGES: StampPage[] = [
       {
         platformId: "X",
         name: "X",
-        description: "Verify your X account with verified status, followers, and account age.",
+        description: "Requires verified status (Premium/Legacy), 100+ followers, and account age over 365 days.",
         documentationLink:
           "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-x-stamp",
         requiresSignature: true,
