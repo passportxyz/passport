@@ -58,22 +58,62 @@ const getIcon = async (iconPath?: string): Promise<string> => {
   }
 };
 
+type CustomSection = {
+  title: string;
+  order: number;
+  items: {
+    platform_id: string;
+    order: number;
+  }[];
+};
+
 export const metadataHandler = createHandler<MetadataRequestBody, MetadataResponseBody>(async (req, res) => {
   const { scorerId } = req.query;
   if (!scorerId) {
     throw new ApiError("Missing required query parameter: `scorerId`", "400_BAD_REQUEST");
   }
-  // TODO: in the future return specific stamp metadata based on the scorerId
-  // TODO: clarify the returned response
-  // get weight for scorerId
-  const embedWeightsUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/weights?community_id=${scorerId as string}`;
-  const weightsResponse = await axios.get(embedWeightsUrl);
-  const weightsResponseData: { [key: string]: number } = weightsResponse.data as { [key: string]: number };
 
-  // get providers / credential ids from passport-platforms
-  // for each provider, get the weight from the weights response
+  // Get config (weights + stamp sections) for scorerId
+  const configUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/config?community_id=${scorerId as string}`;
+  const configResponse = await axios.get(configUrl);
+  const configData = configResponse.data as { weights: { [key: string]: number }; stamp_sections: CustomSection[] };
+  const weightsResponseData: { [key: string]: number } = configData.weights;
+  const customSections: CustomSection[] = configData.stamp_sections || [];
+
+  // If custom sections exist, use them; otherwise fall back to STAMP_PAGES
+  const sectionsToUse =
+    customSections.length > 0
+      ? customSections.map((section) => ({
+          header: section.title,
+          platforms: section.items
+            .map((item) => {
+              // Find the platform in STAMP_PAGES to get its metadata
+              const defaultPlatform = STAMP_PAGES.flatMap((page) => page.platforms).find(
+                (p) => p.platformId === item.platform_id
+              );
+
+              return (
+                defaultPlatform || {
+                  platformId: item.platform_id,
+                  name: item.platform_id,
+                  description: "",
+                  documentationLink: "",
+                }
+              );
+            })
+            .sort((a, b) => {
+              // Sort by the order defined in items
+              const aOrder = section.items.find((i) => i.platform_id === a.platformId)?.order || 0;
+              const bOrder = section.items.find((i) => i.platform_id === b.platformId)?.order || 0;
+              return aOrder - bOrder;
+            }),
+        }))
+      : STAMP_PAGES;
+
+  // Get providers / credential ids from passport-platforms
+  // For each provider, get the weight from the weights response
   const updatedStampPages = await Promise.all(
-    STAMP_PAGES.map(async (stampPage) => ({
+    sectionsToUse.map(async (stampPage) => ({
       ...stampPage,
       platforms: (
         await Promise.all(
