@@ -4,7 +4,7 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node18 --outfile=dist/index.js --external:@aws-sdk/*",
     "clean": "rm -rf dist",
     "test": "jest",
     "run:local": "ts-node run.ts"
@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
+    "esbuild": "^0.25.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }

@@ -130,6 +130,6 @@ export const runAutoCredits = async (useEnv: boolean = false): Promise<{ statusC
 };
 
 // AWS Lambda handler
-exports.handler = async (event: any, context: any) => {
+export const handler = async (event: any, context: any) => {
   return await runAutoCredits(false);
 };

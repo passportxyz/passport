@@ -85,10 +85,7 @@ export const createAutoCreditsService = async () => {
     role: lambdaRole.arn,
     runtime: aws.lambda.Runtime.NodeJS18dX,
     handler: "index.handler",
-    code: new pulumi.asset.AssetArchive({
-      ".": new pulumi.asset.FileArchive(path.join(autoCreditsDir, "dist")),
-      node_modules: new pulumi.asset.FileArchive(path.join(autoCreditsDir, "node_modules")),
-    }),
+    code: new pulumi.asset.FileArchive(path.join(autoCreditsDir, "dist")),
     timeout: 120,
     memorySize: 256,
     environment: {
