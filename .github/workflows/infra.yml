@@ -82,6 +82,11 @@ jobs:
           cd infra/scripts/verifier_sweep
           yarn install --frozen-lockfile
           yarn build
+      - name: Build Auto Credits Service
+        run: |
+          cd infra/scripts/auto_credits
+          npm install
+          npm run build
       - name: Yarn install
         uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v3
       - name: Run pulumi
