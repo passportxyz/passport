@@ -147,6 +147,11 @@ jobs:
           cd infra/scripts/verifier_sweep
           yarn install --frozen-lockfile
           yarn build
+      - name: Build Auto Credits Service
+        run: |
+          cd infra/scripts/auto_credits
+          npm install
+          npm run build
       - name: Prepare to Deploy to AWS
         uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v3
       - name: Deploy Preview
@@ -231,6 +236,11 @@ jobs:
           cd infra/scripts/verifier_sweep
           yarn install --frozen-lockfile
           yarn build
+      - name: Build Auto Credits Service
+        run: |
+          cd infra/scripts/auto_credits
+          npm install
+          npm run build
       - name: Prepare to Deploy to AWS
         uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v3
       - name: Deploy to AWS
