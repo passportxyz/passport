@@ -24,6 +24,7 @@ export const createAutoCreditsService = async () => {
 
   // Create IAM role for the Lambda
   const lambdaRole = new aws.iam.Role("auto-credits-role", {
+    name: "auto-credits-role",
     assumeRolePolicy: JSON.stringify({
       Version: "2012-10-17",
       Statement: [
