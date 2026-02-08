@@ -165,6 +165,65 @@ describe("GET /embed/stamps/metadata", () => {
     );
   });
 
+  it("should include Guest List and Developer List sections when custom_stamps is present", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        weights: {
+          "AllowList#VIPList": 10.0,
+          "DeveloperList#TestRepo#abc12345": 5.0,
+        },
+        stamp_sections: [],
+        custom_stamps: {
+          allow_list_stamps: [
+            {
+              provider_id: "AllowList#VIPList",
+              display_name: "VIP List",
+              description: "Verify you are part of this community.",
+              weight: 10.0,
+            },
+          ],
+          developer_list_stamps: [
+            {
+              provider_id: "DeveloperList#TestRepo#abc12345",
+              display_name: "Test Repo Contributor",
+              description: "Verify contributions to TestRepo",
+              weight: 5.0,
+            },
+          ],
+        },
+      },
+    });
+
+    const response = await request(app)
+      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    const guestListSection = response.body.find((p: { header: string }) => p.header === "Guest List");
+    const developerListSection = response.body.find((p: { header: string }) => p.header === "Developer List");
+
+    expect(guestListSection).toBeDefined();
+    expect(guestListSection.platforms).toHaveLength(1);
+    expect(guestListSection.platforms[0]).toMatchObject({
+      name: "VIP List",
+      platformId: "AllowList",
+      credentials: [{ id: "AllowList#VIPList", weight: "10" }],
+      displayWeight: "10.0",
+    });
+
+    expect(developerListSection).toBeDefined();
+    expect(developerListSection.platforms).toHaveLength(1);
+    expect(developerListSection.platforms[0]).toMatchObject({
+      name: "Test Repo Contributor",
+      platformId: "DeveloperList",
+      credentials: [{ id: "DeveloperList#TestRepo#abc12345", weight: "5" }],
+      displayWeight: "5.0",
+    });
+  });
+
   it("should fall back to default STAMP_PAGES when stamp_sections is empty", async () => {
     // Mock the config response with empty stamp_sections
     mockedAxios.get.mockResolvedValueOnce({
