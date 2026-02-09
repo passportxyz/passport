@@ -72,6 +72,34 @@ BaseHumanIDPlatform supports two distinct verification paths:
 - Record field in VerifiedPayload ignored when `valid=false`
 - Clean separation between SBT and attestation patterns
 
+## isEVM Flag Architecture
+
+The `isEVM` flag indicates whether a platform's stamps are eligible for EVM-based auto-verification. It was unified to a **single source of truth** on `PlatformSpec` (in Providers-config.ts).
+
+### Previous Design (Problematic)
+- `isEVM` existed in two places: on the Platform class (App-Bindings) for frontend, and on PlatformSpec for backend auto-verification
+- This caused sync bugs when one was updated but not the other
+
+### Current Design (Unified)
+- **Backend**: `isEVM` lives on `PlatformDetails` (from PlatformSpec in Providers-config.ts)
+  - Auto-verification reads it from `PlatformDetails.isEVM`
+- **Frontend**: `PlatformProps` carries `isEVM` as a top-level field
+  - Populated from `PlatformDetails` via a derivation loop in `platformMap.ts`
+  - Components like `GenericPlatform.tsx` read `isEVM` from `PlatformProps`
+- **Platform classes** (App-Bindings) no longer carry `isEVM`
+
+### Platforms WITHOUT isEVM
+Some platforms intentionally do NOT have `isEVM` on PlatformSpec because they are not eligible for auto-verification:
+- Civic
+- TrustaLabs
+- ZKEmail
+
+### Key Files
+- `platforms/src/types.ts` - Type definitions for PlatformSpec and isEVM
+- `app/components/GenericPlatform.tsx` - Frontend consumer of isEVM
+- `app/config/platformMap.ts` - Derivation loop populating PlatformProps.isEVM
+- `identity/src/autoVerification.ts` - Backend consumer of isEVM
+
 ## Key Files
 - `platforms/src/platforms.ts` - Platform registry with internal IDs as keys
 - `platforms/src/*/Providers-config.ts` - Platform configurations with display names
