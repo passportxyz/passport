@@ -1,4 +1,4 @@
-import type { GetServerSideProps, NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import path from "path";
 import fs from "fs";
 
@@ -6,7 +6,7 @@ interface Props {
   images: string[];
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async () => {
+export const getStaticProps: GetStaticProps<Props> = async () => {
   const dir = path.join(process.cwd(), "public", "assets", "campaigns");
   const files = fs.readdirSync(dir);
   const images = files
