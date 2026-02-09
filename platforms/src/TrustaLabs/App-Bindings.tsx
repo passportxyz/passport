@@ -6,7 +6,6 @@ import React from "react";
 export class TrustaLabsPlatform extends Platform {
   platformId = "TrustaLabs";
   path = "TrustaLabs";
-  isEVM = true;
 
   banner = {
     content: (

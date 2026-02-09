@@ -265,6 +265,7 @@ describe("Multiple EVM platforms", () => {
         platform={new Ens.EnsPlatform()}
         platFormGroupSpec={Ens.ProviderConfig}
         platformScoreSpec={EnsScoreSpec}
+        isEVM={true}
         onClose={() => {}}
       />
     );

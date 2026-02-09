@@ -11,11 +11,13 @@ const mockedAllPlatforms = new Map();
 mockedAllPlatforms.set("Ens", {
   platform: new Ens.EnsPlatform(),
   platFormGroupSpec: Ens.ProviderConfig,
+  isEVM: Ens.PlatformDetails.isEVM,
 });
 
 mockedAllPlatforms.set("Lens", {
   platform: new Lens.LensPlatform(),
   platFormGroupSpec: Lens.ProviderConfig,
+  isEVM: Lens.PlatformDetails.isEVM,
 });
 
 mockedAllPlatforms.set("Github", {
@@ -24,6 +26,7 @@ mockedAllPlatforms.set("Github", {
     redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
   }),
   platFormGroupSpec: Github.ProviderConfig,
+  isEVM: Github.PlatformDetails.isEVM,
 });
 
 describe("fetchPossibleEVMStamps", () => {
@@ -64,7 +67,7 @@ describe("fetchPossibleEVMStamps", () => {
       ],
     } as Passport;
     const allPlatformsData = Array.from(mockedAllPlatforms.values());
-    const evmPlatforms: PlatformProps[] = allPlatformsData.filter(({ platform }) => platform.isEVM);
+    const evmPlatforms: PlatformProps[] = allPlatformsData.filter(({ isEVM }) => isEVM);
     const types = getTypesToCheck(evmPlatforms, passport, true);
 
     expect(types.length).toBe(2);

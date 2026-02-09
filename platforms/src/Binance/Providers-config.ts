@@ -2,7 +2,6 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { BinanceProvider2 } from "./Providers/binance.js";
 
 export const PlatformDetails: PlatformSpec = {
-  isEVM: true,
   icon: "./assets/binanceStamp.svg",
   platform: "Binance",
   name: "Binance",

@@ -3,7 +3,6 @@ import { Platform } from "../utils/platform.js";
 export class ZkSyncPlatform extends Platform {
   platformId = "ZkSync";
   path = "ZkSync";
-  isEVM = true;
 
   banner = {
     content:

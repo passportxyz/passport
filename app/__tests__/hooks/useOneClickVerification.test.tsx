@@ -31,8 +31,8 @@ const mockPossiblePlatforms = [
           heading:
             "The ENS stamp only recognizes ENS domains if they are set to your account as primary ENS (or reverse record).",
         },
-        isEVM: true,
       },
+      isEVM: true,
       platFormGroupSpec: [
         {
           platformGroup: "Account Name",
@@ -71,8 +71,8 @@ const mockPossiblePlatforms = [
             url: "https://support.passport.xyz/passport-knowledge-base/how-do-i-add-passport-stamps/nft-stamp",
           },
         },
-        isEVM: true,
       },
+      isEVM: true,
       platFormGroupSpec: [
         {
           platformGroup: "Collector's Journey",
@@ -140,8 +140,8 @@ const mockPossiblePlatforms = [
             url: "https://support.gitcoin.co/gitcoin-knowledge-base/gitcoin-passport/how-do-i-add-passport-stamps/guide-to-add-lens-stamp-to-gitcoin-passport",
           },
         },
-        isEVM: true,
       },
+      isEVM: true,
       platFormGroupSpec: [
         {
           platformGroup: "Lens Handle",
@@ -172,13 +172,13 @@ const mockPossiblePlatforms = [
       platform: {
         platformId: "GuildXYZ",
         path: "GuildXYZ",
-        isEVM: true,
         clientId: null,
         redirectUri: null,
         banner: {
           heading: "*Qualifying guilds have more than 250 members",
         },
       },
+      isEVM: true,
       platFormGroupSpec: [
         {
           platformGroup: "Guild Admin",

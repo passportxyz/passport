@@ -6,7 +6,6 @@ import { Hyperlink } from "../utils/Hyperlink.js";
 export class CivicPlatform extends Platform {
   platformId = "Civic";
   path = "Civic";
-  isEVM = true;
 
   constructor(options: PlatformOptions = {}) {
     super();

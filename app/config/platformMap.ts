@@ -234,3 +234,11 @@ defaultPlatformMap.set("Steam", {
   }),
   platFormGroupSpec: Steam.ProviderConfig,
 });
+
+// Derive isEVM from PlatformDetails (single source of truth)
+for (const [platformId, props] of defaultPlatformMap) {
+  const platformModule = platforms[platformId as keyof typeof platforms];
+  if (platformModule?.PlatformDetails?.isEVM !== undefined) {
+    props.isEVM = platformModule.PlatformDetails.isEVM;
+  }
+}

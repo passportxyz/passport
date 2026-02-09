@@ -4,7 +4,6 @@ import { AppContext, Platform, PlatformOptions, ProviderPayload } from "../types
 export class GuildXYZPlatform implements Platform {
   platformId = "GuildXYZ";
   path = "GuildXYZ";
-  isEVM = true;
   clientId: string = null;
   redirectUri: string = null;
 

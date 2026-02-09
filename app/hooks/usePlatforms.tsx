@@ -129,6 +129,7 @@ export const usePlatforms = () => {
       platformsMap.set("AllowList", {
         platform: new AllowList.AllowListPlatform(),
         platFormGroupSpec: allowListProviders,
+        isEVM: AllowList.PlatformDetails.isEVM,
       });
     }
 
@@ -163,6 +164,7 @@ export const usePlatforms = () => {
         platformsMap.set(`Custom#${platformId}`, {
           platform,
           platFormGroupSpec,
+          isEVM: platformDefinitions[platformTypeInfo.basePlatformName]?.PlatformDetails?.isEVM,
         });
       }
     }

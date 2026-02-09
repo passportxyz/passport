@@ -4,7 +4,6 @@ import { Platform } from "../utils/platform.js";
 export class NFTPlatform extends Platform {
   platformId = "NFT";
   path = "NFT";
-  isEVM = true;
 
   banner = {
     content:

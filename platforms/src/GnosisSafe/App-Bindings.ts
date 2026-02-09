@@ -4,7 +4,6 @@ import { Platform } from "../utils/platform.js";
 export class GnosisSafePlatform extends Platform {
   platformId = "GnosisSafe";
   path = "GnosisSafe";
-  isEVM = true;
 
   banner = {
     heading:

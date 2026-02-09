@@ -6,7 +6,6 @@ import React from "react";
 export class BinancePlatform extends Platform {
   platformId = "Binance";
   path = "binance";
-  isEVM = true;
 
   banner = {
     content: (

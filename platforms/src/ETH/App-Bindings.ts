@@ -5,7 +5,6 @@ export class ETHPlatform extends Platform {
   path = "ETH";
   clientId: string = null;
   redirectUri: string = null;
-  isEVM = true;
 
   banner = {
     heading: `
