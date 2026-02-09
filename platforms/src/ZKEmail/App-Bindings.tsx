@@ -13,7 +13,6 @@ export class ZKEmailPlatform extends Platform {
   platformId = "ZKEmail";
   path = "ZKEmail";
   clientId: string | null = null;
-  isEVM = true;
 
   private zkEmailSdk: typeof import("@zk-email/sdk") | null = null;
 

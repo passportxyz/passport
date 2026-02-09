@@ -2,12 +2,12 @@ import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { BinanceProvider2 } from "./Providers/binance.js";
 
 export const PlatformDetails: PlatformSpec = {
-  isEVM: true,
   icon: "./assets/binanceStamp.svg",
   platform: "Binance",
   name: "Binance",
   description: "Verify KYC with your Binance Account Bound Token",
   connectMessage: "Connect Account",
+  isEVM: true,
   timeToGet: "5-10 minutes",
   price: "~$1",
   cta: {

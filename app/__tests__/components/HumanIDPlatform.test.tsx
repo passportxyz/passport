@@ -56,7 +56,6 @@ vi.mock("next/router", () => ({
 class MockHumanIDPlatform {
   platformId = "HumanID";
   path = "HumanID";
-  isEVM = true;
 
   banner = {
     heading: "To add the Human ID Phone Verification Stamp to your Passport...",
@@ -144,7 +143,6 @@ describe("HumanID Platform Integration", () => {
 
       expect(platform.platformId).toBe("HumanID");
       expect(platform.path).toBe("HumanID");
-      expect(platform.isEVM).toBe(true);
       expect(platform.banner).toBeDefined();
       expect(platform.banner.heading).toContain("Human ID Phone Verification");
     });

@@ -125,7 +125,6 @@ export interface Platform {
   platformId: string;
   path?: string;
   banner?: PlatformBanner;
-  isEVM?: boolean;
   getOAuthUrl?(state: string): Promise<string>;
   getProviderPayload(appContext: AppContext): Promise<ProviderPayload>;
 }

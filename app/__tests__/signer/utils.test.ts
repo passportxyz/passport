@@ -20,8 +20,8 @@ describe("signer/utils", () => {
         ],
         platform: {
           platformId: "TestPlatform",
-          isEVM: true,
         },
+        isEVM: true,
       }) as unknown as PlatformProps;
 
     it("should exclude deprecated providers from the check list", () => {

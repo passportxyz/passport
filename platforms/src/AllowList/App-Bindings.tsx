@@ -6,7 +6,6 @@ import { Platform } from "../utils/platform.js";
 export class AllowListPlatform extends Platform {
   platformId = "AllowList";
   path = "AllowList";
-  isEVM = true;
   clientId: string = null;
 
   constructor(options: PlatformOptions = {}) {

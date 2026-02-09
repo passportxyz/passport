@@ -5,7 +5,6 @@ import { Platform } from "../utils/platform.js";
 export class SnapshotPlatform extends Platform {
   platformId = "Snapshot";
   path = "Snapshot";
-  isEVM = true;
   banner = {
     cta: {
       label: "Learn more",

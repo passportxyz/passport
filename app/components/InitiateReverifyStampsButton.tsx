@@ -80,10 +80,10 @@ export const ReverifyStampsModal = ({ isOpen, onClose }: ExpiredStampModalProps)
       const possibleProviders = platformProviderIds[platformId];
       const expiredProvidersInPlatform = possibleProviders.filter((provider) => expiredProviders.includes(provider));
 
-      const platform = platforms.get(platformId)?.platform;
+      const platformProps = platforms.get(platformId);
 
       if (expiredProvidersInPlatform.length > 0) {
-        if (platform?.isEVM) {
+        if (platformProps?.isEVM) {
           evmStampClaim.selectedProviders = [...expiredProvidersInPlatform, ...evmStampClaim.selectedProviders];
         } else {
           stampClaims.push({ platformId: platformId, selectedProviders: expiredProvidersInPlatform });

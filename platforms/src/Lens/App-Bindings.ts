@@ -6,7 +6,6 @@ export class LensPlatform extends Platform {
   path = "Lens";
   clientId: string = null;
   redirectUri: string = null;
-  isEVM = true;
 
   banner = {
     content: `To add the Lens Stamp to your Passport, ensure you're using

@@ -7,6 +7,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Coinbase",
   description: "Verify your Coinbase account and ID",
   connectMessage: "Connect Account",
+  isEVM: true,
   website: "https://www.coinbase.com/onchain-verify",
   timeToGet: "5 minutes",
   price: "Free",

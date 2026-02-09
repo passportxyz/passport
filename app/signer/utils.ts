@@ -58,7 +58,7 @@ export const fetchPossibleEVMStamps = async (
   reIssueStamps: boolean = false
 ): Promise<ValidatedPlatform[]> => {
   const allPlatformsData = Array.from(allPlatforms.values());
-  const evmPlatforms: PlatformProps[] = allPlatformsData.filter(({ platform }) => platform.isEVM);
+  const evmPlatforms: PlatformProps[] = allPlatformsData.filter(({ isEVM }) => isEVM);
 
   const payload = {
     type: "bulk",

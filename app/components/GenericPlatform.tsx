@@ -44,6 +44,7 @@ import { useAccount, useSignMessage, useSendTransaction, useSwitchChain } from "
 export type PlatformProps = {
   platFormGroupSpec: PlatformGroupSpec[];
   platform: PlatformClass;
+  isEVM?: boolean;
 };
 
 enum VerificationStatuses {
@@ -77,6 +78,7 @@ export const GenericPlatform = ({
   platformScoreSpec,
   isOpen,
   onClose,
+  isEVM,
 }: GenericPlatformProps): JSX.Element => {
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
@@ -159,7 +161,7 @@ export const GenericPlatform = ({
         selectedProviders,
         waitForRedirect,
         // Add wagmi functions for EVM platforms
-        ...(platform.isEVM && {
+        ...(isEVM && {
           address,
           signMessageAsync,
           sendTransactionAsync,
@@ -402,10 +404,7 @@ export const GenericPlatform = ({
     };
   };
 
-  const isReverifying = useMemo(
-    () => verificationState.loading && platform.isEVM,
-    [verificationState.loading, platform.isEVM]
-  );
+  const isReverifying = useMemo(() => verificationState.loading && isEVM, [verificationState.loading, isEVM]);
 
   const buttonText = useMemo(() => {
     if (isReverifying) {

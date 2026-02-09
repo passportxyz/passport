@@ -6,7 +6,6 @@ export class EnsPlatform extends Platform {
   path = "Ens";
   clientId: string = null;
   redirectUri: string = null;
-  isEVM = true;
 
   banner = {
     heading:

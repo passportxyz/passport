@@ -11,8 +11,6 @@ export abstract class BaseHumanIDPlatform extends Platform {
   sbtFetcher?: (address: string) => Promise<HubV3SBT | null>;
   attestationFetcher?: (address: string) => Promise<SignProtocolAttestation | null>;
 
-  isEVM = true;
-
   constructor(options: PlatformOptions = {}) {
     super();
     this.state = options.state as string;

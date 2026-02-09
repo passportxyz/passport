@@ -1,9 +1,10 @@
 # 📚 Gitcoin Passport Knowledge Map
 
 ## 🏗️ Architecture
-- @architecture/platform_system.md - How platforms are identified, structured, and split between frontend/backend
+- @architecture/platform_system.md - How platforms are identified, structured, split between frontend/backend, and isEVM flag unification
 - @architecture/credential_verification_error_handling.md - Error flow through verification layers and lost error information
 - @architecture/topnav_dynamic_content.md - Dynamic partner dashboards with centralized data preparation in useCustomization hook
+- @architecture/passport_scorer_customization_api.md - Django backend model, API endpoints, admin interface for partner dashboards and TopNav
 
 ## 📦 Workflows
 - @workflows/package_management.md - Yarn commands and monorepo structure

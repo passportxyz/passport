@@ -7,7 +7,6 @@ import { Hyperlink } from "../utils/Hyperlink.js";
 export class GTCStakingPlatform extends Platform {
   platformId = "GtcStaking";
   path = "GtcStaking";
-  isEVM = true;
   clientId: string = null;
 
   constructor(options: PlatformOptions = {}) {

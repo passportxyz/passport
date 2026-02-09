@@ -23,7 +23,6 @@ export class Platform implements PlatformType {
   redirectUri?: string;
   state?: string;
   banner?: PlatformBanner;
-  isEVM?: boolean;
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
     const authUrl: string = await this.getOAuthUrl(appContext.state, appContext.selectedProviders);

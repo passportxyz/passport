@@ -8,7 +8,6 @@ export class GitcoinPlatform extends Platform {
   path = "Gitcoin";
   clientId: string = null;
   redirectUri: string = null;
-  isEVM = true;
 
   banner = {
     heading: (
