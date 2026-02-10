@@ -67,27 +67,54 @@ type CustomSection = {
   }[];
 };
 
+type CustomStamp = {
+  provider_id: string;
+  display_name: string;
+  description?: string;
+  weight: number;
+};
+
+type CustomStampsConfig = {
+  allow_list_stamps?: CustomStamp[];
+  developer_list_stamps?: CustomStamp[];
+};
+
+type EmbedConfigData = {
+  weights: { [key: string]: number };
+  stamp_sections: CustomSection[];
+  custom_stamps?: CustomStampsConfig;
+};
+
 export const metadataHandler = createHandler<MetadataRequestBody, MetadataResponseBody>(async (req, res) => {
   const { scorerId } = req.query;
   if (!scorerId) {
     throw new ApiError("Missing required query parameter: `scorerId`", "400_BAD_REQUEST");
   }
 
-  // Get config (weights + stamp sections) for scorerId
+  // Get config (weights + stamp sections + custom stamps) for scorerId
   const configUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/config?community_id=${scorerId as string}`;
   const configResponse = await axios.get(configUrl);
-  const configData = configResponse.data as { weights: { [key: string]: number }; stamp_sections: CustomSection[] };
+  const configData = configResponse.data as EmbedConfigData;
   const weightsResponseData: { [key: string]: number } = configData.weights;
   const customSections: CustomSection[] = configData.stamp_sections || [];
+  const customStamps: CustomStampsConfig = configData.custom_stamps || {};
 
-  // If custom sections exist, use them; otherwise fall back to STAMP_PAGES
-  const sectionsToUse =
+  // Build base sections from custom sections or STAMP_PAGES
+  let sectionsToUse: {
+    header: string;
+    platforms: {
+      platformId: string;
+      name: string;
+      description: string;
+      documentationLink?: string;
+      customCredentials?: { id: string; weight: string }[];
+    }[];
+  }[] =
     customSections.length > 0
       ? customSections.map((section) => ({
           header: section.title,
           platforms: section.items
             .map((item) => {
-              // Find the platform in STAMP_PAGES to get its metadata
               const defaultPlatform = STAMP_PAGES.flatMap((page) => page.platforms).find(
                 (p) => p.platformId === item.platform_id
               );
@@ -102,7 +129,6 @@ export const metadataHandler = createHandler<MetadataRequestBody, MetadataRespon
               );
             })
             .sort((a, b) => {
-              // Sort by the order defined in items
               const aOrder = section.items.find((i) => i.platform_id === a.platformId)?.order || 0;
               const bOrder = section.items.find((i) => i.platform_id === b.platformId)?.order || 0;
               return aOrder - bOrder;
@@ -110,8 +136,53 @@ export const metadataHandler = createHandler<MetadataRequestBody, MetadataRespon
         }))
       : STAMP_PAGES;
 
-  // Get providers / credential ids from passport-platforms
-  // For each provider, get the weight from the weights response
+  // Append Guest List and Developer List sections when this scorer has custom stamps
+  const allowListStamps = customStamps.allow_list_stamps || [];
+  const developerListStamps = customStamps.developer_list_stamps || [];
+  if (allowListStamps.length > 0) {
+    sectionsToUse = [
+      ...sectionsToUse,
+      {
+        header: "Guest List",
+        platforms: allowListStamps.map((stamp) => ({
+          platformId: "AllowList",
+          name: stamp.display_name,
+          description: stamp.description || "Verify you are part of this community.",
+          documentationLink:
+            "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-guest-list-stamp",
+          customCredentials: [
+            {
+              id: stamp.provider_id,
+              weight: String(stamp.weight),
+            },
+          ],
+        })),
+      },
+    ];
+  }
+  if (developerListStamps.length > 0) {
+    sectionsToUse = [
+      ...sectionsToUse,
+      {
+        header: "Developer List",
+        platforms: developerListStamps.map((stamp) => ({
+          platformId: "DeveloperList",
+          name: stamp.display_name,
+          description: stamp.description || "Verify your GitHub contributions meet the requirements.",
+          documentationLink:
+            "https://support.passport.xyz/passport-knowledge-base/stamps/how-do-i-add-passport-stamps/the-developer-list-stamp",
+          customCredentials: [
+            {
+              id: stamp.provider_id,
+              weight: String(stamp.weight),
+            },
+          ],
+        })),
+      },
+    ];
+  }
+
+  // Get providers / credential ids from passport-platforms (or use customCredentials for Guest List / Developer List)
   const updatedStampPages = await Promise.all(
     sectionsToUse.map(async (stampPage) => ({
       ...stampPage,
@@ -119,6 +190,25 @@ export const metadataHandler = createHandler<MetadataRequestBody, MetadataRespon
         await Promise.all(
           stampPage.platforms.map(async (platform) => {
             const platformId = platform.platformId;
+            const customCreds = "customCredentials" in platform ? platform.customCredentials : undefined;
+
+            if (customCreds && customCreds.length > 0) {
+              // Custom stamps (Guest List / Developer List): use provided credentials and icon from platform
+              const platformData = platforms[platformId];
+              const icon = platformData?.PlatformDetails?.icon ? await getIcon(platformData.PlatformDetails.icon) : "";
+              const credentials = customCreds;
+              const totalWeight = credentials.reduce((acc, c) => acc + parseFloat(c.weight), 0);
+              const { customCredentials: _omit, ...platformRest } = platform as typeof platform & {
+                customCredentials?: { id: string; weight: string }[];
+              };
+              return {
+                ...platformRest,
+                icon,
+                credentials,
+                displayWeight: displayNumber(totalWeight),
+              };
+            }
+
             const platformData = platforms[platformId];
 
             if (!platformData || !platformData.providers) {
