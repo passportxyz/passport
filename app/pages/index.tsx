@@ -2,8 +2,6 @@
 // --- Methods
 import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
-import path from "path";
-import fs from "fs";
 
 // -- Next Methods
 import type { GetStaticProps, NextPage } from "next";
@@ -49,7 +47,7 @@ datadogLogs.init({
   env: process.env.NEXT_PUBLIC_DATADOG_ENV || "",
 });
 
-export const AppRoutes = ({ campaignImages }: { campaignImages: string[] }) => (
+export const AppRoutes = ({ campaignImages = [] }: { campaignImages?: string[] }) => (
   <Routes>
     <Route path="version" element={<Version />} />
     <Route path="campaign-images" element={<CampaignImages images={campaignImages} />} />
@@ -70,11 +68,13 @@ export const AppRoutes = ({ campaignImages }: { campaignImages: string[] }) => (
 );
 
 export const getStaticProps: GetStaticProps = async () => {
+  const path = require("path");
+  const fs = require("fs");
   const dir = path.join(process.cwd(), "public", "assets", "campaigns");
-  const files = fs.readdirSync(dir);
+  const files: string[] = fs.readdirSync(dir);
   const campaignImages = files
-    .filter((f) => f.endsWith(".webp") && f !== "placeholder.webp")
-    .map((f) => f.replace(".webp", ""))
+    .filter((f: string) => f.endsWith(".webp") && f !== "placeholder.webp")
+    .map((f: string) => f.replace(".webp", ""))
     .sort();
 
   return { props: { campaignImages } };
