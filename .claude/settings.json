@@ -2,5 +2,8 @@
   "permissions": {
     "allow": [],
     "deny": []
+  },
+  "enabledPlugins": {
+    "compound-engineering@every-marketplace": true
   }
 }
