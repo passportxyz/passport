@@ -4,7 +4,7 @@ import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 
 // -- Next Methods
-import type { NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 
 // -- Pages
 import Home from "./Home";
@@ -13,6 +13,7 @@ import Dashboard from "./Dashboard";
 import Privacy from "./privacy";
 import Maintenance from "./Maintenance";
 import Palette from "./palette";
+import CampaignImages from "./CampaignImages";
 
 // -- Datadog
 import { datadogRum } from "@datadog/browser-rum";
@@ -46,9 +47,10 @@ datadogLogs.init({
   env: process.env.NEXT_PUBLIC_DATADOG_ENV || "",
 });
 
-export const AppRoutes = () => (
+export const AppRoutes = ({ campaignImages = [] }: { campaignImages?: string[] }) => (
   <Routes>
     <Route path="version" element={<Version />} />
+    <Route path="campaign-images" element={<CampaignImages images={campaignImages} />} />
     <Route path="campaign/:campaignId/:step?" element={<Campaign />} />
     <Route path="/:key?" element={<CustomizationUrlLayoutRoute />}>
       <Route path="" element={<Home />} />
@@ -65,7 +67,20 @@ export const AppRoutes = () => (
   </Routes>
 );
 
-const App: NextPage = () => {
+export const getStaticProps: GetStaticProps = async () => {
+  const path = require("path");
+  const fs = require("fs");
+  const dir = path.join(process.cwd(), "public", "assets", "campaigns");
+  const files: string[] = fs.readdirSync(dir);
+  const campaignImages = files
+    .filter((f: string) => f.endsWith(".webp") && f !== "placeholder.webp")
+    .map((f: string) => f.replace(".webp", ""))
+    .sort();
+
+  return { props: { campaignImages } };
+};
+
+const App: NextPage<{ campaignImages: string[] }> = ({ campaignImages }) => {
   if (isServerOnMaintenance()) {
     return <Maintenance />;
   }
@@ -73,7 +88,7 @@ const App: NextPage = () => {
   return (
     <div>
       <Router>
-        <AppRoutes />
+        <AppRoutes campaignImages={campaignImages} />
       </Router>
     </div>
   );
