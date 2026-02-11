@@ -60,7 +60,13 @@ export function groupProviderTypesByPlatform(types: string[]): string[][] {
   return Object.values(
     types.reduce(
       (groupedProviders, type) => {
-        const platform = providerTypePlatformMap[type] || "generic";
+        let platform = providerTypePlatformMap[type];
+        if (!platform) {
+          if (type.startsWith("NFTHolder#")) platform = "CustomNFT";
+          else if (type.startsWith("DeveloperList#")) platform = "CustomGithub";
+          else if (type.startsWith("AllowList#")) platform = "AllowList";
+          else platform = "generic";
+        }
 
         if (!groupedProviders[platform]) groupedProviders[platform] = [];
         groupedProviders[platform].push(type);
@@ -70,6 +76,20 @@ export function groupProviderTypesByPlatform(types: string[]): string[][] {
       {} as { [k: keyof typeof platforms]: string[] }
     )
   );
+}
+
+const CONDITION_BASED_PREFIXES = ["DeveloperList", "NFTHolder"] as const;
+
+function parseConditionBasedType(
+  type: string
+): { prefix: string; conditionName: string; conditionHash: string } | null {
+  const prefix = CONDITION_BASED_PREFIXES.find((p) => type.startsWith(`${p}#`));
+  if (!prefix) return null;
+
+  const parts = type.split("#");
+  if (parts.length < 3 || !parts[1] || !parts[2]) return null;
+
+  return { prefix, conditionName: parts[1], conditionHash: parts[2] };
 }
 
 /**
@@ -114,15 +134,16 @@ export async function verifyTypes(
             allowList: type.split("#")[1],
           };
           type = "AllowList";
-        } else if (type.startsWith("DeveloperList")) {
-          // Here we handle the custom DeveloperList stamps
-          const [__type, conditionName, conditionHash, ..._rest] = type.split("#");
-          payloadForType.proofs = {
-            ...payload.proofs,
-            conditionName,
-            conditionHash,
-          };
-          type = "DeveloperList";
+        } else {
+          const parsed = parseConditionBasedType(type);
+          if (parsed) {
+            payloadForType.proofs = {
+              ...payload.proofs,
+              conditionName: parsed.conditionName,
+              conditionHash: parsed.conditionHash,
+            };
+            type = parsed.prefix;
+          }
         }
 
         // Start timing
