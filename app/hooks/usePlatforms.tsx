@@ -100,6 +100,10 @@ export const usePlatforms = () => {
     const customPlatformDefinitions = Object.entries(customStamps || {}).reduce(
       (customPlatformDefinitions, [platformName, { platformType, iconUrl, displayName, description, isEVM }]) => {
         const platformTypeInfo = CUSTOM_PLATFORM_TYPE_INFO[platformType];
+        if (!platformTypeInfo) {
+          console.warn(`Unknown custom platform type: ${platformType} for platform ${platformName}, skipping`);
+          return customPlatformDefinitions;
+        }
         const basePlatformSpecs = platformDefinitions[platformTypeInfo.basePlatformName].PlatformDetails;
 
         const platformId = customPlatformNameToId(platformName);
@@ -228,7 +232,7 @@ export const usePlatforms = () => {
         return category;
       }
     });
-  }, [customStamps]);
+  }, [customStamps, partnerName]);
 
   return {
     getPlatformSpec,

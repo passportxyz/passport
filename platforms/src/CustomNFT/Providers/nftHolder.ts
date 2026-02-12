@@ -5,6 +5,8 @@ import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.j
 
 export const nftConditionEndpoint = `${process.env.SCORER_ENDPOINT}/internal/customization/credential`;
 
+const RPC_TIMEOUT_MS = 10_000;
+
 type NFTContract = {
   address: string;
   chainId: number;
@@ -25,7 +27,7 @@ type ConditionResponse = {
 
 const getCondition = async (type: string, conditionName: string, conditionHash: string): Promise<NFTCondition> => {
   try {
-    const url = `${nftConditionEndpoint}/${type}%23${conditionName}%23${conditionHash}`;
+    const url = `${nftConditionEndpoint}/${encodeURIComponent(`${type}#${conditionName}#${conditionHash}`)}`;
     const response: ConditionResponse = await axios.get(url, {
       headers: { Authorization: process.env.SCORER_API_KEY },
     });
@@ -46,6 +48,11 @@ export class NFTHolderProvider implements Provider {
     const { conditionName, conditionHash } = payload.proofs;
     const address = payload.address;
 
+    const ETH_ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
+    if (!address || !ETH_ADDRESS_RE.test(address)) {
+      return { valid: false, errors: ["Invalid wallet address"] };
+    }
+
     if (!conditionName || !conditionHash) {
       return {
         valid: false,
@@ -59,6 +66,14 @@ export class NFTHolderProvider implements Provider {
       return {
         valid: false,
         errors: ["Invalid condition: no contracts defined"],
+      };
+    }
+
+    const MAX_CONTRACTS = 20;
+    if (condition.contracts.length > MAX_CONTRACTS) {
+      return {
+        valid: false,
+        errors: [`Too many contracts: ${condition.contracts.length} exceeds limit of ${MAX_CONTRACTS}`],
       };
     }
 
@@ -98,12 +113,16 @@ async function checkNFTBalance(ownerAddress: string, contract: NFTContract): Pro
   // ERC-721 balanceOf(address) selector: 0x70a08231
   const data = `0x70a08231000000000000000000000000${ownerAddress.slice(2).toLowerCase()}`;
 
-  const response = await axios.post(rpcUrl, {
-    jsonrpc: "2.0",
-    method: "eth_call",
-    params: [{ to: contract.address, data }, "latest"],
-    id: 1,
-  });
+  const response = await axios.post(
+    rpcUrl,
+    {
+      jsonrpc: "2.0",
+      method: "eth_call",
+      params: [{ to: contract.address, data }, "latest"],
+      id: 1,
+    },
+    { timeout: RPC_TIMEOUT_MS }
+  );
 
   if (response.data.error) {
     throw new Error(`RPC error: ${response.data.error.message}`);
@@ -122,7 +141,7 @@ function getRpcUrl(chainId: number): string {
     8453: process.env.BASE_RPC_URL,
   };
 
-  const url = rpcUrls[chainId] || process.env.MAINNET_RPC_URL;
+  const url = rpcUrls[chainId];
   if (!url) {
     throw new Error(`No RPC URL configured for chainId ${chainId}`);
   }
