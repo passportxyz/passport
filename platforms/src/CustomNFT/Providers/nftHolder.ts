@@ -131,19 +131,36 @@ async function checkNFTBalance(ownerAddress: string, contract: NFTContract): Pro
   return parseInt(response.data.result, 16);
 }
 
-function getRpcUrl(chainId: number): string {
-  // Map chainId to RPC URL from environment
-  const rpcUrls: Record<number, string | undefined> = {
-    1: process.env.MAINNET_RPC_URL,
-    10: process.env.OPTIMISM_RPC_URL,
-    137: process.env.POLYGON_RPC_URL,
-    42161: process.env.ARBITRUM_RPC_URL,
-    8453: process.env.BASE_RPC_URL,
-  };
+const ALCHEMY_CHAIN_SLUGS: Record<number, string> = {
+  1: "eth-mainnet",
+  10: "opt-mainnet",
+  56: "bnb-mainnet",
+  100: "gnosis-mainnet",
+  137: "polygon-mainnet",
+  250: "fantom-mainnet",
+  324: "zksync-mainnet",
+  1101: "polygonzkevm-mainnet",
+  1329: "sei-mainnet",
+  5000: "mantle-mainnet",
+  7000: "zetachain-mainnet",
+  8453: "base-mainnet",
+  42161: "arb-mainnet",
+  42170: "arbnova-mainnet",
+  42220: "celo-mainnet",
+  43114: "avax-mainnet",
+  59144: "linea-mainnet",
+  81457: "blast-mainnet",
+  534352: "scroll-mainnet",
+};
 
-  const url = rpcUrls[chainId];
-  if (!url) {
-    throw new Error(`No RPC URL configured for chainId ${chainId}`);
+function getRpcUrl(chainId: number): string {
+  const slug = ALCHEMY_CHAIN_SLUGS[chainId];
+  if (!slug) {
+    throw new Error(`Unsupported chainId: ${chainId}`);
   }
-  return url;
+  const apiKey = process.env.ALCHEMY_API_KEY;
+  if (!apiKey) {
+    throw new Error("ALCHEMY_API_KEY is not configured");
+  }
+  return `https://${slug}.g.alchemy.com/v2/${apiKey}`;
 }
