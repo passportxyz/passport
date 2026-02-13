@@ -118,7 +118,6 @@ export const Category = ({
                     onOpen={onOpen}
                     setCurrentPlatform={setCurrentPlatform}
                     className={cardClassName}
-                    variant={category.id === CUSTOM_CATEGORY_ID ? "partner" : "default"}
                   />
                 );
               })}
