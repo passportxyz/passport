@@ -42,11 +42,7 @@ function mockRpcError(message: string) {
 describe("NFTHolderProvider verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.MAINNET_RPC_URL = "https://mainnet.example.com";
-    process.env.OPTIMISM_RPC_URL = "https://optimism.example.com";
-    process.env.POLYGON_RPC_URL = "https://polygon.example.com";
-    process.env.ARBITRUM_RPC_URL = "https://arbitrum.example.com";
-    process.env.BASE_RPC_URL = "https://base.example.com";
+    process.env.ALCHEMY_API_KEY = "test-alchemy-key";
     process.env.SCORER_ENDPOINT = "https://scorer.example.com";
     process.env.SCORER_API_KEY = "test-api-key";
   });
@@ -79,7 +75,7 @@ describe("NFTHolderProvider verification", function () {
 
     // Verify RPC call was made with timeout
     expect(axios.post).toHaveBeenCalledWith(
-      "https://mainnet.example.com",
+      "https://eth-mainnet.g.alchemy.com/v2/test-alchemy-key",
       expect.objectContaining({
         jsonrpc: "2.0",
         method: "eth_call",
@@ -283,6 +279,10 @@ describe("NFTHolderProvider verification", function () {
     const provider = new NFTHolderProvider();
     await provider.verify(makePayload());
 
-    expect(axios.post).toHaveBeenCalledWith("https://mainnet.example.com", expect.any(Object), { timeout: 10_000 });
+    expect(axios.post).toHaveBeenCalledWith(
+      "https://eth-mainnet.g.alchemy.com/v2/test-alchemy-key",
+      expect.any(Object),
+      { timeout: 10_000 }
+    );
   });
 });
