@@ -24,6 +24,7 @@ const {
   Outdid,
   Binance,
   CustomGithub,
+  CustomNFT,
   CleanHands,
   HumanIdPhone,
   HumanIdKyc,
@@ -200,6 +201,11 @@ export const CUSTOM_PLATFORM_TYPE_INFO: { [id: string]: CustomPlatformTypeInfo }
       clientId: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CLIENT_ID,
       redirectUri: process.env.NEXT_PUBLIC_PASSPORT_GITHUB_CALLBACK,
     },
+  },
+  NFT: {
+    basePlatformName: "CustomNFT",
+    platformClass: CustomNFT.CustomNFTPlatform,
+    platformParams: {},
   },
 };
 

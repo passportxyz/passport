@@ -98,8 +98,12 @@ export const usePlatforms = () => {
 
   const allPlatformDefinitions = useMemo(() => {
     const customPlatformDefinitions = Object.entries(customStamps || {}).reduce(
-      (customPlatformDefinitions, [platformName, { platformType, iconUrl, displayName, description }]) => {
+      (customPlatformDefinitions, [platformName, { platformType, iconUrl, displayName, description, isEVM }]) => {
         const platformTypeInfo = CUSTOM_PLATFORM_TYPE_INFO[platformType];
+        if (!platformTypeInfo) {
+          console.warn(`Unknown custom platform type: ${platformType} for platform ${platformName}, skipping`);
+          return customPlatformDefinitions;
+        }
         const basePlatformSpecs = platformDefinitions[platformTypeInfo.basePlatformName].PlatformDetails;
 
         const platformId = customPlatformNameToId(platformName);
@@ -111,7 +115,7 @@ export const usePlatforms = () => {
             name: displayName || basePlatformSpecs.name,
             description: description || basePlatformSpecs.description,
             connectMessage: basePlatformSpecs.connectMessage,
-            isEVM: basePlatformSpecs.isEVM,
+            isEVM: isEVM ?? basePlatformSpecs.isEVM,
           },
         };
         return customPlatformDefinitions;
@@ -134,9 +138,12 @@ export const usePlatforms = () => {
     }
 
     if (customStamps) {
-      for (const [platformId, { platformType, banner, credentials }] of Object.entries(customStamps)) {
+      for (const [platformId, { platformType, banner, credentials, isEVM }] of Object.entries(customStamps)) {
         const platformTypeInfo = CUSTOM_PLATFORM_TYPE_INFO[platformType];
-        if (!platformTypeInfo) throw new Error(`Unknown custom platform type: ${platformType}`);
+        if (!platformTypeInfo) {
+          console.warn(`Unknown custom platform type: ${platformType}, skipping`);
+          continue;
+        }
 
         // Not sure how to make typescript happy here, should probably figure
         // this out at some point
@@ -164,7 +171,7 @@ export const usePlatforms = () => {
         platformsMap.set(`Custom#${platformId}`, {
           platform,
           platFormGroupSpec,
-          isEVM: platformDefinitions[platformTypeInfo.basePlatformName]?.PlatformDetails?.isEVM,
+          isEVM: isEVM ?? platformDefinitions[platformTypeInfo.basePlatformName]?.PlatformDetails?.isEVM ?? false,
         });
       }
     }
@@ -225,7 +232,7 @@ export const usePlatforms = () => {
         return category;
       }
     });
-  }, [customStamps]);
+  }, [customStamps, partnerName]);
 
   return {
     getPlatformSpec,

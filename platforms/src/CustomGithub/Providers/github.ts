@@ -27,7 +27,7 @@ type ConditionResponse = {
 
 const getCondition = async (type: string, conditionName: string, conditionHash: string): Promise<Condition> => {
   try {
-    const url = `${githubConditionEndpoint}/${type}%23${conditionName}%23${conditionHash}`;
+    const url = `${githubConditionEndpoint}/${encodeURIComponent(`${type}#${conditionName}#${conditionHash}`)}`;
     const response: ConditionResponse = await axios.get(url, {
       headers: { Authorization: process.env.SCORER_API_KEY },
     });

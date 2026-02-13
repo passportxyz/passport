@@ -47,4 +47,8 @@ async verify(payload: RequestPayload): Promise<VerifiedPayload> {
 ## Files Following This Pattern
 - `platforms/src/CleanHands/Providers/index.ts`
 - `platforms/src/HumanID/shared/BaseHumanIdProvider.ts`
+- `platforms/src/CustomNFT/Providers/nftHolder.ts`
 - All providers extending `BaseHumanIdProvider`
+
+## External Call Safety
+For providers making external RPC or API calls, see `gotchas/provider_external_calls.md` for the required checklist: timeouts, URL encoding, no silent fallbacks, and rejection tracking.

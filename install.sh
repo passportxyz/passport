@@ -28,6 +28,17 @@ else
     echo "✅ Yarn is already installed: $(yarn --version)"
 fi
 
+# Install agent-browser CLI for browser automation
+if ! command -v agent-browser &> /dev/null; then
+    echo ""
+    echo "🌐 Installing agent-browser CLI..."
+    sudo npm install -g agent-browser
+    agent-browser install --with-deps
+    echo "✅ agent-browser installed"
+else
+    echo "✅ agent-browser is already installed"
+fi
+
 # Install project dependencies (includes dev via postinstall)
 echo ""
 echo "📦 Installing all dependencies..."

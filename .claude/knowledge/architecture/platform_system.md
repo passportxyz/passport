@@ -88,6 +88,15 @@ The `isEVM` flag indicates whether a platform's stamps are eligible for EVM-base
   - Components like `GenericPlatform.tsx` read `isEVM` from `PlatformProps`
 - **Platform classes** (App-Bindings) no longer carry `isEVM`
 
+### Custom Platform isEVM Inheritance
+Custom platforms inherit `isEVM` directly from their base platform via `CUSTOM_PLATFORM_TYPE_INFO`:
+```typescript
+isEVM: platformDefinitions[platformTypeInfo.basePlatformName]?.PlatformDetails?.isEVM
+```
+- No way to override at custom platform level (simplifies architecture, prevents misconfiguration)
+- NFT-based custom stamps inherit `isEVM: true` from the NFT base platform
+- Non-EVM bases (Civic, TrustaLabs, ZKEmail) intentionally excluded from auto-verification
+
 ### Platforms WITHOUT isEVM
 Some platforms intentionally do NOT have `isEVM` on PlatformSpec because they are not eligible for auto-verification:
 - Civic
@@ -100,12 +109,20 @@ Some platforms intentionally do NOT have `isEVM` on PlatformSpec because they ar
 - `app/config/platformMap.ts` - Derivation loop populating PlatformProps.isEVM
 - `identity/src/autoVerification.ts` - Backend consumer of isEVM
 
+## Custom Platform ID Convention
+- Custom platform IDs use `Custom#${platformName}` format (e.g., `Custom#my-nft-stamp`)
+- Backend uses `platformName` directly from customization API
+- Provider IDs use `{Type}#name#hash` format (e.g., `NFTHolder#name#hash`, `DeveloperList#name#hash`)
+- See `architecture/custom_platform_type_system.md` for full details
+
 ## Key Files
 - `platforms/src/platforms.ts` - Platform registry with internal IDs as keys
 - `platforms/src/*/Providers-config.ts` - Platform configurations with display names
 - `platforms/src/*/App-Bindings.tsx` - Frontend platform implementations
 - `platforms/src/*/Providers/*.ts` - Backend provider implementations
 - `platforms/src/HumanID/shared/` - Shared HumanID utilities and base classes
+- `platforms/src/CustomGithub/` - DEVEL custom platform type
+- `platforms/src/CustomNFT/` - NFT custom platform type
 - `embed/src/stamps.ts` - Stamp metadata with display names
 - `embed/src/metadata.ts` - Service that needs to resolve platforms
 
@@ -115,3 +132,4 @@ Some platforms intentionally do NOT have `isEVM` on PlatformSpec because they ar
 - Maintain consistency between platform IDs across all services
 - Keep frontend and backend responsibilities clearly separated
 - Share validation logic where appropriate to avoid duplication
+- For custom platforms: always reference via `Custom#${platformName}` ID, never by display name

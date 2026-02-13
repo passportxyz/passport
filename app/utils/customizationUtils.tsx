@@ -48,6 +48,7 @@ type CustomStamp = {
   iconUrl: string;
   displayName: string;
   description?: string;
+  isEVM?: boolean;
   banner: {
     header?: string;
     content?: string;

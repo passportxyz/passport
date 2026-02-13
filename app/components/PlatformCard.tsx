@@ -20,13 +20,10 @@ import { BetaBadge } from "./BetaBadge";
 
 export type SelectedProviders = Record<PLATFORM_ID, PROVIDER_ID[]>;
 
-type CardVariant = "default" | "partner";
-
 type PlatformCardProps = {
   i: number;
   platform: PlatformScoreSpec;
   onOpen: () => void;
-  variant?: CardVariant;
   setCurrentPlatform: React.Dispatch<React.SetStateAction<PlatformScoreSpec | undefined>>;
   className?: string;
 };
@@ -38,16 +35,9 @@ type StampProps = {
   daysUntilExpiration?: number;
   className?: string;
   onClick: () => void;
-  variant?: CardVariant;
   isDeduplicated?: boolean;
   isHumanTech?: boolean;
   isBeta?: boolean;
-};
-
-const variantClasses: Record<CardVariant, string> = {
-  default: "bg-background",
-  partner:
-    "bg-gradient-to-t from-background-2 to-background-3 border-background-3 shadow-[0px_0px_24px_0px] shadow-background-3",
 };
 
 const humanTechPlatforms = new Set<string>([
@@ -70,12 +60,10 @@ const SecureDByHumanTech: React.FC = () => {
   );
 };
 
-const DefaultStamp = ({ idx, platform, className, onClick, variant, isHumanTech, isBeta }: StampProps) => {
+const DefaultStamp = ({ idx, platform, className, onClick, isHumanTech, isBeta }: StampProps) => {
   return (
     <div data-testid="platform-card" onClick={onClick} className={className} key={`${platform.name}${idx}`}>
-      <div
-        className={`group relative flex h-full cursor-pointer flex-col rounded-2xl p-0 transition-all duration-200 hover:scale-[1.01] hover:shadow-md ${variantClasses[variant || "default"]}`}
-      >
+      <div className="group relative flex h-full cursor-pointer flex-col rounded-2xl p-0 transition-all duration-200 hover:scale-[1.01] hover:shadow-md bg-background">
         <div className="m-4 flex h-full flex-col justify-between">
           <div className="flex w-full items-center justify-between">
             {platform.icon ? (
@@ -337,7 +325,6 @@ export const PlatformCard = ({
   onOpen,
   setCurrentPlatform,
   className,
-  variant,
 }: PlatformCardProps): JSX.Element => {
   const { platformExpirationDates, expiredPlatforms, allProvidersState } = useContext(CeramicContext);
   const { platformSpecs, platformProviderIds } = usePlatforms();
@@ -408,7 +395,6 @@ export const PlatformCard = ({
   } else {
     stamp = (
       <DefaultStamp
-        variant={variant}
         idx={i}
         platform={platform}
         platformProviders={platformProviderIds[platform.platform]}

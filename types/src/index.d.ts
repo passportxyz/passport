@@ -359,6 +359,7 @@ export type PLATFORM_ID =
   | "AllowList"
   | "Binance"
   | "DeveloperList"
+  | "NFTHolder"
   | `Custom#${string}`
   | "CleanHands"
   | "HumanIdPhone"
@@ -457,6 +458,7 @@ export type PROVIDER_ID =
   | "BinanceBABT"
   | "BinanceBABT2"
   | `DeveloperList#${string}#${string}`
+  | `NFTHolder#${string}#${string}`
   | "CleanHands"
   | "Biometrics"
   | "ZKEmail#AmazonCasualPurchaser"
