@@ -1,9 +1,9 @@
 {
   "permissions": {
-    "allow": [
-      "yarn lint",
-      "yarn test"
-    ],
+    "allow": [],
     "deny": []
+  },
+  "enabledPlugins": {
+    "compound-engineering@every-marketplace": true
   }
 }
