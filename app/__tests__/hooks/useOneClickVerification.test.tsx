@@ -230,9 +230,7 @@ const TestingComponent = () => {
         checkSessionIsValid: () => false,
       }}
     >
-      <div onClick={() => initiateVerification("0x1234567890123456789012345678901234567890", "token")}>
-        Click me
-      </div>
+      <div onClick={() => initiateVerification("0x1234567890123456789012345678901234567890", "token")}>Click me</div>
       <div data-testid="loadingState">{verificationState.loading.toString()}</div>
       <div data-testid="success">{verificationState.success.toString()}</div>
       <div data-testid="error">{verificationState?.error?.toString()}</div>
