@@ -8,7 +8,7 @@ import { CUSTOM_PLATFORM_TYPE_INFO } from "../../config/platformMap";
 import { generateUID } from "../../utils/helpers";
 import { scrollCampaignBadgeProviders } from "../../config/scroll_campaign";
 import { waitForRedirect } from "../../context/stampClaimingContext";
-import { fetchVerifiableCredentialWithFallback } from "../../utils/credentials";
+import { fetchVerifiableCredential } from "../../utils/credentials";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../../config/stamp_config";
 import { PROVIDER_ID, Stamp, VerifiableCredential } from "@gitcoin/passport-types";
 import { datadogLogs } from "@datadog/browser-logs";
@@ -16,7 +16,7 @@ import { LoadButton } from "../LoadButton";
 import { GitHubIcon } from "../WelcomeFooter";
 import { ScrollCampaignPage } from "./ScrollCampaignPage";
 import { BadgeCTA } from "../ScrollCampaign";
-import { useAccount, useSignMessage } from "wagmi";
+import { useAccount } from "wagmi";
 
 export const ScrollConnectGithub = () => {
   const goToNextStep = useNextCampaignStep();
@@ -25,7 +25,6 @@ export const ScrollConnectGithub = () => {
   const { userDid, database } = useContext(CeramicContext);
   const goToLoginStep = useNavigateToRootStep();
   const { address } = useAccount();
-  const { signMessageAsync } = useSignMessage();
   const [noCredentialReceived, setNoCredentialReceived] = useState(false);
   const [msg, setMsg] = useState<string | undefined>("Verifying existing badges on chain ... ");
   const [isVerificationRunning, setIsVerificationRunning] = useState(false);
@@ -71,8 +70,12 @@ export const ScrollConnectGithub = () => {
           goToLoginStep();
         }
 
+        if (!dbAccessToken) {
+          throw new Error("No database access token available - please sign in again");
+        }
+
         setMsg("Please wait, we are checking your eligibility ...");
-        const verifyCredentialsResponse = await fetchVerifiableCredentialWithFallback(
+        const verifyCredentialsResponse = await fetchVerifiableCredential(
           iamUrl,
           {
             type: customGithubPlatform.platformId,
@@ -82,8 +85,7 @@ export const ScrollConnectGithub = () => {
             proofs: providerPayload,
             signatureType: IAM_SIGNATURE_TYPE,
           },
-          dbAccessToken,
-          (message: string) => signMessageAsync({ message })
+          dbAccessToken
         );
 
         setMsg(undefined);
@@ -117,20 +119,15 @@ export const ScrollConnectGithub = () => {
           setNoCredentialReceived(true);
         }
       }
+    } catch (error) {
+      failure({
+        title: "Error",
+        message: error instanceof Error ? error.message : "An unexpected error occurred",
+      });
     } finally {
       setIsVerificationRunning(false);
     }
-  }, [
-    address,
-    checkSessionIsValid,
-    dbAccessToken,
-    goToLoginStep,
-    goToNextStep,
-    userDid,
-    database,
-    failure,
-    signMessageAsync,
-  ]);
+  }, [address, checkSessionIsValid, dbAccessToken, goToLoginStep, goToNextStep, userDid, database, failure]);
 
   return (
     <ScrollCampaignPage>

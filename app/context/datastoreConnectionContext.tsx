@@ -10,6 +10,8 @@ import { useAccount } from "wagmi";
 import { WalletClient } from "viem";
 import { logoutHumanWallet } from "../utils/humanWallet";
 
+const SIWE_EXPIRATION_MS = 5 * 60 * 1000; // 5 minutes
+
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
 
 export type DatastoreConnectionContextState = {
@@ -119,6 +121,7 @@ export const useDatastoreConnection = () => {
         version: "1",
         chainId: connectedChainId,
         nonce,
+        expirationTime: new Date(Date.now() + SIWE_EXPIRATION_MS).toISOString(),
       });
 
       const message = siweMessage.prepareMessage();
@@ -140,6 +143,7 @@ export const useDatastoreConnection = () => {
           chainId: siweMessage.chainId,
           nonce: siweMessage.nonce,
           issuedAt: siweMessage.issuedAt,
+          expirationTime: siweMessage.expirationTime,
         },
         signature,
       });

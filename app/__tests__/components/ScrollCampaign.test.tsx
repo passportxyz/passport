@@ -48,7 +48,6 @@ vi.mock("../../utils/credentials", async (importActual) => {
   return {
     ...originalModule,
     fetchVerifiableCredential: vi.fn().mockImplementation(mockCredentialsResponse),
-    fetchVerifiableCredentialWithFallback: vi.fn().mockImplementation(mockCredentialsResponse),
   };
 });
 
@@ -344,7 +343,7 @@ describe("Github Connect page tests", () => {
   });
 
   it("displays an error message if the verification failed", async () => {
-    vi.spyOn(passportUtilsCredentials, "fetchVerifiableCredentialWithFallback").mockImplementation(async () => {
+    vi.spyOn(passportUtilsCredentials, "fetchVerifiableCredential").mockImplementation(async () => {
       return { credentials: [] };
     });
 

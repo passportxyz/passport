@@ -12,7 +12,7 @@ import {
   StampPatch,
   ValidResponseBody,
 } from "@gitcoin/passport-types";
-import { fetchVerifiableCredentialWithFallback } from "../utils/credentials";
+import { fetchVerifiableCredential } from "../utils/credentials";
 
 // --- Style Components
 import { StampDrawer } from "./StampDrawer";
@@ -180,7 +180,11 @@ export const GenericPlatform = ({
 
       if (!checkSessionIsValid()) throw new InvalidSessionError();
 
-      const verifyCredentialsResponse = await fetchVerifiableCredentialWithFallback(
+      if (!dbAccessToken) {
+        throw new Error("No database access token available - please sign in again");
+      }
+
+      const verifyCredentialsResponse = await fetchVerifiableCredential(
         iamUrl,
         {
           type: platform.platformId,
@@ -190,8 +194,7 @@ export const GenericPlatform = ({
           proofs: providerPayload,
           signatureType: IAM_SIGNATURE_TYPE,
         },
-        dbAccessToken,
-        (message: string) => signMessageAsync({ message })
+        dbAccessToken
       );
 
       const verifiedCredentials =

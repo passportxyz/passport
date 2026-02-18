@@ -2,7 +2,7 @@ import { PROVIDER_ID, StampPatch, ValidResponseBody } from "@gitcoin/passport-ty
 import { useContext, useMemo } from "react";
 import { fetchPossibleEVMStamps } from "../signer/utils";
 import { IAM_SIGNATURE_TYPE, iamUrl } from "../config/stamp_config";
-import { fetchVerifiableCredentialWithFallback } from "../utils/credentials";
+import { fetchVerifiableCredential } from "../utils/credentials";
 import { CeramicContext } from "../context/ceramicContext";
 import { useAtom } from "jotai";
 import { mutableUserVerificationAtom } from "../context/userState";
@@ -15,11 +15,7 @@ export const useOneClickVerification = () => {
   const { passport, allPlatforms, handlePatchStamps } = useContext(CeramicContext);
   const { success } = useMessage();
 
-  const initiateVerification = async function (
-    signMessage: (message: string) => Promise<string>,
-    address: string,
-    dbAccessToken?: string
-  ) {
+  const initiateVerification = async function (address: string, dbAccessToken: string) {
     datadogLogs.logger.info("Initiating one click verification", { address });
 
     setUserVerificationState({
@@ -51,7 +47,7 @@ export const useOneClickVerification = () => {
         )
         .flat(2);
 
-      const credentialResponse = await fetchVerifiableCredentialWithFallback(
+      const credentialResponse = await fetchVerifiableCredential(
         iamUrl,
         {
           type: "EVMBulkVerify",
@@ -61,8 +57,7 @@ export const useOneClickVerification = () => {
           proofs: {},
           signatureType: IAM_SIGNATURE_TYPE,
         },
-        dbAccessToken,
-        signMessage
+        dbAccessToken
       );
 
       // Should be able to assume that all stamps should be patched
