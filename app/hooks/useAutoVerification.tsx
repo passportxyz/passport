@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef } from "react";
-import { useAccount, useSignMessage } from "wagmi";
+import { useAccount } from "wagmi";
 import { useDatastoreConnectionContext } from "../context/datastoreConnectionContext";
 import { CeramicContext } from "../context/ceramicContext";
 import { useOneClickVerification } from "./useOneClickVerification";
@@ -7,7 +7,6 @@ import { datadogLogs } from "@datadog/browser-logs";
 
 export const useAutoVerification = () => {
   const { address } = useAccount();
-  const { signMessageAsync } = useSignMessage();
   const { dbAccessTokenStatus, dbAccessToken } = useDatastoreConnectionContext();
   const { databaseReady } = useContext(CeramicContext);
   const { initiateVerification } = useOneClickVerification();
@@ -17,7 +16,7 @@ export const useAutoVerification = () => {
 
   useEffect(() => {
     // Check if login is complete (wallet connected + database connected)
-    const isLoginComplete = address && dbAccessTokenStatus === "connected" && databaseReady;
+    const isLoginComplete = address && dbAccessTokenStatus === "connected" && dbAccessToken && databaseReady;
 
     // Reset when user disconnects
     if (!isLoginComplete) {
@@ -31,7 +30,7 @@ export const useAutoVerification = () => {
 
       datadogLogs.logger.info("Initiating automatic stamp verification", { address });
 
-      initiateVerification((message: string) => signMessageAsync({ message }), address, dbAccessToken)
+      initiateVerification(address, dbAccessToken)
         .then(() => {
           datadogLogs.logger.info("Auto verification completed successfully", { address });
         })
@@ -45,7 +44,7 @@ export const useAutoVerification = () => {
           verificationInitiatedRef.current = false;
         });
     }
-  }, [address, dbAccessToken, dbAccessTokenStatus, databaseReady, initiateVerification, signMessageAsync]);
+  }, [address, dbAccessToken, dbAccessTokenStatus, databaseReady, initiateVerification]);
 
   return {
     isAutoVerificationReady: !verificationInitiatedRef.current,

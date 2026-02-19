@@ -7,7 +7,7 @@ import { mutableUserVerificationAtom } from "../../context/userState";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
 import { DatastoreConnectionContext } from "../../context/datastoreConnectionContext";
-import { fetchVerifiableCredentialWithFallback } from "../../utils/credentials";
+import { fetchVerifiableCredential } from "../../utils/credentials";
 import { fetchPossibleEVMStamps } from "../../signer/utils";
 import { VerifiableCredential } from "@gitcoin/passport-types";
 
@@ -16,7 +16,7 @@ vi.mock("../../context/walletStore", () => ({
 }));
 
 vi.mock("../../utils/credentials", () => ({
-  fetchVerifiableCredentialWithFallback: vi.fn(),
+  fetchVerifiableCredential: vi.fn(),
 }));
 
 const mockPossiblePlatforms = [
@@ -219,8 +219,6 @@ const TestingComponent = () => {
     // initiateVerification();
   }, [verificationState]);
 
-  const mockSignMessage = vi.fn().mockResolvedValue("0xmocksignature");
-
   return (
     <DatastoreConnectionContext.Provider
       value={{
@@ -232,9 +230,7 @@ const TestingComponent = () => {
         checkSessionIsValid: () => false,
       }}
     >
-      <div onClick={() => initiateVerification(mockSignMessage, "0x1234567890123456789012345678901234567890", "token")}>
-        Click me
-      </div>
+      <div onClick={() => initiateVerification("0x1234567890123456789012345678901234567890", "token")}>Click me</div>
       <div data-testid="loadingState">{verificationState.loading.toString()}</div>
       <div data-testid="success">{verificationState.success.toString()}</div>
       <div data-testid="error">{verificationState?.error?.toString()}</div>
@@ -247,7 +243,7 @@ describe("useOneClickVerification", () => {
     renderWithContext(mockCeramicContext, <TestingComponent />);
     await waitFor(() => {
       screen.getByText("Click me").click();
-      expect(fetchVerifiableCredentialWithFallback).not.toHaveBeenCalled();
+      expect(fetchVerifiableCredential).not.toHaveBeenCalled();
     });
   });
   it("should attempt to issue credentials if possible stamps are found", async () => {
@@ -255,7 +251,7 @@ describe("useOneClickVerification", () => {
     (fetchPossibleEVMStamps as Mock).mockResolvedValue(mockPossiblePlatforms);
     await waitFor(() => {
       screen.getByText("Click me").click();
-      expect(fetchVerifiableCredentialWithFallback).toHaveBeenCalledWith(
+      expect(fetchVerifiableCredential).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           types: [
@@ -269,15 +265,14 @@ describe("useOneClickVerification", () => {
             "GuildPassportMember",
           ],
         }),
-        expect.any(String), // dbAccessToken
-        expect.any(Function) // signMessage fallback
+        expect.any(String) // dbAccessToken
       );
     });
   });
   it("should indicate passport was successfully refreshed", async () => {
     renderWithContext(mockCeramicContext, <TestingComponent />);
     (fetchPossibleEVMStamps as Mock).mockResolvedValue(mockPossiblePlatforms);
-    (fetchVerifiableCredentialWithFallback as Mock).mockResolvedValue({
+    (fetchVerifiableCredential as Mock).mockResolvedValue({
       credentials: [
         {
           record: {
@@ -326,7 +321,7 @@ describe("useOneClickVerification", () => {
   it("should indicate that an error was thrown", async () => {
     renderWithContext(mockCeramicContext, <TestingComponent />);
     (fetchPossibleEVMStamps as Mock).mockResolvedValue(mockPossiblePlatforms);
-    (fetchVerifiableCredentialWithFallback as Mock).mockRejectedValue(new Error("error"));
+    (fetchVerifiableCredential as Mock).mockRejectedValue(new Error("error"));
     await waitFor(() => {
       screen.getByText("Click me").click();
       expect(screen.getByTestId("error").textContent).toBe("Error: error");
