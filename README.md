@@ -4,7 +4,7 @@
 
 Many social organizations, online particularly, have difficulty ensuring that every participant is a unique human and does not have multiple participating accounts. Most existing digital identity solutions are either centralized (e.g., national identity cards) or individualistic (e.g., most “self-sovereign” identity models). However, identity is naturally [intersectional and social](https://www.radicalxchange.org/concepts/intersectional-social-identity/); everybody shares different data and relationships with a unique set of others. Passport aims to provide a more collaborative and secure infrastructure for digital identity by capturing the richness of our diversely shared lives.
 
-Passport is an identity verification application. We have written software enabling people to grow personal collections of [verifiable credentials](https://decentralized-id.com/web-standards/w3c/wg/vc/verifiable-credentials/) about themselves and organizations to assess their identities to coordinate rights and responsibilities. The institutions define, verify, and utilize identity as functions of the networked records of the individuals. While we build the Passport agnostic to specific applications, we are actively exploring its benefits for [personhood proofs](https://en.wikipedia.org/wiki/Proof_of_personhood) and [plurality](https://www.radicalxchange.org/media/blog/why-i-am-a-pluralist/) in organizational designs.
+Passport is an identity verification application. We have written software enabling people to grow personal collections of [verifiable credentials](https://decentralized-id.com/web-standards/w3c/verifiable-credentials/) about themselves and organizations to assess their identities to coordinate rights and responsibilities. The institutions define, verify, and utilize identity as functions of the networked records of the individuals. While we build the Passport agnostic to specific applications, we are actively exploring its benefits for [personhood proofs](https://en.wikipedia.org/wiki/Proof_of_personhood) and [plurality](https://www.radicalxchange.org/media/blog/why-i-am-a-pluralist/) in organizational designs.
 
 ## Documentation
 
@@ -14,7 +14,7 @@ Check out our documentation at https://docs.passport.xyz
 
 We welcome everyone to contribute to Passport and the Scorer API! Please review our [contributing guidelines](./CONTRIBUTING.md) before proceeding.
 
-You can join our [Discord](https://discord.gg/passport) (just be sure to select the builder role when you join) to get help and discuss the project with the rest of the community.
+You can join our [Discord](https://discord.com/invite/S3fdErz4NV) (just be sure to select the builder role when you join) to get help and discuss the project with the rest of the community.
 
 You can also familiarize yourself with our near term project roadmap in the passport [project backlog](https://github.com/orgs/passportxyz/projects/)
 
@@ -97,7 +97,7 @@ Holds the Pulumi deployment configuration for this repository. [README](infra/RE
 
 ## schemas
 
-Ceramic schemas and model definitions, and scripts for creating and publishing these to the Ceramic Network. [README](schemas/README.md)
+Ceramic schemas and model definitions, and scripts for creating and publishing these to the Ceramic Network. [README](js-ceramic/README.md)
 
 ## types
 
