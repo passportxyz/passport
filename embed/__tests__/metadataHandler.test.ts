@@ -10,9 +10,11 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 // Mock the passport-platforms module
 jest.unstable_mockModule("@gitcoin/passport-platforms", () => ({
   platforms: {
-    Binance: { providers: { BinanceBABT: { type: "BinanceBABT" } } },
-    Holonym: { providers: { HolonymPhone: { type: "HolonymPhone" } } },
-    Google: { providers: { Google: { type: "Google" } } },
+    Binance: { PlatformDetails: { icon: "./assets/binanceStampIcon.svg" }, providers: [{ type: "BinanceBABT" }] },
+    Holonym: { providers: [{ type: "HolonymPhone" }] },
+    Google: { providers: [{ type: "Google" }] },
+    AllowList: { PlatformDetails: { icon: "./assets/star-light.svg" }, providers: [] },
+    CustomGithub: { PlatformDetails: { icon: "./assets/dev-icon.svg" }, providers: [] },
   },
 }));
 
@@ -163,6 +165,254 @@ describe("GET /embed/stamps/metadata", () => {
         }),
       ])
     );
+  });
+
+  it("should include Guest List and Developer List sections when custom_stamps is present", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        weights: {
+          "AllowList#VIPList": 10.0,
+          "DeveloperList#TestRepo#abc12345": 5.0,
+        },
+        stamp_sections: [],
+        custom_stamps: {
+          allow_list_stamps: [
+            {
+              provider_id: "AllowList#VIPList",
+              display_name: "VIP List",
+              description: "Verify you are part of this community.",
+              weight: 10.0,
+            },
+          ],
+          developer_list_stamps: [
+            {
+              provider_id: "DeveloperList#TestRepo#abc12345",
+              display_name: "Test Repo Contributor",
+              description: "Verify contributions to TestRepo",
+              weight: 5.0,
+            },
+          ],
+        },
+      },
+    });
+
+    const response = await request(app)
+      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    const guestListSection = response.body.find((p: { header: string }) => p.header === "Guest List");
+    const developerListSection = response.body.find((p: { header: string }) => p.header === "Developer List");
+
+    expect(guestListSection).toBeDefined();
+    expect(guestListSection.platforms).toHaveLength(1);
+    expect(guestListSection.platforms[0]).toMatchObject({
+      name: "VIP List",
+      platformId: "AllowList",
+      credentials: [{ id: "AllowList#VIPList", weight: "10" }],
+      displayWeight: "10.0",
+    });
+
+    expect(developerListSection).toBeDefined();
+    expect(developerListSection.platforms).toHaveLength(1);
+    expect(developerListSection.platforms[0]).toMatchObject({
+      name: "Test Repo Contributor",
+      platformId: "DeveloperList",
+      credentials: [{ id: "DeveloperList#TestRepo#abc12345", weight: "5" }],
+      displayWeight: "5.0",
+    });
+  });
+
+  it("should handle unified platforms array format", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        weights: {},
+        stamp_sections: [
+          {
+            title: "Guest List",
+            order: 0,
+            items: [{ platform_id: "AllowList#VIPList", order: 0 }],
+          },
+          {
+            title: "Developer List",
+            order: 1,
+            items: [{ platform_id: "DeveloperList#TestRepo#abc12345", order: 0 }],
+          },
+        ],
+        platforms: [
+          {
+            platform_id: "AllowList#VIPList",
+            icon_platform_id: "AllowList",
+            name: "VIP List",
+            description: "Verify you are part of this community.",
+            documentation_link: "https://example.com/guest-list",
+            requires_signature: false,
+            requires_popup: false,
+            requires_sdk_flow: false,
+            credentials: [{ id: "AllowList#VIPList", weight: "10.0" }],
+          },
+          {
+            platform_id: "DeveloperList#TestRepo#abc12345",
+            icon_platform_id: "CustomGithub",
+            name: "Test Repo Contributor",
+            description: "Verify contributions to TestRepo",
+            documentation_link: "https://example.com/dev-list",
+            requires_signature: true,
+            requires_popup: true,
+            requires_sdk_flow: false,
+            credentials: [{ id: "DeveloperList#TestRepo#abc12345", weight: "5.0" }],
+          },
+        ],
+      },
+    });
+
+    const response = await request(app)
+      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(200);
+
+    const guestListSection = response.body.find((p: { header: string }) => p.header === "Guest List");
+    const developerListSection = response.body.find((p: { header: string }) => p.header === "Developer List");
+
+    expect(guestListSection).toBeDefined();
+    expect(guestListSection.platforms).toHaveLength(1);
+    expect(guestListSection.platforms[0]).toMatchObject({
+      name: "VIP List",
+      platformId: "AllowList#VIPList",
+      credentials: [{ id: "AllowList#VIPList", weight: "10.0" }],
+      displayWeight: "10.0",
+    });
+
+    expect(developerListSection).toBeDefined();
+    expect(developerListSection.platforms).toHaveLength(1);
+    expect(developerListSection.platforms[0]).toMatchObject({
+      name: "Test Repo Contributor",
+      platformId: "DeveloperList#TestRepo#abc12345",
+      credentials: [{ id: "DeveloperList#TestRepo#abc12345", weight: "5.0" }],
+      displayWeight: "5.0",
+      requiresSignature: true,
+      requiresPopup: true,
+    });
+  });
+
+  it("should support multiple custom platforms in same section", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        weights: {},
+        stamp_sections: [
+          {
+            title: "Custom Stamps",
+            order: 0,
+            items: [
+              { platform_id: "AllowList#VIPList", order: 0 },
+              { platform_id: "DeveloperList#TestRepo#abc12345", order: 1 },
+            ],
+          },
+        ],
+        platforms: [
+          {
+            platform_id: "AllowList#VIPList",
+            icon_platform_id: "AllowList",
+            name: "VIP List",
+            description: "Custom allow list",
+            requires_signature: false,
+            requires_popup: false,
+            requires_sdk_flow: false,
+            credentials: [{ id: "AllowList#VIPList", weight: "5.0" }],
+          },
+          {
+            platform_id: "DeveloperList#TestRepo#abc12345",
+            icon_platform_id: "CustomGithub",
+            name: "Test Repo",
+            description: "Developer contributions",
+            requires_signature: true,
+            requires_popup: true,
+            requires_sdk_flow: false,
+            credentials: [{ id: "DeveloperList#TestRepo#abc12345", weight: "3.0" }],
+          },
+        ],
+      },
+    });
+
+    const response = await request(app)
+      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(200);
+
+    const section = response.body.find((p: { header: string }) => p.header === "Custom Stamps");
+    expect(section).toBeDefined();
+    expect(section.platforms).toHaveLength(2);
+
+    // AllowList custom platform
+    expect(section.platforms[0]).toMatchObject({
+      name: "VIP List",
+      platformId: "AllowList#VIPList",
+      credentials: [{ id: "AllowList#VIPList", weight: "5.0" }],
+      displayWeight: "5.0",
+    });
+
+    // DeveloperList custom platform in the same section
+    expect(section.platforms[1]).toMatchObject({
+      name: "Test Repo",
+      platformId: "DeveloperList#TestRepo#abc12345",
+      credentials: [{ id: "DeveloperList#TestRepo#abc12345", weight: "3.0" }],
+      displayWeight: "3.0",
+      requiresSignature: true,
+      requiresPopup: true,
+    });
+  });
+
+  it("should prefer platforms field over custom_stamps when both present", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        weights: {},
+        stamp_sections: [
+          {
+            title: "Guest List",
+            order: 0,
+            items: [{ platform_id: "AllowList#VIPList", order: 0 }],
+          },
+        ],
+        platforms: [
+          {
+            platform_id: "AllowList#VIPList",
+            icon_platform_id: "AllowList",
+            name: "VIP List (from platforms)",
+            description: "From platforms field",
+            credentials: [{ id: "AllowList#VIPList", weight: "10.0" }],
+          },
+        ],
+        // This should be ignored when platforms is present
+        custom_stamps: {
+          allow_list_stamps: [
+            {
+              provider_id: "AllowList#VIPList",
+              display_name: "VIP List (from custom_stamps)",
+              weight: 10.0,
+            },
+          ],
+        },
+      },
+    });
+
+    const response = await request(app)
+      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
+      .set("Accept", "application/json")
+      .set("x-api-key", "test")
+      .expect(200);
+
+    const guestListSection = response.body.find((p: { header: string }) => p.header === "Guest List");
+    expect(guestListSection).toBeDefined();
+    // Should use the name from platforms field, not custom_stamps
+    expect(guestListSection.platforms[0].name).toBe("VIP List (from platforms)");
   });
 
   it("should fall back to default STAMP_PAGES when stamp_sections is empty", async () => {
