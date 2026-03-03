@@ -167,65 +167,6 @@ describe("GET /embed/stamps/metadata", () => {
     );
   });
 
-  it("should include Guest List and Developer List sections when custom_stamps is present", async () => {
-    mockedAxios.get.mockResolvedValueOnce({
-      status: 200,
-      data: {
-        weights: {
-          "AllowList#VIPList": 10.0,
-          "DeveloperList#TestRepo#abc12345": 5.0,
-        },
-        stamp_sections: [],
-        custom_stamps: {
-          allow_list_stamps: [
-            {
-              provider_id: "AllowList#VIPList",
-              display_name: "VIP List",
-              description: "Verify you are part of this community.",
-              weight: 10.0,
-            },
-          ],
-          developer_list_stamps: [
-            {
-              provider_id: "DeveloperList#TestRepo#abc12345",
-              display_name: "Test Repo Contributor",
-              description: "Verify contributions to TestRepo",
-              weight: 5.0,
-            },
-          ],
-        },
-      },
-    });
-
-    const response = await request(app)
-      .get(`/embed/stamps/metadata?scorerId=${mockScorerId}`)
-      .set("Accept", "application/json")
-      .set("x-api-key", "test")
-      .expect(200)
-      .expect("Content-Type", /json/);
-
-    const guestListSection = response.body.find((p: { header: string }) => p.header === "Guest List");
-    const developerListSection = response.body.find((p: { header: string }) => p.header === "Developer List");
-
-    expect(guestListSection).toBeDefined();
-    expect(guestListSection.platforms).toHaveLength(1);
-    expect(guestListSection.platforms[0]).toMatchObject({
-      name: "VIP List",
-      platformId: "AllowList",
-      credentials: [{ id: "AllowList#VIPList", weight: "10" }],
-      displayWeight: "10.0",
-    });
-
-    expect(developerListSection).toBeDefined();
-    expect(developerListSection.platforms).toHaveLength(1);
-    expect(developerListSection.platforms[0]).toMatchObject({
-      name: "Test Repo Contributor",
-      platformId: "DeveloperList",
-      credentials: [{ id: "DeveloperList#TestRepo#abc12345", weight: "5" }],
-      displayWeight: "5.0",
-    });
-  });
-
   it("should handle unified platforms array format", async () => {
     mockedAxios.get.mockResolvedValueOnce({
       status: 200,
@@ -369,37 +310,33 @@ describe("GET /embed/stamps/metadata", () => {
     });
   });
 
-  it("should prefer platforms field over custom_stamps when both present", async () => {
+  it("should handle platform with multiple grouped credentials and is_evm", async () => {
     mockedAxios.get.mockResolvedValueOnce({
       status: 200,
       data: {
         weights: {},
         stamp_sections: [
           {
-            title: "Guest List",
+            title: "NFT Stamps",
             order: 0,
-            items: [{ platform_id: "AllowList#VIPList", order: 0 }],
+            items: [{ platform_id: "Covenant", order: 0 }],
           },
         ],
         platforms: [
           {
-            platform_id: "AllowList#VIPList",
+            platform_id: "Covenant",
             icon_platform_id: "AllowList",
-            name: "VIP List (from platforms)",
-            description: "From platforms field",
-            credentials: [{ id: "AllowList#VIPList", weight: "10.0" }],
+            name: "Covenant NFT",
+            description: "Verify NFT ownership",
+            is_evm: true,
+            requires_signature: false,
+            requires_popup: false,
+            credentials: [
+              { id: "NFTHolder#Covenant#b2bce93f", weight: "4.0" },
+              { id: "AllowList#OctantFinal", weight: "21.0" },
+            ],
           },
         ],
-        // This should be ignored when platforms is present
-        custom_stamps: {
-          allow_list_stamps: [
-            {
-              provider_id: "AllowList#VIPList",
-              display_name: "VIP List (from custom_stamps)",
-              weight: 10.0,
-            },
-          ],
-        },
       },
     });
 
@@ -409,10 +346,19 @@ describe("GET /embed/stamps/metadata", () => {
       .set("x-api-key", "test")
       .expect(200);
 
-    const guestListSection = response.body.find((p: { header: string }) => p.header === "Guest List");
-    expect(guestListSection).toBeDefined();
-    // Should use the name from platforms field, not custom_stamps
-    expect(guestListSection.platforms[0].name).toBe("VIP List (from platforms)");
+    const section = response.body.find((p: { header: string }) => p.header === "NFT Stamps");
+    expect(section).toBeDefined();
+    expect(section.platforms).toHaveLength(1);
+    expect(section.platforms[0]).toMatchObject({
+      platformId: "Covenant",
+      name: "Covenant NFT",
+      isEvm: true,
+      credentials: [
+        { id: "NFTHolder#Covenant#b2bce93f", weight: "4.0" },
+        { id: "AllowList#OctantFinal", weight: "21.0" },
+      ],
+      displayWeight: "25.0",
+    });
   });
 
   it("should fall back to default STAMP_PAGES when stamp_sections is empty", async () => {
