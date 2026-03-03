@@ -33,3 +33,7 @@ schemas/.env.yarn
 !.env.example
 
 .playwright-mcp
+
+# Mim - Transient/local state files
+.claude/knowledge/unresolved.md
+.claude/knowledge/mim.log
