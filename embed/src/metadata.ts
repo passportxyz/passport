@@ -173,24 +173,10 @@ export const metadataHandler = createHandler<MetadataRequestBody, MetadataRespon
             const platformId = ref.platform_id;
             const platformData = platforms[platformId];
 
-            if (!platformData || !platformData.providers) {
-              return {
-                platformId,
-                name: staticDef?.name || platformId,
-                description: staticDef?.description || "",
-                documentationLink: staticDef?.documentationLink || "",
-                requiresSignature: staticDef?.requiresSignature,
-                requiresPopup: staticDef?.requiresPopup,
-                popupUrl: staticDef?.popupUrl,
-                requiresSDKFlow: staticDef?.requiresSDKFlow,
-                icon: "",
-                credentials: [],
-                displayWeight: displayNumber(0),
-              };
-            }
-
-            const icon = await getIcon(platformData.PlatformDetails?.icon);
-            const providers: Provider[] = platformData.providers;
+            const providers: Provider[] = platformData?.providers || [];
+            const icon = platformData?.PlatformDetails?.icon
+              ? await getIcon(platformData.PlatformDetails.icon)
+              : "";
             const credentials = providers.map((provider) => ({
               id: provider.type,
               weight: weightsResponseData[provider.type] ? weightsResponseData[provider.type].toString() : "0",

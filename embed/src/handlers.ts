@@ -123,8 +123,8 @@ export const autoVerificationHandler = createHandler<AutoVerificationRequestBody
       customEvmCredentialIds = configPlatforms
         .filter((p) => p.is_evm)
         .flatMap((p) => p.credentials.map((c) => c.id));
-    } catch {
-      // Non-fatal: proceed without custom EVM credentials
+    } catch (err) {
+      console.warn("Failed to fetch embed config for custom EVM credentials:", err);
     }
 
     const { credentials, credentialErrors, timings } = await autoVerifyStamps({
