@@ -80,7 +80,7 @@ After the standard tasks, Planner creates the actual work subtasks (tasks #4–N
 ### Documenter
 - Claims the docs task when it unblocks (after review approved)
 - Interviews each teammate (one message each, expect one reply each)
-- Captures learnings into CLAUDE.md and project knowledge files
+- Captures learnings into CLAUDE.md and into the project knowledge system (use the `mim-ai:remember` skill if available — see Mim instructions for how knowledge is structured)
 - Keeps CLAUDE.md tight and token-efficient — every line costs tokens in every future session
 - Trims stale or redundant entries while adding new ones
 - Sends final summary to master thread — this is the team's "done" signal
