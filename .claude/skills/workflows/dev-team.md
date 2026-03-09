@@ -55,6 +55,7 @@ After the standard tasks, Planner creates the actual work subtasks (tasks #4–N
 ### Planner
 - Goes first: receives the initial task/issue from the user
 - Creates ALL tasks (standard + dynamic) upfront with correct blockers
+- Uses `/compound-engineering:workflows:plan` to produce a structured plan with research, spec analysis, and acceptance criteria
 - Creates or overwrites the GitHub issue body with the full plan
 - Sends plan to master thread for approval before Worker begins
 - Answers Worker questions if plan is unclear
@@ -63,18 +64,17 @@ After the standard tasks, Planner creates the actual work subtasks (tasks #4–N
 ### Worker
 - Waits for task #3 to unblock before starting implementation
 - Claims task #3, reviews plan, messages Planner if anything is unclear, then marks it done
-- Claims and implements dynamic tasks one at a time in order
+- Uses `/compound-engineering:workflows:work` to execute the plan — this handles branch setup, incremental commits, test-as-you-go, and quality checks
+- Uses **blocking sub-agents** for parallelism within tasks (see `.claude/skills/sub-agents.md`)
 - Runs tests, fixes issues
 - Opens the PR when all implementation tasks are completed
 
 ### Reviewer
 - Claims the review task when it unblocks (after PR is open)
-- Orchestrator: discovers and delegates to review sub-agents in `.claude/skills/` in parallel
-- Synthesizes sub-agent verdicts into a single result
+- Uses `/compound-engineering:workflows:review` to run multi-agent code review — this discovers and delegates to review sub-agents (security-sentinel, performance-oracle, architecture-strategist, kieran-typescript-reviewer, etc.) in parallel, synthesizes findings, and creates actionable todo files
 - MUST ask the Planner: "Does this implementation match your plan?" — required step
 - Approves the PR on GitHub when satisfied
-- If issues found: sends specific, actionable feedback to Worker (file paths, line numbers)
-- If no review sub-agents available: run `git diff`, read actual changes, verify edge cases
+- If issues found: uses `/compound-engineering:resolve_todo_parallel` to fix review findings, or sends specific feedback to Worker for complex issues
 - Never rubber-stamp — if you can't point to specific code you verified, you haven't reviewed
 
 ### Documenter
@@ -86,6 +86,22 @@ After the standard tasks, Planner creates the actual work subtasks (tasks #4–N
 - Sends final summary to master thread — this is the team's "done" signal
 
 Note: model selection is handled by the message router, not per-role.
+
+## Sub-Agent Usage
+
+All roles should use **blocking sub-agents** for parallel work within their role. See `.claude/skills/sub-agents.md` for the full guide. Key rules:
+- Launch multiple Agent calls in a single message when tasks are independent — they run concurrently
+- Never use `run_in_background: true` for work you need to see — use blocking
+- The compound-engineering slash commands already use sub-agents internally (research agents in plan, review agents in review) — you don't need to wrap them
+
+## Multiple Workers (Rare)
+
+For exceptionally large tasks where a single Worker's context would be insufficient, the Planner may recommend splitting into multiple Worker roles with clearly separated file boundaries. Each Worker gets its own worktree branch and PR. The Reviewer reviews all PRs. The master thread merges them in order.
+
+This is rare — most tasks are better served by a single Worker using parallel blocking sub-agents. Only split workers when:
+- The task has genuinely independent streams (e.g., new service + separate frontend)
+- Each stream is large enough to fill a worker's context on its own
+- The streams don't share files (otherwise merge conflicts negate the benefit)
 
 ## Message Discipline
 
@@ -113,15 +129,15 @@ When you finish a workflow step, update the task status — don't message teamma
 
 1. Create a thread for each role
 2. Give the Planner the task (issue, description, context)
-3. Planner creates all tasks (standard + dynamic) with blockers, then creates/updates GitHub issue
+3. Planner runs `/compound-engineering:workflows:plan`, creates all tasks with blockers, creates/updates GitHub issue
 4. Planner sends plan to **master thread for approval**
 5. Master/user approves or rejects the plan
 6. If approved, Planner sends plan to Worker: "implement tasks #4–N"
 7. Worker claims task #3, reviews plan, asks Planner if unclear, marks #3 done
-8. Worker claims and implements dynamic tasks; opens PR when all are done
-9. Reviewer's task unblocks — claims it, spins up sub-agents, synthesizes verdict
+8. Worker runs `/compound-engineering:workflows:work` with the plan file, implements tasks, opens PR
+9. Reviewer's task unblocks — runs `/compound-engineering:workflows:review` on the PR
 10. Reviewer asks Planner to confirm plan match (required)
-11. If issues: Reviewer → Worker with specific fixes; Worker fixes and updates PR, goto 9
+11. If issues: Reviewer → Worker with specific fixes OR runs `/compound-engineering:resolve_todo_parallel`; Worker fixes and updates PR, goto 9
 12. If approved: Reviewer approves PR on GitHub; Documenter's task unblocks
 13. Documenter sends ONE interview message to each teammate, waits for replies
 14. Documenter writes docs, sends summary to master thread (DONE)
