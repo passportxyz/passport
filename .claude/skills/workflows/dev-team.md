@@ -72,9 +72,11 @@ After the standard tasks, Planner creates the actual work subtasks (tasks #4–N
 ### Reviewer
 - Claims the review task when it unblocks (after PR is open)
 - Uses `/compound-engineering:workflows:review` to run multi-agent code review — this discovers and delegates to review sub-agents (security-sentinel, performance-oracle, architecture-strategist, kieran-typescript-reviewer, etc.) in parallel, synthesizes findings, and creates actionable todo files
+- **Skeptic triage**: after review generates todos, spin up a skeptic sub-agent to triage them — keep real issues (mark as todo), delete false positives and low-value noise. If a fix is trivial, do it inline rather than leaving it as a todo. Expect to act on ~2/3 of auto-generated todos.
+- Runs `/compound-engineering:resolve_todo_parallel` on the filtered (post-skeptic) todo list
 - MUST ask the Planner: "Does this implementation match your plan?" — required step
 - Approves the PR on GitHub when satisfied
-- If issues found: uses `/compound-engineering:resolve_todo_parallel` to fix review findings, or sends specific feedback to Worker for complex issues
+- For complex issues beyond `/resolve_todo_parallel`: sends specific feedback to Worker
 - Never rubber-stamp — if you can't point to specific code you verified, you haven't reviewed
 
 ### Documenter
@@ -135,9 +137,9 @@ When you finish a workflow step, update the task status — don't message teamma
 6. If approved, Planner sends plan to Worker: "implement tasks #4–N"
 7. Worker claims task #3, reviews plan, asks Planner if unclear, marks #3 done
 8. Worker runs `/compound-engineering:workflows:work` with the plan file, implements tasks, opens PR
-9. Reviewer's task unblocks — runs `/compound-engineering:workflows:review` on the PR
+9. Reviewer's task unblocks — runs `/compound-engineering:workflows:review` on the PR; skeptic sub-agent triages todos; runs `/compound-engineering:resolve_todo_parallel` on filtered list
 10. Reviewer asks Planner to confirm plan match (required)
-11. If issues: Reviewer → Worker with specific fixes OR runs `/compound-engineering:resolve_todo_parallel`; Worker fixes and updates PR, goto 9
+11. If complex issues remain: Reviewer → Worker with specific fixes; Worker fixes and updates PR, goto 9
 12. If approved: Reviewer approves PR on GitHub; Documenter's task unblocks
 13. Documenter sends ONE interview message to each teammate, waits for replies
 14. Documenter writes docs, sends summary to master thread (DONE)
