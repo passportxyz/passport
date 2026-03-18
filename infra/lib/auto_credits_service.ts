@@ -7,7 +7,6 @@ import { stack, defaultTags } from "./tags";
 
 const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
 
-const CREDITS_THRESHOLD = "500000";
 const ETH_RPC_URL = "https://eth.llamarpc.com";
 
 export const createAutoCreditsService = async () => {
@@ -18,7 +17,6 @@ export const createAutoCreditsService = async () => {
 
   const variables: Record<string, any> = {
     PASSPORT_VC_SECRETS_ARN: PASSPORT_VC_SECRETS_ARN,
-    CREDITS_THRESHOLD,
     ETH_RPC_URL,
   };
 
@@ -96,7 +94,7 @@ export const createAutoCreditsService = async () => {
 
   // Create CloudWatch event rule - run once per day
   const eventRule = new aws.cloudwatch.EventRule("auto-credits-schedule", {
-    scheduleExpression: "rate(1 day)",
+    scheduleExpression: "rate(7 days)",
   });
 
   // Connect event rule to Lambda
@@ -119,7 +117,7 @@ export const createAutoCreditsService = async () => {
     evaluationPeriods: 1,
     metricName: "Errors",
     namespace: "AWS/Lambda",
-    period: 86400, // 1 day (matches schedule)
+    period: 604800, // 7 days (matches schedule)
     statistic: "Sum",
     threshold: 0,
     alarmDescription: "Auto-credits Lambda failed - may be out of ETH for gas",
