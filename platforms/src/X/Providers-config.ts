@@ -21,6 +21,7 @@ export const ProviderConfig: PlatformGroupSpec[] = [
         description:
           "Verify that you own a verified X account (Premium, Premium+, Government, Business, or Legacy) with at least 100 followers and account age over 365 days",
         name: "X",
+        isDeprecated: true,
       },
     ],
   },
