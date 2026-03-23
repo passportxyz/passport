@@ -10,7 +10,6 @@ const CONTRACT_ABI = [
 export type AutoCreditsConfig = {
   privateKey: string;
   rpcUrl: string;
-  threshold: bigint;
 };
 
 export class AutoCreditsError extends Error {
@@ -27,12 +26,9 @@ const loadConfigFromEnv = async (): Promise<AutoCreditsConfig> => {
     throw new AutoCreditsError(`Missing environment variable(s): ${missingVars.join(", ")}`);
   }
 
-  const thresholdStr = process.env.CREDITS_THRESHOLD || "500000";
-
   return {
     privateKey: process.env.HUMAN_NETWORK_CLIENT_PRIVATE_KEY!,
     rpcUrl: process.env.ETH_RPC_URL!,
-    threshold: BigInt(thresholdStr),
   };
 };
 
@@ -53,56 +49,46 @@ const loadConfigFromAWS = async (): Promise<AutoCreditsConfig> => {
     throw new AutoCreditsError("Missing HUMAN_NETWORK_CLIENT_PRIVATE_KEY in VC secrets");
   }
 
-  const thresholdStr = process.env.CREDITS_THRESHOLD || "500000";
-
   return {
     privateKey: vcSecrets.HUMAN_NETWORK_CLIENT_PRIVATE_KEY,
     rpcUrl: process.env.ETH_RPC_URL!,
-    threshold: BigInt(thresholdStr),
   };
 };
 
-export const checkAndRequestCredits = async (
+export const requestCredits = async (
   config: AutoCreditsConfig
 ): Promise<{
-  creditsChecked: bigint;
-  requestedCredits: boolean;
-  txHash?: string;
+  previousCredits: bigint;
+  newCredits: bigint;
+  txHash: string;
 }> => {
   const provider = new ethers.JsonRpcProvider(config.rpcUrl);
   const wallet = new ethers.Wallet(config.privateKey, provider);
   const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, wallet);
 
-  console.log("Checking credits for address:", wallet.address);
+  console.log("Requesting credits for address:", wallet.address);
 
-  const currentCredits = await contract.creditsFor(wallet.address);
-  console.log("Current credits:", currentCredits.toString());
-  console.log("Threshold:", config.threshold.toString());
+  const previousCredits = await contract.creditsFor(wallet.address);
+  console.log("Credits before request:", previousCredits.toString());
 
-  if (currentCredits < config.threshold) {
-    console.log("Credits below threshold, requesting more...");
+  // Always request credits. The contract enforces a 24-hour cooldown
+  // via nextTimeAllowedToIncreaseCredits, so duplicate calls revert safely.
+  // Credits on-chain are append-only (never decremented); consumption is
+  // tracked off-chain by Human Network, so a threshold check is meaningless.
+  const tx = await contract.requestCredits();
+  console.log("Transaction hash:", tx.hash);
 
-    const tx = await contract.requestCredits();
-    console.log("Transaction hash:", tx.hash);
+  const receipt = await tx.wait();
+  console.log("Transaction confirmed in block:", receipt.blockNumber);
+  console.log("Gas used:", receipt.gasUsed.toString());
 
-    const receipt = await tx.wait();
-    console.log("Transaction confirmed in block:", receipt.blockNumber);
-    console.log("Gas used:", receipt.gasUsed.toString());
+  const newCredits = await contract.creditsFor(wallet.address);
+  console.log("Credits after request:", newCredits.toString());
 
-    const newCredits = await contract.creditsFor(wallet.address);
-    console.log("New credits balance:", newCredits.toString());
-
-    return {
-      creditsChecked: currentCredits,
-      requestedCredits: true,
-      txHash: tx.hash,
-    };
-  }
-
-  console.log("Credits above threshold, no action needed");
   return {
-    creditsChecked: currentCredits,
-    requestedCredits: false,
+    previousCredits,
+    newCredits,
+    txHash: tx.hash,
   };
 };
 
@@ -112,15 +98,14 @@ export const runAutoCredits = async (useEnv: boolean = false): Promise<{ statusC
   const config = await (useEnv ? loadConfigFromEnv() : loadConfigFromAWS());
   console.log("=====Configuration=====");
   console.log("RPC URL:", config.rpcUrl);
-  console.log("Threshold:", config.threshold.toString());
   console.log("=======================");
 
-  const result = await checkAndRequestCredits(config);
+  const result = await requestCredits(config);
 
   const body = JSON.stringify({
     success: true,
-    creditsChecked: result.creditsChecked.toString(),
-    requestedCredits: result.requestedCredits,
+    previousCredits: result.previousCredits.toString(),
+    newCredits: result.newCredits.toString(),
     txHash: result.txHash,
   });
 
