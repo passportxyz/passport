@@ -44,19 +44,27 @@ echo ""
 echo "📦 Installing all dependencies..."
 yarn install
 
-# Check if running on Fedora/RHEL and offer to install Playwright deps
+# Check if running on a supported system and offer to install Playwright deps
 if [ -f /etc/os-release ]; then
     . /etc/os-release
+    PLAYWRIGHT_SCRIPT=""
     if [[ "$ID" == "fedora" ]] || [[ "$ID" == "rhel" ]]; then
         echo ""
         echo "🎭 Detected Fedora/RHEL system"
+        PLAYWRIGHT_SCRIPT="./fedora-install-playwright-deps.sh"
+    elif [[ "$ID" == "debian" ]] || [[ "$ID" == "ubuntu" ]]; then
+        echo ""
+        echo "🎭 Detected Debian/Ubuntu system"
+        PLAYWRIGHT_SCRIPT="./debian-install-playwright-deps.sh"
+    fi
+    if [ -n "$PLAYWRIGHT_SCRIPT" ]; then
         read -p "Would you like to install Playwright browser dependencies? (y/n) " -n 1 -r
         echo ""
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            if [ -f ./fedora-install-playwright-deps.sh ]; then
-                ./fedora-install-playwright-deps.sh
+            if [ -f "$PLAYWRIGHT_SCRIPT" ]; then
+                "$PLAYWRIGHT_SCRIPT"
             else
-                echo "⚠️  fedora-install-playwright-deps.sh not found"
+                echo "⚠️  $PLAYWRIGHT_SCRIPT not found"
             fi
         fi
     fi
