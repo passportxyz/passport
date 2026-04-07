@@ -71,7 +71,16 @@ export class GnosisSafeProvider implements Provider {
 
 const getSafes = async (address: string): Promise<OwnerSafesResponse> => {
   try {
-    const requestResponse = await axios.get(`${gnosisSafeApiEndpoint}owners/${address}/safes/`);
+    const headers: Record<string, string> = {};
+    const apiKey = process.env.SAFE_API_KEY;
+    if (apiKey) {
+      headers["Authorization"] = `Bearer ${apiKey}`;
+    }
+
+    const requestResponse = await axios.get(`${gnosisSafeApiEndpoint}owners/${address}/safes/`, {
+      headers,
+      timeout: 10_000,
+    });
 
     if (requestResponse.status != 200) {
       throw [`HTTP Error '${requestResponse.status}'. Details: '${requestResponse.statusText}'.`];

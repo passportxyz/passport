@@ -12,11 +12,13 @@ jest.mock("axios");
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 const MOCK_ADDRESS = "0xEf1c6E67703c7BD7107eed8303Fbe6EC2554BF6B";
+const MOCK_API_KEY = "test-safe-api-key";
 
 const validResponseList = ["safe-1", "safe-2", "safe-3"];
 
 beforeEach(() => {
   jest.clearAllMocks();
+  process.env.SAFE_API_KEY = MOCK_API_KEY;
 });
 
 describe("Verification succeeds", function () {
@@ -37,7 +39,10 @@ describe("Verification succeeds", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`, {
+      headers: { Authorization: `Bearer ${MOCK_API_KEY}` },
+      timeout: 10_000,
+    });
 
     expect(gnosisSafePayload).toEqual({
       valid: true,
@@ -45,6 +50,31 @@ describe("Verification succeeds", function () {
         address: MOCK_ADDRESS,
       },
       errors: [],
+    });
+  });
+});
+
+describe("API authentication", function () {
+  it("should send requests without auth header when SAFE_API_KEY is not set", async () => {
+    delete process.env.SAFE_API_KEY;
+
+    (axios.get as jest.Mock).mockImplementation(() => {
+      return Promise.resolve({
+        status: 200,
+        data: {
+          safes: validResponseList,
+        },
+      });
+    });
+
+    const gnosisSafeProvider = new GnosisSafeProvider();
+    await gnosisSafeProvider.verify({
+      address: MOCK_ADDRESS,
+    } as unknown as RequestPayload);
+
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`, {
+      headers: {},
+      timeout: 10_000,
     });
   });
 });
@@ -67,7 +97,10 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`, {
+      headers: { Authorization: `Bearer ${MOCK_API_KEY}` },
+      timeout: 10_000,
+    });
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
@@ -91,7 +124,10 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`, {
+      headers: { Authorization: `Bearer ${MOCK_API_KEY}` },
+      timeout: 10_000,
+    });
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
@@ -119,7 +155,10 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`, {
+      headers: { Authorization: `Bearer ${MOCK_API_KEY}` },
+      timeout: 10_000,
+    });
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
@@ -140,7 +179,10 @@ describe("Verification fails", function () {
 
     // Check the request to get the NFTs
     expect(axios.get).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`);
+    expect(mockedAxios.get).toBeCalledWith(`${gnosisSafeApiEndpoint}owners/${MOCK_ADDRESS}/safes/`, {
+      headers: { Authorization: `Bearer ${MOCK_API_KEY}` },
+      timeout: 10_000,
+    });
 
     expect(gnosisSafePayload).toEqual({
       valid: false,
