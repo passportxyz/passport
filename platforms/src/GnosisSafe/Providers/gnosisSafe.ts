@@ -12,8 +12,8 @@ import { getAddress } from "../../utils/signer.js";
 // ----- Utils
 import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
 
-// https://safe-transaction.gnosis.io/
-export const gnosisSafeApiEndpoint = "https://safe-transaction-mainnet.safe.global/api/v1/";
+// https://docs.safe.global/core-api/transaction-service-reference/mainnet
+export const gnosisSafeApiEndpoint = "https://api.safe.global/tx-service/eth/api/v1/";
 
 type OwnerSafesResponse = {
   safes: string[];
