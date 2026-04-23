@@ -58,11 +58,6 @@ export abstract class BaseHumanIDPlatform extends Platform {
   }
 
   async getProviderPayload(appContext: AppContext): Promise<ProviderPayload> {
-    // Require wallet methods for Human ID verification (SBT-based platforms)
-    if (!appContext.signMessageAsync || !appContext.sendTransactionAsync || !appContext.address) {
-      throw new Error("Human ID verification requires wallet connection and signing capabilities");
-    }
-
     return requestSBT({
       credentialType: this.credentialType,
       hasExistingCredential: this.hasExistingCredential.bind(this),

@@ -97,10 +97,9 @@ export type AppContext = {
   selectedProviders: PROVIDER_ID[]; // can be used to translate to a scope when making an oauth request
   waitForRedirect(platform: PlatformClass, timeout?: number): Promise<ProviderPayload>;
 
-  // Optional properties for EVM platforms that need wallet functionality
-  address?: string;
-  signMessageAsync?: ({ message }: { message: string }) => Promise<string>;
-  sendTransactionAsync?: (variables: {
+  address: string;
+  signMessageAsync: ({ message }: { message: string }) => Promise<string>;
+  sendTransactionAsync: (variables: {
     to: `0x${string}`;
     value?: bigint;
     data?: `0x${string}`;
@@ -109,7 +108,7 @@ export type AppContext = {
     maxFeePerGas?: bigint;
     maxPriorityFeePerGas?: bigint;
   }) => Promise<`0x${string}`>;
-  switchChainAsync?: ({ chainId }: { chainId: number }) => Promise<any>;
+  switchChainAsync: ({ chainId }: { chainId: number }) => Promise<any>;
 };
 
 export type PlatformBanner = {

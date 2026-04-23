@@ -26,6 +26,10 @@ const appContext = {
   state: "state",
   userDid: "did:pk:ethr:1:0x12345",
   selectedProviders: [] as any[],
+  address: "0x12345",
+  signMessageAsync: jest.fn(),
+  sendTransactionAsync: jest.fn(),
+  switchChainAsync: jest.fn(),
 };
 
 describe("getProviderInfo", () => {

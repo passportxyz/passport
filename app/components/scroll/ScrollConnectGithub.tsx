@@ -16,7 +16,7 @@ import { LoadButton } from "../LoadButton";
 import { GitHubIcon } from "../WelcomeFooter";
 import { ScrollCampaignPage } from "./ScrollCampaignPage";
 import { BadgeCTA } from "../ScrollCampaign";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage, useSendTransaction, useSwitchChain } from "wagmi";
 
 export const ScrollConnectGithub = () => {
   const goToNextStep = useNextCampaignStep();
@@ -25,6 +25,9 @@ export const ScrollConnectGithub = () => {
   const { userDid, database } = useContext(CeramicContext);
   const goToLoginStep = useNavigateToRootStep();
   const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+  const { sendTransactionAsync } = useSendTransaction();
+  const { switchChainAsync } = useSwitchChain();
   const [noCredentialReceived, setNoCredentialReceived] = useState(false);
   const [msg, setMsg] = useState<string | undefined>("Verifying existing badges on chain ... ");
   const [isVerificationRunning, setIsVerificationRunning] = useState(false);
@@ -59,6 +62,10 @@ export const ScrollConnectGithub = () => {
           callbackUrl: window.location.origin,
           selectedProviders: scrollCampaignBadgeProviders,
           waitForRedirect,
+          address,
+          signMessageAsync,
+          sendTransactionAsync,
+          switchChainAsync,
         })) as {
           [k: string]: string;
         };
