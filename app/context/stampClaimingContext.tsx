@@ -25,7 +25,7 @@ import { datadogRum } from "@datadog/browser-rum";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useMessage } from "../hooks/useMessage";
 import { usePlatforms } from "../hooks/usePlatforms";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage, useSendTransaction, useSwitchChain } from "wagmi";
 
 export enum StampClaimProgressStatus {
   Idle = "idle",
@@ -89,6 +89,9 @@ export const StampClaimingContext = createContext(startingState);
 export const StampClaimingContextProvider = ({ children }: { children: any }) => {
   const { handlePatchStamps, userDid } = useContext(CeramicContext);
   const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+  const { sendTransactionAsync } = useSendTransaction();
+  const { switchChainAsync } = useSwitchChain();
   const { dbAccessToken } = useDatastoreConnectionContext();
   const { success, failure } = useMessage();
   const [status, setStatus] = useState(StampClaimProgressStatus.Idle);
@@ -155,6 +158,10 @@ export const StampClaimingContextProvider = ({ children }: { children: any }) =>
               callbackUrl: window.location.origin,
               selectedProviders,
               waitForRedirect,
+              address,
+              signMessageAsync,
+              sendTransactionAsync,
+              switchChainAsync,
             })) as {
               [k: string]: string;
             };

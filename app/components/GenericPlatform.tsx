@@ -160,13 +160,10 @@ export const GenericPlatform = ({
         callbackUrl: window.location.origin,
         selectedProviders,
         waitForRedirect,
-        // Add wagmi functions for EVM platforms
-        ...(isEVM && {
-          address,
-          signMessageAsync,
-          sendTransactionAsync,
-          switchChainAsync,
-        }),
+        address,
+        signMessageAsync,
+        sendTransactionAsync,
+        switchChainAsync,
       };
 
       const providerPayload = (await platform.getProviderPayload(appContext)) as {
