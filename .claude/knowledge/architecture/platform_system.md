@@ -48,29 +48,53 @@ The platforms package has a unique architecture where both frontend and backend 
 - Both frontend and backend can share utility files (e.g., `utils.ts`, `constants.ts`)
 - Code runs in different runtime environments but shares type definitions
 
-## HumanID Dual-Path Architecture
+## HumanID Multi-Source Architecture
 
-BaseHumanIDPlatform supports two distinct verification paths:
+BaseHumanIDPlatform supports three verification source types. Platforms compose them:
 
-### 1. SBT Path (KYC, Phone, Biometrics)
-- **Method**: Uses `sbtFetcher` to retrieve on-chain SBTs
-- **Validation**: 
+### 1. SBT Sources (KYC, Phone, Biometrics, ZK Passport)
+- **Method**: `sbtFetcher` (single) or `sbtFetchers` (ordered list) — first valid SBT wins
+- **Validation**:
   - Checks publicValues array (minimum 5 elements)
   - Nullifier at index 3
   - Expiry validation using `>` (not `>=`) for consistency
-- **Providers**: Extend `BaseHumanIdProvider` for shared validation
+- **Providers**: Extend `BaseHumanIdProvider`. Override `sources()` to compose multiple SBT sources (e.g. Government ID accepts regular KYC SBT and ZK Passport SBT).
 
-### 2. Attestation Path (CleanHands)
+### 2. On-Chain Attestation Source (CleanHands)
 - **Method**: Uses `attestationFetcher` for Sign Protocol attestations
 - **Validation**: Checks `indexingValue` field exists and is non-empty
-- **Implementation**: Standalone provider (doesn't inherit `BaseHumanIdProvider`)
-- **Rationale**: Avoids forcing attestations into SBT pattern
+
+### 3. Off-Chain Attestation Source (Free ZK Passport)
+- **Method**: `hasValidOffChainAttestation` on the platform; the provider adds an
+  off-chain `CredentialSource` that fetches from id-server directly
+  (`getZkPassportFreeOffChainAttestation`).
+- **Validation**: Checks `expiresAt > now` and `payload.uniqueIdentifier` is non-empty
+- **Stamp expiry**: Sources may return `expiresInSeconds` to clamp the issued VC's
+  `expirationDate`. The free ZK Passport attestation has a 7-day TTL — see
+  `gotchas/humanid_offchain_attestation_expiry.md`.
+
+### Government ID — multi-source example
+`HumanIdKycProvider` (type `HolonymGovIdProvider`) accepts any of three Human ID
+issuance paths in this order: (1) regular KYC SBT, (2) paid ZK Passport SBT
+(record `sbtType: zk-passport-onchain`), (3) free ZK Passport off-chain
+attestation (record `sbtType: zk-passport-offchain`, `expiresInSeconds` clamped
+to attestation TTL).
+
+### Iframe option forwarding
+`BaseHumanIDPlatform` exposes `kycOptions` / `cleanHandsOptions` fields that are
+forwarded to `privateRequestSBT`, controlling which cards appear in the Human ID
+iframe chooser. `HumanIdKycPlatform` sets all three KYC flags (`regularKYC`,
+`paidZKPassport`, `freeZKPassport`). The `freeZKPassport` flag is stripped from
+the public `requestSBT` type but is accepted by the underlying
+`privateRequestSBT` — the local `ExtendedHumanIDProvider` cast in
+`HumanID/shared/types.ts` re-types it via `KycOptions` from
+`@holonym-foundation/human-id-interface-core`.
 
 ### Key Architectural Decisions
 - Shared validation logic in `utils.ts` to avoid duplication
 - Constants for credential types (no magic strings)
 - Record field in VerifiedPayload ignored when `valid=false`
-- Clean separation between SBT and attestation patterns
+- Sources are composable: each is `(address) => Promise<{valid, record, expiresInSeconds?} | {valid:false, error}>`
 
 ## isEVM Flag Architecture
 

@@ -30,3 +30,4 @@
 - @gotchas/topnav_positioning_responsive.md - NavPopover responsive positioning issues across screen sizes
 - @gotchas/provider_external_calls.md - RPC timeout, URL encoding, no silent fallback, rejection tracking
 - @gotchas/usePlatforms_symmetric_guards.md - Guards must be symmetric across both useMemo blocks
+- @gotchas/humanid_offchain_attestation_expiry.md - Free ZK Passport 7-day off-chain attestation TTL clamps Government ID stamp expiry
