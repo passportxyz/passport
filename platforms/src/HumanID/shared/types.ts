@@ -1,5 +1,10 @@
 import { CredentialType } from "@holonym-foundation/human-id-sdk";
-import type { RequestSBTExtraParams } from "@holonym-foundation/human-id-interface-core";
+import type {
+  RequestSBTExtraParams,
+  KycOptions,
+  CleanHandsOptions,
+  PaymentConfig,
+} from "@holonym-foundation/human-id-interface-core";
 
 type RequestSBTResponse = null | {
   sbt: {
@@ -17,8 +22,17 @@ interface HumanIDProviderInterface {
   requestSBT(type: CredentialType, args: RequestSBTExtraParams): Promise<unknown>;
 }
 
+// privateRequestSBT accepts the full unrestricted KycOptions (including freeZKPassport),
+// unlike the public requestSBT which strips freeZKPassport from the type. We forward all
+// three sub-options so the iframe shows every Government ID card variant.
+export type PrivateRequestSBTArgs = RequestSBTExtraParams & {
+  kycOptions?: KycOptions;
+  cleanHandsOptions?: CleanHandsOptions;
+  paymentConfig?: PaymentConfig;
+};
+
 // Extended interface with secret methods that exist at runtime but aren't in the public interface
 export interface ExtendedHumanIDProvider extends HumanIDProviderInterface {
   getKeygenMessage(): string;
-  privateRequestSBT(type: CredentialType, args: RequestSBTExtraParams): Promise<RequestSBTResponse>;
+  privateRequestSBT(type: CredentialType, args: PrivateRequestSBTArgs): Promise<RequestSBTResponse>;
 }
