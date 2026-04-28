@@ -8,8 +8,11 @@ export const mockPrivateRequestSBT = vi.fn();
 export const mockSetOptimismRpcUrl = vi.fn();
 export const mockGetPhoneSBTByAddress = vi.fn();
 export const mockGetKycSBTByAddress = vi.fn();
+export const mockGetZkPassportSBTByAddress = vi.fn();
+export const mockGetCleanHandsSPAttestationByAddress = vi.fn();
 export const mockUncheckedGetMinimalPhoneSBTByAddress = vi.fn();
 export const mockUncheckedGetMinimalKycSBTByAddress = vi.fn();
+export const mockUncheckedGetMinimalZkPassportSBTByAddress = vi.fn();
 
 // Mock Human ID provider instance
 const mockHumanIDProvider = {
@@ -43,16 +46,22 @@ mockGetPhoneSBTByAddress.mockResolvedValue({
   revoked: false,
 });
 mockGetKycSBTByAddress.mockResolvedValue(null);
+mockGetZkPassportSBTByAddress.mockResolvedValue(null);
+mockGetCleanHandsSPAttestationByAddress.mockResolvedValue(null);
 mockUncheckedGetMinimalPhoneSBTByAddress.mockResolvedValue([BigInt(Date.now()), true]); // [expiry, hasPhone]
 mockUncheckedGetMinimalKycSBTByAddress.mockResolvedValue(null);
+mockUncheckedGetMinimalZkPassportSBTByAddress.mockResolvedValue(null);
 
 // Export functions
 export const initHumanID = mockInitHumanID;
 export const setOptimismRpcUrl = mockSetOptimismRpcUrl;
 export const getPhoneSBTByAddress = mockGetPhoneSBTByAddress;
 export const getKycSBTByAddress = mockGetKycSBTByAddress;
+export const getZkPassportSBTByAddress = mockGetZkPassportSBTByAddress;
+export const getCleanHandsSPAttestationByAddress = mockGetCleanHandsSPAttestationByAddress;
 export const uncheckedGetMinimalPhoneSBTByAddress = mockUncheckedGetMinimalPhoneSBTByAddress;
 export const uncheckedGetMinimalKycSBTByAddress = mockUncheckedGetMinimalKycSBTByAddress;
+export const uncheckedGetMinimalZkPassportSBTByAddress = mockUncheckedGetMinimalZkPassportSBTByAddress;
 
 // Reset all mocks function for tests
 export const resetHumanIDMocks = () => {
@@ -63,6 +72,9 @@ export const resetHumanIDMocks = () => {
   mockSetOptimismRpcUrl.mockClear();
   mockGetPhoneSBTByAddress.mockClear();
   mockGetKycSBTByAddress.mockClear();
+  mockGetZkPassportSBTByAddress.mockClear();
+  mockGetCleanHandsSPAttestationByAddress.mockClear();
   mockUncheckedGetMinimalPhoneSBTByAddress.mockClear();
   mockUncheckedGetMinimalKycSBTByAddress.mockClear();
+  mockUncheckedGetMinimalZkPassportSBTByAddress.mockClear();
 };
