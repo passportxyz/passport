@@ -134,7 +134,7 @@ export const OnchainCTA: React.FC<OnchainCTAProps> = ({ setShowSidebar }) => {
       <div className="flex flex-col h-full w-full">
         <div className="flex flex-col md:flex-row items-start justify-between flex-wrap">
           <div className="flex justify-start">
-            <h2 className={`text-2xl text-black font-semibold pr-4 text-nowrap ${!description && "mb-4"}`}>{title}</h2>
+            <h2 className={`text-2xl text-black font-semibold pr-4 ${!description && "mb-4"}`}>{title}</h2>
           </div>
         </div>
         <p className="py-2 self-center md:self-start">{description}</p>
