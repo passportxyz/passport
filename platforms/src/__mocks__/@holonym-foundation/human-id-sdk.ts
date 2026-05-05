@@ -80,6 +80,16 @@ export const getKycSBTByAddress = jest.fn(async (address: string): Promise<SBTRe
   };
 });
 
+export const getZkPassportSBTByAddress = jest.fn(async (_address: string): Promise<SBTResult | null> => null);
+
+export const uncheckedGetMinimalZkPassportSBTByAddress = jest.fn(
+  async (_address: string): Promise<{ address: string } | null> => null
+);
+
+export const getCleanHandsSPAttestationByAddress = jest.fn(
+  async (_address: string): Promise<{ indexingValue: string } | null> => null
+);
+
 export const uncheckedGetMinimalPhoneSBTByAddress = jest.fn(async (address: string) => {
   if (!address) {
     return null;

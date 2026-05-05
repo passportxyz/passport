@@ -152,8 +152,8 @@ describe("Attempt verification", function () {
       address: MOCK_ADDRESS,
     } as RequestPayload);
 
-    // When getExistingSbt throws, it returns undefined, which then fails validation
+    // SDK errors surface as the source error, prefixed with the credential type.
     expect(verifiedPayload.valid).toBe(false);
-    expect(verifiedPayload.errors).toEqual(["biometrics SBT not found"]);
+    expect(verifiedPayload.errors).toEqual(["biometrics Network error"]);
   });
 });

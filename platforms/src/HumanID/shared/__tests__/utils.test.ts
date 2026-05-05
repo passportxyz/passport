@@ -1,4 +1,4 @@
-import { validateSbt, validateAttestation, isHexString, isAddress } from "../utils.js";
+import { validateSbt, validateAttestation, isHexString, isAddress, validateOffChainAttestation } from "../utils.js";
 
 describe("isHexString", () => {
   it("should return true for strings starting with 0x", () => {
@@ -174,5 +174,65 @@ describe("validateAttestation", () => {
       expect(result.valid).toBe(false);
       expect((result as any).error).toBe("Invalid attestation - missing indexingValue");
     });
+  });
+});
+
+describe("validateOffChainAttestation", () => {
+  const futureIso = (msFromNow: number) => new Date(Date.now() + msFromNow).toISOString();
+
+  it("returns valid with parsed expiresAt for an unexpired attestation", () => {
+    const result = validateOffChainAttestation({
+      address: "0xabc",
+      attestationType: "zk-passport",
+      payload: { uniqueIdentifier: "uid-1" },
+      issuedAt: new Date(Date.now() - 60_000).toISOString(),
+      expiresAt: futureIso(60_000),
+    });
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.expiresAt.getTime()).toBeGreaterThan(Date.now());
+    }
+  });
+
+  it("returns invalid for null", () => {
+    const result = validateOffChainAttestation(null);
+    expect(result.valid).toBe(false);
+    expect((result as any).error).toMatch(/not found/);
+  });
+
+  it("returns invalid when uniqueIdentifier is empty", () => {
+    const result = validateOffChainAttestation({
+      address: "0xabc",
+      attestationType: "zk-passport",
+      payload: { uniqueIdentifier: "" },
+      issuedAt: new Date().toISOString(),
+      expiresAt: futureIso(60_000),
+    });
+    expect(result.valid).toBe(false);
+    expect((result as any).error).toMatch(/uniqueIdentifier/);
+  });
+
+  it("returns invalid when expiresAt is in the past", () => {
+    const result = validateOffChainAttestation({
+      address: "0xabc",
+      attestationType: "zk-passport",
+      payload: { uniqueIdentifier: "uid-1" },
+      issuedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+      expiresAt: new Date(Date.now() - 60_000).toISOString(),
+    });
+    expect(result.valid).toBe(false);
+    expect((result as any).error).toMatch(/expired/);
+  });
+
+  it("returns invalid when expiresAt is unparseable", () => {
+    const result = validateOffChainAttestation({
+      address: "0xabc",
+      attestationType: "zk-passport",
+      payload: { uniqueIdentifier: "uid-1" },
+      issuedAt: new Date().toISOString(),
+      expiresAt: "not-a-date",
+    });
+    expect(result.valid).toBe(false);
+    expect((result as any).error).toMatch(/invalid expiresAt/);
   });
 });

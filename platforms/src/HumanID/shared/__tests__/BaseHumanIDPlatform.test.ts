@@ -192,7 +192,7 @@ describe("BaseHumanIDPlatform", () => {
         const platform = new InvalidPlatform({} as PlatformOptions);
 
         await expect(platform.credentialChecker("0x1234567890123456789012345678901234567890")).rejects.toThrow(
-          "Platform must define either sbtFetcher or attestationFetcher"
+          "Platform must define an SBT fetcher, an attestation fetcher, or an off-chain attestation check"
         );
       });
     });

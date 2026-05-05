@@ -2,6 +2,7 @@
 import React from "react";
 import { BaseHumanIDPlatform } from "../HumanID/shared/BaseHumanIDPlatform.js";
 import { getCleanHandsSPAttestationByAddress } from "@holonym-foundation/human-id-sdk";
+import type { CleanHandsOptions } from "@holonym-foundation/human-id-interface-core";
 import { CLEAN_HANDS_CREDENTIAL_TYPE } from "./constants.js";
 import { Hyperlink } from "../utils/Hyperlink.js";
 
@@ -10,6 +11,14 @@ export class CleanHandsPlatform extends BaseHumanIDPlatform {
   path = "CleanHands";
   credentialType = CLEAN_HANDS_CREDENTIAL_TYPE;
   attestationFetcher = getCleanHandsSPAttestationByAddress; // Note: attestation, not SBT
+
+  // Show both the Onfido card and the ZK Passport card in the Human ID iframe.
+  // The ZK Passport branch issues to the same Sign Protocol schema, so the
+  // existing attestationFetcher covers both branches.
+  cleanHandsOptions: CleanHandsOptions = {
+    regularKYC: true,
+    zkPassport: true,
+  };
 
   banner = {
     content: (

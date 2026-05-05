@@ -1,8 +1,28 @@
 import { initHumanID, CredentialType, SignProtocolAttestation } from "@holonym-foundation/human-id-sdk";
-import type { RequestSBTExtraParams, TransactionRequestWithChainId } from "@holonym-foundation/human-id-interface-core";
+import type {
+  RequestSBTExtraParams,
+  TransactionRequestWithChainId,
+  KycOptions,
+  CleanHandsOptions,
+  PaymentConfig,
+} from "@holonym-foundation/human-id-interface-core";
 import type { Address } from "viem";
+import axios from "axios";
 import { ProviderPayload } from "../../types.js";
 import { ExtendedHumanIDProvider } from "./types.js";
+
+// Free ZK Passport off-chain attestations live in id-server, keyed by wallet address,
+// with a 7-day lifetime. There is no SDK helper yet, so we hit id-server directly.
+// Production-only host; sandbox is intentionally not wired here.
+const ID_SERVER_BASE_URL = "https://id-server.holonym.io";
+
+export type ZkPassportOffChainAttestation = {
+  address: string;
+  attestationType: "zk-passport";
+  payload: { uniqueIdentifier: string };
+  issuedAt: string; // ISO timestamp
+  expiresAt: string; // ISO timestamp; issuedAt + 7 days
+};
 
 export function isHexString(value: string): value is `0x${string}` {
   return value.startsWith("0x");
@@ -38,6 +58,73 @@ export function validateSbt(
   return { valid: true };
 }
 
+/**
+ * Fetch the most recent free ZK Passport off-chain attestation for an address from id-server.
+ * Returns null when no attestation exists (HTTP 404). Throws on other non-2xx responses or
+ * malformed payloads — callers should not silently swallow those.
+ *
+ * Note: id-server returns the most recent attestation regardless of expiry. Callers must
+ * check `expiresAt > now` themselves (see validateOffChainAttestation).
+ */
+export async function getZkPassportFreeOffChainAttestation(
+  address: string
+): Promise<ZkPassportOffChainAttestation | null> {
+  const url = `${ID_SERVER_BASE_URL}/off-chain-attestations/zk-passport`;
+
+  let response;
+  try {
+    response = await axios.get(url, {
+      params: { address },
+      timeout: 10_000,
+      // We handle 404 ourselves; let axios throw on 5xx and other errors.
+      validateStatus: (status) => (status >= 200 && status < 300) || status === 404,
+    });
+  } catch (e) {
+    throw new Error(`Failed to fetch ZK Passport off-chain attestation: ${e instanceof Error ? e.message : String(e)}`);
+  }
+
+  if (response.status === 404) return null;
+
+  const data = response.data;
+  if (
+    !data ||
+    typeof data !== "object" ||
+    typeof data.address !== "string" ||
+    data.attestationType !== "zk-passport" ||
+    typeof data.expiresAt !== "string" ||
+    typeof data.payload !== "object" ||
+    data.payload === null ||
+    typeof data.payload.uniqueIdentifier !== "string"
+  ) {
+    throw new Error("Malformed ZK Passport off-chain attestation response");
+  }
+
+  return data as ZkPassportOffChainAttestation;
+}
+
+export function validateOffChainAttestation(
+  attestation: ZkPassportOffChainAttestation | null
+): { valid: true; expiresAt: Date } | { valid: false; error: string } {
+  if (!attestation) {
+    return { valid: false, error: "Off-chain attestation not found" };
+  }
+
+  if (!attestation.payload?.uniqueIdentifier) {
+    return { valid: false, error: "Off-chain attestation missing uniqueIdentifier" };
+  }
+
+  const expiresAt = new Date(attestation.expiresAt);
+  if (isNaN(expiresAt.getTime())) {
+    return { valid: false, error: "Off-chain attestation has invalid expiresAt" };
+  }
+
+  if (expiresAt <= new Date()) {
+    return { valid: false, error: "Off-chain attestation has expired" };
+  }
+
+  return { valid: true, expiresAt };
+}
+
 export function validateAttestation(
   attestation: SignProtocolAttestation | null
 ): { valid: true } | { valid: false; error: string } {
@@ -62,6 +149,9 @@ export async function requestSBT({
   sendTransactionAsync,
   switchChainAsync,
   hasExistingCredential,
+  kycOptions,
+  cleanHandsOptions,
+  paymentConfig,
 }: {
   credentialType: CredentialType;
   address: Address;
@@ -77,6 +167,9 @@ export async function requestSBT({
   }) => Promise<`0x${string}`>;
   switchChainAsync: (params: { chainId: number }) => Promise<any>;
   hasExistingCredential?: (address: string) => Promise<boolean>;
+  kycOptions?: KycOptions;
+  cleanHandsOptions?: CleanHandsOptions;
+  paymentConfig?: PaymentConfig;
 }): Promise<ProviderPayload> {
   // Check if user already has a valid credential (SBT or attestation)
   if (hasExistingCredential && (await hasExistingCredential(address))) {
@@ -94,10 +187,18 @@ export async function requestSBT({
   // Request signature from user
   const signature = await signMessageAsync({ message });
 
-  // Prepare SBT request parameters
-  const requestParams: RequestSBTExtraParams = {
+  // Prepare SBT request parameters. kycOptions / cleanHandsOptions / paymentConfig
+  // forward to privateRequestSBT — the iframe shows the corresponding card variants.
+  const requestParams: RequestSBTExtraParams & {
+    kycOptions?: KycOptions;
+    cleanHandsOptions?: CleanHandsOptions;
+    paymentConfig?: PaymentConfig;
+  } = {
     signature,
     address: address,
+    kycOptions,
+    cleanHandsOptions,
+    paymentConfig,
     paymentCallback: async (tx: TransactionRequestWithChainId) => {
       const chainId = parseInt(tx.chainId, 16);
 
