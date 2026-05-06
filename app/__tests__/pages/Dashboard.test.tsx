@@ -139,7 +139,7 @@ describe("DashboardCTAs", () => {
   it("renders with default customization", () => {
     render(<DashboardCTAs customization={{ key: "none" } as Customization} />);
 
-    expect(screen.getByTestId("dashboard-score-panel")).toHaveClass("w-full xl:w-1/2");
+    expect(screen.getByTestId("dashboard-score-panel")).toHaveClass("w-full xl:w-1/4");
     expect(screen.getByTestId("dashboard-score-explanation-panel")).toBeInTheDocument();
     expect(screen.queryByTestId("dynamic-custom-dashboard-panel")).not.toBeInTheDocument();
   });
@@ -177,7 +177,7 @@ describe("DashboardCTAs", () => {
 
     // eslint-disable-next-line testing-library/no-node-access
     const innerContainer = screen.getByTestId("dashboard-score-panel").parentElement;
-    expect(innerContainer).toHaveClass("col-span-full flex flex-col grow lg:flex-row gap-8 mt-0.5");
+    expect(innerContainer).toHaveClass("col-span-full flex flex-col grow xl:flex-row gap-8 mt-0.5");
   });
 });
 
