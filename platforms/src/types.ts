@@ -56,6 +56,17 @@ export class ProviderInternalVerificationError extends ProviderVerificationError
   }
 }
 
+// Intentionally extends Error (not ProviderVerificationError) so it falls through
+// the instanceof checks in utils/providers.ts and reaches reportUnhandledError —
+// giving ops visibility into upstream backend failures (5xx, timeouts, unreachable
+// services) instead of silently rewriting them as "expected" verification failures.
+export class ProviderBackendError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ProviderBackendError";
+  }
+}
+
 // IAM Types
 
 // All Identity Providers should implement Provider

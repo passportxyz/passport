@@ -2,7 +2,7 @@
 import { type Provider } from "../../types.js";
 import type { RequestPayload, VerifiedPayload, ProviderContext, PROVIDER_ID } from "@gitcoin/passport-types";
 import axios from "axios";
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
+import { handleProviderModelAxiosError } from "../../utils/handleProviderModelAxiosError.js";
 
 export type ModelResponse = {
   data: {
@@ -96,7 +96,7 @@ export async function fetchModelData<T>(address: string, url_subpath: string, da
 
     return response.data;
   } catch (e) {
-    handleProviderAxiosError(e, "model data (" + url_subpath + ")", [dataScienceEndpoint]);
+    handleProviderModelAxiosError(e, "model data (" + url_subpath + ")", [dataScienceEndpoint]);
   }
 }
 

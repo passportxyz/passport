@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { RequestPayload, ProviderContext, VerifiedPayload, PROVIDER_ID } from "@gitcoin/passport-types";
-import { ProviderExternalVerificationError } from "../../types.js";
+import { ProviderBackendError, ProviderExternalVerificationError } from "../../types.js";
 import { Providers, withTimeout } from "../providers.js";
 import { SimpleProvider } from "../simpleProvider.js";
 import { verifySimpleProvider } from "../simpleProviderVerifier.js";
@@ -115,6 +115,29 @@ describe("Providers", function () {
       errors: [
         expect.stringContaining(
           "There was an unexpected error during verification. MyError: I'm an unhandled error at"
+        ),
+      ],
+    });
+  });
+
+  it("should report ProviderBackendError as an unhandled error so ops sees backend outages", async () => {
+    (verifySimpleProvider as jest.Mock).mockImplementationOnce(() => {
+      throw new ProviderBackendError("upstream model returned 503");
+    });
+
+    const provider = new SimpleProvider();
+    const providers = new Providers([provider]);
+    const result = await providers.verify(mockPayload.type, mockPayload, mockContext);
+
+    expect(console.error).toHaveBeenCalledWith(
+      "UNHANDLED ERROR: for type Simple and address 0x0 -",
+      expect.stringContaining("ProviderBackendError at")
+    );
+    expect(result).toEqual({
+      valid: false,
+      errors: [
+        expect.stringContaining(
+          "There was an unexpected error during verification. ProviderBackendError: upstream model returned 503 at"
         ),
       ],
     });
