@@ -8,6 +8,7 @@ import {
 } from "../collectors_journey.js";
 
 import { RequestPayload } from "@gitcoin/passport-types";
+import { ProviderBackendError, ProviderExternalVerificationError } from "../../../types.js";
 
 // ----- Libs
 import axios, { AxiosError } from "axios";
@@ -263,24 +264,53 @@ describe("Test Error cases for stamp  verification", function () {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  const buildAxiosError = (response: AxiosError["response"] | undefined, message = "Network error"): AxiosError => {
+    const err = new Error(message) as AxiosError;
+    if (response) err.response = response;
+    return err;
+  };
+
   it.each([
     ["DigitalCollectorProvider", new DigitalCollectorProvider()],
     ["ArtAficionadoProvider", new ArtAficionadoProvider()],
     ["NftVisionaryProvider", new NftVisionaryProvider()],
   ])(
-    "%p should throw Provider External Verification error when unable to access nft stamp api",
-    async (nftProviderName: string, nftProvider: NftCollectorBaseProvider) => {
-      const mockAxiosError = new Error("Network error") as AxiosError;
-      mockedAxios.isAxiosError.mockReturnValueOnce(true);
-      mockAxiosError.response = {
+    "%p should throw ProviderBackendError on 5xx response from nft stamp api",
+    async (_nftProviderName: string, nftProvider: NftCollectorBaseProvider) => {
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const mockAxiosError = buildAxiosError({
         status: 500,
         data: {},
         headers: {},
         statusText: "Internal Server Error",
-        config: {
-          headers: {} as unknown as any,
-        },
-      };
+        config: { headers: {} as unknown as any },
+      });
+
+      mockedAxios.post.mockRejectedValueOnce(mockAxiosError);
+
+      const verifyPromise = nftProvider.verify({
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload);
+
+      await expect(verifyPromise).rejects.toThrow(ProviderBackendError);
+      await expect(verifyPromise).rejects.toThrow(
+        "Error making queryNftStampApi request, received error response with code 500: {}, headers: {}"
+      );
+    }
+  );
+
+  it.each([
+    ["DigitalCollectorProvider", new DigitalCollectorProvider()],
+    ["ArtAficionadoProvider", new ArtAficionadoProvider()],
+    ["NftVisionaryProvider", new NftVisionaryProvider()],
+  ])(
+    "%p should throw ProviderBackendError when no response is received from nft stamp api",
+    async (_nftProviderName: string, nftProvider: NftCollectorBaseProvider) => {
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const mockAxiosError = buildAxiosError(undefined, "timeout of 10000ms exceeded");
+      // axios sets `request` (but not `response`) when no response was received
+      (mockAxiosError as any).request = {};
 
       mockedAxios.post.mockRejectedValueOnce(mockAxiosError);
 
@@ -288,9 +318,34 @@ describe("Test Error cases for stamp  verification", function () {
         nftProvider.verify({
           address: MOCK_ADDRESS_LOWER,
         } as unknown as RequestPayload)
-      ).rejects.toThrow(
-        "Error making queryNftStampApi request, received error response with code 500: {}, headers: {}"
-      );
+      ).rejects.toThrow(ProviderBackendError);
+    }
+  );
+
+  it.each([
+    ["DigitalCollectorProvider", new DigitalCollectorProvider()],
+    ["ArtAficionadoProvider", new ArtAficionadoProvider()],
+    ["NftVisionaryProvider", new NftVisionaryProvider()],
+  ])(
+    "%p should throw ProviderExternalVerificationError on 4xx response from nft stamp api",
+    async (_nftProviderName: string, nftProvider: NftCollectorBaseProvider) => {
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const mockAxiosError = buildAxiosError({
+        status: 400,
+        data: { detail: "bad address" },
+        headers: {},
+        statusText: "Bad Request",
+        config: { headers: {} as unknown as any },
+      });
+
+      mockedAxios.post.mockRejectedValueOnce(mockAxiosError);
+
+      const verifyPromise = nftProvider.verify({
+        address: MOCK_ADDRESS_LOWER,
+      } as unknown as RequestPayload);
+
+      await expect(verifyPromise).rejects.toThrow(ProviderExternalVerificationError);
+      await expect(verifyPromise).rejects.not.toThrow(ProviderBackendError);
     }
   );
 });

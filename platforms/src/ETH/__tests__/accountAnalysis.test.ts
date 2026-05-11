@@ -1,5 +1,5 @@
 import { RequestPayload } from "@gitcoin/passport-types";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import {
   ETHAdvocateProvider,
   ETHMaxiProvider,
@@ -10,6 +10,7 @@ import {
   EthGasSpentProvider,
   EthTransactionsProvider,
 } from "../Providers/accountAnalysis.js";
+import { ProviderBackendError, ProviderExternalVerificationError } from "../../types.js";
 
 const mockAddress = "0x0";
 let mockContext = {};
@@ -176,6 +177,64 @@ describe("AccountAnalysis Providers", () => {
     mockedAxios.post.mockRejectedValueOnce(new Error("Test Error"));
     const ethAdvocateProvider = new ETHMaxiProvider();
     await expect(ethAdvocateProvider.verify({ address: mockAddress } as RequestPayload, mockContext)).rejects.toThrow();
+  });
+
+  describe("fetchModelData error surfacing", () => {
+    const buildAxiosError = (response: AxiosError["response"] | undefined, message = "Network error"): AxiosError => {
+      const err = new Error(message) as AxiosError;
+      if (response) err.response = response;
+      return err;
+    };
+
+    it("throws ProviderBackendError on 5xx so reportUnhandledError sees it", async () => {
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      mockedAxios.post.mockRejectedValueOnce(
+        buildAxiosError({
+          status: 503,
+          data: { detail: "model unavailable" },
+          headers: {},
+          statusText: "Service Unavailable",
+          config: { headers: {} as unknown as any },
+        })
+      );
+
+      const provider = new ETHMaxiProvider();
+      const verifyPromise = provider.verify({ address: mockAddress } as RequestPayload, mockContext);
+
+      await expect(verifyPromise).rejects.toThrow(ProviderBackendError);
+      await expect(verifyPromise).rejects.toThrow(/code 503/);
+    });
+
+    it("throws ProviderBackendError when no response is received (timeout / connection refused)", async () => {
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const err = buildAxiosError(undefined, "timeout of 10000ms exceeded");
+      (err as any).request = {};
+      mockedAxios.post.mockRejectedValueOnce(err);
+
+      const provider = new ETHMaxiProvider();
+      await expect(provider.verify({ address: mockAddress } as RequestPayload, mockContext)).rejects.toThrow(
+        ProviderBackendError
+      );
+    });
+
+    it("throws ProviderExternalVerificationError on 4xx (client-side failure)", async () => {
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      mockedAxios.post.mockRejectedValueOnce(
+        buildAxiosError({
+          status: 422,
+          data: { detail: "invalid address" },
+          headers: {},
+          statusText: "Unprocessable Entity",
+          config: { headers: {} as unknown as any },
+        })
+      );
+
+      const provider = new ETHMaxiProvider();
+      const verifyPromise = provider.verify({ address: mockAddress } as RequestPayload, mockContext);
+
+      await expect(verifyPromise).rejects.toThrow(ProviderExternalVerificationError);
+      await expect(verifyPromise).rejects.not.toThrow(ProviderBackendError);
+    });
   });
 
   describe("getETHAnalysis", () => {

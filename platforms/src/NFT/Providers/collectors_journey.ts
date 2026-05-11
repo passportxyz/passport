@@ -9,7 +9,7 @@ import axios from "axios";
 import { getAddress } from "../../utils/signer.js";
 
 // ----- Utils
-import { handleProviderAxiosError } from "../../utils/handleProviderAxiosError.js";
+import { handleProviderModelAxiosError } from "../../utils/handleProviderModelAxiosError.js";
 
 // Alchemy Api key
 // const apiKey = process.env.ALCHEMY_API_KEY;
@@ -83,7 +83,7 @@ export class NftCollectorBaseProvider extends NftBaseProvider {
         })
       ).data as NftApiResponse;
     } catch (error) {
-      handleProviderAxiosError(error, "queryNftStampApi", []);
+      handleProviderModelAxiosError(error, "queryNftStampApi", []);
     }
   }
 }
