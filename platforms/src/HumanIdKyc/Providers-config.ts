@@ -1,6 +1,7 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { HumanIdKycProvider } from "./Providers/humanIdKyc.js";
 import { requestSBT } from "../HumanID/shared/utils.js";
+import { KYC_OPTIONS } from "./constants.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/idCard.svg",
@@ -32,6 +33,7 @@ export const PlatformDetails: PlatformSpec = {
                   signMessageAsync,
                   sendTransactionAsync,
                   switchChainAsync,
+                  kycOptions: KYC_OPTIONS,
                 });
               },
             },

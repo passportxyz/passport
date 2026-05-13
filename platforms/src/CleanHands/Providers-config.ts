@@ -1,6 +1,7 @@
 import { PlatformSpec, PlatformGroupSpec, Provider } from "../types.js";
 import { CleanHandsProvider } from "./Providers/index.js";
 import { requestSBT } from "../HumanID/shared/utils.js";
+import { CLEAN_HANDS_OPTIONS } from "./constants.js";
 
 export const PlatformDetails: PlatformSpec = {
   icon: "./assets/cleanHands.svg",
@@ -31,6 +32,7 @@ export const PlatformDetails: PlatformSpec = {
                   signMessageAsync,
                   sendTransactionAsync,
                   switchChainAsync,
+                  cleanHandsOptions: CLEAN_HANDS_OPTIONS,
                 });
               },
             },

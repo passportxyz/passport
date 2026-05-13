@@ -2,9 +2,8 @@ import React from "react";
 import { PlatformOptions } from "../types.js";
 import { BaseHumanIDPlatform } from "../HumanID/shared/BaseHumanIDPlatform.js";
 import { getKycSBTByAddress, getZkPassportSBTByAddress } from "@holonym-foundation/human-id-sdk";
-import type { KycOptions } from "@holonym-foundation/human-id-interface-core";
 import { getZkPassportFreeOffChainAttestation, validateOffChainAttestation } from "../HumanID/shared/utils.js";
-import { KYC_CREDENTIAL_TYPE } from "./constants.js";
+import { KYC_CREDENTIAL_TYPE, KYC_OPTIONS } from "./constants.js";
 
 export class HumanIdKycPlatform extends BaseHumanIDPlatform {
   platformId = "HumanIdKyc";
@@ -20,14 +19,7 @@ export class HumanIdKycPlatform extends BaseHumanIDPlatform {
     return validateOffChainAttestation(attestation).valid;
   };
 
-  // freeZKPassport is omitted from the public requestSBT type but accepted by
-  // privateRequestSBT at runtime — the cast in HumanID/shared/types.ts makes
-  // the unrestricted KycOptions reachable.
-  kycOptions: KycOptions = {
-    regularKYC: true,
-    paidZKPassport: true,
-    freeZKPassport: true,
-  };
+  kycOptions = KYC_OPTIONS;
 
   constructor(options: PlatformOptions) {
     super(options);
