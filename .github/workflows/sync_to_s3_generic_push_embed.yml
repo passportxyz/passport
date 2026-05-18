@@ -12,6 +12,10 @@ on:
         type: string
         required: true
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build:
     name: Push Embed to S3
@@ -19,7 +23,6 @@ jobs:
 
     env:
       AWS_REGION: us-west-2
-      CORE_INFRA_PULUMI_STACK: passportxyz/core-infra/${{ inputs.environment }}
       ONE_PASS_ENV: passport-embed-${{ inputs.environment }}-env
 
     steps:
@@ -28,55 +31,37 @@ jobs:
           name: passport-embed-popup-${{ inputs.environment }}
           path: embed-popup/dist
 
-      - name: Install 1Password CLI
-        uses: 1password/install-cli-action@v1
-
-      - name: Load secret
-        id: op-load-secret
-        uses: 1password/load-secrets-action@v1
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          export-env: true
-        env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-          AWS_ACCESS_KEY_ID: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SECRET_ACCESS_KEY
-          PULUMI_ACCESS_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/PULUMI_ACCESS_TOKEN
-
-      - name: Install 1Password CLI
-        uses: 1password/install-cli-action@v1
-
-      - name: Configure 1Password Service Account
-        uses: 1password/load-secrets-action/configure@v1
-        with:
-          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          role-to-assume: arn:aws:iam::${{ inputs.environment == 'production' && '559026686882' || '515520736917' }}:role/pulumi-ci-passport-${{ inputs.environment }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Install Pulumi CLI
-        uses: pulumi/actions@v4
+        uses: pulumi/actions@v5
         with:
           pulumi-version: latest
 
-      - name: Set AWS_SESSION_TOKEN if needed
-        id: set-aws-session-token
-        if: inputs.environment == 'production'
-        uses: 1password/load-secrets-action@v1
-        with:
-          export-env: true
-        env:
-          AWS_SESSION_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SESSION_TOKEN
+      - name: Pulumi login (S3 backend)
+        run: pulumi login s3://passportxyz-pulumi-state
+        shell: bash
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Checkout core-infra for cross-stack outputs
+        uses: actions/checkout@v3
         with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
+          repository: passportxyz/core-infra
+          ref: main
+          path: core-infra
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get Pulumi Stack Outputs From Core Infra
         id: get_pulumi_outputs
+        working-directory: core-infra/aws
+        shell: bash
         run: |
-          BUCKET_NAME=$(pulumi stack output embedPopupBucketName --stack ${{ env.CORE_INFRA_PULUMI_STACK }})
-          CLOUDFRONT_ID=$(pulumi stack output embedPopupDistributionId --stack ${{ env.CORE_INFRA_PULUMI_STACK }})
+          pulumi stack select ${{ inputs.environment }}
+          BUCKET_NAME=$(pulumi stack output embedPopupBucketName)
+          CLOUDFRONT_ID=$(pulumi stack output embedPopupDistributionId)
 
           if [[ -z "$BUCKET_NAME" || -z "$CLOUDFRONT_ID" ]]; then
             echo "Error: Failed to retrieve Pulumi stack outputs!"

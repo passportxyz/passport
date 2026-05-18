@@ -1,7 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import { stack } from "../lib/tags";
 
-const coreInfraStack = new pulumi.StackReference(`passportxyz/core-infra/${stack}`);
+const coreInfraStack = new pulumi.StackReference(`organization/core-infra/${stack}`);
 
 export const vpcId = coreInfraStack.getOutput("vpcId");
 export const vpcPrivateSubnets = coreInfraStack.getOutput("privateSubnetIds");
@@ -21,7 +21,7 @@ export const privateAlbZoneId = coreInfraStack.getOutput("privateAlbZoneId");
 export const privateAlbHttpListenerArn = coreInfraStack.getOutput("privateAlbHttpListenerArn");
 export const privateAlbRoute53Record = coreInfraStack.getOutput("privateAlbRoute53Record");
 
-export const passportDataScienceStack = new pulumi.StackReference(`passportxyz/passport-data/${stack}`);
+export const passportDataScienceStack = new pulumi.StackReference(`organization/passport-data/${stack}`);
 export const passportDataScienceEndpoint = passportDataScienceStack.getOutput("internalAlbBaseUrl");
 
 export const snsAlertsTopicArn = coreInfraStack.getOutput("snsAlertsTopicArn");

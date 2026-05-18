@@ -19,7 +19,6 @@ jobs:
 
     env:
       AWS_REGION: us-west-2
-      CORE_INFRA_PULUMI_STACK: passportxyz/core-infra/${{ inputs.environment }}
       ONE_PASS_ENV: passport-embed-${{ inputs.environment }}-env
 
     steps:
