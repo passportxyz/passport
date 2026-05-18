@@ -15,6 +15,10 @@ on:
         type: string
         required: true
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   verify_image_ecr:
     name: Verify given image tag exists in ECR
@@ -34,10 +38,10 @@ jobs:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           AWS_ACCESS_KEY_ID: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_ACCESS_KEY_ID
           AWS_SECRET_ACCESS_KEY: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SECRET_ACCESS_KEY
-      
+
       - name: Install 1Password CLI
         uses: 1password/install-cli-action@v1
-        
+
       - name: Configure 1Password Service Account
         uses: 1password/load-secrets-action/configure@v1
         with:
@@ -98,18 +102,6 @@ jobs:
           export-env: true
         env:
           CLOUDFLARE_API_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/CLOUDFLARE_API_TOKEN
-          AWS_ACCESS_KEY_ID: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SECRET_ACCESS_KEY
-          PULUMI_ACCESS_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/PULUMI_ACCESS_TOKEN
-      
-      - name: Set AWS_SESSION_TOKEN if needed
-        id: set-aws-session-token
-        if: inputs.environment == 'production'
-        uses: 1password/load-secrets-action@v1
-        with:
-          export-env: true
-        env:
-          AWS_SESSION_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SESSION_TOKEN
 
       - name: Build Sweeper Service
         run: |
@@ -124,16 +116,14 @@ jobs:
       - name: Prepare to Deploy to AWS
         uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v3
       - name: Preview Deploy
-        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v3
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v4
         with:
           docker_tag: ${{ inputs.docker_tag }}
-          stack_name: passportxyz/passport/${{ inputs.environment }}
+          stack_name: ${{ inputs.environment }}
           aws_region: us-west-2
+          aws_role_arn: arn:aws:iam::${{ inputs.environment == 'production' && '559026686882' || '515520736917' }}:role/pulumi-ci-passport-${{ inputs.environment }}
           pulumi_command: preview
           pulumi_diff: true
-          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          PULUMI_ACCESS_TOKEN: ${{ env.PULUMI_ACCESS_TOKEN }}
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
 
@@ -170,19 +160,7 @@ jobs:
           export-env: true
         env:
           CLOUDFLARE_API_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/CLOUDFLARE_API_TOKEN
-          AWS_ACCESS_KEY_ID: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SECRET_ACCESS_KEY
-          PULUMI_ACCESS_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/PULUMI_ACCESS_TOKEN
-      
-      - name: Set AWS_SESSION_TOKEN if needed
-        id: set-aws-session-token
-        if: inputs.environment == 'production'
-        uses: 1password/load-secrets-action@v1
-        with:
-          export-env: true
-        env:
-          AWS_SESSION_TOKEN: op://DeployerVault/github-aws-${{ inputs.environment }}/ci/AWS_SESSION_TOKEN
-        
+
       - name: Build Sweeper Service
         run: |
           cd infra/scripts/verifier_sweep
@@ -196,14 +174,12 @@ jobs:
       - name: Prepare to Deploy to AWS
         uses: passportxyz/gh-workflows/.github/actions/prepare_deploy_to_aws@v3
       - name: Deploy to AWS
-        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v3
+        uses: passportxyz/gh-workflows/.github/actions/deploy_to_aws@v4
         with:
           docker_tag: ${{ inputs.docker_tag }}
-          stack_name: passportxyz/passport/${{ inputs.environment }}
+          stack_name: ${{ inputs.environment }}
           aws_region: us-west-2
+          aws_role_arn: arn:aws:iam::${{ inputs.environment == 'production' && '559026686882' || '515520736917' }}:role/pulumi-ci-passport-${{ inputs.environment }}
           pulumi_command: up
-          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          PULUMI_ACCESS_TOKEN: ${{ env.PULUMI_ACCESS_TOKEN }}
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
