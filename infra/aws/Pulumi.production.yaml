@@ -1,0 +1,2 @@
+secretsprovider: awskms://alias/pulumi-state
+encryptedkey: AQICAHhv9c7hfZIQkfM61+RS2kiYbdA8lu+LyzhUcpIETj4XXQEblfdq0MIGjLI+/bTdIcTRAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMei7jL3q3u7BlJ18UAgEQgDt+Hhly//GCV1CPs7IikG2cArQCcQS16QheZAGA/SC/HAChWz7zpfrhVOF0q25QeGi3FaqlduofJXHi/w==
