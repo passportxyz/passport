@@ -546,7 +546,7 @@ export const passportXyzService = new aws.ecs.Service(
 
 const ecsAutoScalingTargetXyz = new aws.appautoscaling.Target("autoscaling-target-iam", {
   maxCapacity: 10,
-  minCapacity: 1,
+  minCapacity: 3,
   resourceId: pulumi.interpolate`service/${cluster.name}/${passportXyzService.name}`,
   scalableDimension: "ecs:service:DesiredCount",
   serviceNamespace: "ecs",
