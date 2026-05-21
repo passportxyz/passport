@@ -26,6 +26,11 @@ jobs:
       ONE_PASS_ENV: passport-xyz-${{ inputs.environment }}-env
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.refspec }}
+
       - uses: actions/download-artifact@v4
         with:
           name: passport-app-${{ inputs.environment }}
@@ -37,6 +42,17 @@ jobs:
           role-to-assume: arn:aws:iam::${{ inputs.environment == 'production' && '559026686882' || '515520736917' }}:role/pulumi-ci-passport-${{ inputs.environment }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: infra/yarn.lock
+
+      - name: Install infra deps
+        working-directory: infra
+        run: yarn install --frozen-lockfile
+
       - name: Install Pulumi CLI
         uses: pulumi/actions@v5
         with:
@@ -46,17 +62,9 @@ jobs:
         run: pulumi login s3://passportxyz-pulumi-state
         shell: bash
 
-      - name: Checkout core-infra for cross-stack outputs
-        uses: actions/checkout@v3
-        with:
-          repository: passportxyz/core-infra
-          ref: main
-          path: core-infra
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get Pulumi Stack Outputs From Core Infra
+      - name: Get Pulumi Stack Outputs
         id: get_pulumi_outputs
-        working-directory: core-infra/aws
+        working-directory: infra/aws
         shell: bash
         run: |
           pulumi stack select ${{ inputs.environment }}

@@ -28,3 +28,11 @@ export const snsAlertsTopicArn = coreInfraStack.getOutput("snsAlertsTopicArn");
 
 export const passportXyzDomainName = coreInfraStack.getOutput("passportXyzDomainName");
 export const passportXyzHostedZoneId = coreInfraStack.getOutput("passportXyzHostedZoneId");
+
+// Downstream-needed core-infra outputs surfaced here so they can also be
+// re-exported from index.ts as this stack's own outputs (used by the post-
+// deploy S3 sync workflows; see sync_to_s3_generic_push_app.yml + embed).
+export const passportAppBucketName = coreInfraStack.getOutput("passportAppBucketName");
+export const passportAppDistributionId = coreInfraStack.getOutput("passportAppDistributionId");
+export const embedPopupBucketName = coreInfraStack.getOutput("embedPopupBucketName");
+export const embedPopupDistributionId = coreInfraStack.getOutput("embedPopupDistributionId");
