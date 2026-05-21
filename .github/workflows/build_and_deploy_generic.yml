@@ -233,7 +233,7 @@ jobs:
 
   push_app:
     name: Push App to S3
-    needs: [deploy_confirm]
+    needs: [deploy_confirm, deploy_backends]
     uses: ./.github/workflows/sync_to_s3_generic_push_app.yml
     secrets: inherit
     with:
@@ -242,7 +242,7 @@ jobs:
 
   push_embed:
     name: Push Embed to S3
-    needs: [deploy_confirm]
+    needs: [deploy_confirm, deploy_backends]
     uses: ./.github/workflows/sync_to_s3_generic_push_embed.yml
     secrets: inherit
     with:
