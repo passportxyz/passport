@@ -7,7 +7,7 @@ import { stack, defaultTags } from "./tags";
 
 const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-xyz-${stack}-env/ci/PASSPORT_VC_SECRETS_ARN`);
 
-const ETH_RPC_URL = "https://eth.llamarpc.com";
+const ETH_RPC_URL = "https://eth.drpc.org";
 
 export const createAutoCreditsService = async () => {
   // Only run in production - other environments don't have the HN private key

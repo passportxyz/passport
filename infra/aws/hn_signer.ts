@@ -39,7 +39,7 @@ const hnSignerResources: Record<string, any> = {
   production: {
     cpu: "1024",
     memory: "2048",
-    desiredCount: 2,
+    desiredCount: 1,
     maxCapacity: 8,
   },
 };
