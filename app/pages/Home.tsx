@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 // --- Components
 import SIWEButton from "../components/SIWEButton";
@@ -9,6 +9,9 @@ import { DEFAULT_CUSTOMIZATION_KEY, useCustomization } from "../hooks/useCustomi
 
 import { useLoginFlow } from "../hooks/useLoginFlow";
 import { InitialScreenWelcome } from "../components/InitialScreenLayout";
+
+// --- Analytics
+import posthog from "posthog-js";
 
 export default function Home() {
   const { isLoggingIn, signIn, loginStep } = useLoginFlow();
@@ -20,6 +23,11 @@ export default function Home() {
     const usingCustomization = customization.key !== DEFAULT_CUSTOMIZATION_KEY;
     setEnableEthBranding(!usingCustomization);
   }, [customization.key]);
+
+  const handleConnectWallet = useCallback(() => {
+    posthog.capture("cta_clicked", { site: "passport.human.tech", cta_id: "connect_wallet" });
+    signIn();
+  }, [signIn]);
 
   // customization.scorer?.weights
 
@@ -45,7 +53,7 @@ export default function Home() {
           isLoading={isLoggingIn}
           enableEthBranding={enableEthBranding}
           data-testid="connectWalletButton"
-          onClick={signIn}
+          onClick={handleConnectWallet}
           className="px-10 mmb-12 md:w-2/3"
         />
       </div>

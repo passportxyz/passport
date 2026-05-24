@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useMemo, useCallback } 
 import { datadogRum } from "@datadog/browser-rum";
 import { SiweMessage } from "siwe";
 import axios from "axios";
+import posthog from "posthog-js";
 
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { updateIntercomUserData } from "../hooks/useIntercom";
@@ -169,6 +170,7 @@ export const useDatastoreConnection = () => {
         setDbAccessToken(existingToken);
         setDbAccessTokenStatus("connected");
         setUserAddress(address);
+        posthog.identify(address);
 
         // Set up session validity check
         setCheckSessionIsValid(() => () => isTokenValid(existingToken));
@@ -187,6 +189,7 @@ export const useDatastoreConnection = () => {
       setDbAccessToken(dbAccessToken);
       setDbAccessTokenStatus("connected");
       setUserAddress(address);
+      posthog.identify(address);
 
       // Set up session validity check
       setCheckSessionIsValid(() => () => isTokenValid(dbAccessToken));
