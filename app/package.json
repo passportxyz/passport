@@ -55,6 +55,7 @@
     "react-confetti": "^6.1.0",
     "react-dom": "^18.3.1",
     "react-google-login": "^5.2.2",
+    "posthog-js": "^1.240.4",
     "react-gtm-module": "^2.0.11",
     "react-responsive": "^10.0.0",
     "react-router-dom": "^6.22.3",

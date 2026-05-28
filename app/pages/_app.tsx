@@ -15,6 +15,9 @@ import { ScorerContextProvider } from "../context/scorerContext";
 // --- GTM Module
 import TagManager from "react-gtm-module";
 
+// --- Analytics
+import posthog from "posthog-js";
+
 import { themes, ThemeWrapper } from "../utils/theme";
 import { StampClaimingContextProvider } from "../context/stampClaimingContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -23,6 +26,14 @@ import { Web3Context, Web3ErrorContext } from "../hooks/Web3Context";
 import { AutoVerificationProvider } from "../components/AutoVerificationProvider";
 
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
+
+// Initialize PostHog (client-side only)
+if (typeof window !== "undefined") {
+  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
+    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
+    person_profiles: "identified_only",
+  });
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
