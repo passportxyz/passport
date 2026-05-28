@@ -148,7 +148,11 @@ export const GenericPlatform = ({
   // fetch VCs from IAM server
   const handleFetchCredential = async (): Promise<void> => {
     datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
-    posthog.capture("cta_clicked", { site: "passport.human.tech", cta_id: "verify_stamp", platform: platform.platformId });
+    posthog.capture("cta_clicked", {
+      site: "passport.human.tech",
+      cta_id: "verify_stamp",
+      platform: platform.platformId,
+    });
     setLoading(true);
     const selectedProviders = platformProviderIds;
 
