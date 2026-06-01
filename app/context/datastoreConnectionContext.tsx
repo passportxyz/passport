@@ -5,7 +5,6 @@ import axios from "axios";
 import posthog from "posthog-js";
 
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
-import { updateIntercomUserData } from "../hooks/useIntercom";
 import { useCustomDisconnect } from "../hooks/useCustomDisconnect";
 import { useAccount } from "wagmi";
 import { WalletClient } from "viem";
@@ -150,7 +149,6 @@ export const useDatastoreConnection = () => {
       });
 
       const accessToken = authResponse.data?.access as string;
-      updateIntercomUserData({ address });
       setConnectedAddress(address);
       return accessToken;
     } catch (error) {

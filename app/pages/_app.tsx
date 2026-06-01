@@ -6,6 +6,7 @@ import { BroadcastChannel } from "broadcast-channel";
 // --- Next Methods
 import { AppProps } from "next/app";
 import Head from "next/head";
+import Script from "next/script";
 
 import "../styles/globals.css";
 import { CeramicContextProvider } from "../context/ceramicContext";
@@ -21,7 +22,6 @@ import posthog from "posthog-js";
 import { themes, ThemeWrapper } from "../utils/theme";
 import { StampClaimingContextProvider } from "../context/stampClaimingContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useIntercom } from "../hooks/useIntercom";
 import { Web3Context, Web3ErrorContext } from "../hooks/Web3Context";
 import { AutoVerificationProvider } from "../components/AutoVerificationProvider";
 
@@ -61,8 +61,6 @@ const RenderOnlyOnClient = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App({ Component, pageProps }: AppProps) {
-  const { initialize } = useIntercom();
-
   useEffect(() => {
     TagManager.initialize({
       gtmId: `${GTM_ID}`,
@@ -71,12 +69,6 @@ function App({ Component, pageProps }: AppProps) {
       preview: "env-34",
     });
   }, []);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      initialize();
-    }
-  }, [initialize]);
 
   if (typeof window !== "undefined") {
     // pull any search params
@@ -143,6 +135,7 @@ function App({ Component, pageProps }: AppProps) {
           </DatastoreConnectionContextProvider>
         </QueryClientProvider>
       </Web3Context>
+      <Script src="https://iris-v2-fqgd.onrender.com/widget/iris-widget.js" strategy="afterInteractive" />
     </>
   );
 }
