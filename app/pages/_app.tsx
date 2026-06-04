@@ -135,7 +135,11 @@ function App({ Component, pageProps }: AppProps) {
           </DatastoreConnectionContextProvider>
         </QueryClientProvider>
       </Web3Context>
-      <Script src="https://iris-v2-fqgd.onrender.com/widget/iris-widget.js" strategy="afterInteractive" />
+      <Script
+        src="https://iris-v2-fqgd.onrender.com/widget/iris-widget.js"
+        data-iris-key="passport"
+        strategy="afterInteractive"
+      />
     </>
   );
 }
