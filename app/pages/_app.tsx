@@ -6,7 +6,6 @@ import { BroadcastChannel } from "broadcast-channel";
 // --- Next Methods
 import { AppProps } from "next/app";
 import Head from "next/head";
-import Script from "next/script";
 
 import "../styles/globals.css";
 import { CeramicContextProvider } from "../context/ceramicContext";
@@ -135,11 +134,8 @@ function App({ Component, pageProps }: AppProps) {
           </DatastoreConnectionContextProvider>
         </QueryClientProvider>
       </Web3Context>
-      <Script
-        src="https://iris-v2-fqgd.onrender.com/widget/iris-widget.js"
-        data-iris-key="passport"
-        strategy="afterInteractive"
-      />
+      {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+      <script src="https://iris-v2-fqgd.onrender.com/widget/iris-widget.js" data-iris-key="passport" async />
     </>
   );
 }
