@@ -201,7 +201,7 @@ Different agents caught orthogonal issues: security-sentinel found path traversa
 ## Cross-References
 
 - Plan: `docs/plans/2026-02-11-feat-nft-custom-platform-type-plan.md`
-- Architecture: `.claude/knowledge/architecture/platform_system.md` (isEVM flag, platform identification)
-- Error handling: `.claude/knowledge/conventions/error_handling.md` (provider philosophy)
-- Testing: `.claude/knowledge/testing/provider_testing.md` (VerifiedPayload patterns)
+- Architecture: `wiki/architecture/platform-system.md` (isEVM flag, platform identification)
+- Error handling: `wiki/development/providers.md` (provider philosophy)
+- Testing: `wiki/development/providers.md` (VerifiedPayload patterns)
 - Review todos: `todos/001-007-complete-*.md`
