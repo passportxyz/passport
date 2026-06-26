@@ -28,10 +28,36 @@ import { AutoVerificationProvider } from "../components/AutoVerificationProvider
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 
 // Initialize PostHog (client-side only)
+//
+// Behavioral analytics standard: heatmaps, scroll, and click maps plus autocapture
+// are enabled across every surface. Session replay is gated by surface type.
+//
+// Surface decision: app.passport.xyz (wallet / KYC / PII flows) and
+// passport.human.tech (marketing landing) are served from this single Next.js SPA
+// with one shared init and no clean route boundary that guarantees a wallet-free
+// surface — the landing page (Home) itself hosts the SIWE connect-wallet button.
+// Per the analytics standard we therefore default the whole app to the APP profile:
+// session replay is DISABLED so we never record wallet / KYC sessions. Enabling
+// masked replay on the marketing pages requires host/route separation and is a
+// follow-up.
 if (typeof window !== "undefined") {
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
     person_profiles: "identified_only",
+    autocapture: true,
+    capture_pageview: true,
+    capture_pageleave: true,
+    enable_heatmaps: true,
+    // APP profile — safety first: never record wallet / KYC sessions.
+    disable_session_recording: true,
+  });
+
+  // Register the behavioral-analytics dimensions as super properties so they ride
+  // along on autocapture, pageview, and heatmap events.
+  posthog.register({
+    site: "passport",
+    product: "passport",
+    surface_type: "app",
   });
 }
 
