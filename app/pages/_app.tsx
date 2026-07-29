@@ -27,6 +27,12 @@ import { AutoVerificationProvider } from "../components/AutoVerificationProvider
 
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 
+// Fraction of sessions to session-replay. app.passport.xyz runs ~640
+// sessions/day; 25% keeps ~160 recordings/day, enough to diagnose the
+// verification funnel without paying for full coverage. Tunable via
+// NEXT_PUBLIC_POSTHOG_REPLAY_RATE.
+const REPLAY_SAMPLE_RATE = Number(process.env.NEXT_PUBLIC_POSTHOG_REPLAY_RATE ?? "0.25");
+
 // Initialize PostHog (client-side only)
 //
 // Behavioral analytics standard: heatmaps, scroll, and click maps plus autocapture
@@ -36,10 +42,21 @@ const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
 // passport.human.tech (marketing landing) are served from this single Next.js SPA
 // with one shared init and no clean route boundary that guarantees a wallet-free
 // surface — the landing page (Home) itself hosts the SIWE connect-wallet button.
-// Per the analytics standard we therefore default the whole app to the APP profile:
-// session replay is DISABLED so we never record wallet / KYC sessions. Enabling
-// masked replay on the marketing pages requires host/route separation and is a
-// follow-up.
+// Replay was previously DISABLED outright for that reason.
+//
+// It is now enabled as *fully masked* replay, which is what the earlier note
+// deferred pending host/route separation. Masking makes the route boundary
+// unnecessary: every input value and every piece of on-screen text is redacted
+// in the browser, before anything is sent to PostHog, so a wallet or KYC screen
+// yields layout and interaction timing but no content. That is what the funnel
+// analysis actually needs — where users stall, misclick, or hit errors.
+//
+// Masking is set HERE and not in PostHog project settings on purpose. The
+// project has no masking configured (session_recording_masking_config and
+// session_replay_config are both null), and posthog-js only masks input values
+// by default — on-screen text is NOT masked by default. Relying on the project
+// defaults would have recorded rendered PII: names, dates of birth, document
+// numbers, wallet addresses and balances.
 if (typeof window !== "undefined") {
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
@@ -48,8 +65,21 @@ if (typeof window !== "undefined") {
     capture_pageview: true,
     capture_pageleave: true,
     enable_heatmaps: true,
-    // APP profile — safety first: never record wallet / KYC sessions.
+    // Recording is started explicitly below so this app owns its sample rate
+    // rather than inheriting the project-wide one (set low to stop waap.xyz, at
+    // ~4,200 sessions/day, from dominating the bill).
     disable_session_recording: true,
+    session_recording: {
+      maskAllInputs: true,
+      // "*" masks all on-screen text. Do not narrow this to a selector without
+      // an audit of every wallet/KYC screen: the default (unmasked text) is
+      // what makes replay unsafe on this app.
+      maskTextSelector: "*",
+    },
+    // The project has capture_console_log_opt_in enabled. Console output on a
+    // wallet/KYC app can carry addresses, tokens and raw API responses, so it
+    // is disabled here regardless of the project setting.
+    enable_recording_console_log: false,
   });
 
   // Register the behavioral-analytics dimensions as super properties so they ride
@@ -59,6 +89,19 @@ if (typeof window !== "undefined") {
     product: "passport",
     surface_type: "app",
   });
+
+  if (Math.random() < REPLAY_SAMPLE_RATE) {
+    // All four override keys are set explicitly rather than passing the `true`
+    // shorthand, which covers only sampling and linked_flag. PostHog's ingestion
+    // controls combine restrictively, so without this the project-level sample
+    // rate would apply on top of the draw above and cut the sample again.
+    posthog.startSessionRecording({
+      sampling: true,
+      linked_flag: true,
+      url_trigger: true,
+      event_trigger: true,
+    });
+  }
 }
 
 const queryClient = new QueryClient({
