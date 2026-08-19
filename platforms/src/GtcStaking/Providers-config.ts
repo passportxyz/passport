@@ -14,7 +14,7 @@ export const PlatformDetails: PlatformSpec = {
   name: "Identity Staking",
   description: "Stake GTC to boost trust in the ecosystem",
   connectMessage: "Verify amount",
-  website: "https://staking.passport.gitcoin.co/",
+  website: "https://stake.passport.xyz/",
   isEVM: true,
   timeToGet: "10-20 minutes",
   price: "5-125 GTC + gas fees",
