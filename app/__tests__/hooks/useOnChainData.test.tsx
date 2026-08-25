@@ -217,4 +217,61 @@ describe("useOnChainData hook", () => {
     // Assert
     expect(result.current.activeChainProviders).toEqual(customProviders);
   });
+
+  it("surfaces isError when getAttestationData throws", async () => {
+    // QueryClient with retry: false so errors surface immediately
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+
+    vi.mocked(getAttestationData).mockRejectedValue(new Error("RPC timeout"));
+
+    const { result, waitForNextUpdate } = renderHook(() => useOnChainData(), { wrapper });
+
+    await waitForNextUpdate();
+
+    expect(result.current.isError).toBe(true);
+    expect(result.current.data).toEqual({});
+    expect(result.current.activeChainProviders).toEqual([]);
+  });
+
+  it("surfaces isError when getPassport (inside getAttestationData) throws", async () => {
+    // getPassport no longer has a silent catch — the error propagates through
+    // getAttestationData which also no longer catches it.
+    // We simulate this by rejecting getAttestationData (the exported boundary).
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+
+    vi.mocked(getAttestationData).mockRejectedValue(new Error("contract read failed"));
+
+    const { result, waitForNextUpdate } = renderHook(() => useOnChainData(), { wrapper });
+
+    await waitForNextUpdate();
+
+    expect(result.current.isError).toBe(true);
+  });
+
+  it("does not set isError for legitimate empty on-chain data (score 0, no providers)", async () => {
+    vi.mocked(getAttestationData).mockResolvedValue({
+      score: { value: 0, expirationDate: new Date("2023-12-31") },
+      providers: [],
+    } as any);
+
+    const { result, waitForNextUpdate } = renderHook(() => useOnChainData(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitForNextUpdate();
+
+    expect(result.current.isError).toBe(false);
+    expect(result.current.data[mockHexChainId]).toEqual({
+      score: 0,
+      providers: [],
+      expirationDate: new Date("2023-12-31"),
+    });
+    expect(result.current.activeChainProviders).toEqual([]);
+  });
 });

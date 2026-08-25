@@ -10,7 +10,7 @@ import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 import { getAttestationData } from "../utils/onChainStamps";
 import { FeatureFlags } from "../config/feature_flags";
-import { UseQueryResult, useQueries, useQueryClient } from "@tanstack/react-query";
+import { UseQueryResult, keepPreviousData, useQueries, useQueryClient } from "@tanstack/react-query";
 import { parseValidChains } from "./useOnChainStatus";
 import { useCustomization } from "./useCustomization";
 import { useAccount, useChains } from "wagmi";
@@ -44,6 +44,7 @@ export interface OnChainData {
   data: Record<string, SingleChainData | undefined>;
   activeChainProviders: OnChainProviderType[];
   isPending: boolean;
+  isError: boolean;
   refresh: (chainId?: ChainId) => void;
 }
 
@@ -74,15 +75,11 @@ const getOnChainDataForChain = async ({
     customScorerId,
   });
 
-  const score = attestationData?.score.value || 0;
-  const expirationDate = attestationData?.score.expirationDate;
-  const providers = attestationData?.providers || [];
-
   return {
     chainId,
-    providers,
-    score,
-    expirationDate,
+    providers: attestationData.providers,
+    score: attestationData.score.value,
+    expirationDate: attestationData.score.expirationDate,
   };
 };
 
@@ -139,6 +136,8 @@ const useOnChainDataQuery = (address?: string) => {
             customScorerId,
             publicClient: publicClient!,
           }),
+        retry: 3,
+        placeholderData: keepPreviousData,
       };
     }),
     combine,
@@ -164,11 +163,12 @@ export const useOnChainData = (): OnChainData => {
 
   useEffect(() => {
     if (isError && error) {
-      console.error("Failed to check onchain status", error);
-      datadogLogs.logger.error("Failed to check onchain status", error);
-      datadogRum.addError(error);
+      const meta = { operation: "getOnChainDataForChain", chainId, address };
+      console.error("Failed to check onchain status", meta, error);
+      datadogLogs.logger.error("Failed to check onchain status", { ...meta, error });
+      datadogRum.addError(error, meta);
     }
-  }, [isError, error]);
+  }, [isError, error, chainId, address]);
 
   const refresh = useCallback(
     (chainId?: string) => {
@@ -186,8 +186,9 @@ export const useOnChainData = (): OnChainData => {
       data: data || {},
       activeChainProviders,
       isPending,
+      isError,
       refresh,
     }),
-    [data, activeChainProviders, isPending, refresh]
+    [data, activeChainProviders, isPending, isError, refresh]
   );
 };

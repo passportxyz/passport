@@ -43,7 +43,7 @@ const StampsList = ({ className, onChainPlatformIds }: StampsListProps) => {
 
 export const DashboardValidStampsPanel = ({ className }: { className: string }) => {
   const { verifiedPlatforms, allProvidersState } = useContext(CeramicContext);
-  const { activeChainProviders } = useOnChainData();
+  const { activeChainProviders, isError, refresh } = useOnChainData();
 
   const hasOnchainProviders = useCallback(
     (platformId: PLATFORM_ID) => {
@@ -69,11 +69,25 @@ export const DashboardValidStampsPanel = ({ className }: { className: string }) 
     >
       <div className="my-2">Valid Stamps</div>
       <div className="h-[2px] w-full bg-gradient-to-r from-background via-foreground-2 to-background" />
-      <StampsList className="m-6" onChainPlatformIds={onChainPlatformIds} />
-      <InitiateOnChainButton className="mb-2" />
-      <span className={`mb-2 text-sm ${anyOnchain ? "visible" : "invisible"}`}>
-        <OnchainMarker /> = Onchain
-      </span>
+      {isError ? (
+        <div className="m-6 flex flex-col items-center gap-3 text-sm text-foreground-2">
+          <span>Couldn&apos;t load on-chain data.</span>
+          <button
+            onClick={() => refresh()}
+            className="rounded border border-foreground-3 px-3 py-1 text-sm hover:bg-background-2"
+          >
+            Try again
+          </button>
+        </div>
+      ) : (
+        <>
+          <StampsList className="m-6" onChainPlatformIds={onChainPlatformIds} />
+          <InitiateOnChainButton className="mb-2" />
+          <span className={`mb-2 text-sm ${anyOnchain ? "visible" : "invisible"}`}>
+            <OnchainMarker /> = Onchain
+          </span>
+        </>
+      )}
     </div>
   );
 };
