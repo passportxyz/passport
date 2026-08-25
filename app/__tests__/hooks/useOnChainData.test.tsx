@@ -37,6 +37,9 @@ const createWrapper = () => {
     defaultOptions: {
       queries: {
         retry: false,
+        // retryDelay: 0 makes per-query retry: 3 (set in the hook) complete instantly in tests,
+        // so waitForNextUpdate() settles within the default 1000ms timeout.
+        retryDelay: 0,
       },
     },
   });
@@ -219,15 +222,11 @@ describe("useOnChainData hook", () => {
   });
 
   it("surfaces isError when getAttestationData throws", async () => {
-    // QueryClient with retry: false so errors surface immediately
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-
     vi.mocked(getAttestationData).mockRejectedValue(new Error("RPC timeout"));
 
-    const { result, waitForNextUpdate } = renderHook(() => useOnChainData(), { wrapper });
+    const { result, waitForNextUpdate } = renderHook(() => useOnChainData(), {
+      wrapper: createWrapper(),
+    });
 
     await waitForNextUpdate();
 
@@ -240,14 +239,11 @@ describe("useOnChainData hook", () => {
     // getPassport no longer has a silent catch — the error propagates through
     // getAttestationData which also no longer catches it.
     // We simulate this by rejecting getAttestationData (the exported boundary).
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-
     vi.mocked(getAttestationData).mockRejectedValue(new Error("contract read failed"));
 
-    const { result, waitForNextUpdate } = renderHook(() => useOnChainData(), { wrapper });
+    const { result, waitForNextUpdate } = renderHook(() => useOnChainData(), {
+      wrapper: createWrapper(),
+    });
 
     await waitForNextUpdate();
 
