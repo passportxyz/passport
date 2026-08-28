@@ -136,8 +136,7 @@ const VerifiedStamp = ({
   useEffect(() => {
     const onchainProviderSet = new Set(activeChainProviders.map((p) => p.providerName));
     const providerSet = new Set(platformProviders);
-    const intersection = onchainProviderSet.intersection(providerSet);
-    setIsAnyOnchain(intersection.size > 0);
+    setIsAnyOnchain([...onchainProviderSet].some((p) => providerSet.has(p)));
   }, [activeChainProviders, platformProviders]);
 
   const style = {
