@@ -165,7 +165,11 @@ function App({ Component, pageProps }: AppProps) {
       if (code) {
         channel.postMessage({
           target: provider,
-          data: { code: code, state: queryState },
+          data: {
+            code: code,
+            state: queryState,
+            ...(openIdClaimedId ? { openid: queryString.toString() } : {}),
+          },
         });
       }
 

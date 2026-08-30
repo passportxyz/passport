@@ -43,3 +43,32 @@ describe("when index is provided queryParams matching twitters OAuth response", 
     expect(mockCloseWindow).toBeCalledTimes(1);
   });
 });
+
+describe("when index is provided Steam OpenID query params", () => {
+  it("should postMessage the full OpenID query string and close window", async () => {
+    mockPostMessage.mockClear();
+    const mockCloseWindow = vi.fn();
+    const search =
+      "?openid.claimed_id=https%3A%2F%2Fsteamcommunity.com%2Fopenid%2Fid%2F76561198000000000&openid.mode=id_res&openid.sig=abc&state=steam-123";
+
+    Object.defineProperty(window, "location", {
+      writable: true,
+      value: { search },
+    });
+    Object.defineProperty(window, "close", {
+      writable: true,
+      value: mockCloseWindow,
+    });
+
+    const appProps = {} as AppProps;
+    render(<App {...appProps} />);
+
+    expect(mockPostMessage).toBeCalledTimes(1);
+    const posted = mockPostMessage.mock.calls[0][0];
+    expect(posted.target).toBe("steam");
+    expect(posted.data.code).toContain("steamcommunity.com/openid/id/");
+    expect(posted.data.openid).toContain("openid.claimed_id=");
+    expect(posted.data.openid).toContain("openid.sig=");
+    expect(mockCloseWindow).toBeCalledTimes(1);
+  });
+});
