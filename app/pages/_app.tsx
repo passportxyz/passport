@@ -107,34 +107,27 @@ function App({ Component, pageProps }: AppProps) {
     }
   }, []);
 
-  if (typeof window !== "undefined") {
-    // pull any search params
-    const queryString = new URLSearchParams(window?.location?.search);
-    // Twitter oauth will attach code & state in oauth procedure
+  // OAuth popup callback: runs client-only after hydration so SSR and the
+  // initial client render agree on the tree (fixes React hydration mismatch
+  // #423/#418 on every OAuth-callback URL).
+  useEffect(() => {
+    const queryString = new URLSearchParams(window.location.search);
     const queryError = queryString.get("error");
     const queryCode = queryString.get("code");
     const queryState = queryString.get("state");
-
-    // We expect for a queryState like" 'twitter-asdfgh', 'google-asdfghjk'
+    const openIdClaimedId = queryString.get("openid.claimed_id");
+    const code = queryCode || openIdClaimedId || null;
     const providerPath = queryState?.split("-");
     const provider = providerPath ? providerPath[0] : undefined;
 
-    // if Twitter oauth then submit message to other windows and close self
-    if ((queryError || queryCode) && queryState && provider) {
-      // shared message channel between windows (on the same domain)
+    if ((queryError || code) && queryState && provider) {
       const channel = new BroadcastChannel(`${provider}_oauth_channel`);
-
-      // only continue with the process if a code is returned
       if (queryCode) {
         channel.postMessage({ target: provider, data: { code: queryCode, state: queryState } });
       }
-
-      // always close the redirected window
       window.close();
-
-      return <div></div>;
     }
-  }
+  }, []);
 
   return (
     <>
