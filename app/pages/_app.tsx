@@ -182,6 +182,12 @@ function App({ Component, pageProps }: AppProps) {
         <link rel="shortcut icon" href="/favicon.png" />
         <title>Human Passport</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
+        {/* PostHog session replay reads these for page attribution on init.
+            Without them, querySelector("meta[property='og:site_name']") returns
+            null and .content throws — reproduces on GitHub OAuth callback URLs
+            where PostHog initialises before the popup closes. See #3052. */}
+        <meta property="og:site_name" content="Human Passport" />
+        <meta name="apple-mobile-web-app-title" content="Human Passport" />
       </Head>
       <Web3Context>
         <QueryClientProvider client={queryClient}>
