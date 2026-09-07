@@ -5,6 +5,7 @@
  * Extracts the user's address from the `did` claim (format: did:pkh:eip155:1:0xADDRESS)
  */
 import jwt from "jsonwebtoken";
+import { logger } from "./logger.js";
 
 // Public key for verifying SIWE JWTs (RS256)
 // Supports both raw PEM and base64-encoded PEM (for Docker/secrets managers)
@@ -19,7 +20,7 @@ function decodeKey(envVar: string): string | undefined {
   try {
     return Buffer.from(value, "base64").toString("utf-8");
   } catch {
-    console.error(`Failed to base64 decode ${envVar}`);
+    logger.error(`Failed to base64 decode ${envVar}`);
     return undefined;
   }
 }
@@ -42,7 +43,7 @@ export interface ScorerJwtPayload {
  */
 export function verifyAndExtractAddress(token: string): string | null {
   if (!SIWE_JWT_PUBLIC_KEY) {
-    console.error("SIWE_JWT_PUBLIC_KEY not configured");
+    logger.error("SIWE_JWT_PUBLIC_KEY not configured");
     return null;
   }
 
@@ -55,14 +56,14 @@ export function verifyAndExtractAddress(token: string): string | null {
     // Extract address from DID format: did:pkh:eip155:1:0xADDRESS
     const did = decoded.did;
     if (!did || !did.startsWith("did:pkh:eip155:1:")) {
-      console.error("Invalid DID format in JWT:", did);
+      logger.error("Invalid DID format in JWT:", did);
       return null;
     }
 
     const address = did.split(":").pop();
     return address?.toLowerCase() || null;
   } catch (error) {
-    console.error("JWT verification failed:", error);
+    logger.error("JWT verification failed:", error);
     return null;
   }
 }
