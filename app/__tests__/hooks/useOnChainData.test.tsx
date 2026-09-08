@@ -12,12 +12,14 @@ import { useOnChainData } from "../../hooks/useOnChainData";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 
 // Mock dependencies
-vi.mock("@datadog/browser-logs");
-vi.mock("@datadog/browser-rum");
-vi.mock("wagmi");
-vi.mock("viem");
-vi.mock("../../hooks/useCustomization");
-vi.mock("../../utils/onChainStamps");
+vi.mock("@datadog/browser-logs", () => ({ datadogLogs: { logger: { error: vi.fn() } } }));
+vi.mock("@datadog/browser-rum", () => ({ datadogRum: { addError: vi.fn() } }));
+vi.mock("wagmi", () => ({ useAccount: vi.fn(), useChains: vi.fn() }));
+vi.mock("viem", () => ({ createPublicClient: vi.fn() }));
+vi.mock("../../hooks/useCustomization", () => ({ useCustomization: vi.fn() }));
+vi.mock("../../utils/onChainStamps", () => ({ getAttestationData: vi.fn() }));
+vi.mock("../../utils/chains", () => ({ chains: [], wagmiTransports: {} }));
+vi.mock("../../hooks/useOnChainStatus", () => ({ parseValidChains: () => true }));
 
 // Sample data for tests
 const mockAddress = "0x1234567890123456789012345678901234567890";
@@ -44,9 +46,10 @@ const createWrapper = () => {
     },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  return Object.assign(Wrapper, { queryClient });
 };
 
 describe("useOnChainData hook", () => {
@@ -269,5 +272,65 @@ describe("useOnChainData hook", () => {
       expirationDate: new Date("2023-12-31"),
     });
     expect(result.current.activeChainProviders).toEqual([]);
+  });
+
+  it.each(["wallet", "scorer", "disconnect"])("clears old data after a %s change", async (change) => {
+    chains[0].useCustomCommunityId = true;
+    const { result, rerender, waitFor } = renderHook(() => useOnChainData(), {
+      wrapper: createWrapper(),
+    });
+    await waitFor(() => expect(result.current.activeChainProviders).toEqual(mockProviders));
+
+    // Keep the new identity pending so old data cannot be mistaken for its result.
+    vi.mocked(getAttestationData).mockImplementation(() => new Promise(() => {}));
+    if (change === "scorer") {
+      vi.mocked(useCustomization).mockReturnValue({ scorer: { id: 2 } } as any);
+    } else {
+      vi.mocked(useAccount).mockReturnValue({
+        address: change === "disconnect" ? undefined : "0x2234567890123456789012345678901234567890",
+        chain: { id: mockDecimalChainId },
+      } as any);
+    }
+    rerender();
+    expect(result.current.data).toEqual({});
+    expect(result.current.activeChainProviders).toEqual([]);
+    expect(result.current.isActiveChainError).toBe(false);
+  });
+
+  it("keeps a failed inactive chain separate from the connected chain", async () => {
+    chains.push({ id: "0xa", attestationProvider: { status: "enabled" } } as any);
+    vi.mocked(useChains).mockReturnValue([{ id: 1 }, { id: 10 }] as any);
+    const rpcError = new Error("Optimism RPC unavailable");
+    vi.mocked(getAttestationData).mockImplementation(async ({ chainId }) => {
+      if (chainId === "0xa") throw rpcError;
+      return {
+        score: { value: 10, expirationDate: new Date("2023-12-31") },
+        providers: mockProviders,
+      };
+    });
+    const { result, rerender, waitFor } = renderHook(() => useOnChainData(), {
+      wrapper: createWrapper(),
+    });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.errorsByChain).toEqual({ "0xa": rpcError });
+    expect(result.current.isActiveChainError).toBe(false);
+    expect(result.current.activeChainProviders).toEqual(mockProviders);
+
+    vi.mocked(useAccount).mockReturnValue({ address: mockAddress, chain: { id: 10 } } as any);
+    rerender();
+    expect(result.current.isActiveChainError).toBe(true);
+    expect(result.current.activeChainProviders).toEqual([]);
+  });
+
+  it("retains cached data during a same-key refetch", async () => {
+    const wrapper = createWrapper();
+    const { result, waitFor } = renderHook(() => useOnChainData(), { wrapper });
+    await waitFor(() => expect(result.current.activeChainProviders).toEqual(mockProviders));
+    vi.mocked(getAttestationData).mockImplementation(() => new Promise(() => {}));
+    act(() => {
+      void wrapper.queryClient.refetchQueries({ queryKey: ["onChain", "passport", mockAddress] });
+    });
+    expect(result.current.activeChainProviders).toEqual(mockProviders);
+    expect(result.current.data[mockHexChainId]?.score).toBe(10);
   });
 });
