@@ -92,7 +92,7 @@ export async function fetchModelData<T>(address: string, url_subpath: string, da
       payload["data"] = data;
     }
     const url = `http://${dataScienceEndpoint}/${url_subpath}`;
-    const response = await axios.post<T>(url, payload);
+    const response = await axios.post<T>(url, payload, { timeout: 10_000 });
 
     return response.data;
   } catch (e) {
