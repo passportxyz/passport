@@ -252,6 +252,208 @@ describe("fetchAndCheckContributions", () => {
     });
   });
 
+  it("should accept commits on the same day the repo was created (day-rounded occurredAt)", async () => {
+    const mockApiResponse: GithubContributionResponse = {
+      data: {
+        data: {
+          viewer: {
+            id: mockUserId,
+            createdAt: "2024-01-01T00:00:00Z",
+            contributionsCollection: {
+              commitContributionsByRepository: [
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 3,
+                        occurredAt: "2026-03-03T08:00:00Z", // day-rounded bucket
+                        repository: {
+                          createdAt: "2026-03-03T11:01:32Z", // repo created later same day
+                          isPrivate: false,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    };
+
+    mockedPost.mockResolvedValue(mockApiResponse);
+
+    const context: GithubContext = {};
+    const result = await fetchAndCheckContributions(context, mockCode);
+
+    expect(result).toEqual({
+      userId: mockUserId,
+      contributionDays: 1,
+      hadBadCommits: false,
+    });
+  });
+
+  it("should accept commits on the same day the user account was created", async () => {
+    const mockApiResponse: GithubContributionResponse = {
+      data: {
+        data: {
+          viewer: {
+            id: mockUserId,
+            createdAt: "2026-07-29T12:45:31Z", // user created mid-day
+            contributionsCollection: {
+              commitContributionsByRepository: [
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 1,
+                        occurredAt: "2026-07-29T07:00:00Z", // day-rounded bucket, before exact creation
+                        repository: {
+                          createdAt: "2026-01-01T00:00:00Z",
+                          isPrivate: false,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    };
+
+    mockedPost.mockResolvedValue(mockApiResponse);
+
+    const context: GithubContext = {};
+    const result = await fetchAndCheckContributions(context, mockCode);
+
+    expect(result).toEqual({
+      userId: mockUserId,
+      contributionDays: 1,
+      hadBadCommits: false,
+    });
+  });
+
+  it("should reject commits from a genuinely earlier day than repo creation", async () => {
+    const mockApiResponse: GithubContributionResponse = {
+      data: {
+        data: {
+          viewer: {
+            id: mockUserId,
+            createdAt: "2024-01-01T00:00:00Z",
+            contributionsCollection: {
+              commitContributionsByRepository: [
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 2,
+                        occurredAt: "2026-03-02T08:00:00Z", // day before repo creation
+                        repository: {
+                          createdAt: "2026-03-03T11:01:32Z",
+                          isPrivate: false,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    };
+
+    mockedPost.mockResolvedValue(mockApiResponse);
+
+    const context: GithubContext = {};
+    const result = await fetchAndCheckContributions(context, mockCode);
+
+    expect(result).toEqual({
+      userId: mockUserId,
+      contributionDays: 0,
+      hadBadCommits: true,
+    });
+  });
+
+  it("should use timezone-independent UTC day keys for deduplication", async () => {
+    const mockApiResponse: GithubContributionResponse = {
+      data: {
+        data: {
+          viewer: {
+            id: mockUserId,
+            createdAt: "2024-01-01T00:00:00Z",
+            contributionsCollection: {
+              commitContributionsByRepository: [
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 1,
+                        occurredAt: "2024-09-05T07:00:00Z",
+                        repository: {
+                          createdAt: "2024-01-01T00:00:00Z",
+                          isPrivate: false,
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  contributions: {
+                    pageInfo: {
+                      endCursor: null,
+                      hasNextPage: false,
+                    },
+                    nodes: [
+                      {
+                        commitCount: 2,
+                        occurredAt: "2024-09-05T08:00:00Z", // same UTC day, different hour
+                        repository: {
+                          createdAt: "2024-01-01T00:00:00Z",
+                          isPrivate: false,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    };
+
+    mockedPost.mockResolvedValue(mockApiResponse);
+
+    const context: GithubContext = {};
+    const result = await fetchAndCheckContributions(context, mockCode);
+
+    expect(result).toEqual({
+      userId: mockUserId,
+      contributionDays: 1, // same UTC day, should deduplicate
+      hadBadCommits: false,
+    });
+  });
+
   it("should paginate", async () => {
     // Mock the GitHub API requests
     const firstPageMockResponse: GithubContributionResponse = {

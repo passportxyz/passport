@@ -88,6 +88,8 @@ function removeTrailingSlash(url: string): string {
   return url.endsWith("/") ? url.slice(0, -1) : url;
 }
 
+const toDay = (date: string | Date) => new Date(date).toISOString().slice(0, 10);
+
 const parseContributions = ({
   commitContributionsByRepository,
   userCreatedAt,
@@ -100,6 +102,8 @@ const parseContributions = ({
   const uniqueContributionDates = new Set<string>();
   let hadBadCommits = false;
 
+  const userCreatedDay = toDay(userCreatedAt);
+
   commitContributionsByRepository.forEach((repoCommits) => {
     const { pageInfo, nodes } = repoCommits.contributions;
     if (pageInfo.hasNextPage) {
@@ -108,10 +112,10 @@ const parseContributions = ({
     }
     nodes.forEach((node) => {
       if (node.repository.isPrivate) return;
-      const commitDate = new Date(node.occurredAt);
-      const repoCreatedAt = new Date(node.repository.createdAt);
-      if (commitDate >= repoCreatedAt && commitDate >= userCreatedAt) {
-        uniqueContributionDates.add(commitDate.toDateString());
+      const commitDay = toDay(node.occurredAt);
+      const repoCreatedDay = toDay(node.repository.createdAt);
+      if (commitDay >= repoCreatedDay && commitDay >= userCreatedDay) {
+        uniqueContributionDates.add(commitDay);
       } else {
         hadBadCommits = true;
       }

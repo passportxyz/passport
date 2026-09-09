@@ -38,7 +38,7 @@ export class GTCStakingPlatform extends Platform {
     ),
     cta: {
       label: "Identity Staking",
-      url: "https://www.staking.passport.gitcoin.co/",
+      url: "https://stake.passport.xyz/",
     },
   };
 }

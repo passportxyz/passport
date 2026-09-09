@@ -78,9 +78,7 @@ export class NftCollectorBaseProvider extends NftBaseProvider {
     const providerUrl = `http://${dataScienceEndpoint}/nft-model-predict`;
     try {
       return (
-        await axios.post(providerUrl, {
-          address,
-        })
+        await axios.post(providerUrl, { address }, { timeout: 10_000 })
       ).data as NftApiResponse;
     } catch (error) {
       handleProviderModelAxiosError(error, "queryNftStampApi", []);

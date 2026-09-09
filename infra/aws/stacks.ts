@@ -5,7 +5,11 @@ const coreInfraStack = new pulumi.StackReference(`organization/core-infra/${stac
 
 export const vpcId = coreInfraStack.getOutput("vpcId");
 export const vpcPrivateSubnets = coreInfraStack.getOutput("privateSubnetIds");
-export const redisConnectionUrl = pulumi.interpolate`${coreInfraStack.getOutput("staticRedisConnectionUrl")}`;
+// Use the raw ElastiCache node endpoint rather than the `staticRedisConnectionUrl`
+// DNS alias: that alias lives at core-redis.api.scorer.gitcoin.co, and the parent
+// gitcoin.co zone (Gitcoin-controlled) no longer delegates to api.scorer.gitcoin.co,
+// so the name NXDOMAINs everywhere including inside the VPC.
+export const redisConnectionUrl = pulumi.interpolate`${coreInfraStack.getOutput("redisConnectionUrl")}`;
 
 // Public ALB Data
 export const albDnsName = coreInfraStack.getOutput("coreAlbDns");

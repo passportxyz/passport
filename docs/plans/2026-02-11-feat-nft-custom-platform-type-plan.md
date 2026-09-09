@@ -542,9 +542,9 @@ Not a blocker, but recommended for operational visibility.
 ## References
 
 - Backend handoff document (provided in conversation)
-- `.claude/knowledge/architecture/platform_system.md` — isEVM flag architecture
-- `.claude/knowledge/conventions/error_handling.md` — provider error philosophy
-- `.claude/knowledge/testing/provider_testing.md` — VerifiedPayload test patterns
+- `wiki/architecture/platform-system.md` — isEVM flag architecture
+- `wiki/development/providers.md` — provider error philosophy
+- `wiki/development/providers.md` — VerifiedPayload test patterns
 - [ERC-721 Standard](https://eips.ethereum.org/EIPS/eip-721) — `balanceOf(address)` returns count of owned tokens
 - [ERC-1155 Standard](https://ethereum.org/developers/docs/standards/tokens/erc-1155/) — `balanceOf(address, tokenId)` requires token ID
 - [viem readContract docs](https://viem.sh/docs/contract/readContract) — returns `bigint`, compare with `> 0n`
