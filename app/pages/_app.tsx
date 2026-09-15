@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { BroadcastChannel } from "broadcast-channel";
 
@@ -130,6 +130,12 @@ const RenderOnlyOnClient = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App({ Component, pageProps }: AppProps) {
+  // True only after mount when this window is an OAuth popup callback.
+  // Initialized to false so SSR and the initial hydrating render agree on the
+  // tree — fixing the deterministic React #423/#418 hydration mismatch that
+  // fired ~2,878 events/week on passport-prod. See internal-docs#2490.
+  const [isOAuthCallback, setIsOAuthCallback] = useState(false);
+
   useEffect(() => {
     TagManager.initialize({
       gtmId: `${GTM_ID}`,
@@ -139,9 +145,9 @@ function App({ Component, pageProps }: AppProps) {
     });
   }, []);
 
-  if (typeof window !== "undefined") {
+  useEffect(() => {
     // pull any search params
-    const queryString = new URLSearchParams(window?.location?.search);
+    const queryString = new URLSearchParams(window.location.search);
     // Twitter oauth will attach code & state in oauth procedure
     const queryError = queryString.get("error");
     const queryCode = queryString.get("code");
@@ -149,7 +155,7 @@ function App({ Component, pageProps }: AppProps) {
     // Steam OpenID uses openid.claimed_id instead of code
     const openIdClaimedId = queryString.get("openid.claimed_id");
 
-    // We expect for a queryState like" 'twitter-asdfgh', 'google-asdfghjk'
+    // We expect for a queryState like 'twitter-asdfgh', 'google-asdfghjk'
     const providerPath = queryState?.split("-");
     const provider = providerPath ? providerPath[0] : undefined;
 
@@ -169,11 +175,15 @@ function App({ Component, pageProps }: AppProps) {
         });
       }
 
+      setIsOAuthCallback(true);
+
       // always close the redirected window
       window.close();
-
-      return <div></div>;
     }
+  }, []);
+
+  if (isOAuthCallback) {
+    return <div></div>;
   }
 
   return (
