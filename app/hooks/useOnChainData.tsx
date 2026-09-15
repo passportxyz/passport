@@ -44,6 +44,9 @@ export interface OnChainData {
   data: Record<string, SingleChainData | undefined>;
   activeChainProviders: OnChainProviderType[];
   isPending: boolean;
+  isError: boolean;
+  errorsByChain: Partial<Record<ChainId, Error>>;
+  isActiveChainError: boolean;
   refresh: (chainId?: ChainId) => void;
 }
 
@@ -74,49 +77,57 @@ const getOnChainDataForChain = async ({
     customScorerId,
   });
 
-  const score = attestationData?.score.value || 0;
-  const expirationDate = attestationData?.score.expirationDate;
-  const providers = attestationData?.providers || [];
-
   return {
     chainId,
-    providers,
-    score,
-    expirationDate,
+    providers: attestationData.providers,
+    score: attestationData.score.value,
+    expirationDate: attestationData.score.expirationDate,
   };
 };
 
 const useOnChainDataQuery = (address?: string) => {
   const wagmiChains = useChains();
   const customization = useCustomization();
-  const enabledChains = chains
-    .filter(({ attestationProvider }) => attestationProvider?.status === "enabled")
-    .filter((chain) => parseValidChains(customization, chain));
+  const enabledChains = useMemo(
+    () =>
+      chains
+        .filter(({ attestationProvider }) => attestationProvider?.status === "enabled")
+        .filter((chain) => parseValidChains(customization, chain)),
+    [customization]
+  );
 
   // Combines results of all queries into a single object
-  const combine = useCallback((results: UseQueryResult<GetOnChainDataForChainResult>[]) => {
-    const isPending = results.some((result) => result.isPending);
-    const isError = results.some((result) => result.isError);
-    const error = results.find((result) => result.isError)?.error;
-
-    const data = results.reduce(
-      (acc, { data }) => {
-        if (data) {
-          const { chainId, ...rest } = data;
-          acc[chainId] = rest;
+  const combine = useCallback(
+    (results: UseQueryResult<GetOnChainDataForChainResult>[]) => {
+      const isPending = results.some((result) => result.isPending);
+      const isError = results.some((result) => result.isError);
+      const errorsByChain: Partial<Record<ChainId, Error>> = {};
+      results.forEach((result, index) => {
+        if (result.isError && result.error) {
+          errorsByChain[enabledChains[index].id] = result.error;
         }
-        return acc;
-      },
-      {} as Record<ChainId, SingleChainData>
-    );
+      });
 
-    return {
-      data,
-      isPending,
-      isError,
-      error,
-    };
-  }, []);
+      const data = results.reduce(
+        (acc, { data }) => {
+          if (address && data) {
+            const { chainId, ...rest } = data;
+            acc[chainId] = rest;
+          }
+          return acc;
+        },
+        {} as Record<ChainId, SingleChainData>
+      );
+
+      return {
+        data,
+        isPending,
+        isError,
+        errorsByChain,
+      };
+    },
+    [enabledChains, address]
+  );
 
   return useQueries({
     queries: enabledChains.map((chain) => {
@@ -139,6 +150,7 @@ const useOnChainDataQuery = (address?: string) => {
             customScorerId,
             publicClient: publicClient!,
           }),
+        retry: 3,
       };
     }),
     combine,
@@ -155,20 +167,23 @@ export const useOnChainData = (): OnChainData => {
   const chainId = decimalToHexChainId(chain?.id || 0);
   const queryClient = useQueryClient();
 
-  const { data, isError, error, isPending } = useOnChainDataQuery(address);
+  const { data, isError, errorsByChain, isPending } = useOnChainDataQuery(address);
 
   const activeChainProviders = useMemo(
     () => (chainId && data ? data[chainId]?.providers : null) || [],
     [chainId, data]
   );
 
+  const isActiveChainError = Boolean(errorsByChain[chainId]);
+
   useEffect(() => {
-    if (isError && error) {
-      console.error("Failed to check onchain status", error);
-      datadogLogs.logger.error("Failed to check onchain status", error);
-      datadogRum.addError(error);
-    }
-  }, [isError, error]);
+    Object.entries(errorsByChain).forEach(([failedChainId, error]) => {
+      const meta = { operation: "getOnChainDataForChain", chainId: failedChainId, address };
+      console.error("Failed to check onchain status", meta, error);
+      datadogLogs.logger.error("Failed to check onchain status", { ...meta, error });
+      datadogRum.addError(error, meta);
+    });
+  }, [errorsByChain, address]);
 
   const refresh = useCallback(
     (chainId?: string) => {
@@ -186,8 +201,11 @@ export const useOnChainData = (): OnChainData => {
       data: data || {},
       activeChainProviders,
       isPending,
+      isError,
+      errorsByChain,
+      isActiveChainError,
       refresh,
     }),
-    [data, activeChainProviders, isPending, refresh]
+    [data, activeChainProviders, isPending, isError, errorsByChain, isActiveChainError, refresh]
   );
 };
