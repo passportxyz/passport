@@ -30,6 +30,7 @@ export type AutoVerificationFields = {
   address: string;
   scorerId: string;
   credentialIds?: string[];
+  customEvmCredentialIds?: string[];
 };
 
 export type AutoVerificationResponseBodyType = {
@@ -38,18 +39,15 @@ export type AutoVerificationResponseBodyType = {
 };
 
 export const getEvmProvidersByPlatform = ({
-  scorerId,
   onlyCredentialIds,
+  customEvmCredentialIds,
 }: {
-  scorerId: string;
   onlyCredentialIds?: string[];
+  customEvmCredentialIds?: string[];
 }): PROVIDER_ID[][] => {
   const evmPlatforms = Object.values(platforms).filter(({ PlatformDetails }) => PlatformDetails.isEVM);
 
-  // TODO we should use the scorerId to check for any EVM stamps particular to a community, and include those here
-  const _ = scorerId;
-
-  return evmPlatforms.map(({ ProviderConfig }) =>
+  const result = evmPlatforms.map(({ ProviderConfig }) =>
     ProviderConfig.reduce((acc, platformGroupSpec) => {
       const providers = platformGroupSpec.providers.map(({ name }) => name);
 
@@ -63,16 +61,29 @@ export const getEvmProvidersByPlatform = ({
       return acc;
     }, [] as PROVIDER_ID[])
   );
+
+  // Append custom EVM credentials as additional platform groups
+  if (customEvmCredentialIds?.length) {
+    const filtered = onlyCredentialIds
+      ? customEvmCredentialIds.filter((id) => onlyCredentialIds.includes(id))
+      : customEvmCredentialIds;
+    if (filtered.length > 0) {
+      result.push(filtered as PROVIDER_ID[]);
+    }
+  }
+
+  return result;
 };
 
 export const autoVerifyStamps = async ({
   address,
   scorerId,
   credentialIds,
+  customEvmCredentialIds,
 }: AutoVerificationFields): Promise<AutoVerificationResult> => {
   const evmProvidersByPlatform = getEvmProvidersByPlatform({
-    scorerId,
     onlyCredentialIds: credentialIds,
+    customEvmCredentialIds,
   });
 
   if (!isAddress(address)) {
