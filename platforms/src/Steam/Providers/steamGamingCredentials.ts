@@ -56,22 +56,33 @@ export class SteamProvider implements Provider {
     let record = undefined;
 
     try {
-      // 1. Extract Steam ID from OpenID claimed_id
-      // The frontend passes openid.claimed_id as 'code' in the OAuth flow
-      const claimedId = payload.proofs?.code as string | undefined;
-      if (!claimedId) {
+      // 1. Verify the Steam OpenID assertion with Steam, then take the Steam ID
+      // from the verified claimed_id. claimed_id alone is client-controlled.
+      const assertion = typeof payload.proofs?.openid === "string" ? payload.proofs.openid : "";
+      if (!assertion) {
         return {
           valid: false,
-          errors: ["Missing Steam OpenID claimed_id"],
+          errors: ["Missing Steam OpenID assertion"],
         };
       }
 
-      const steamId = extractSteamId(claimedId);
+      const steamId = await verifySteamOpenIdAssertion(assertion);
       if (!steamId) {
         return {
           valid: false,
-          errors: ["Invalid Steam OpenID response. Unable to extract Steam ID."],
+          errors: ["Steam OpenID assertion could not be verified."],
         };
+      }
+
+      const claimedId = payload.proofs?.code as string | undefined;
+      if (claimedId) {
+        const claimedSteamId = extractSteamId(claimedId);
+        if (claimedSteamId !== steamId) {
+          return {
+            valid: false,
+            errors: ["Steam OpenID claimed_id does not match the verified assertion."],
+          };
+        }
       }
 
       // 2. Fetch gaming data from Steam API
@@ -141,6 +152,56 @@ export class SteamProvider implements Provider {
 function extractSteamId(claimedId: string): string | null {
   const match = claimedId.match(/^https:\/\/steamcommunity\.com\/openid\/id\/(\d{17})$/);
   return match ? match[1] : null;
+}
+
+const STEAM_OPENID_ENDPOINT = "https://steamcommunity.com/openid/login";
+
+/**
+ * Ask Steam to confirm an OpenID 2.0 id_res assertion (check_authentication).
+ * Returns the 17-digit Steam ID when Steam says the assertion is valid.
+ */
+export async function verifySteamOpenIdAssertion(assertion: string): Promise<string | null> {
+  let params: URLSearchParams;
+  try {
+    params = new URLSearchParams(assertion);
+  } catch {
+    return null;
+  }
+
+  const claimedId = params.get("openid.claimed_id");
+  const sig = params.get("openid.sig");
+  const opEndpoint = params.get("openid.op_endpoint");
+  if (!claimedId || !sig) {
+    return null;
+  }
+  if (opEndpoint && opEndpoint !== STEAM_OPENID_ENDPOINT) {
+    return null;
+  }
+
+  const steamId = extractSteamId(claimedId);
+  if (!steamId) {
+    return null;
+  }
+
+  const verifyParams = new URLSearchParams(params);
+  verifyParams.set("openid.mode", "check_authentication");
+
+  let body: string;
+  try {
+    const response = await axios.post(STEAM_OPENID_ENDPOINT, verifyParams.toString(), {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      timeout: 10_000,
+    });
+    body = typeof response.data === "string" ? response.data : String(response.data ?? "");
+  } catch {
+    return null;
+  }
+
+  if (!/(?:^|\n)is_valid\s*:\s*true(?:\s|$)/im.test(body)) {
+    return null;
+  }
+
+  return steamId;
 }
 
 // Helper: Fetch gaming data from Steam Web API
