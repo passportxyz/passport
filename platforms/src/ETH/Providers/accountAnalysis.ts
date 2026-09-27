@@ -126,7 +126,7 @@ export class AccountAnalysis implements Provider {
     const ethAnalysis = await getETHAnalysis(address, context);
     const value = ethAnalysis[this.dataKey];
 
-    if (value < this.minimum) {
+    if (typeof value !== "number" || !Number.isFinite(value) || value < this.minimum) {
       return {
         valid: false,
         errors: [this.failureMessageFormatter(this.minimum, value)],
