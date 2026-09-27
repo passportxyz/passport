@@ -133,6 +133,28 @@ describe("<CardList />", () => {
     expect(possiblePoints).toEqual(["CleanHands", "Gitcoin", "GTC Staking", "Discord", "Google"]);
   });
 
+  it("hides the Biometrics card when its flag is off and shows it when on", () => {
+    const biometrics = {
+      ...platforms.Biometrics.PlatformDetails,
+      possiblePoints: 5,
+      displayPossiblePoints: 5,
+      earnedPoints: 0,
+    };
+
+    try {
+      vi.stubEnv("NEXT_PUBLIC_FF_BIOMETRICS_STAMP", "off");
+      const { unmount } = renderWithContext(mockCeramicContext, <CardList />, {}, { scoredPlatforms: [biometrics] });
+      expect(screen.queryByTestId("platform-name")).not.toBeInTheDocument();
+
+      unmount();
+      vi.stubEnv("NEXT_PUBLIC_FF_BIOMETRICS_STAMP", "on");
+      renderWithContext(mockCeramicContext, <CardList />, {}, { scoredPlatforms: [biometrics] });
+      expect(screen.getByTestId("platform-name")).toHaveTextContent("Biometrics");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("should indicate on card whether or not it has been verified", () => {
     render(<Category category={categoryProps["category"]} />);
     const verifiedBtnCnt = screen

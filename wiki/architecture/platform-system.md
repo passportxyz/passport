@@ -28,6 +28,11 @@ Both halves live in the same package per platform:
 - Custom stamps: the customization API may set `isEVM` per stamp; falls back to the base platform's value (`isEVM ?? basePlatformSpecs.isEVM` in `app/hooks/usePlatforms.tsx`).
 - Civic, TrustaLabs, ZKEmail intentionally have no `isEVM` — excluded from auto-verification.
 
+## Biometrics Dashboard Visibility
+
+- `NEXT_PUBLIC_FF_BIOMETRICS_STAMP=off` hides the Biometrics card in `app/components/CardList.tsx`. Unset or `on` keeps it visible.
+- The platform remains registered and scored; this flag only controls the dashboard card. Embed metadata is separate (`embed/src/stamps.ts`).
+
 ## Key Files
 
 - `platforms/src/platforms.ts` — platform registry (IDs as keys)

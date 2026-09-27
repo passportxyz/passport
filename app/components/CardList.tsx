@@ -69,6 +69,8 @@ const useShouldDisplayPlatform = () => {
 
       if (process.env.NEXT_PUBLIC_FF_OUTDID_STAMP !== "on" && platform.platform === "Outdid") return false;
 
+      if (process.env.NEXT_PUBLIC_FF_BIOMETRICS_STAMP === "off" && platform.platform === "Biometrics") return false;
+
       return true;
     },
     [customization, platformProviderIds, platforms]
