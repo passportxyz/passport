@@ -13,12 +13,15 @@ export class HumanIdPhonePlatform extends BaseHumanIDPlatform {
   constructor(options: PlatformOptions) {
     super(options);
 
+    // Temporary: phone verification is disabled while migrating from Messente
+    // to Twilio Verify. Restore the original banner once Twilio is live.
+    // See holonym-foundation/internal-docs#2990
     this.banner = {
-      heading: "To add the Human ID Phone Stamp to your Passport...",
+      heading: "Phone verification is temporarily unavailable",
       content: React.createElement(
         "div",
         {},
-        "Connect your wallet and verify your phone number privately through Human ID"
+        "We're upgrading our phone verification provider. This stamp will be back shortly — check back soon."
       ),
       cta: {
         label: "Learn more",
