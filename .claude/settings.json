@@ -4,6 +4,7 @@
     "deny": []
   },
   "enabledPlugins": {
-    "compound-engineering@every-marketplace": true
+    "compound-engineering@every-marketplace": true,
+    "mim-ai@mim-marketplace": true
   }
 }

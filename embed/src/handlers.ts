@@ -109,10 +109,29 @@ export const autoVerificationHandler = createHandler<AutoVerificationRequestBody
       throw new ApiError("Invalid address", "400_BAD_REQUEST");
     }
 
+    // Fetch custom EVM platform credential IDs for this scorer
+    let customEvmCredentialIds: string[] | undefined;
+    try {
+      const configUrl = `${process.env.SCORER_ENDPOINT}/internal/embed/config?community_id=${scorerId}`;
+      const configResponse = await axios.get(configUrl, {
+        headers: { Authorization: apiKey },
+      });
+      const configPlatforms = (configResponse.data?.platforms || []) as {
+        is_evm?: boolean;
+        credentials: { id: string }[];
+      }[];
+      customEvmCredentialIds = configPlatforms
+        .filter((p) => p.is_evm)
+        .flatMap((p) => p.credentials.map((c) => c.id));
+    } catch (err) {
+      console.warn("Failed to fetch embed config for custom EVM credentials:", err);
+    }
+
     const { credentials, credentialErrors, timings } = await autoVerifyStamps({
       address,
       scorerId,
       credentialIds,
+      customEvmCredentialIds,
     });
 
     const score = await addStampsAndGetScore({ address, scorerId, stamps: credentials });

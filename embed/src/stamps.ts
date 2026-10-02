@@ -15,7 +15,7 @@ type Platform = {
   requiresSDKFlow?: boolean;
 };
 
-const oAuthPopupUrl = process.env.EMBED_POPUP_OAUTH_URL;
+export const oAuthPopupUrl = process.env.EMBED_POPUP_OAUTH_URL;
 
 export const STAMP_PAGES: StampPage[] = [
   {
