@@ -216,6 +216,43 @@ describe("issueNullifiableCredential", function () {
       value: expectedOprfInput,
     });
   });
+
+  it("will not generate a credential with expiration date more than 90 days in the future", async () => {
+    const record = {
+      type: "Simple",
+      version: "Test-Case-1",
+      address: "0x0",
+    };
+
+    const expectedHash: string =
+      "v0.0.0:" +
+      base64.encode(
+        createHash("sha256")
+          .update(key)
+          .update(JSON.stringify(objToSortedArray(record)))
+          .digest()
+      );
+
+    const { credential } = await issueNullifiableCredential({
+      DIDKit,
+      issuerKey: key,
+      address: "0x0",
+      record,
+      nullifierGenerators,
+      expiresInSeconds: 3600 * 24 * 10000,
+    });
+
+    expect(DIDKit.issueCredential).toHaveBeenCalled();
+    // expect the structure/details added by issueHashedCredential to be correct
+    const expirationDate = new Date(credential.expirationDate).getTime();
+    const issuanceDate = new Date(credential.issuanceDate).getTime();
+    const now = new Date().getTime();
+    const maxExpirationDate = now + 3600000 * 24 * 90;
+
+    // Check that issuance and expiration dates are within the expected delta (500 millis)
+    expect(now - issuanceDate < 500).toBeTruthy();
+    expect(expirationDate - maxExpirationDate < 500).toBeTruthy();
+  });
 });
 
 describe("verifyCredential", function () {
