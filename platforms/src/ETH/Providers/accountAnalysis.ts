@@ -161,7 +161,7 @@ class HumanProbabilityProvider implements Provider {
     const analysis = await getAggregateAnalysis(address, context);
     const value = analysis.humanProbability;
 
-    if (value < this.minimum) {
+    if (typeof value !== "number" || !Number.isFinite(value) || value < this.minimum) {
       return {
         valid: false,
         errors: [
