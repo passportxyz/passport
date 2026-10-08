@@ -3,6 +3,7 @@ import { type Provider } from "../../types.js";
 import type { RequestPayload, VerifiedPayload, ProviderContext, PROVIDER_ID } from "@gitcoin/passport-types";
 import axios from "axios";
 import { handleProviderModelAxiosError } from "../../utils/handleProviderModelAxiosError.js";
+import { getLinkedGroup, type LinkedGroup } from "./linkedGroup.js";
 
 export type ModelResponse = {
   data: {
@@ -27,6 +28,11 @@ export type ETHAnalysisContext = ProviderContext & {
 
 export type AggregateAnalysis = {
   humanProbability: number;
+  /**
+   * Set when the score used another linked wallet's results: the credential
+   * must not outlive that wallet's place in the group.
+   */
+  expiresInSeconds?: number;
 };
 
 const dataScienceEndpoint = process.env.DATA_SCIENCE_API_URL;
@@ -62,25 +68,130 @@ type AggregateData = {
   [K in ModelKeys as `txs_${K}`]: number;
 };
 
+export type ChainResult = { score: number; txs: number };
+export type ChainResults = Record<ModelKeys, ChainResult>;
+export type MemberResults = { address: string; results: ChainResults };
+
+async function getChainResults(address: string): Promise<ChainResults> {
+  const entries = await Promise.all(
+    Object.entries(MODEL_SUBPATHS).map(async ([modelAbbreviation, subpath]) => {
+      const { data } = await fetchModelData<ModelResponse>(address, subpath);
+      return [modelAbbreviation, { score: data.human_probability, txs: data.n_transactions }] as const;
+    })
+  );
+  return Object.fromEntries(entries) as ChainResults;
+}
+
+function toAggregateData(results: ChainResults): AggregateData {
+  return Object.assign(
+    {},
+    ...Object.entries(results).map(([chain, { score, txs }]) => ({
+      [`score_${chain}`]: score,
+      [`txs_${chain}`]: txs,
+    }))
+  ) as AggregateData;
+}
+
+async function aggregateScore(address: string, results: ChainResults): Promise<number> {
+  const { data } = await fetchModelData<ModelResponse>(address, "aggregate-model-predict", toAggregateData(results));
+  return data.human_probability;
+}
+
+// The aggregate model ignores a chain score backed by 10 transactions or
+// fewer, and -1 means the chain model had no data.
+const MAX_IGNORED_TXS = 10;
+const counts = ({ score, txs }: ChainResult): boolean => score >= 0 && txs > MAX_IGNORED_TXS;
+
+/**
+ * The per-chain aggregate function: for each chain, the best result any member
+ * has, with that result's transaction count. Only results the aggregate model
+ * counts can win; ties go to the higher count, then the lower address, so the
+ * same group always gives the same bundle. A chain no member counts on keeps
+ * the holder's own result.
+ */
+export function bestPerChain(
+  holder: MemberResults,
+  members: MemberResults[]
+): { results: ChainResults; usesOtherWallets: boolean } {
+  let usesOtherWallets = false;
+  const results = { ...holder.results };
+  for (const chain of Object.keys(MODEL_SUBPATHS) as ModelKeys[]) {
+    const best = members
+      .filter((member) => counts(member.results[chain]))
+      .sort(
+        (a, b) =>
+          b.results[chain].score - a.results[chain].score ||
+          b.results[chain].txs - a.results[chain].txs ||
+          a.address.localeCompare(b.address)
+      )[0];
+    if (!best) continue;
+    results[chain] = best.results[chain];
+    if (best.address !== holder.address) usesOtherWallets = true;
+  }
+  return { results, usesOtherWallets };
+}
+
+/** A credential holding results from more than one wallet lasts 30 days, not 90. */
+export const GROUP_CREDENTIAL_MAX_SECONDS = 30 * 24 * 60 * 60;
+
+/**
+ * The score of a WaaP address with its linked wallets
+ * (holonym-foundation/internal-docs#3587): the per-chain aggregate function's
+ * bundle, run through the same aggregate model. Linking never lowers a score,
+ * so it is also scored against each member alone and keeps the highest. A
+ * member whose model calls fail is left out; the holder's own calls failing
+ * still fails the verification, as for a wallet alone.
+ */
+async function getGroupAnalysis(holder: string, group: LinkedGroup): Promise<AggregateAnalysis> {
+  const [ownResults, settledOthers] = await Promise.all([
+    getChainResults(holder),
+    Promise.allSettled(
+      group.addresses
+        .filter((address) => address !== holder)
+        .map(async (address) => ({ address, results: await getChainResults(address) }))
+    ),
+  ]);
+  const own: MemberResults = { address: holder, results: ownResults };
+  const others = settledOthers
+    .filter((settled): settled is PromiseFulfilledResult<MemberResults> => settled.status === "fulfilled")
+    .map((settled) => settled.value);
+
+  const bundle = bestPerChain(own, [own, ...others]);
+  const candidates: Promise<{ score: number; usesOtherWallets: boolean }>[] = [
+    ...(bundle.usesOtherWallets
+      ? [aggregateScore(holder, bundle.results).then((score) => ({ score, usesOtherWallets: true }))]
+      : []),
+    ...others.map((member) =>
+      aggregateScore(member.address, member.results).then((score) => ({ score, usesOtherWallets: true }))
+    ),
+  ];
+  const ownScore = await aggregateScore(holder, own.results);
+  const scored = (await Promise.allSettled(candidates))
+    .filter(
+      (settled): settled is PromiseFulfilledResult<{ score: number; usesOtherWallets: boolean }> =>
+        settled.status === "fulfilled"
+    )
+    .map((settled) => settled.value);
+
+  // On a tie the holder's own score wins: it needs no shorter lifetime.
+  const best = scored.reduce((current, candidate) => (candidate.score > current.score ? candidate : current), {
+    score: ownScore,
+    usesOtherWallets: false,
+  });
+  if (!best.usesOtherWallets) return { humanProbability: best.score };
+  return {
+    humanProbability: best.score,
+    expiresInSeconds: Math.min(GROUP_CREDENTIAL_MAX_SECONDS, group.cooldownSeconds ?? GROUP_CREDENTIAL_MAX_SECONDS),
+  };
+}
+
 export async function getAggregateAnalysis(address: string, context: ETHAnalysisContext): Promise<AggregateAnalysis> {
   if (!context?.aggregateAnalysis) {
-    const results = await Promise.all(
-      Object.entries(MODEL_SUBPATHS).map(async ([modelAbbreviation, subpath]) => {
-        const { data } = await fetchModelData<ModelResponse>(address, subpath);
-        return {
-          [`score_${modelAbbreviation}`]: data.human_probability,
-          [`txs_${modelAbbreviation}`]: data.n_transactions,
-        };
-      })
-    );
-
-    const aggregateData: AggregateData = Object.assign({}, ...results);
-
-    const { data } = await fetchModelData<ModelResponse>(address, "aggregate-model-predict", aggregateData);
-
-    context.aggregateAnalysis = {
-      humanProbability: data.human_probability,
-    };
+    const holder = address.toLowerCase();
+    const group = await getLinkedGroup(holder);
+    context.aggregateAnalysis = group
+      ? await getGroupAnalysis(holder, group)
+      : { humanProbability: await aggregateScore(address, await getChainResults(address)) };
   }
   return context.aggregateAnalysis;
 }
@@ -175,6 +286,7 @@ class HumanProbabilityProvider implements Provider {
       record: {
         address,
       },
+      ...(analysis.expiresInSeconds !== undefined && { expiresInSeconds: analysis.expiresInSeconds }),
     };
   }
 }
