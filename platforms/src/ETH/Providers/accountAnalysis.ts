@@ -135,12 +135,29 @@ export function bestPerChain(
 export const GROUP_CREDENTIAL_MAX_SECONDS = 30 * 24 * 60 * 60;
 
 /**
+ * The score a linked wallet needs alone before its chain results join the
+ * group's bundle (holonym-foundation/internal-docs#3587, decided 2026-10-12).
+ * Without it, weak wallets' best chains stitch into a strong-looking profile:
+ * three known Sybils scoring 0, 0 and 11 alone combined to 97, and 24% of weak
+ * Sybil groups of 5 passed. Set by ETH_GROUP_MIN_MEMBER_SCORE, default 20.
+ */
+export const DEFAULT_GROUP_MIN_MEMBER_SCORE = 20;
+
+export function groupMinMemberScore(): number {
+  const raw = process.env.ETH_GROUP_MIN_MEMBER_SCORE;
+  const value = raw === undefined || raw.trim() === "" ? NaN : Number(raw);
+  return Number.isFinite(value) && value >= 0 ? value : DEFAULT_GROUP_MIN_MEMBER_SCORE;
+}
+
+/**
  * The score of a WaaP address with its linked wallets
  * (holonym-foundation/internal-docs#3587): the per-chain aggregate function's
- * bundle, run through the same aggregate model. Linking never lowers a score,
- * so it is also scored against each member alone and keeps the highest. A
- * member whose model calls fail is left out; the holder's own calls failing
- * still fails the verification, as for a wallet alone.
+ * bundle, run through the same aggregate model. Only linked wallets scoring at
+ * least groupMinMemberScore() alone contribute chain results to the bundle; the
+ * holder's own results always do. Linking never lowers a score, so it is also
+ * scored against each member alone and keeps the highest. A member whose model
+ * calls fail is left out; the holder's own calls failing still fails the
+ * verification, as for a wallet alone.
  */
 async function getGroupAnalysis(holder: string, group: LinkedGroup): Promise<AggregateAnalysis> {
   const [ownResults, settledOthers] = await Promise.all([
@@ -156,22 +173,36 @@ async function getGroupAnalysis(holder: string, group: LinkedGroup): Promise<Agg
     .filter((settled): settled is PromiseFulfilledResult<MemberResults> => settled.status === "fulfilled")
     .map((settled) => settled.value);
 
-  const bundle = bestPerChain(own, [own, ...others]);
-  const candidates: Promise<{ score: number; usesOtherWallets: boolean }>[] = [
-    ...(bundle.usesOtherWallets
-      ? [aggregateScore(holder, bundle.results).then((score) => ({ score, usesOtherWallets: true }))]
-      : []),
-    ...others.map((member) =>
-      aggregateScore(member.address, member.results).then((score) => ({ score, usesOtherWallets: true }))
+  // Each linked wallet alone first: that score decides whether its chains may
+  // join the bundle, and is itself a candidate (linking never lowers a score).
+  const [ownScore, settledAlone] = await Promise.all([
+    aggregateScore(holder, own.results),
+    Promise.allSettled(
+      others.map(async (member) => ({ member, score: await aggregateScore(member.address, member.results) }))
     ),
-  ];
-  const ownScore = await aggregateScore(holder, own.results);
-  const scored = (await Promise.allSettled(candidates))
+  ]);
+  const alone = settledAlone
     .filter(
-      (settled): settled is PromiseFulfilledResult<{ score: number; usesOtherWallets: boolean }> =>
+      (settled): settled is PromiseFulfilledResult<{ member: MemberResults; score: number }> =>
         settled.status === "fulfilled"
     )
     .map((settled) => settled.value);
+
+  const minMemberScore = groupMinMemberScore();
+  const contributors = alone.filter(({ score }) => score >= minMemberScore).map(({ member }) => member);
+  const bundle = bestPerChain(own, [own, ...contributors]);
+
+  const scored: { score: number; usesOtherWallets: boolean }[] = alone.map(({ score }) => ({
+    score,
+    usesOtherWallets: true,
+  }));
+  if (bundle.usesOtherWallets) {
+    try {
+      scored.push({ score: await aggregateScore(holder, bundle.results), usesOtherWallets: true });
+    } catch {
+      // A failed bundle call leaves the holder's and members' own scores.
+    }
+  }
 
   // On a tie the holder's own score wins: it needs no shorter lifetime.
   const best = scored.reduce((current, candidate) => (candidate.score > current.score ? candidate : current), {

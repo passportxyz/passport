@@ -6,6 +6,7 @@ import {
   ETHMaxiProvider,
   GROUP_CREDENTIAL_MAX_SECONDS,
   bestPerChain,
+  groupMinMemberScore,
   getAggregateAnalysis,
   type ChainResults,
 } from "../Providers/accountAnalysis.js";
@@ -73,6 +74,18 @@ const group = (cooldownSeconds?: number) =>
   lookup({ addresses: [WAAP, B, C], waapAddress: WAAP, ...(cooldownSeconds !== undefined && { cooldownSeconds }) });
 
 const analyse = (address = WAAP) => getAggregateAnalysis(address, {});
+
+// The tiers an address is issued, as the three ETHScore providers decide them.
+const tiersFor = async (address: string): Promise<string[]> => {
+  const context = {};
+  const providers = [new ETHEnthusiastProvider(), new ETHAdvocateProvider(), new ETHMaxiProvider()];
+  const earned: string[] = [];
+  for (const provider of providers) {
+    const payload = await provider.verify({ address } as RequestPayload, context);
+    if (payload.valid) earned.push(provider.type);
+  }
+  return earned;
+};
 
 describe("Ethereum Stamp for a linked group", () => {
   const saved = { url: process.env.SILK_AUTH_SERVER_URL, key: process.env.SILK_SERVICE_API_KEY };
@@ -227,18 +240,6 @@ describe("Ethereum Stamp for a linked group", () => {
     const THIRTY_DAYS = 30 * 24 * 60 * 60;
     const linkedGroup = () => lookup({ addresses: [WAAP, A, B, C], waapAddress: WAAP });
 
-    // The tiers W is issued, as the three ETHScore providers decide them.
-    const tiersFor = async (address: string): Promise<string[]> => {
-      const context = {};
-      const providers = [new ETHEnthusiastProvider(), new ETHAdvocateProvider(), new ETHMaxiProvider()];
-      const earned: string[] = [];
-      for (const provider of providers) {
-        const payload = await provider.verify({ address } as RequestPayload, context);
-        if (payload.valid) earned.push(provider.type);
-      }
-      return earned;
-    };
-
     it("Example 1: each wallet earns #50 alone, the group earns all three", async () => {
       linkedGroup();
       chainData = { [A]: { base: [94, 150] }, [B]: { arb: [73, 200] }, [C]: { op: [52, 80] } };
@@ -305,6 +306,82 @@ describe("Ethereum Stamp for a linked group", () => {
       // so the credentials on W still last 30 days.
       expect(await analyse()).toEqual({ humanProbability: 94, expiresInSeconds: THIRTY_DAYS });
       expect(await tiersFor(WAAP)).toEqual(["ETHScore#50", "ETHScore#75", "ETHScore#90"]);
+    });
+  });
+
+  // Karo's real groups (#3587, 2026-10-09): known Sybils from the Hop list,
+  // checked on the production models by Anmol (2026-10-13). Best per chain
+  // stitched A, B and C (0, 0 and 11 alone) into 97. Per-chain split as Anmol
+  // reported it; transaction counts are stand-ins.
+  describe("internal-docs#3587 Sybil groups (wallet floor)", () => {
+    const A = "0x434940231840e28d4495e9effc98cfff0abf6cb2";
+    const Bs = "0x6941f024f76f1c3e52504464a5216bc512db961b";
+    const Cs = "0x20f488ad35e01b76eb44e6bdfe62803c8daa9515";
+    const D = "0xb365159c6912c374500001827462239dff97a80d";
+    const passesData = {
+      [A]: { polygon: [40, 30], arb: [45, 40], op: [38, 25] },
+      [Bs]: { base: [55, 35] },
+      [Cs]: { eth: [52, 60] },
+    } as typeof chainData;
+    const passesModel = {
+      "": -1, // fresh W
+      "arb=45/40,op=38/25,polygon=40/30": 0, // A alone
+      "base=55/35": 0, // B alone
+      "eth=52/60": 11, // C alone
+      "arb=45/40,base=55/35,eth=52/60,op=38/25,polygon=40/30": 97, // stitched
+    };
+    const saved = process.env.ETH_GROUP_MIN_MEMBER_SCORE;
+    afterEach(() => {
+      if (saved === undefined) delete process.env.ETH_GROUP_MIN_MEMBER_SCORE;
+      else process.env.ETH_GROUP_MIN_MEMBER_SCORE = saved;
+    });
+
+    it("Passes group: no wallet scores 20 alone, so nothing is stitched and W earns no tier", async () => {
+      lookup({ addresses: [WAAP, A, Bs, Cs], waapAddress: WAAP });
+      chainData = passesData;
+      aggregateTable = passesModel;
+
+      // W keeps the best single wallet's own score (linking never lowers a score).
+      expect(await analyse()).toEqual({ humanProbability: 11, expiresInSeconds: GROUP_CREDENTIAL_MAX_SECONDS });
+      expect(aggregateCalls.some((call) => call.data.score_eth === 52 && call.data.score_base === 55)).toBe(false);
+      expect(await tiersFor(WAAP)).toEqual([]);
+    });
+
+    it("Fails group: W earns no tier", async () => {
+      lookup({ addresses: [WAAP, A, Bs, D], waapAddress: WAAP });
+      chainData = { ...passesData, [D]: { eth: [20, 15] } } as typeof chainData;
+      delete chainData[Cs];
+      aggregateTable = {
+        "": -1,
+        "arb=45/40,op=38/25,polygon=40/30": 0,
+        "base=55/35": 0,
+        "eth=20/15": 1,
+      };
+
+      expect((await analyse()).humanProbability).toBe(1);
+      expect(await tiersFor(WAAP)).toEqual([]);
+    });
+
+    // The floor is what stops it: without one, the same wallets stitch to 97.
+    it("with the floor at 0, the Passes group stitches to 97 again", async () => {
+      process.env.ETH_GROUP_MIN_MEMBER_SCORE = "0";
+      lookup({ addresses: [WAAP, A, Bs, Cs], waapAddress: WAAP });
+      chainData = passesData;
+      aggregateTable = passesModel;
+
+      expect((await analyse()).humanProbability).toBe(97);
+      expect(await tiersFor(WAAP)).toEqual(["ETHScore#50", "ETHScore#75", "ETHScore#90"]);
+    });
+
+    it("reads the floor from ETH_GROUP_MIN_MEMBER_SCORE, defaulting to 20", () => {
+      delete process.env.ETH_GROUP_MIN_MEMBER_SCORE;
+      expect(groupMinMemberScore()).toBe(20);
+      process.env.ETH_GROUP_MIN_MEMBER_SCORE = "35";
+      expect(groupMinMemberScore()).toBe(35);
+      for (const invalid of ["", "soon", "-5"]) {
+        process.env.ETH_GROUP_MIN_MEMBER_SCORE = invalid;
+        expect(groupMinMemberScore()).toBe(20);
+      }
     });
   });
 });
