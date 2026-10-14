@@ -132,7 +132,7 @@ const passportXyzAppEnvironment = secretsManager
 const logsRetention = Object({
   review: 1,
   staging: 7,
-  production: 14,
+  production: 90,
 });
 
 const productionService = {
