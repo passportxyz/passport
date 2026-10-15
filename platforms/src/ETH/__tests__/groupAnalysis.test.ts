@@ -311,24 +311,26 @@ describe("Ethereum Stamp for a linked group", () => {
 
   // Karo's real groups (#3587, 2026-10-09): known Sybils from the Hop list,
   // checked on the production models by Anmol (2026-10-13). Best per chain
-  // stitched A, B and C (0, 0 and 11 alone) into 97. Per-chain split as Anmol
-  // reported it; transaction counts are stand-ins.
+  // stitched A, B and C (0, 0 and 11 alone) into 97. Per-chain [score,
+  // transactions] are Karo's live Models API reads (#3587, 2026-10-13; read
+  // 7-8 October); chains left out scored -1 with 0 transactions. D's numbers
+  // are stand-ins (only its score alone, 1, is known).
   describe("internal-docs#3587 Sybil groups (wallet floor)", () => {
     const A = "0x434940231840e28d4495e9effc98cfff0abf6cb2";
     const Bs = "0x6941f024f76f1c3e52504464a5216bc512db961b";
     const Cs = "0x20f488ad35e01b76eb44e6bdfe62803c8daa9515";
     const D = "0xb365159c6912c374500001827462239dff97a80d";
     const passesData = {
-      [A]: { polygon: [40, 30], arb: [45, 40], op: [38, 25] },
-      [Bs]: { base: [55, 35] },
-      [Cs]: { eth: [52, 60] },
+      [A]: { arb: [36, 20], op: [10, 18], polygon: [24, 19] },
+      [Bs]: { eth: [11, 93], arb: [3, 9], op: [1, 185], polygon: [0, 443], base: [2, 12] },
+      [Cs]: { eth: [52, 193], arb: [1, 247], op: [6, 108], polygon: [1, 142], base: [0, 19] },
     } as typeof chainData;
     const passesModel = {
       "": -1, // fresh W
-      "arb=45/40,op=38/25,polygon=40/30": 0, // A alone
-      "base=55/35": 0, // B alone
-      "eth=52/60": 11, // C alone
-      "arb=45/40,base=55/35,eth=52/60,op=38/25,polygon=40/30": 97, // stitched
+      "arb=36/20,op=10/18,polygon=24/19": 0, // A alone
+      "base=2/12,eth=11/93,op=1/185,polygon=0/443": 0, // B alone (Arbitrum has 9 transactions, so it isn't counted)
+      "arb=1/247,base=0/19,eth=52/193,op=6/108,polygon=1/142": 11, // C alone
+      "arb=36/20,base=2/12,eth=52/193,op=10/18,polygon=24/19": 97, // stitched: Ethereum from C, Base from B, the rest from A
     };
     const saved = process.env.ETH_GROUP_MIN_MEMBER_SCORE;
     afterEach(() => {
@@ -343,7 +345,7 @@ describe("Ethereum Stamp for a linked group", () => {
 
       // W keeps the best single wallet's own score (linking never lowers a score).
       expect(await analyse()).toEqual({ humanProbability: 11, expiresInSeconds: GROUP_CREDENTIAL_MAX_SECONDS });
-      expect(aggregateCalls.some((call) => call.data.score_eth === 52 && call.data.score_base === 55)).toBe(false);
+      expect(aggregateCalls.some((call) => call.data.score_eth === 52 && call.data.score_arb === 36)).toBe(false);
       expect(await tiersFor(WAAP)).toEqual([]);
     });
 
@@ -353,8 +355,8 @@ describe("Ethereum Stamp for a linked group", () => {
       delete chainData[Cs];
       aggregateTable = {
         "": -1,
-        "arb=45/40,op=38/25,polygon=40/30": 0,
-        "base=55/35": 0,
+        "arb=36/20,op=10/18,polygon=24/19": 0,
+        "base=2/12,eth=11/93,op=1/185,polygon=0/443": 0,
         "eth=20/15": 1,
       };
 
