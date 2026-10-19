@@ -29,7 +29,7 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
         target={isExternal ? "_blank" : undefined}
         rel={isExternal ? "noopener noreferrer" : undefined}
         aria-label={`${partnerName}: ${header}`}
-        className="absolute inset-0 z-[1] rounded-[20px] focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
+        className="absolute inset-0 z-[1] rounded-[20px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-white"
       />
 
       {/* Background image */}
@@ -58,10 +58,12 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
       </div>
 
       {/* Details panel, shown by "Learn more" */}
-      {details && detailsOpen && (
+      {details && (
         <div
           id={`campaign-details-${imageTag}`}
-          className="absolute inset-0 z-[2] bg-[rgba(10,20,18,0.88)] backdrop-blur-sm text-white px-5 pt-6 pb-14 flex flex-col gap-[10px] overflow-y-auto"
+          className={`absolute inset-0 z-[2] bg-[rgba(10,20,18,0.88)] backdrop-blur-sm text-white px-5 pt-6 pb-14 flex-col gap-[10px] overflow-y-auto ${
+            detailsOpen ? "flex" : "hidden"
+          }`}
         >
           <p className="text-xs tracking-widest uppercase text-white/70">How Passport is used</p>
           <p className="text-[15px] leading-[22px]">{details}</p>
