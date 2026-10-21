@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import { FeaturedCampaign, SanitizedHTMLComponent } from "../../utils/customizationUtils";
 
 interface CampaignCardProps {
@@ -14,6 +14,8 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
   const { partnerName, partnerLogo, header, subheader, imageTag, destinationUrl, audienceLabel, details } = campaign;
   const [imgError, setImgError] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  // imageTag and id both come from image_tag, which is not unique, so the panel id is generated.
+  const detailsId = useId();
 
   const isExternal = isExternalUrl(destinationUrl);
 
@@ -60,13 +62,13 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
       {/* Details panel, shown by "Learn more" */}
       {details && (
         <div
-          id={`campaign-details-${imageTag}`}
+          id={detailsId}
           className={`absolute inset-0 z-[2] bg-[rgba(10,20,18,0.88)] backdrop-blur-sm text-white px-5 pt-6 pb-14 flex-col gap-[10px] overflow-y-auto ${
             detailsOpen ? "flex" : "hidden"
           }`}
         >
           <p className="text-xs tracking-widest uppercase text-white/70">How Passport is used</p>
-          <p className="text-[15px] leading-[22px]">{details}</p>
+          <p className="text-[15px] leading-[22px] whitespace-pre-line">{details}</p>
         </div>
       )}
 
@@ -87,7 +89,7 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
             type="button"
             onClick={() => setDetailsOpen((open) => !open)}
             aria-expanded={detailsOpen}
-            aria-controls={`campaign-details-${imageTag}`}
+            aria-controls={detailsId}
             className="relative z-[3] pointer-events-auto text-white text-sm leading-5 font-medium underline underline-offset-[3px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-white rounded-sm"
           >
             {detailsOpen ? "Show less" : "Learn more"}
