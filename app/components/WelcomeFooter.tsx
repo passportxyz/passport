@@ -89,7 +89,7 @@ const WelcomeFooter = ({ displayPrivacyPolicy }: { displayPrivacyPolicy: boolean
         </Link>
         <div className="flex flex-col md:flex-row gap-y-1 items-end justify-end flex-wrap">
           <div className="md:px-2">
-            <Link href="https://github.com/passportxyz/passport">
+            <Link href="https://github.com/passportxyz">
               <GitHubIcon />
             </Link>
           </div>
