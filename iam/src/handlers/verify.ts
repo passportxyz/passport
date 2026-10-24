@@ -1,7 +1,5 @@
 import {
   CredentialResponseBody,
-  ErrorResponseBody,
-  ValidResponseBody,
   VerifyRequestBody,
 } from "@gitcoin/passport-types";
 
@@ -14,6 +12,7 @@ import {
   verifyChallengeAndGetAddress,
 } from "../utils/identityHelper.js";
 import { verifyAndExtractAddress, extractBearerToken } from "../utils/scorerJwt.js";
+import { logger } from "../utils/logger.js";
 
 const { ApiError, createHandler } = serverUtils;
 
@@ -34,7 +33,7 @@ export const verifyHandler = createHandler<VerifyRequestBody, CredentialResponse
 
     if (jwtAddress) {
       // JWT is valid - use the address from the JWT, skip challenge verification
-      console.log(`JWT authenticated request for address: ${jwtAddress}`);
+      logger.info(`JWT authenticated request for address: ${jwtAddress}`);
       payload.address = jwtAddress;
 
       const types = payload.types.filter((type) => type);
@@ -49,7 +48,7 @@ export const verifyHandler = createHandler<VerifyRequestBody, CredentialResponse
       return void res.json(credentials);
     }
     // If JWT verification failed, fall through to challenge-based auth
-    console.warn("JWT verification failed, falling back to challenge-based auth");
+    logger.warn("JWT verification failed, falling back to challenge-based auth");
   }
 
   // Legacy challenge-based authentication flow
