@@ -150,8 +150,6 @@ describe("ZKEmail Providers", () => {
       expect(result.errors).toHaveLength(0);
       expect(result.record).toEqual({
         hashedEmail: MOCK_EMAIL_HASH,
-        totalProofs: proofs.length.toString(),
-        proofType: "amazon",
       });
     });
 
@@ -316,8 +314,6 @@ describe("ZKEmail Providers", () => {
       expect(result.errors).toHaveLength(0);
       expect(result.record).toEqual({
         hashedEmail: MOCK_EMAIL_HASH,
-        totalProofs: "3",
-        proofType: "uber",
       });
     });
 
@@ -1043,7 +1039,7 @@ describe("ZKEmail Caching Optimization", () => {
       const result = await provider.verify(payload);
 
       expect(result.valid).toBe(true);
-      expect(result.record?.totalProofs).toBe("10");
+      expect(result.record?.hashedEmail).toBe(MOCK_EMAIL_HASH);
     });
 
     it("should fail when proof count is one below threshold", async () => {
@@ -1122,7 +1118,7 @@ describe("ZKEmail Caching Optimization", () => {
       const result = await provider.verify(payload);
 
       expect(result.valid).toBe(true);
-      expect(result.record?.totalProofs).toBe("1");
+      expect(result.record?.hashedEmail).toBe(MOCK_EMAIL_HASH);
     });
 
     it("should handle large proof sets efficiently with caching", async () => {
@@ -1170,7 +1166,7 @@ describe("ZKEmail Caching Optimization", () => {
       const result = await provider.verify(payload);
 
       expect(result.valid).toBe(true);
-      expect(result.record?.totalProofs).toBe("50");
+      expect(result.record?.hashedEmail).toBe(MOCK_EMAIL_HASH);
     });
 
     it("should fail heavy user with 49 valid proofs", async () => {
@@ -1219,10 +1215,10 @@ describe("ZKEmail Caching Optimization", () => {
       expect(result2.valid).toBe(true);
       expect(result3.valid).toBe(true);
 
-      // All should report same total from cache
-      expect(result1.record?.totalProofs).toBe("75");
-      expect(result2.record?.totalProofs).toBe("75");
-      expect(result3.record?.totalProofs).toBe("75");
+      // All should have the same hashedEmail
+      expect(result1.record?.hashedEmail).toBe(MOCK_EMAIL_HASH);
+      expect(result2.record?.hashedEmail).toBe(MOCK_EMAIL_HASH);
+      expect(result3.record?.hashedEmail).toBe(MOCK_EMAIL_HASH);
     });
 
     it("should handle mixed valid count scenarios across tiers", async () => {

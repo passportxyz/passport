@@ -235,13 +235,14 @@ abstract class ZKEmailBaseProvider implements Provider {
       // Get the hashed email - extract on-demand from cached or current proofs
       const hashedEmailForRecord = cached ? getHashedEmailFromProof(cached.unpackedProofs[0]) : firstHashedEmail;
 
+      // TODO remove
+      console.log("Hashed email:", hashedEmailForRecord);
+
       return {
         valid: true,
         errors,
         record: {
           hashedEmail: hashedEmailForRecord,
-          totalProofs: validProofCount.toString(),
-          proofType: proofType,
         },
       };
     } catch (error) {
