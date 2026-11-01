@@ -16,6 +16,27 @@ const originalEnv = process.env;
 const MOCK_STEAM_ID = "76561198000000000";
 const MOCK_CLAIMED_ID = `https://steamcommunity.com/openid/id/${MOCK_STEAM_ID}`;
 
+function mockOpenIdAssertion(steamId: string): string {
+  return new URLSearchParams({
+    "openid.ns": "http://specs.openid.net/auth/2.0",
+    "openid.mode": "id_res",
+    "openid.op_endpoint": "https://steamcommunity.com/openid/login",
+    "openid.claimed_id": `https://steamcommunity.com/openid/id/${steamId}`,
+    "openid.identity": `https://steamcommunity.com/openid/id/${steamId}`,
+    "openid.return_to": "https://passport.human.tech/",
+    "openid.response_nonce": "2026-01-01T00:00:00Znonce",
+    "openid.assoc_handle": "1234567890",
+    "openid.signed": "signed,op_endpoint,claimed_id,identity,return_to,response_nonce,assoc_handle",
+    "openid.sig": "dGVzdHNpZ25hdHVyZQ==",
+  }).toString();
+}
+
+const MOCK_OPENID = mockOpenIdAssertion(MOCK_STEAM_ID);
+const validProofs = {
+  code: MOCK_CLAIMED_ID,
+  openid: MOCK_OPENID,
+};
+
 // Mock Steam API responses
 const validGamesResponse = {
   data: {
@@ -91,6 +112,11 @@ beforeEach(() => {
     STEAM_API_KEY: "test_api_key",
   };
 
+  mockedAxios.post.mockResolvedValue({
+    data: "ns:http://specs.openid.net/auth/2.0\nis_valid:true\n",
+    status: 200,
+  });
+
   // Default mock: return valid games response
   mockedAxios.get.mockImplementation(async (url: string) => {
     if (url.includes("GetOwnedGames")) {
@@ -113,7 +139,7 @@ describe("SteamProvider", function () {
       const provider = new SteamProvider();
       const payload = {
         proofs: {
-          code: MOCK_CLAIMED_ID,
+          ...validProofs,
         },
       } as unknown as RequestPayload;
 
@@ -129,7 +155,7 @@ describe("SteamProvider", function () {
       expect(result.errors).toBeUndefined();
     });
 
-    it("should return invalid when missing claimed_id", async () => {
+    it("should return invalid when missing OpenID assertion", async () => {
       const provider = new SteamProvider();
       const payload = {
         proofs: {},
@@ -139,14 +165,51 @@ describe("SteamProvider", function () {
 
       expect(result.valid).toBe(false);
       expect(result.record).toBeUndefined();
-      expect(result.errors).toEqual(["Missing Steam OpenID claimed_id"]);
+      expect(result.errors).toEqual(["Missing Steam OpenID assertion"]);
+      expect(mockedAxios.post).not.toHaveBeenCalled();
+      expect(mockedAxios.get).not.toHaveBeenCalled();
+    });
+
+    it("should return invalid when Steam rejects the OpenID assertion", async () => {
+      mockedAxios.post.mockResolvedValue({
+        data: "ns:http://specs.openid.net/auth/2.0\nis_valid:false\n",
+        status: 200,
+      });
+
+      const provider = new SteamProvider();
+      const payload = {
+        proofs: validProofs,
+      } as unknown as RequestPayload;
+
+      const result = await provider.verify(payload);
+
+      expect(result.valid).toBe(false);
+      expect(result.record).toBeUndefined();
+      expect(result.errors).toEqual(["Steam OpenID assertion could not be verified."]);
+      expect(mockedAxios.get).not.toHaveBeenCalled();
+    });
+
+    it("should return invalid when claimed_id does not match the verified assertion", async () => {
+      const provider = new SteamProvider();
+      const payload = {
+        proofs: {
+          code: "https://steamcommunity.com/openid/id/76561198000000001",
+          openid: MOCK_OPENID,
+        },
+      } as unknown as RequestPayload;
+
+      const result = await provider.verify(payload);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toEqual(["Steam OpenID claimed_id does not match the verified assertion."]);
+      expect(mockedAxios.get).not.toHaveBeenCalled();
     });
 
     it("should return invalid when claimed_id format is invalid", async () => {
       const provider = new SteamProvider();
       const payload = {
         proofs: {
-          code: "invalid-claimed-id",
+          openid: "openid.claimed_id=not-a-steam-url&openid.sig=dGVzdA==",
         },
       } as unknown as RequestPayload;
 
@@ -154,7 +217,7 @@ describe("SteamProvider", function () {
 
       expect(result.valid).toBe(false);
       expect(result.record).toBeUndefined();
-      expect(result.errors).toEqual(["Invalid Steam OpenID response. Unable to extract Steam ID."]);
+      expect(result.errors).toEqual(["Steam OpenID assertion could not be verified."]);
     });
 
     it("should return invalid when no games found (private profile)", async () => {
@@ -168,7 +231,7 @@ describe("SteamProvider", function () {
       const provider = new SteamProvider();
       const payload = {
         proofs: {
-          code: MOCK_CLAIMED_ID,
+          ...validProofs,
         },
       } as unknown as RequestPayload;
 
@@ -208,7 +271,7 @@ describe("SteamProvider", function () {
       const provider = new SteamProvider();
       const payload = {
         proofs: {
-          code: MOCK_CLAIMED_ID,
+          ...validProofs,
         },
       } as unknown as RequestPayload;
 
@@ -264,7 +327,7 @@ describe("SteamProvider", function () {
       const provider = new SteamProvider();
       const payload = {
         proofs: {
-          code: MOCK_CLAIMED_ID,
+          ...validProofs,
         },
       } as unknown as RequestPayload;
 
@@ -308,7 +371,7 @@ describe("SteamProvider", function () {
       const provider = new SteamProvider();
       const payload = {
         proofs: {
-          code: MOCK_CLAIMED_ID,
+          ...validProofs,
         },
       } as unknown as RequestPayload;
 
@@ -357,7 +420,7 @@ describe("SteamProvider", function () {
       const provider = new SteamProvider();
       const payload = {
         proofs: {
-          code: MOCK_CLAIMED_ID,
+          ...validProofs,
         },
       } as unknown as RequestPayload;
 
@@ -376,7 +439,7 @@ describe("SteamProvider", function () {
       const provider = new SteamProvider();
       const payload = {
         proofs: {
-          code: MOCK_CLAIMED_ID,
+          ...validProofs,
         },
       } as unknown as RequestPayload;
 
@@ -389,7 +452,7 @@ describe("SteamProvider", function () {
       const provider = new SteamProvider();
       const payload = {
         proofs: {
-          code: MOCK_CLAIMED_ID,
+          ...validProofs,
         },
       } as unknown as RequestPayload;
 
@@ -418,7 +481,7 @@ describe("SteamProvider", function () {
       const provider = new SteamProvider();
       const payload = {
         proofs: {
-          code: MOCK_CLAIMED_ID,
+          ...validProofs,
         },
       } as unknown as RequestPayload;
 

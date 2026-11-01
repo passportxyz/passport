@@ -48,12 +48,13 @@ export class SteamPlatform extends Platform {
 
     // Wait for OpenID redirect response
     return appContext.waitForRedirect(this).then((data) => {
-      // Steam OpenID returns claimed_id in the response
-      // The frontend callback handler extracts openid.claimed_id and passes it as 'code'
+      // Steam OpenID returns claimed_id plus the signed assertion query string.
+      // IAM must verify the assertion with Steam; claimed_id alone is not enough.
       return {
         code: data.code || "",
         sessionKey: data.state,
         signature: data.signature,
+        openid: typeof data.openid === "string" ? data.openid : "",
       };
     });
   }
