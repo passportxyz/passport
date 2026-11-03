@@ -217,6 +217,8 @@ function App({ Component, pageProps }: AppProps) {
       <Script
         src="https://iris-v2-fqgd.onrender.com/widget/iris-widget.js"
         data-iris-key="passport"
+        data-iris-wc-id="458187c5895e1cb056679eedabc8f362"
+        data-iris-auto-wallet
         strategy="afterInteractive"
       />
     </>

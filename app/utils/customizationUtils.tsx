@@ -41,6 +41,8 @@ export interface FeaturedCampaign {
   imageTag: string;
   partnerName: string;
   partnerLogo: string;
+  audienceLabel?: string;
+  details?: string;
 }
 
 type CustomStamp = {
