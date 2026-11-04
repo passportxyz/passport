@@ -7,7 +7,10 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
 const require = createRequire(import.meta.url);
-const uiDist = join(dirname(require.resolve("@human.tech/ui/package.json")), "dist");
+const uiDist = join(
+  dirname(require.resolve("@human.tech/ui/package.json")),
+  "dist",
+);
 const publicDir = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 
 for (const folder of ["graphics", "lottie"]) {
