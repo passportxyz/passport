@@ -2,6 +2,7 @@
 // --- Methods
 import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import { LoginFlowProvider } from "../hooks/useLoginFlow";
 
 // -- Next Methods
 import type { GetStaticProps, NextPage } from "next";
@@ -9,6 +10,8 @@ import type { GetStaticProps, NextPage } from "next";
 // -- Pages
 import Home from "./Home";
 import Welcome from "./Welcome";
+import WalletOnboarding from "./WalletOnboarding";
+import LinkedWallets from "./LinkedWallets";
 import Dashboard from "./Dashboard";
 import Privacy from "./privacy";
 import Maintenance from "./Maintenance";
@@ -55,6 +58,8 @@ export const AppRoutes = ({ campaignImages = [] }: { campaignImages?: string[] }
     <Route path="/:key?" element={<CustomizationUrlLayoutRoute />}>
       <Route path="" element={<Home />} />
       <Route path="welcome" element={<Welcome />} />
+      <Route path="wallet-onboarding" element={<WalletOnboarding />} />
+      <Route path="linked-wallets" element={<LinkedWallets />} />
       <Route path="dashboard">
         {/* This is here to support legacy customization paths */}
         <Route path=":customizationKey" element={<Dashboard />} />
@@ -88,7 +93,9 @@ const App: NextPage<{ campaignImages: string[] }> = ({ campaignImages }) => {
   return (
     <div>
       <Router>
-        <AppRoutes campaignImages={campaignImages} />
+        <LoginFlowProvider>
+          <AppRoutes campaignImages={campaignImages} />
+        </LoginFlowProvider>
       </Router>
     </div>
   );

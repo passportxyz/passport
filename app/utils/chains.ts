@@ -1,4 +1,3 @@
-import { CaipNetwork } from "@reown/appkit";
 import { TEST_MODE } from "../context/testModeState";
 import {
   AttestationProvider,
@@ -23,13 +22,12 @@ import {
   avalanche,
   scroll,
   shape,
-  type AppKitNetwork,
-} from "@reown/appkit/networks";
+} from "viem/chains";
 import { Config } from "wagmi";
-import { http, HttpTransport } from "viem";
+import { http, HttpTransport, type Chain as ViemChain } from "viem";
 
-// Type matches the library, forces at least 1 element
-export const wagmiChains: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet];
+// Type matches wagmi's createConfig, forces at least 1 element
+export const wagmiChains: [ViemChain, ...ViemChain[]] = [mainnet];
 export let wagmiTransports: Record<Config["chains"][number]["id"], HttpTransport> = {
   [mainnet.id]: http(process.env.NEXT_PUBLIC_PASSPORT_MAINNET_RPC_URL),
 };
@@ -335,17 +333,6 @@ if (!TEST_MODE) {
     wagmiTransports[shape.id] = http(process.env.NEXT_PUBLIC_PASSPORT_SHAPE_RPC_URL);
   }
 }
-
-// Need to use the more restrictive "CaipNetwork" type in some places
-export const networkMap = wagmiChains
-  .filter((network): network is CaipNetwork => (network as CaipNetwork).caipNetworkId !== undefined)
-  .reduce(
-    (acc, network) => {
-      acc[network.id] = network;
-      return acc;
-    },
-    {} as Record<string, CaipNetwork>
-  );
 
 export const chains: Chain[] = chainConfigs.map((config) => new Chain(config));
 

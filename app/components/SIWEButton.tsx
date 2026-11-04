@@ -4,7 +4,7 @@ import { LoadButton, LoadingButtonProps } from "./LoadButton";
 const SIWEButton = (props: LoadingButtonProps & { enableEthBranding: boolean; subtext?: string }) => {
   const { enableEthBranding, isLoading, subtext, ...rest } = props;
   return (
-    <LoadButton {...rest} className={(props.className || "") + " rounded-md"}>
+    <LoadButton {...rest} isLoading={isLoading} className={(props.className || "") + " rounded-md"}>
       {/* {enableEthBranding && !isLoading && (
         <svg className="my-1" width="19" height="30" viewBox="0 0 19 30" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M9.22009 22.4887V30.0001L18.4402 17.0493L9.22009 22.4887Z" fill="#2F3030" />
@@ -35,7 +35,7 @@ const SIWEButton = (props: LoadingButtonProps & { enableEthBranding: boolean; su
       )}
       <div className="flex flex-col items-center">
         <span className="hidden group-disabled:inline">Logging in...</span>
-        <span className="inline group-disabled:hidden">Connect your wallet</span>
+        <span className="inline group-disabled:hidden">Connect wallet</span>
         <div className={`text-xs ${subtext ? "block" : "hidden"}`}>({subtext})</div>
       </div>
     </LoadButton>

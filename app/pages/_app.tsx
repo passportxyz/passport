@@ -8,6 +8,8 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 import Script from "next/script";
 
+import "@human.tech/ui/core.css";
+import "@human.tech/ui/passport.css";
 import "../styles/globals.css";
 import { CeramicContextProvider } from "../context/ceramicContext";
 import { DatastoreConnectionContextProvider } from "../context/datastoreConnectionContext";
@@ -22,7 +24,8 @@ import posthog from "posthog-js";
 import { themes, ThemeWrapper } from "../utils/theme";
 import { StampClaimingContextProvider } from "../context/stampClaimingContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Web3Context, Web3ErrorContext } from "../hooks/Web3Context";
+import { Web3Context } from "../hooks/Web3Context";
+import { WalletPicker } from "../components/WalletPicker";
 import { AutoVerificationProvider } from "../components/AutoVerificationProvider";
 
 const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID || "";
@@ -201,11 +204,10 @@ function App({ Component, pageProps }: AppProps) {
                 <StampClaimingContextProvider>
                   <RenderOnlyOnClient>
                     <ThemeWrapper initChakra={true} defaultTheme={themes.LUNARPUNK_DARK_MODE}>
-                      <Web3ErrorContext>
-                        <AutoVerificationProvider>
-                          <Component {...pageProps} />
-                        </AutoVerificationProvider>
-                      </Web3ErrorContext>
+                      <AutoVerificationProvider>
+                        <Component {...pageProps} />
+                      </AutoVerificationProvider>
+                      <WalletPicker />
                     </ThemeWrapper>
                   </RenderOnlyOnClient>
                 </StampClaimingContextProvider>

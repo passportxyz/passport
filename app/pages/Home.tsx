@@ -1,5 +1,5 @@
 // --- React Methods
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 // --- Components
 import SIWEButton from "../components/SIWEButton";
@@ -9,12 +9,17 @@ import { DEFAULT_CUSTOMIZATION_KEY, useCustomization } from "../hooks/useCustomi
 
 import { useLoginFlow } from "../hooks/useLoginFlow";
 import { InitialScreenWelcome } from "../components/InitialScreenLayout";
+import { hasValidStoredSession } from "../context/datastoreConnectionContext";
+import { useAccount } from "wagmi";
 
 // --- Analytics
 import posthog from "posthog-js";
 
 export default function Home() {
-  const { isLoggingIn, signIn, loginStep } = useLoginFlow();
+  const { address, isConnected } = useAccount();
+  // Shared with the header's Connect Wallet (LoginFlowProvider): one login, one loading state, and
+  // the provider decides where to go after it.
+  const { isBusy, signIn, loginStep } = useLoginFlow();
   const [enableEthBranding, setEnableEthBranding] = useState(false);
   const customization = useCustomization();
   const threshold = customization.scorer?.threshold;
@@ -24,9 +29,20 @@ export default function Home() {
     setEnableEthBranding(!usingCustomization);
   }, [customization.key]);
 
+  // After a refresh the wallet reconnects on its own. If this address still has a valid Passport
+  // session, resume it (no new signature) instead of leaving the user on the sign-in screen.
+  const resumedSession = useRef(false);
+  useEffect(() => {
+    if (resumedSession.current || !isConnected || !address || loginStep !== "NOT_STARTED") return;
+    if (!hasValidStoredSession(address)) return;
+    resumedSession.current = true;
+    signIn();
+  }, [isConnected, address, loginStep, signIn]);
+
+  // The only sign-in: WaaP's window, with email, phone, social or an external wallet.
   const handleConnectWallet = useCallback(() => {
     posthog.capture("cta_clicked", { site: "passport.human.tech", cta_id: "connect_wallet" });
-    signIn();
+    signIn({ useWaap: true });
   }, [signIn]);
 
   // customization.scorer?.weights
@@ -39,7 +55,7 @@ export default function Home() {
         built for humans.
       </div>
 
-      <div className="flex justify-center md:justify-start items-center w-full mb-8">
+      <div className="flex flex-col justify-center md:justify-start items-center md:items-start gap-4 w-full mb-8">
         <SIWEButton
           subtext={(() => {
             if (loginStep === "PENDING_WALLET_CONNECTION") {
@@ -48,15 +64,28 @@ export default function Home() {
               return "Sign message in wallet";
             }
           })()}
-          loadIconPosition="right"
-          disabled={isLoggingIn || isServerOnMaintenance()}
-          isLoading={isLoggingIn}
+          loadIconPosition="left"
+          disabled={isBusy || isServerOnMaintenance()}
+          isLoading={isBusy}
           enableEthBranding={enableEthBranding}
           data-testid="connectWalletButton"
           onClick={handleConnectWallet}
           className="px-10 mmb-12 md:w-2/3"
         />
       </div>
+
+      {/* Dev-only shortcuts to the onboarding mockup preview (see WalletOnboarding/mock.ts). */}
+      {process.env.NODE_ENV === "development" && (
+        <div data-testid="onboardingPreviewLinks" className="flex flex-wrap items-center gap-3 text-sm text-color-9">
+          <span>Dev preview:</span>
+          <a className="underline" href="#/wallet-onboarding?mock=boost">
+            Onboarding (below threshold)
+          </a>
+          <a className="underline" href="#/wallet-onboarding?mock=nice">
+            Onboarding (verified)
+          </a>
+        </div>
+      )}
     </InitialScreenWelcome>
   );
 }

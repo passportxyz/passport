@@ -8,7 +8,7 @@ import { CeramicContextState } from "../../context/ceramicContext";
 import { Chain } from "../../utils/chains";
 import { ChakraProvider } from "@chakra-ui/react";
 import { closeAllToasts } from "../../__test-fixtures__/toastTestHelpers";
-import { optimism } from "@reown/appkit/networks";
+import { optimism } from "viem/chains";
 
 vi.mock("axios");
 

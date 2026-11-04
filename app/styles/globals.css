@@ -1,3 +1,9 @@
+/* @human.tech/ui asks for "Suisse Intl"; this app loads the same font files as "Suisse".
+   html:root outranks the package's own :root rule whatever order the stylesheets load in. */
+html:root {
+  --font-family-interface: "Suisse", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
 @font-face {
   font-family: "Suisse";
   src: url("/assets/fonts/SuisseIntl/SuisseIntl-Black.woff2") format("woff2");

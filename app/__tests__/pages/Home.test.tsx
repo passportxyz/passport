@@ -1,14 +1,14 @@
-import { vi, describe, it, expect, Mock } from "vitest";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Home from "../../pages/Home";
+import { LoginFlowProvider } from "../../hooks/useLoginFlow";
+import { markOnboardingSeen } from "../../utils/onboardingStatus";
 import { HashRouter as Router } from "react-router-dom";
 import { makeTestCeramicContext, renderWithContext } from "../../__test-fixtures__/contextTestHelpers";
 import { CeramicContextState } from "../../context/ceramicContext";
 // import { useWeb3ModalAccount, openModalMock } from "../../__mocks__/web3modalMock";
-
-import { checkShowOnboard } from "../../utils/helpers";
 
 vi.mock("wagmi", async () => ({
   ...(await vi.importActual("wagmi")),
@@ -47,7 +47,9 @@ test("renders connect wallet button", () => {
   renderWithContext(
     mockCeramicContext,
     <Router>
-      <Home />
+      <LoginFlowProvider>
+        <Home />
+      </LoginFlowProvider>
     </Router>
   );
 
@@ -58,7 +60,9 @@ test("clicking connect wallet button calls connect", async () => {
   renderWithContext(
     mockCeramicContext,
     <Router>
-      <Home />
+      <LoginFlowProvider>
+        <Home />
+      </LoginFlowProvider>
     </Router>
   );
   const connectWalletButton = screen.getByTestId("connectWalletButton");
@@ -70,13 +74,18 @@ test("clicking connect wallet button calls connect", async () => {
   });
 });
 
-describe("Welcome navigation", () => {
-  it("calls navigate with /dashboard when wallet is connected but checkShowOnboard is false", async () => {
-    (checkShowOnboard as Mock).mockReturnValue(false);
+// Where a login lands (LoginFlowProvider): onboarding on an account's first login on this device,
+// the dashboard after that.
+describe("Post-login navigation", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("navigates to onboarding on the account's first login on this device", async () => {
     renderWithContext(
       { ...mockCeramicContext, passport: undefined },
       <Router>
-        <Home />
+        <LoginFlowProvider>
+          <Home />
+        </LoginFlowProvider>
       </Router>
     );
 
@@ -85,16 +94,18 @@ describe("Welcome navigation", () => {
     await userEvent.click(connectWalletButton);
 
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith("/dashboard");
+      expect(navigate).toHaveBeenCalledWith("/wallet-onboarding");
     });
   });
 
-  it("calls navigate with /welcome when checkShowOnboard is true", async () => {
-    (checkShowOnboard as Mock).mockReturnValue(true);
+  it("navigates to the dashboard once the account has seen onboarding on this device", async () => {
+    markOnboardingSeen("0x123");
     renderWithContext(
       { ...mockCeramicContext, passport: undefined },
       <Router>
-        <Home />
+        <LoginFlowProvider>
+          <Home />
+        </LoginFlowProvider>
       </Router>
     );
 

@@ -1,30 +1,20 @@
 import "@testing-library/jest-dom";
 import { vi } from "vitest";
 
-// Mock Silk wallet SDK to prevent async initialization in tests
-vi.mock("@silk-wallet/silk-wallet-sdk", () => ({
-  initSilk: vi.fn(() => ({
+// Mock WaaP (Human Wallet) initialisation so tests never load its iframe. The
+// stub has no stored login, so the wagmi connector reports "not authorized".
+vi.mock("@human.tech/waap-sdk", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@human.tech/waap-sdk")>()),
+  initWaaP: vi.fn(() => ({
+    connected: false,
     on: vi.fn(),
-    off: vi.fn(),
-    request: vi.fn(),
+    removeListener: vi.fn(),
+    request: vi.fn(async () => []),
     login: vi.fn(),
     logout: vi.fn(),
+    getLoginMethod: vi.fn(() => null),
+    requestEmail: vi.fn(),
   })),
-}));
-
-// Mock @reown/appkit to prevent network requests during tests
-vi.mock("@reown/appkit/react", () => ({
-  useAppKit: () => ({ open: vi.fn() }),
-  useAppKitEvents: () => ({
-    data: { event: "MODAL_CLOSE", properties: { connected: true } },
-  }),
-  useAppKitState: () => ({ open: false }),
-  useDisconnect: () => ({ disconnect: vi.fn() }),
-  useAppKitAccount: () => ({
-    address: "0x1234567890123456789012345678901234567890",
-    isConnected: true,
-  }),
-  createAppKit: vi.fn(() => ({ open: vi.fn() })),
 }));
 
 const { info, log, warn, error } = console;
