@@ -64,6 +64,37 @@ describe("AccountAnalysis Providers", () => {
     mockContext = {};
   });
 
+  describe.each([
+    ["gas_spent", EthGasSpentProvider],
+    ["n_days_active", EthDaysActiveProvider],
+    ["n_transactions", EthTransactionsProvider],
+  ] as const)("invalid model metric %s", (field, Provider) => {
+    it.each([
+      ["omitted", undefined],
+      ["null", null],
+      ["numeric string", "5000"],
+      ["non-numeric string", "invalid"],
+      ["boolean", true],
+      ["array", [5000]],
+      ["object", {}],
+      ["NaN", NaN],
+      ["positive infinity", Infinity],
+      ["negative infinity", -Infinity],
+    ])("rejects %s on both the fetched and cached paths", async (_label, value) => {
+      // Do not use mockResponse: its defaults hide missing and NaN model fields.
+      const data = value === undefined ? {} : { [field]: value };
+      mockedAxios.post.mockResolvedValueOnce({ status: 200, data: { data } });
+      const provider = new Provider();
+
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const result = await provider.verify({ address: mockAddress } as RequestPayload, mockContext);
+        expect(result.valid).toBe(false);
+        expect(result.errors).toBeDefined();
+      }
+      expect(mockedAxios.post).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("should check human_probability", () => {
     it.each(scoreTestCases)("for score %i should return %s for %p", async (score, expected, provider) => {
       const mockedResponse = mockResponse({ score });
