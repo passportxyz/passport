@@ -220,9 +220,12 @@ export async function getAggregateAnalysis(address: string, context: ETHAnalysis
   if (!context?.aggregateAnalysis) {
     const holder = address.toLowerCase();
     const group = await getLinkedGroup(holder);
-    context.aggregateAnalysis = group
-      ? await getGroupAnalysis(holder, group)
-      : { humanProbability: await aggregateScore(address, await getChainResults(address)) };
+    // With no unlink cooldown a linked wallet can leave at once, so a credential built from its
+    // activity could not last at all (expiresInSeconds would be 0): score the holder alone.
+    context.aggregateAnalysis =
+      group && group.cooldownSeconds !== 0
+        ? await getGroupAnalysis(holder, group)
+        : { humanProbability: await aggregateScore(address, await getChainResults(address)) };
   }
   return context.aggregateAnalysis;
 }

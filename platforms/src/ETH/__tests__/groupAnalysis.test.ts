@@ -185,6 +185,18 @@ describe("Ethereum Stamp for a linked group", () => {
     expect((await analyse()).expiresInSeconds).toBe(300);
   });
 
+  // With no cooldown a linked wallet can leave at once, so no credential built
+  // from its activity can last at all. Score the WaaP address alone instead of
+  // issuing one that expires the moment it is issued.
+  it("scores the WaaP address alone when there is no unlink cooldown", async () => {
+    group(0);
+    chainData = { [WAAP]: { eth: [40, 100] }, [B]: { eth: [90, 100] } };
+
+    expect(await analyse()).toEqual({ humanProbability: 40 });
+    const called = new Set(mockedAxios.post.mock.calls.map(([, payload]) => (payload as { address: string }).address));
+    expect([...called]).toEqual([WAAP]);
+  });
+
   // Rule: a linked wallet never holds a credential earned from another
   // wallet's activity (Problem 1).
   it("scores a linked wallet that isn't the WaaP address alone", async () => {
