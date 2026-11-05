@@ -36,3 +36,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# @human.tech/ui runtime assets, copied from the package by scripts/copyUiAssets.mjs
+/public/graphics
+/public/lottie

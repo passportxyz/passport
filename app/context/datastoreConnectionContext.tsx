@@ -9,6 +9,7 @@ import { useCustomDisconnect } from "../hooks/useCustomDisconnect";
 import { useAccount } from "wagmi";
 import { WalletClient } from "viem";
 import { logoutHumanWallet } from "../utils/humanWallet";
+import { isWalletLinkInProgress } from "../utils/walletLinkingGuard";
 
 const SIWE_EXPIRATION_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -65,6 +66,13 @@ const isTokenValid = (token: string): boolean => {
   return expiry > new Date();
 };
 
+// Whether this address still has a valid saved Passport session, i.e. signing in again would
+// reuse the token without asking the wallet for a new signature.
+export const hasValidStoredSession = (address: string): boolean => {
+  const token = window.localStorage.getItem(`dbcache-token-${address}`);
+  return !!token && isTokenValid(token);
+};
+
 // In the app, the context hook should be used. This is only exported for testing
 export const useDatastoreConnection = () => {
   const { disconnect: disconnectWallet } = useCustomDisconnect();
@@ -78,6 +86,8 @@ export const useDatastoreConnection = () => {
   const [checkSessionIsValid, setCheckSessionIsValid] = useState<() => boolean>(() => false);
 
   useEffect(() => {
+    // Linking a wallet temporarily switches wagmi's active account; it's restored afterwards.
+    if (isWalletLinkInProgress()) return;
     // Clear status when wallet disconnected
     if (
       (!chain || !isConnected || (connectedAddress && web3ModalAddress !== connectedAddress)) &&

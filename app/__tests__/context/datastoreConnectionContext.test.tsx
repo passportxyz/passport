@@ -66,6 +66,7 @@ vi.mock("wagmi", async (importOriginal) => ({
     isConnected: true,
     chain: { id: 1 },
   }),
+  useDisconnect: () => ({ disconnectAsync: vi.fn() }),
 }));
 
 vi.mock("../../context/walletStore", () => {

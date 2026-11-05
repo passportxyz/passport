@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
-import { useAppKit } from "@reown/appkit/react";
+import { openWalletPicker } from "../hooks/useWalletPicker";
 import { CollapseMode, DarkTheme, LightTheme, PassportScoreWidget } from "@human.tech/passport-embed";
 import { Button } from "./Button";
 import BodyWrapper from "./BodyWrapper";
@@ -220,7 +220,6 @@ const ComputerGraphic = ({ theme, className }: { theme: ThemeOption; className?:
 };
 
 export const EmbedCampaign = () => {
-  const { open: openWeb3Modal } = useAppKit();
   const { address } = useAccount();
   const [selectedTheme, setSelectedTheme] = React.useState<ThemeOption>("Dark");
   const [collapseType, setCollapseType] = React.useState<"Shift" | "Overlay" | "None">("Shift");
@@ -314,7 +313,9 @@ export const EmbedCampaign = () => {
             <PassportScoreWidget
               theme={selectedTheme === "Dark" ? DarkTheme : LightTheme}
               address={address}
-              connectWalletCallback={openWeb3Modal}
+              connectWalletCallback={async () => {
+                await openWalletPicker();
+              }}
               generateSignatureCallback={generateSignature}
               collapseMode={{ None: "off", Shift: "shift", Overlay: "overlay" }[collapseType] as CollapseMode}
               {...passportEmbedParams}
