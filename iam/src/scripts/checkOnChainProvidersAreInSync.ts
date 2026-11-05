@@ -24,15 +24,17 @@ function difference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
   return diff;
 }
 
-async function main() {
+async function main(): Promise<void> {
   let exitCode = 0;
   const provider = new JsonRpcProvider(apiUrl);
   const decoderContract = new Contract(decoderContractAddress, passportDecoderAbi[chainId], provider);
 
-  const latestOnChainProviderVersion = await decoderContract.currentVersion();
+  const latestOnChainProviderVersion: bigint = (await decoderContract.currentVersion()) as bigint;
   console.log("latestOnChainProviderVersion:", latestOnChainProviderVersion);
 
-  const decoderProviders: string[] = await decoderContract.getProviders(Number(latestOnChainProviderVersion));
+  const decoderProviders: string[] = (await decoderContract.getProviders(
+    Number(latestOnChainProviderVersion)
+  )) as string[];
   const onChainProviders = new Set(decoderProviders.map((p: string, idx: number) => `${idx} => ${p}`));
   const providerBitmapProviders = providerBitMapInfo.reduce((acc, cur) => {
     const idx = cur.index * 256 + cur.bit;
@@ -67,4 +69,4 @@ async function main() {
   process.exit(exitCode);
 }
 
-main();
+void main();
