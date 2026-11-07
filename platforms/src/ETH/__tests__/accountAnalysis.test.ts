@@ -79,6 +79,57 @@ describe("AccountAnalysis Providers", () => {
     });
   });
 
+  describe.each([ETHEnthusiastProvider, ETHAdvocateProvider, ETHMaxiProvider])(
+    "malformed aggregate scores for %p",
+    (ProviderClass) => {
+      it.each([
+        ["missing", undefined],
+        ["null", null],
+        ["boolean", true],
+        ["numeric string", "99"],
+        ["nonnumeric string", "abc"],
+        ["NaN", NaN],
+        ["positive infinity", Infinity],
+        ["negative infinity", -Infinity],
+        ["array", [99]],
+        ["object", {}],
+      ])("rejects %s on fetched and cached paths", async (_label, value) => {
+        const aggregateResponse = mockResponse({ score: 99 });
+        if (value === undefined) {
+          delete (aggregateResponse.data.data as Partial<ModelResponse["data"]>).human_probability;
+        } else {
+          aggregateResponse.data.data.human_probability = value as number;
+        }
+        mockedAxios.post.mockImplementation((url) =>
+          Promise.resolve(
+            url.endsWith("/aggregate-model-predict") ? aggregateResponse : mockResponse({ score: 99 })
+          )
+        );
+        const provider = new ProviderClass();
+
+        for (let attempt = 0; attempt < 2; attempt++) {
+          const result = await provider.verify({ address: mockAddress } as RequestPayload, mockContext);
+          expect(result.valid).toBe(false);
+          expect(result.errors).toBeDefined();
+          expect(result.record).toBeUndefined();
+        }
+        expect(mockedAxios.post).toHaveBeenCalledTimes(7);
+      });
+
+      it("accepts the exact threshold on fetched and cached paths", async () => {
+        const provider = new ProviderClass();
+        mockedAxios.post.mockResolvedValue(mockResponse({ score: provider.minimum }));
+
+        for (let attempt = 0; attempt < 2; attempt++) {
+          const result = await provider.verify({ address: mockAddress } as RequestPayload, mockContext);
+          expect(result.valid).toBe(true);
+          expect(result.record).toEqual({ address: mockAddress });
+        }
+        expect(mockedAxios.post).toHaveBeenCalledTimes(7);
+      });
+    }
+  );
+
   describe("should fail the human_probability check if one of the simple models fails", () => {
     it.each(scoreTestCases)("for score %i should return %s for %p", async (score, expected, provider) => {
       const mockedResponse = mockResponse({ score });
