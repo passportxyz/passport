@@ -19,7 +19,7 @@ const PASSPORT_VC_SECRETS_ARN = op.read.parse(`op://DevOps/passport-xyz-${stack}
 const logsRetention = Object({
   review: 1,
   staging: 7,
-  production: 14,
+  production: 90,
 });
 
 // Define resource sizing by environment
