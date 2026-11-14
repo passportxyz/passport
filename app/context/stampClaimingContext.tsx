@@ -39,7 +39,7 @@ export const waitForRedirect = (platform: Platform, timeout?: number): Promise<P
 
   const waitForRedirect = new Promise<ProviderPayload>((resolve, reject) => {
     // Listener to watch for oauth redirect response on other windows (on the same host)
-    function listenForRedirect(e: { target: string; data: { code: string; state: string } }) {
+    function listenForRedirect(e: { target: string; data: { code: string; state: string; openid?: string } }) {
       // when receiving oauth response from a spawned child run fetchVerifiableCredential
       if (e.target === platform.path) {
         // pull data from message
@@ -47,7 +47,11 @@ export const waitForRedirect = (platform: Platform, timeout?: number): Promise<P
         const queryState = e.data.state;
         datadogLogs.logger.info("Saving Stamp", { platform: platform.platformId });
         try {
-          resolve({ code: queryCode, state: queryState });
+          resolve({
+            code: queryCode,
+            state: queryState,
+            ...(e.data.openid ? { openid: e.data.openid } : {}),
+          });
         } catch (e) {
           datadogLogs.logger.error("Error saving Stamp", { platform: platform.platformId });
           reject(e);
