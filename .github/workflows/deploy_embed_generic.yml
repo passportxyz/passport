@@ -1,9 +1,7 @@
 name: Deploy Embed Generic
-run-name: Deploy Embed to  - ${{ github.event.inputs.environment || 'review' }}
+run-name: Deploy Embed to  - ${{ github.event.inputs.environment || 'staging' }}
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       commit:
@@ -13,10 +11,9 @@ on:
       environment:
         description: "Environment to deploy to"
         required: false
-        default: "review"
+        default: "staging"
         type: choice
         options:
-          - review
           - staging
           - production
 jobs:
