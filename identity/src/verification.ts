@@ -203,7 +203,8 @@ export async function verifyTypes(
 export const verifyProvidersAndIssueCredentials = async (
   providersByPlatform: string[][],
   address: string,
-  payload: RequestPayload
+  payload: RequestPayload,
+  chainId?: number
 ): Promise<{ credentials: CredentialResponseBody[]; timings?: ProviderTimings }> => {
   const { results, timings } = await verifyTypes(providersByPlatform, payload);
 
@@ -233,6 +234,7 @@ export const verifyProvidersAndIssueCredentials = async (
             DIDKit,
             issuerKey: issuer.key,
             address,
+            ...(chainId === undefined ? {} : { chainId }),
             record,
             expiresInSeconds: verifyResult.expiresInSeconds,
             signatureType: payload.signatureType,

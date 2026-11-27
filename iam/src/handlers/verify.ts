@@ -13,7 +13,7 @@ import {
   verifyProvidersAndIssueCredentials,
   verifyChallengeAndGetAddress,
 } from "../utils/identityHelper.js";
-import { verifyAndExtractAddress, extractBearerToken } from "../utils/scorerJwt.js";
+import { verifyAndExtractWallet, extractBearerToken } from "../utils/scorerJwt.js";
 
 const { ApiError, createHandler } = serverUtils;
 
@@ -30,21 +30,23 @@ export const verifyHandler = createHandler<VerifyRequestBody, CredentialResponse
 
   if (token) {
     // JWT authentication - verify token and extract address
-    const jwtAddress = verifyAndExtractAddress(token);
+    const wallet = verifyAndExtractWallet(token);
 
-    if (jwtAddress) {
-      // JWT is valid - use the address from the JWT, skip challenge verification
-      console.log(`JWT authenticated request for address: ${jwtAddress}`);
-      payload.address = jwtAddress;
+    if (wallet) {
+      payload.address = wallet.address;
 
       const types = payload.types.filter((type) => type);
       const providersGroupedByPlatforms = groupProviderTypesByPlatform(types);
 
-      const { credentials } = await verifyProvidersAndIssueCredentials(
-        providersGroupedByPlatforms,
-        jwtAddress,
-        payload
-      );
+      const { credentials } =
+        wallet.chainId === undefined
+          ? await verifyProvidersAndIssueCredentials(providersGroupedByPlatforms, wallet.address, payload)
+          : await verifyProvidersAndIssueCredentials(
+              providersGroupedByPlatforms,
+              wallet.address,
+              payload,
+              wallet.chainId
+            );
 
       return void res.json(credentials);
     }

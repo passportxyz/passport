@@ -54,7 +54,15 @@ jobs:
 
       - name: Build Application
         working-directory: .
+        env:
+          PASSPORT_DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
         run: |
+          if [ -z "${NEXT_PUBLIC_SCOPED_WALLET_API_ORIGIN:-}" ]; then
+            case "$PASSPORT_DEPLOY_ENVIRONMENT" in
+              staging) export NEXT_PUBLIC_SCOPED_WALLET_API_ORIGIN=https://api.staging.passport.xyz ;;
+              production) export NEXT_PUBLIC_SCOPED_WALLET_API_ORIGIN=https://api.passport.xyz ;;
+            esac
+          fi
           yarn build:platforms
           yarn build:identity
           yarn build:database-client

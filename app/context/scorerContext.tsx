@@ -1,10 +1,11 @@
+import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 // --- React Methods
 import React, { createContext, useCallback, useEffect, useState } from "react";
 
 // --- Axios
 import axios from "axios";
 
-import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
+import { CERAMIC_CACHE_ENDPOINT, SCOPED_WALLET_API_ORIGIN } from "../config/stamp_config";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { usePlatforms } from "../hooks/usePlatforms";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
@@ -279,6 +280,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
 
   const [passingScore, setPassingScore] = useState(false);
   const customization = useCustomization();
+  const { credentialChainId } = useDatastoreConnectionContext();
   const { platformSpecs, platformProviders, platforms, getPlatformSpec } = usePlatforms();
 
   const loadScore = async (
@@ -290,16 +292,20 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
     setScoreState({ status: "loading" });
     try {
       const useAlternateScorer = customization.scorer?.id;
-      const method = rescore ? "post" : "get";
-      const url = `${scorerApiGetScore}/${address}${useAlternateScorer && method === "get" ? `?alternate_scorer_id=${customization.scorer?.id}` : ""}`;
+      const scoped = credentialChainId !== undefined;
+      const method = rescore || scoped ? "post" : "get";
+      const url = scoped
+        ? new URL("/v2/wallet-stamps/score", SCOPED_WALLET_API_ORIGIN).toString()
+        : `${scorerApiGetScore}/${address}${useAlternateScorer && method === "get" ? `?alternate_scorer_id=${customization.scorer?.id}` : ""}`;
 
       let data: any = {};
-      if (method === "post" && useAlternateScorer) {
+      if (!scoped && method === "post" && useAlternateScorer) {
         data = { alternate_scorer_id: customization.scorer?.id };
       }
 
       response = await axios({
         url,
+        ...(scoped && useAlternateScorer ? { params: { alternate_scorer_id: useAlternateScorer } } : {}),
         data,
         method,
         headers: {
@@ -308,7 +314,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       });
     } catch (e) {
       // Rethrow if this is already rescoring, to avoid loop
-      if (rescore) throw e;
+      if (rescore || credentialChainId !== undefined) throw e;
       else return loadScore(address, dbAccessToken, true);
     }
 

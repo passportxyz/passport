@@ -158,6 +158,7 @@ export const issueNullifiableCredential = async ({
   DIDKit,
   issuerKey,
   address,
+  chainId = 1,
   record,
   nullifierGenerators,
   expiresInSeconds = CREDENTIAL_EXPIRES_AFTER_SECONDS,
@@ -165,11 +166,15 @@ export const issueNullifiableCredential = async ({
   DIDKit: DIDKitLib;
   issuerKey: string;
   address: string;
+  chainId?: number;
   record: ProofRecord;
   nullifierGenerators: NullifierGenerators;
   expiresInSeconds: number;
   signatureType?: string;
 }): Promise<IssuedCredential> => {
+  if (!Number.isSafeInteger(chainId) || chainId <= 0) {
+    throw new Error("Invalid credential chain ID");
+  }
   const nullifiers = await getNullifiers({ record, nullifierGenerators });
   const legacy = !checkRotatingKeysEnabled();
 
@@ -195,8 +200,7 @@ export const issueNullifiableCredential = async ({
           provider: "https://schema.org/Text",
         },
 
-        // construct a pkh DID on mainnet (:1) for the given wallet address
-        id: `did:pkh:eip155:1:${address}`,
+        id: `did:pkh:eip155:${chainId}:${address}`,
         provider: record.type,
         ...(legacy
           ? {

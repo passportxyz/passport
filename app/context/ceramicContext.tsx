@@ -19,7 +19,7 @@ import { ScorerContext } from "./scorerContext";
 import { PlatformGroupSpec, ProviderSpec, platforms as stampPlatforms } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
-import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS } from "../config/stamp_config";
+import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS, SCOPED_WALLET_API_ORIGIN } from "../config/stamp_config";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { useMessage } from "../hooks/useMessage";
@@ -168,7 +168,7 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
   const { platforms: allPlatforms } = usePlatforms();
 
   const { address } = useAccount();
-  const { dbAccessToken, userAddress, checkSessionIsValid } = useDatastoreConnectionContext();
+  const { dbAccessToken, userAddress, credentialChainId, checkSessionIsValid } = useDatastoreConnectionContext();
   const { refreshScore, fetchStampWeights } = useContext(ScorerContext);
   const customization = useCustomization();
 
@@ -200,30 +200,31 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
 
   useEffect((): void => {
     try {
-      if (dbAccessToken && address && !database && userAddress) {
-        // Construct DID string from address for backward compatibility
-        const didString = `did:pkh:eip155:1:${userAddress.toLowerCase()}`;
-        setUserDid(didString);
-
+      if (dbAccessToken && address && userAddress) {
         // Ceramic cache db
         const databaseInstance = new PassportDatabase(
           CERAMIC_CACHE_ENDPOINT || "",
           address,
           dbAccessToken,
           datadogLogs.logger,
-          userAddress
+          userAddress,
+          credentialChainId === undefined
+            ? undefined
+            : { chainId: credentialChainId, apiOrigin: SCOPED_WALLET_API_ORIGIN }
         );
 
+        setUserDid(databaseInstance.did);
         setDatabase(databaseInstance);
       } else {
         setDatabase(undefined);
+        setUserDid(undefined);
         setIsLoadingPassport(IsLoadingPassportState.Loading);
       }
     } catch (e) {
       console.log("failed to connect self id :(");
       setDatabase(undefined);
     }
-  }, [address, dbAccessToken, userAddress]);
+  }, [address, dbAccessToken, userAddress, credentialChainId]);
 
   useEffect(() => {
     if (database && address) {

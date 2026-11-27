@@ -7,9 +7,11 @@ import posthog from "posthog-js";
 import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
 import { useCustomDisconnect } from "../hooks/useCustomDisconnect";
 import { useAccount } from "wagmi";
-import { WalletClient } from "viem";
+import { publicActions, WalletClient } from "viem";
 import { logoutHumanWallet } from "../utils/humanWallet";
 
+const CHAIN_WALLET_STATEMENT = "Authorize credential issuance for this deployed wallet in Human Passport";
+const SCOPED_CREDENTIALS_ENABLED = process.env.NEXT_PUBLIC_CHAIN_WALLET_SCORING_ENABLED === "true";
 const SIWE_EXPIRATION_MS = 5 * 60 * 1000; // 5 minutes
 
 export type DbAuthTokenStatus = "idle" | "failed" | "connected" | "connecting";
@@ -18,6 +20,7 @@ export type DatastoreConnectionContextState = {
   dbAccessTokenStatus: DbAuthTokenStatus;
   dbAccessToken?: string;
   userAddress?: string;
+  credentialChainId?: number;
   disconnect: (address: string) => Promise<void>;
   connect: (address: string, walletClient: WalletClient) => Promise<void>;
   checkSessionIsValid: () => boolean;
@@ -74,13 +77,17 @@ export const useDatastoreConnection = () => {
   const [dbAccessToken, setDbAccessToken] = useState<string | undefined>();
   const [connectedAddress, setConnectedAddress] = useState<string | undefined>();
   const [userAddress, setUserAddress] = useState<string | undefined>();
+  const [credentialChainId, setCredentialChainId] = useState<number | undefined>();
 
   const [checkSessionIsValid, setCheckSessionIsValid] = useState<() => boolean>(() => false);
 
   useEffect(() => {
     // Clear status when wallet disconnected
     if (
-      (!chain || !isConnected || (connectedAddress && web3ModalAddress !== connectedAddress)) &&
+      (!chain ||
+        !isConnected ||
+        (connectedAddress && web3ModalAddress !== connectedAddress) ||
+        (credentialChainId !== undefined && credentialChainId !== chainId)) &&
       dbAccessTokenStatus === "connected"
     ) {
       console.log("Clearing db access token", chain, isConnected, connectedAddress, web3ModalAddress);
@@ -92,10 +99,15 @@ export const useDatastoreConnection = () => {
       setDbAccessTokenStatus("idle");
       setDbAccessToken(undefined);
       setUserAddress(undefined);
+      setCredentialChainId(undefined);
     }
-  }, [chain, dbAccessTokenStatus, isConnected, web3ModalAddress, connectedAddress]);
+  }, [chain, chainId, credentialChainId, dbAccessTokenStatus, isConnected, web3ModalAddress, connectedAddress]);
 
-  const getPassportDatabaseAccessToken = async (address: string, walletClient: WalletClient): Promise<string> => {
+  const getPassportDatabaseAccessToken = async (
+    address: string,
+    walletClient: WalletClient,
+    scope?: number
+  ): Promise<string> => {
     let nonce = null;
     try {
       // Get nonce from server
@@ -108,18 +120,14 @@ export const useDatastoreConnection = () => {
     }
 
     try {
-      // Always use mainnet (chainId: 1) for SIWE messages
-      // Smart wallet factories are deployed on mainnet, so ERC-6492 verification works there
-      const connectedChainId = 1;
-
       // Create SIWE message
       const siweMessage = new SiweMessage({
         domain: window.location.host,
         address,
-        statement: "Sign in to Human Passport",
+        statement: scope === undefined ? "Sign in to Human Passport" : CHAIN_WALLET_STATEMENT,
         uri: window.location.origin,
         version: "1",
-        chainId: connectedChainId,
+        chainId: scope ?? 1,
         nonce,
         expirationTime: new Date(Date.now() + SIWE_EXPIRATION_MS).toISOString(),
       });
@@ -146,6 +154,7 @@ export const useDatastoreConnection = () => {
           expirationTime: siweMessage.expirationTime,
         },
         signature,
+        ...(scope === undefined ? {} : { deployed_wallet: true }),
       });
 
       const accessToken = authResponse.data?.access as string;
@@ -159,12 +168,25 @@ export const useDatastoreConnection = () => {
   };
 
   const loadDbAccessToken = useCallback(async (address: string, walletClient: WalletClient) => {
-    const dbCacheTokenKey = `dbcache-token-${address}`;
+    let scope: number | undefined;
+    if (SCOPED_CREDENTIALS_ENABLED) {
+      const client = walletClient.extend(publicActions);
+      const connectedChain = await client.getChainId();
+      const code = await client.getBytecode({ address: address as `0x${string}` });
+      // An EIP-7702 delegated EOA still has an EOA signing key.
+      if (code && code !== "0x" && !code.startsWith("0xef0100")) {
+        scope = connectedChain;
+      }
+    }
+    const dbCacheTokenKey =
+      scope === undefined ? `dbcache-token-${address}` : `dbcache-token-eip155:${scope}:${address.toLowerCase()}`;
 
     // Check for existing valid token first (session continuity)
     const existingToken = window.localStorage.getItem(dbCacheTokenKey);
     if (existingToken) {
       if (isTokenValid(existingToken)) {
+        setConnectedAddress(address);
+        setCredentialChainId(scope);
         setDbAccessToken(existingToken);
         setDbAccessTokenStatus("connected");
         setUserAddress(address);
@@ -181,7 +203,8 @@ export const useDatastoreConnection = () => {
 
     // Need to get a new access token
     try {
-      const dbAccessToken = await getPassportDatabaseAccessToken(address, walletClient);
+      const dbAccessToken = await getPassportDatabaseAccessToken(address, walletClient, scope);
+      setCredentialChainId(scope);
       // Store the token in localStorage
       window.localStorage.setItem(dbCacheTokenKey, dbAccessToken);
       setDbAccessToken(dbAccessToken);
@@ -219,11 +242,16 @@ export const useDatastoreConnection = () => {
 
   const disconnect = async (address: string) => {
     await disconnectWallet();
-    localStorage.removeItem(`dbcache-token-${address}`);
+    const key =
+      credentialChainId === undefined
+        ? `dbcache-token-${address}`
+        : `dbcache-token-eip155:${credentialChainId}:${address.toLowerCase()}`;
+    localStorage.removeItem(key);
   };
 
   return {
     userAddress,
+    credentialChainId,
     connect,
     disconnect,
     dbAccessToken,
@@ -233,19 +261,27 @@ export const useDatastoreConnection = () => {
 };
 
 export const DatastoreConnectionContextProvider = ({ children }: { children: any }) => {
-  const { dbAccessToken, dbAccessTokenStatus, disconnect, connect, userAddress, checkSessionIsValid } =
-    useDatastoreConnection();
+  const {
+    dbAccessToken,
+    dbAccessTokenStatus,
+    disconnect,
+    connect,
+    userAddress,
+    credentialChainId,
+    checkSessionIsValid,
+  } = useDatastoreConnection();
 
   const providerProps = useMemo(
     () => ({
       userAddress,
+      credentialChainId,
       connect,
       disconnect,
       dbAccessToken,
       dbAccessTokenStatus,
       checkSessionIsValid,
     }),
-    [dbAccessToken, dbAccessTokenStatus, userAddress, connect, disconnect, checkSessionIsValid]
+    [dbAccessToken, dbAccessTokenStatus, userAddress, credentialChainId, connect, disconnect, checkSessionIsValid]
   );
 
   return <DatastoreConnectionContext.Provider value={providerProps}>{children}</DatastoreConnectionContext.Provider>;
