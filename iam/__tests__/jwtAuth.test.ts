@@ -8,7 +8,7 @@ import * as scorerJwtMock from "../src/utils/scorerJwt";
 
 // Mock the scorerJwt module
 jest.mock("../src/utils/scorerJwt", () => ({
-  verifyAndExtractAddress: jest.fn(),
+  verifyAndExtractWallet: jest.fn(),
   extractBearerToken: jest.fn(),
 }));
 
@@ -27,8 +27,8 @@ jest.mock("../src/utils/identityHelper", () => {
   };
 });
 
-const verifyAndExtractAddress = scorerJwtMock.verifyAndExtractAddress as jest.MockedFunction<
-  typeof scorerJwtMock.verifyAndExtractAddress
+const verifyAndExtractWallet = scorerJwtMock.verifyAndExtractWallet as jest.MockedFunction<
+  typeof scorerJwtMock.verifyAndExtractWallet
 >;
 const extractBearerToken = scorerJwtMock.extractBearerToken as jest.MockedFunction<
   typeof scorerJwtMock.extractBearerToken
@@ -87,12 +87,37 @@ describe("POST /verify with JWT authentication", () => {
     jest.restoreAllMocks();
   });
 
+  it("takes the chain and address from the signed scoped JWT", async () => {
+    const address = "0x1111111111111111111111111111111111111111";
+    extractBearerToken.mockReturnValue("wallet-token");
+    verifyAndExtractWallet.mockReturnValue({ address, chainId: 8453 });
+    const response = await request(app)
+      .post("/api/v0.0.0/verify")
+      .set("Authorization", "Bearer wallet-token")
+      .send({
+        payload: {
+          type: "Simple",
+          types: ["Simple"],
+          address: "0x2222222222222222222222222222222222222222",
+          chainId: 1,
+          proofs: { valid: "true" },
+        },
+      });
+    expect(response.status).toBe(200);
+    expect(verifyProvidersAndIssueCredentialsMock).toHaveBeenCalledWith(
+      expect.any(Array),
+      address,
+      expect.objectContaining({ address }),
+      8453
+    );
+  });
+
   it("handles valid JWT authentication without challenge", async () => {
     const testAddress = "0x1234567890123456789012345678901234567890";
 
     // Mock JWT extraction and verification
     extractBearerToken.mockReturnValue("valid-jwt-token");
-    verifyAndExtractAddress.mockReturnValue(testAddress.toLowerCase());
+    verifyAndExtractWallet.mockReturnValue({ address: testAddress.toLowerCase() });
 
     const payload = {
       type: "Simple",
@@ -117,7 +142,7 @@ describe("POST /verify with JWT authentication", () => {
 
     // Verify JWT functions were called
     expect(extractBearerToken).toHaveBeenCalledWith("Bearer valid-jwt-token");
-    expect(verifyAndExtractAddress).toHaveBeenCalledWith("valid-jwt-token");
+    expect(verifyAndExtractWallet).toHaveBeenCalledWith("valid-jwt-token");
 
     // Verify challenge-based auth was NOT used
     expect(verifyChallengeAndGetAddress).not.toHaveBeenCalled();
@@ -128,7 +153,7 @@ describe("POST /verify with JWT authentication", () => {
 
     // Mock JWT extraction but verification fails
     extractBearerToken.mockReturnValue("invalid-jwt-token");
-    verifyAndExtractAddress.mockReturnValue(null); // JWT verification failed
+    verifyAndExtractWallet.mockReturnValue(null); // JWT verification failed
 
     // Mock challenge-based auth
     verifyChallengeAndGetAddress.mockResolvedValue(testAddress);
@@ -187,7 +212,7 @@ describe("POST /verify with JWT authentication", () => {
     const payloadAddress = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
     extractBearerToken.mockReturnValue("valid-jwt-token");
-    verifyAndExtractAddress.mockReturnValue(jwtAddress.toLowerCase());
+    verifyAndExtractWallet.mockReturnValue({ address: jwtAddress.toLowerCase() });
 
     const payload = {
       type: "Simple",
@@ -211,7 +236,7 @@ describe("POST /verify with JWT authentication", () => {
     const testAddress = "0x1234567890123456789012345678901234567890";
 
     extractBearerToken.mockReturnValue("valid-jwt-token");
-    verifyAndExtractAddress.mockReturnValue(testAddress.toLowerCase());
+    verifyAndExtractWallet.mockReturnValue({ address: testAddress.toLowerCase() });
 
     const payload = {
       type: "EVMBulkVerify",

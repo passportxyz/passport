@@ -160,6 +160,21 @@ describe("issueNullifiableCredential", function () {
     expect(typeof credential.proof).toEqual("object");
   });
 
+  it("signs the chain-specific subject without changing the credential nullifier", async () => {
+    const request = {
+      DIDKit,
+      issuerKey: key,
+      address: "0x1111111111111111111111111111111111111111",
+      record: { type: "Simple", version: "0.0.0" },
+      nullifierGenerators,
+      expiresInSeconds: 3600,
+    };
+    const { credential: ethereum } = await issueNullifiableCredential(request);
+    const { credential: base } = await issueNullifiableCredential({ ...request, chainId: 8453 });
+    expect(base.credentialSubject.id).toBe(`did:pkh:eip155:8453:${request.address}`);
+    expect(base.credentialSubject.nullifiers).toEqual(ethereum.credentialSubject.nullifiers);
+  });
+
   it("can generate an eip712 signed credential containing hash", async () => {
     const mockMishtiOprfResponse = "encrypted";
     (humanNetworkOprf as jest.Mock).mockResolvedValue(mockMishtiOprfResponse);

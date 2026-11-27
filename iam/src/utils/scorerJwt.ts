@@ -2,7 +2,7 @@
  * JWT verification for SIWE-issued tokens
  *
  * Verifies JWTs issued by the passport-scorer using RS256 asymmetric signing.
- * Extracts the user's address from the `did` claim (format: did:pkh:eip155:1:0xADDRESS)
+ * Reads the signed EIP-155 subject and deployed-wallet scope.
  */
 import jwt from "jsonwebtoken";
 
@@ -32,15 +32,12 @@ export interface ScorerJwtPayload {
   iat: number;
   jti: string;
   token_type: string;
+  chain_wallet?: boolean;
 }
 
-/**
- * Verify a scorer JWT and extract the user's address
- *
- * @param token - The JWT token from Authorization header
- * @returns The lowercase address extracted from the did claim, or null if invalid
- */
-export function verifyAndExtractAddress(token: string): string | null {
+type ScorerWallet = { address: string; chainId?: number };
+
+export function verifyAndExtractWallet(token: string): ScorerWallet | null {
   if (!SIWE_JWT_PUBLIC_KEY) {
     console.error("SIWE_JWT_PUBLIC_KEY not configured");
     return null;
@@ -51,18 +48,17 @@ export function verifyAndExtractAddress(token: string): string | null {
       algorithms: ["RS256"],
       issuer: "passport-scorer",
     }) as ScorerJwtPayload;
+    const match =
+      typeof decoded.did === "string" ? /^did:pkh:eip155:([1-9][0-9]*):(0x[0-9a-f]{40})$/i.exec(decoded.did) : null;
+    if (!match || !Number.isFinite(decoded.exp)) return null;
 
-    // Extract address from DID format: did:pkh:eip155:1:0xADDRESS
-    const did = decoded.did;
-    if (!did || !did.startsWith("did:pkh:eip155:1:")) {
-      console.error("Invalid DID format in JWT:", did);
-      return null;
+    const chainId = Number(match[1]);
+    const address = match[2].toLowerCase();
+    if (decoded.chain_wallet === true) {
+      return decoded.token_type === "access" && Number.isSafeInteger(chainId) ? { address, chainId } : null;
     }
-
-    const address = did.split(":").pop();
-    return address?.toLowerCase() || null;
-  } catch (error) {
-    console.error("JWT verification failed:", error);
+    return chainId === 1 ? { address } : null;
+  } catch {
     return null;
   }
 }
