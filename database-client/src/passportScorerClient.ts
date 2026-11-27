@@ -121,14 +121,11 @@ export class PassportDatabase implements DataStorageBase {
 
   deleteStamps = async (providers: PROVIDER_ID[]): Promise<PassportLoadResponse> => {
     if (this.walletStampUrl) {
+      const updates = providers.map<{ provider: PROVIDER_ID; stamp: null }>((provider) => ({ provider, stamp: null }));
       return this.processPassportResponse(
-        axios.patch(
-          this.walletStampUrl,
-          providers.map((provider) => ({ provider, stamp: null })),
-          {
-            headers: { Authorization: `Bearer ${this.token}` },
-          }
-        ),
+        axios.patch(this.walletStampUrl, updates, {
+          headers: { Authorization: `Bearer ${this.token}` },
+        }),
         "delete",
         true
       );
