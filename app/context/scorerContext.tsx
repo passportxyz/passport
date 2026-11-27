@@ -5,7 +5,7 @@ import React, { createContext, useCallback, useEffect, useState } from "react";
 // --- Axios
 import axios from "axios";
 
-import { CERAMIC_CACHE_ENDPOINT } from "../config/stamp_config";
+import { CERAMIC_CACHE_ENDPOINT, SCOPED_WALLET_API_ORIGIN } from "../config/stamp_config";
 import { PROVIDER_ID } from "@gitcoin/passport-types";
 import { usePlatforms } from "../hooks/usePlatforms";
 import { PlatformSpec } from "@gitcoin/passport-platforms";
@@ -295,7 +295,7 @@ export const ScorerContextProvider = ({ children }: { children: any }) => {
       const scoped = credentialChainId !== undefined;
       const method = rescore || scoped ? "post" : "get";
       const url = scoped
-        ? new URL("/v2/wallet-stamps/score", scorerApiGetScore).toString()
+        ? new URL("/v2/wallet-stamps/score", SCOPED_WALLET_API_ORIGIN).toString()
         : `${scorerApiGetScore}/${address}${useAlternateScorer && method === "get" ? `?alternate_scorer_id=${customization.scorer?.id}` : ""}`;
 
       let data: any = {};

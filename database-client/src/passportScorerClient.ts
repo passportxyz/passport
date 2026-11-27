@@ -27,14 +27,14 @@ export class PassportDatabase implements DataStorageBase {
     token: string,
     logger?: Logger,
     userAddress?: string,
-    chainId?: number
+    walletScope?: { chainId: number; apiOrigin: string }
   ) {
     this.passportScorerUrl = passportScorerUrl;
     this.address = address;
     this.logger = logger;
-    this.did = `did:pkh:eip155:${chainId ?? 1}:${(userAddress || address).toLowerCase()}`;
-    if (chainId !== undefined) {
-      this.walletStampUrl = new URL("/v2/wallet-stamps", passportScorerUrl).toString();
+    this.did = `did:pkh:eip155:${walletScope?.chainId ?? 1}:${(userAddress || address).toLowerCase()}`;
+    if (walletScope) {
+      this.walletStampUrl = new URL("/v2/wallet-stamps", walletScope.apiOrigin).toString();
     }
     this.allowEmpty = false;
     this.token = token;

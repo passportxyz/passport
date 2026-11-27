@@ -19,7 +19,7 @@ import { ScorerContext } from "./scorerContext";
 import { PlatformGroupSpec, ProviderSpec, platforms as stampPlatforms } from "@gitcoin/passport-platforms";
 import { PlatformProps } from "../components/GenericPlatform";
 
-import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS } from "../config/stamp_config";
+import { CERAMIC_CACHE_ENDPOINT, IAM_VALID_ISSUER_DIDS, SCOPED_WALLET_API_ORIGIN } from "../config/stamp_config";
 import { useDatastoreConnectionContext } from "./datastoreConnectionContext";
 import { useCustomization } from "../hooks/useCustomization";
 import { useMessage } from "../hooks/useMessage";
@@ -208,7 +208,9 @@ export const CeramicContextProvider = ({ children }: { children: any }) => {
           dbAccessToken,
           datadogLogs.logger,
           userAddress,
-          credentialChainId
+          credentialChainId === undefined
+            ? undefined
+            : { chainId: credentialChainId, apiOrigin: SCOPED_WALLET_API_ORIGIN }
         );
 
         setUserDid(databaseInstance.did);

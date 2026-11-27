@@ -38,6 +38,28 @@ describe("scorerClient", () => {
     jest.clearAllMocks();
   });
 
+  it("uses the v2 API origin for scoped reads and updates", async () => {
+    const apiOrigin = "https://api.passport.example";
+    const scoped = new PassportDatabase(passportScorerUrl, address, token, logger as unknown as Logger, userAddress, {
+      chainId: 8453,
+      apiOrigin,
+    });
+    jest.spyOn(axios, "get").mockResolvedValue({});
+    jest.spyOn(axios, "patch").mockResolvedValue({});
+
+    await scoped.getPassport();
+    await scoped.addStamps(stamps);
+
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    expect(scoped.did).toBe(`did:pkh:eip155:8453:${userAddress}`);
+    expect(axios.get).toHaveBeenCalledWith(`${apiOrigin}/v2/wallet-stamps`, config);
+    expect(axios.patch).toHaveBeenCalledWith(
+      `${apiOrigin}/v2/wallet-stamps`,
+      stamps.map(({ provider, credential }) => ({ provider, stamp: credential })),
+      config
+    );
+  });
+
   it("should call axios.post with the correct url and data", async () => {
     jest.spyOn(axios, "post").mockImplementation((url: string): Promise<{}> => {
       return new Promise((resolve) => {
